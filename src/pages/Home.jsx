@@ -1,161 +1,166 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import MetricCard from "@/components/nova/MetricCard";
+
+import QuickStats from "@/components/dashboard/QuickStats";
+import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
+import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
+import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
+import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+
 import { 
   Mic, 
-  AlertOctagon, 
-  Clock, 
-  ShieldAlert,
   Sparkles,
   ArrowRight,
   Zap,
-  BarChart3,
-  MessageSquare
+  Calendar,
+  Clock
 } from "lucide-react";
 
 export default function Home() {
+  const [latestAnalysis, setLatestAnalysis] = useState(null);
+
+  // Fetch analysis history
+  const { data: analysisHistory = [], isLoading } = useQuery({
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 20),
+  });
+
+  // Check for stored analysis from session
+  useEffect(() => {
+    const stored = sessionStorage.getItem("novaAnalysis");
+    if (stored) {
+      setLatestAnalysis(JSON.parse(stored));
+    }
+  }, []);
+
+  // Get current sprint info (simulated)
+  const sprintInfo = {
+    name: "Sprint 14",
+    daysRemaining: 4,
+    progress: 65,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden border-b border-slate-200/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent" />
-        <div className="absolute top-20 left-1/4 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-1/4 w-96 h-96 bg-indigo-200/20 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-1/4 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl" />
         
-        <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-20">
+        <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center"
           >
-            <Badge variant="outline" className="mb-6 px-4 py-1.5 text-sm font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700">
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Demo Version – Simulation Mode
-            </Badge>
-            
-            <h1 className="text-5xl md:text-6xl font-bold text-slate-900 tracking-tight mb-6">
-              Nova
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                {" "}AI Scrum Master
-              </span>
-            </h1>
-            
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Your intelligent assistant that analyzes Daily Scrums, detects blockers, 
-              and provides actionable insights to keep your team moving forward.
-            </p>
-            
-            <Link to={createPageUrl("Analysis")}>
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
-              >
-                <Mic className="w-5 h-5 mr-2" />
-                Simulate a Daily Scrum
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            
-            <p className="mt-4 text-sm text-slate-500">
-              Experience how Nova analyzes meetings using sample data
-            </p>
+            {/* Welcome Banner */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    AI-Powered Scrum Master
+                  </Badge>
+                  <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {sprintInfo.name}
+                  </Badge>
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+                  Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}! 👋
+                </h1>
+                <p className="text-slate-600 mt-2 text-lg">
+                  Here's your sprint overview and latest insights.
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
+                  <Clock className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-600">
+                    <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> days left in sprint
+                  </span>
+                </div>
+                <Link to={createPageUrl("Analysis")}>
+                  <Button 
+                    size="lg" 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                  >
+                    <Mic className="w-4 h-4 mr-2" />
+                    New Analysis
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <QuickStats analysisHistory={analysisHistory} />
           </motion.div>
         </div>
       </div>
 
-      {/* Metrics Section */}
-      <div className="max-w-6xl mx-auto px-6 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
-        >
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">
-            Simulated Metrics
-          </h2>
-          <p className="text-slate-400 text-sm">
-            What Nova typically detects in a single sprint
-          </p>
-        </motion.div>
-        
-        <div className="grid md:grid-cols-3 gap-6">
-          <MetricCard
-            icon={AlertOctagon}
-            label="Detected Blockers"
-            value="3"
-            color="blue"
-            delay={0.3}
-          />
-          <MetricCard
-            icon={Clock}
-            label="Estimated Time Saved"
-            value="5h"
-            color="emerald"
-            delay={0.4}
-          />
-          <MetricCard
-            icon={ShieldAlert}
-            label="Risks Identified"
-            value="2"
-            color="amber"
-            delay={0.5}
-          />
-        </div>
-      </div>
-
-      {/* Features Preview */}
-      <div className="max-w-6xl mx-auto px-6 pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="rounded-3xl border border-slate-200 bg-white p-8 md:p-12"
-        >
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">
-            What Nova Does
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="font-semibold text-slate-900">Real-Time Analysis</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Joins your Daily Scrums via Teams or Zoom and analyzes conversations as they happen.
-              </p>
-            </div>
+      {/* Main Dashboard Content */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Sprint Performance Chart */}
+            <SprintPerformanceChart analysisHistory={analysisHistory} />
             
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-emerald-600" />
-              </div>
-              <h3 className="font-semibold text-slate-900">Instant Insights</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Detects blockers, dependencies, and risks immediately, suggesting actions in real-time.
-              </p>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-amber-600" />
-              </div>
-              <h3 className="font-semibold text-slate-900">Continuous Learning</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Connects to Jira, Azure DevOps, and Confluence to provide context-aware recommendations.
-              </p>
-            </div>
+            {/* Key Recommendations */}
+            <KeyRecommendations latestAnalysis={latestAnalysis} />
           </div>
-          
-          <div className="mt-10 pt-8 border-t border-slate-100">
-            <p className="text-sm text-slate-500 text-center">
-              <span className="font-medium text-slate-700">Coming soon:</span> Direct integrations with Jira, Azure DevOps, Microsoft Teams, and Zoom
-            </p>
+
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
+          </div>
+        </div>
+
+        {/* Quick Actions Footer */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-8"
+        >
+          <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Ready for your Daily Scrum?
+                </h3>
+                <p className="text-slate-400 max-w-lg">
+                  Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link to={createPageUrl("Settings")}>
+                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <Zap className="w-4 h-4 mr-2" />
+                    Connect Slack
+                  </Button>
+                </Link>
+                <Link to={createPageUrl("Analysis")}>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                    Start Analysis
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
