@@ -122,6 +122,18 @@ Provide a detailed analysis in the following JSON format:`;
       response_json_schema: responseSchema
     });
 
+    // Save to database for history tracking
+    const analysisRecord = {
+      title: `Daily Standup - ${new Date().toLocaleDateString()}`,
+      source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
+      blockers_count: result.blockers?.length || 0,
+      risks_count: result.risks?.length || 0,
+      analysis_data: result,
+      transcript_preview: transcript.substring(0, 200),
+    };
+    
+    await base44.entities.AnalysisHistory.create(analysisRecord);
+
     // Store result in sessionStorage and navigate
     sessionStorage.setItem("novaAnalysis", JSON.stringify(result));
     navigate(createPageUrl("Results"));
