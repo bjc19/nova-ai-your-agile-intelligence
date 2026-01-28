@@ -33,6 +33,12 @@ export default function Layout({ children }) {
             >
               Analyze
             </Link>
+            <Link 
+              to={createPageUrl("Settings")}
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Settings
+            </Link>
           </div>
         </div>
       </nav>

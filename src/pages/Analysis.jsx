@@ -4,14 +4,21 @@ import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TranscriptInput, { SAMPLE_TRANSCRIPT } from "@/components/nova/TranscriptInput";
+import FileUpload from "@/components/nova/FileUpload";
+import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
 import { base44 } from "@/api/base44Client";
 import { 
   Sparkles, 
   ArrowLeft, 
   Loader2,
   Wand2,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Upload,
+  FileText,
+  Settings
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -20,6 +27,40 @@ export default function Analysis() {
   const [transcript, setTranscript] = useState(SAMPLE_TRANSCRIPT);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("transcript");
+  const [selectedSlackChannel, setSelectedSlackChannel] = useState(null);
+  const [slackConnected, setSlackConnected] = useState(false); // Will be true when backend is enabled
+
+  const handleFileDataExtracted = (data) => {
+    setTranscript(data);
+    setActiveTab("transcript");
+  };
+
+  const handleSlackChannelSelect = (channel) => {
+    setSelectedSlackChannel(channel);
+    // In production, this would fetch actual messages from Slack
+    const simulatedSlackMessages = `Slack Channel: #${channel.name}
+
+@sarah_dev (9:02 AM):
+Good morning! Yesterday I completed the auth module refactoring. Today I'm picking up the dashboard analytics. No blockers.
+
+@mike_backend (9:04 AM):
+Morning team. Still working on the database migration. Hit an issue with the legacy data format - need to write a custom transformer. Might need an extra day.
+
+@lisa_qa (9:05 AM):
+@mike_backend that might affect my testing timeline. Can we sync after standup?
+
+@tom_fullstack (9:07 AM):
+Wrapped up the API endpoints yesterday. Today starting on the mobile responsive fixes. Quick question - @sarah_dev are you changing any of the header components? Want to avoid conflicts.
+
+@sarah_dev (9:08 AM):
+@tom_fullstack yes, I'll be updating the nav. Let me share my branch with you.
+
+@emma_pm (9:10 AM):
+Thanks team. @mike_backend let's discuss the migration timeline - client demo is Thursday. We need a backup plan.`;
+    
+    setTranscript(simulatedSlackMessages);
+  };
 
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
@@ -108,25 +149,106 @@ Provide a detailed analysis in the following JSON format:`;
           <div className="flex items-center gap-3 mb-3">
             <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-blue-50 border-blue-200 text-blue-700">
               <Sparkles className="w-3 h-3 mr-1" />
-              Simulation Mode
+              {slackConnected ? "Live Mode" : "Simulation Mode"}
             </Badge>
           </div>
           
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Analyze Your Daily Scrum
-          </h1>
-          <p className="text-slate-600">
-            Paste your meeting transcript below or use our sample data to see Nova in action.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                Analyze Your Daily Scrum
+              </h1>
+              <p className="text-slate-600">
+                Import data from Slack, upload files, or paste your transcript.
+              </p>
+            </div>
+            <Link to={createPageUrl("Settings")}>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Settings className="w-4 h-4" />
+                Integrations
+              </Button>
+            </Link>
+          </div>
         </motion.div>
 
-        {/* Input Section */}
-        <div className="space-y-6">
-          <TranscriptInput 
-            value={transcript} 
-            onChange={setTranscript} 
-          />
+        {/* Input Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-xl">
+            <TabsTrigger 
+              value="slack" 
+              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Slack
+            </TabsTrigger>
+            <TabsTrigger 
+              value="upload" 
+              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Upload
+            </TabsTrigger>
+            <TabsTrigger 
+              value="transcript" 
+              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Paste
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="slack" className="mt-6">
+            <SlackChannelSelector 
+              onChannelSelect={handleSlackChannelSelect}
+              isConnected={slackConnected}
+            />
+            {!slackConnected && (
+              <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <p className="text-sm text-blue-900">
+                  <strong>Demo Mode:</strong> Connect Slack in{" "}
+                  <Link to={createPageUrl("Settings")} className="underline">Settings</Link>
+                  {" "}to import real messages. For now, use the sample channels above.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="upload" className="mt-6">
+            <FileUpload onDataExtracted={handleFileDataExtracted} />
+            <p className="text-xs text-slate-500 mt-3">
+              Upload meeting transcripts, exported Jira reports, or any text file with standup notes.
+            </p>
+          </TabsContent>
+
+          <TabsContent value="transcript" className="mt-6">
+            <TranscriptInput 
+              value={transcript} 
+              onChange={setTranscript} 
+            />
+          </TabsContent>
+        </Tabs>
+
+        {/* Analysis Section */}
+        <div className="space-y-6 mt-6">
           
+          {transcript && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-slate-700">Data Ready for Analysis</span>
+                <Badge variant="outline" className="text-xs">
+                  {transcript.length.toLocaleString()} characters
+                </Badge>
+              </div>
+              <p className="text-xs text-slate-500 line-clamp-2">
+                {transcript.substring(0, 150)}...
+              </p>
+            </motion.div>
+          )}
+
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
