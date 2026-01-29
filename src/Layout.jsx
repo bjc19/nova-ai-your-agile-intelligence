@@ -1,8 +1,25 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Sparkles } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { Sparkles, LogOut, LogIn } from "lucide-react";
 
-export default function Layout({ children }) {
+export default function Layout({ children, currentPageName }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const auth = await base44.auth.isAuthenticated();
+      setIsAuthenticated(auth);
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  const isPublicPage = currentPageName === "Home" || currentPageName === "Demo";
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Navigation */}
@@ -21,24 +38,53 @@ export default function Layout({ children }) {
           </Link>
           
           <div className="flex items-center gap-6">
-            <Link 
-              to={createPageUrl("Home")}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link 
-              to={createPageUrl("Analysis")}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Analyze
-            </Link>
-            <Link 
-              to={createPageUrl("Settings")}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Settings
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link 
+                  to={createPageUrl("Dashboard")}
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to={createPageUrl("Analysis")}
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  Analyze
+                </Link>
+                <Link 
+                  to={createPageUrl("Settings")}
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  Settings
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => base44.auth.logout(createPageUrl("Home"))}
+                  className="text-slate-500 hover:text-slate-700"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to={createPageUrl("Demo")}
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  Try Demo
+                </Link>
+                <Button 
+                  size="sm"
+                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </nav>
