@@ -29,16 +29,14 @@ export default function Dashboard() {
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check authentication
+  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) {
-        navigate(createPageUrl("Home"));
-        return;
+      if (authenticated) {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
       }
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
       setIsLoading(false);
     };
     checkAuth();
