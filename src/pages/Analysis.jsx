@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TranscriptInput, { SAMPLE_TRANSCRIPT } from "@/components/nova/TranscriptInput";
 import FileUpload from "@/components/nova/FileUpload";
 import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
+import PostureIndicator from "@/components/nova/PostureIndicator";
+import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTURES } from "@/components/nova/PostureEngine";
 import { base44 } from "@/api/base44Client";
 import { 
   Sparkles, 
@@ -29,7 +31,19 @@ export default function Analysis() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("transcript");
   const [selectedSlackChannel, setSelectedSlackChannel] = useState(null);
-  const [slackConnected, setSlackConnected] = useState(false); // Will be true when backend is enabled
+  const [slackConnected, setSlackConnected] = useState(false);
+  const [detectedContext, setDetectedContext] = useState(null);
+  const [currentPosture, setCurrentPosture] = useState(POSTURES.agile_coach);
+
+  // Analyze transcript to detect context and determine posture
+  useEffect(() => {
+    if (transcript && transcript.length > 50) {
+      const context = analyzeTranscriptForContext(transcript);
+      setDetectedContext(context);
+      const posture = determinePosture(context);
+      setCurrentPosture(posture);
+    }
+  }, [transcript]);
 
   const handleFileDataExtracted = (data) => {
     setTranscript(data);
@@ -71,17 +85,28 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
     setIsAnalyzing(true);
     setError(null);
 
-    const analysisPrompt = `You are Nova, an AI Scrum Master analyzing a Daily Scrum meeting transcript. Analyze the following transcript and identify:
+    // Detect context and get appropriate posture
+    const context = analyzeTranscriptForContext(transcript);
+    const posture = determinePosture(context);
+    setCurrentPosture(posture);
+
+    const basePrompt = `You are Nova, an AI Scrum Master analyzing a meeting transcript. Analyze the following transcript and identify:
 
 1. Blockers - issues preventing team members from making progress
 2. Risks - potential problems that could impact the sprint/project
 3. Dependencies - tasks that depend on other team members or external factors
 4. Recommended actions for each issue
 
+Detected ceremony: ${context.current_ceremony !== "none" ? context.current_ceremony.replace("_", " ") : "Daily Scrum"}
+Communication tone: ${context.communication_tone}
+Sprint status: ${context.sprint_status}
+
 Transcript:
 ${transcript}
 
 Provide a detailed analysis in the following JSON format:`;
+
+    const analysisPrompt = getPosturePrompt(posture, basePrompt);
 
     const responseSchema = {
       type: "object",
@@ -122,20 +147,31 @@ Provide a detailed analysis in the following JSON format:`;
       response_json_schema: responseSchema
     });
 
+    // Determine title based on detected ceremony
+    const ceremonyTitles = {
+      daily_scrum: "Daily Standup",
+      sprint_planning: "Sprint Planning",
+      backlog_refinement: "Backlog Refinement",
+      sprint_review: "Sprint Review",
+      retrospective: "Retrospective",
+      none: "Team Meeting"
+    };
+    const title = `${ceremonyTitles[context.current_ceremony] || "Daily Standup"} - ${new Date().toLocaleDateString()}`;
+
     // Save to database for history tracking
     const analysisRecord = {
-      title: `Daily Standup - ${new Date().toLocaleDateString()}`,
+      title,
       source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
       blockers_count: result.blockers?.length || 0,
       risks_count: result.risks?.length || 0,
-      analysis_data: result,
+      analysis_data: { ...result, posture: posture.id, context },
       transcript_preview: transcript.substring(0, 200),
     };
     
     await base44.entities.AnalysisHistory.create(analysisRecord);
 
     // Store result in sessionStorage and navigate
-    sessionStorage.setItem("novaAnalysis", JSON.stringify(result));
+    sessionStorage.setItem("novaAnalysis", JSON.stringify({ ...result, posture: posture.id, context }));
     navigate(createPageUrl("Results"));
     setIsAnalyzing(false);
   };
@@ -163,6 +199,7 @@ Provide a detailed analysis in the following JSON format:`;
               <Sparkles className="w-3 h-3 mr-1" />
               {slackConnected ? "Live Mode" : "Simulation Mode"}
             </Badge>
+            <PostureIndicator postureId={currentPosture.id} size="compact" />
           </div>
           
           <div className="flex items-center justify-between">
@@ -243,6 +280,11 @@ Provide a detailed analysis in the following JSON format:`;
         {/* Analysis Section */}
         <div className="space-y-6 mt-6">
           
+          {/* Posture Indicator */}
+          {transcript && transcript.length > 50 && (
+            <PostureIndicator postureId={currentPosture.id} showDetails={true} />
+          )}
+          
           {transcript && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -251,9 +293,16 @@ Provide a detailed analysis in the following JSON format:`;
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-slate-700">Data Ready for Analysis</span>
-                <Badge variant="outline" className="text-xs">
-                  {transcript.length.toLocaleString()} characters
-                </Badge>
+                <div className="flex items-center gap-2">
+                  {detectedContext?.current_ceremony !== "none" && (
+                    <Badge variant="outline" className="text-xs bg-indigo-50 border-indigo-200 text-indigo-700">
+                      {detectedContext.current_ceremony.replace("_", " ")}
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-xs">
+                    {transcript.length.toLocaleString()} characters
+                  </Badge>
+                </div>
               </div>
               <p className="text-xs text-slate-500 line-clamp-2">
                 {transcript.substring(0, 150)}...
