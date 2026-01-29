@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import AnalysisTable from "@/components/nova/AnalysisTable";
 import RecommendationCard from "@/components/nova/RecommendationCard";
 import MetricCard from "@/components/nova/MetricCard";
+import PostureIndicator from "@/components/nova/PostureIndicator";
+import { POSTURES } from "@/components/nova/PostureEngine";
 import { 
   ArrowLeft, 
   RotateCcw,
@@ -67,6 +69,9 @@ export default function Results() {
                   <CheckCircle2 className="w-3 h-3 mr-1" />
                   Analysis Complete
                 </Badge>
+                {analysis.posture && (
+                  <PostureIndicator postureId={analysis.posture} size="compact" />
+                )}
               </div>
               <h1 className="text-3xl font-bold text-slate-900">
                 Analysis Results
@@ -81,6 +86,18 @@ export default function Results() {
             </Link>
           </div>
         </motion.div>
+
+        {/* Posture Context */}
+        {analysis.posture && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-6"
+          >
+            <PostureIndicator postureId={analysis.posture} showDetails={true} />
+          </motion.div>
+        )}
 
         {/* Summary Stats */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
