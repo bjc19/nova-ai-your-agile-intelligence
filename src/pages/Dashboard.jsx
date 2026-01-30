@@ -12,6 +12,7 @@ import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChar
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 
 import { 
   Mic, 
@@ -62,6 +63,29 @@ export default function Dashboard() {
     name: "Sprint 14",
     daysRemaining: 4,
     progress: 65,
+  };
+
+  // Simulated sprint health data (will come from Jira integration)
+  const sprintHealth = {
+    sprint_name: "Sprint 14",
+    sprint_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    risk_score: analysisHistory.length > 0 
+      ? Math.min(100, (analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) * 15) + 
+                       (analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) * 10))
+      : 45,
+    status: analysisHistory.length > 0 && 
+            analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) >= 3 
+      ? "at_risk" : "healthy",
+    wip_count: 6,
+    wip_historical_avg: 5,
+    tickets_in_progress_over_3d: analysisHistory.length > 0 ? Math.min(3, analysisHistory[0]?.blockers_count || 0) : 1,
+    blocked_tickets_over_48h: analysisHistory.length > 0 ? Math.min(2, analysisHistory[0]?.risks_count || 0) : 0,
+    alert_sent: false,
+    recommendations: latestAnalysis?.recommendations?.slice(0, 1) || ["Réduire le WIP et prioriser les tickets bloqués"],
+    problematic_tickets: [
+      { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
+      { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }
+    ]
   };
 
   if (isLoading) {
@@ -138,6 +162,9 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Sprint Health Card - Drift Detection */}
+            <SprintHealthCard sprintHealth={sprintHealth} />
+            
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
             
