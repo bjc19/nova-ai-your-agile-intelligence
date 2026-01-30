@@ -294,7 +294,7 @@ Provide a detailed analysis in the following JSON format:`;
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-slate-700">Data Ready for Analysis</span>
                 <div className="flex items-center gap-2">
-                  {detectedContext?.current_ceremony !== "none" && (
+                  {detectedContext && detectedContext.current_ceremony !== "none" && (
                     <Badge variant="outline" className="text-xs bg-indigo-50 border-indigo-200 text-indigo-700">
                       {detectedContext.current_ceremony.replace("_", " ")}
                     </Badge>
