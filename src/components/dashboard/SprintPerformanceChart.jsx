@@ -10,15 +10,59 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
         day: `Day ${index + 1}`,
         blockers: item.blockers_count || 0,
         risks: item.risks_count || 0,
+        blockersData: item.analysis_data?.blockers || [],
+        risksData: item.analysis_data?.risks || [],
       }))
     : [
-        { day: "Mon", blockers: 2, risks: 1 },
-        { day: "Tue", blockers: 3, risks: 2 },
-        { day: "Wed", blockers: 1, risks: 1 },
-        { day: "Thu", blockers: 4, risks: 3 },
-        { day: "Fri", blockers: 2, risks: 1 },
-        { day: "Today", blockers: 3, risks: 2 },
+        { day: "Mon", blockers: 2, risks: 1, blockersData: [{member: "John", issue: "API timeout"}], risksData: [{description: "Deadline risk"}] },
+        { day: "Tue", blockers: 3, risks: 2, blockersData: [], risksData: [] },
+        { day: "Wed", blockers: 1, risks: 1, blockersData: [], risksData: [] },
+        { day: "Thu", blockers: 4, risks: 3, blockersData: [], risksData: [] },
+        { day: "Fri", blockers: 2, risks: 1, blockersData: [], risksData: [] },
+        { day: "Today", blockers: 3, risks: 2, blockersData: [], risksData: [] },
       ];
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || !payload.length) return null;
+    
+    const data = payload[0]?.payload;
+    
+    return (
+      <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-4 max-w-xs">
+        <p className="font-semibold text-slate-900 mb-2">{label}</p>
+        <div className="space-y-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-sm font-medium text-slate-700">Blockers: {data?.blockers || 0}</span>
+            </div>
+            {data?.blockersData?.length > 0 && (
+              <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
+                {data.blockersData.slice(0, 3).map((b, i) => (
+                  <li key={i}>• {b.member}: {b.issue?.substring(0, 40)}{b.issue?.length > 40 ? '...' : ''}</li>
+                ))}
+                {data.blockersData.length > 3 && <li className="text-slate-400">+{data.blockersData.length - 3} more</li>}
+              </ul>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-sm font-medium text-slate-700">Risks: {data?.risks || 0}</span>
+            </div>
+            {data?.risksData?.length > 0 && (
+              <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
+                {data.risksData.slice(0, 3).map((r, i) => (
+                  <li key={i}>• {r.description?.substring(0, 40)}{r.description?.length > 40 ? '...' : ''}</li>
+                ))}
+                {data.risksData.length > 3 && <li className="text-slate-400">+{data.risksData.length - 3} more</li>}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Calculate trends
   const latestBlockers = chartData[chartData.length - 1]?.blockers || 0;
@@ -84,14 +128,7 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
                   tickLine={false}
                   tick={{ fontSize: 12, fill: '#94a3b8' }}
                 />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
                   dataKey="blockers"
