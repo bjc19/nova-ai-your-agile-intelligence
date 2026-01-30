@@ -21,6 +21,7 @@ import {
 export default function Results() {
   const navigate = useNavigate();
   const [analysis, setAnalysis] = useState(null);
+  const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
 
   useEffect(() => {
     const storedAnalysis = sessionStorage.getItem("novaAnalysis");
@@ -99,23 +100,97 @@ export default function Results() {
           </motion.div>
         )}
 
-        {/* Summary Stats */}
+        {/* Summary Stats - Clickable */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <MetricCard
-            icon={AlertOctagon}
-            label="Blockers Detected"
-            value={analysis.blockers?.length || 0}
-            color="blue"
-            delay={0.1}
-          />
-          <MetricCard
-            icon={ShieldAlert}
-            label="Risks Identified"
-            value={analysis.risks?.length || 0}
-            color="amber"
-            delay={0.2}
-          />
+          <div 
+            onClick={() => setExpandedSection(expandedSection === "blockers" ? null : "blockers")}
+            className="cursor-pointer"
+          >
+            <MetricCard
+              icon={AlertOctagon}
+              label="Blockers Detected"
+              value={analysis.blockers?.length || 0}
+              color="blue"
+              delay={0.1}
+              active={expandedSection === "blockers"}
+            />
+          </div>
+          <div 
+            onClick={() => setExpandedSection(expandedSection === "risks" ? null : "risks")}
+            className="cursor-pointer"
+          >
+            <MetricCard
+              icon={ShieldAlert}
+              label="Risks Identified"
+              value={analysis.risks?.length || 0}
+              color="amber"
+              delay={0.2}
+              active={expandedSection === "risks"}
+            />
+          </div>
         </div>
+
+        {/* Expanded Details Inline */}
+        {expandedSection === "blockers" && analysis.blockers && analysis.blockers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-8 p-6 rounded-2xl bg-blue-50/50 border border-blue-200"
+          >
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <AlertOctagon className="w-5 h-5 text-blue-600" />
+              Blocker Details
+            </h3>
+            <div className="space-y-3">
+              {analysis.blockers.map((blocker, index) => (
+                <div key={index} className="p-4 bg-white rounded-xl border border-blue-100">
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="font-medium text-slate-900">{blocker.member}</span>
+                    <Badge className={
+                      blocker.urgency === "high" ? "bg-red-100 text-red-700" :
+                      blocker.urgency === "medium" ? "bg-amber-100 text-amber-700" :
+                      "bg-slate-100 text-slate-700"
+                    }>
+                      {blocker.urgency}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-700 mb-2">{blocker.issue}</p>
+                  <p className="text-sm text-blue-700">
+                    <span className="font-medium">Action:</span> {blocker.action}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {expandedSection === "risks" && analysis.risks && analysis.risks.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-8 p-6 rounded-2xl bg-amber-50/50 border border-amber-200"
+          >
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-amber-600" />
+              Risk Details
+            </h3>
+            <div className="space-y-3">
+              {analysis.risks.map((risk, index) => (
+                <div key={index} className="p-4 bg-white rounded-xl border border-amber-100">
+                  <p className="font-medium text-slate-900 mb-2">{risk.description}</p>
+                  <p className="text-sm text-slate-600 mb-1">
+                    <span className="font-medium">Impact:</span> {risk.impact}
+                  </p>
+                  <p className="text-sm text-amber-700">
+                    <span className="font-medium">Mitigation:</span> {risk.mitigation}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Summary */}
         {analysis.summary && (
