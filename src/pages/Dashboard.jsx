@@ -13,6 +13,7 @@ import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
+import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 
 import { 
   Mic, 
@@ -163,7 +164,35 @@ export default function Dashboard() {
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Sprint Health Card - Drift Detection */}
-            <SprintHealthCard sprintHealth={sprintHealth} />
+            <SprintHealthCard 
+              sprintHealth={{
+                sprint_name: "Sprint 14",
+                wip_count: 8,
+                wip_historical_avg: 5,
+                tickets_in_progress_over_3d: 3,
+                blocked_tickets_over_48h: 2,
+                sprint_day: 5,
+                historical_sprints_count: 4,
+                drift_acknowledged: false,
+                problematic_tickets: sprintHealth.problematic_tickets
+              }}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")}
+            />
+
+            {/* Actionable Metrics Radar */}
+            <MetricsRadarCard 
+              metricsData={{
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14,
+              }}
+              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
+              onApplyLever={(lever) => console.log("Apply lever:", lever)}
+            />
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
