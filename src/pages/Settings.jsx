@@ -188,10 +188,10 @@ export default function Settings() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-slate-900 mb-1">
-                    Backend Functions Required
+                    {t('backendRequired')}
                   </h3>
                   <p className="text-sm text-slate-600 mb-3">
-                    To enable live integrations with external services, you need to activate Backend Functions in your app settings. This requires the Builder plan or higher.
+                    {t('backendRequiredDescription')}
                   </p>
                   <Button variant="outline" size="sm" className="gap-2">
                     <ExternalLink className="w-4 h-4" />
