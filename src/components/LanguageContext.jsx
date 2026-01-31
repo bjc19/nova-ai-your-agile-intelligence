@@ -30,6 +30,11 @@ export const translations = {
     importDataDescription: "Importez des données depuis Slack, téléchargez des transcripts de réunion, ou collez vos notes directement. Nova analysera et fournira des insights actionnables.",
     connectSlack: "Connecter Slack",
     startAnalysis: "Démarrer l'analyse",
+    keyRecommendations: "Recommandations clés",
+    basedOnLatestAnalysis: "Basées sur votre dernière analyse",
+    high: "élevée",
+    medium: "moyenne",
+    low: "basse",
     
     // Settings
     languageSettings: "Langue / Language",
@@ -104,6 +109,11 @@ export const translations = {
     importDataDescription: "Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.",
     connectSlack: "Connect Slack",
     startAnalysis: "Start Analysis",
+    keyRecommendations: "Key Recommendations",
+    basedOnLatestAnalysis: "Based on your latest analysis",
+    high: "high",
+    medium: "medium",
+    low: "low",
     
     // Settings
     languageSettings: "Language / Langue",

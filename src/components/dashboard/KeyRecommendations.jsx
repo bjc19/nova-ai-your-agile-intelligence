@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/components/LanguageContext";
 import {
   Lightbulb,
   ArrowRight,
@@ -19,6 +20,8 @@ const recommendationIcons = {
 };
 
 export default function KeyRecommendations({ latestAnalysis = null }) {
+  const { t } = useLanguage();
+  
   // Sample recommendations for demo
   const sampleRecommendations = [
     {
@@ -76,9 +79,9 @@ export default function KeyRecommendations({ latestAnalysis = null }) {
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-slate-900">
-                Key Recommendations
+                {t('keyRecommendations')}
               </CardTitle>
-              <p className="text-sm text-slate-500">Based on your latest analysis</p>
+              <p className="text-sm text-slate-500">{t('basedOnLatestAnalysis')}</p>
             </div>
           </div>
         </CardHeader>
@@ -105,7 +108,7 @@ export default function KeyRecommendations({ latestAnalysis = null }) {
                           {rec.title}
                         </h4>
                         <Badge variant="outline" className={`text-xs shrink-0 ${priorityColors[rec.priority]}`}>
-                          {rec.priority}
+                          {t(rec.priority)}
                         </Badge>
                       </div>
                       <p className="text-sm text-slate-600 line-clamp-2">
