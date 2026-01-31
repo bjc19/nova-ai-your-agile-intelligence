@@ -36,6 +36,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [userResponse, setUserResponse] = useState("");
   const [isSendingNotifications, setIsSendingNotifications] = useState(false);
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
+  const [recosApplied, setRecosApplied] = useState(false);
 
   // Demo data if none provided
   const data = flowData || {
@@ -157,6 +158,8 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
 
       // Schedule automatic verification (in production, this would be a background job)
       console.log("Vérification programmée pour:", appliedRecords);
+      
+      setRecosApplied(true);
       
     } catch (error) {
       console.error("Error applying recommendations:", error);
@@ -494,16 +497,24 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                     <TooltipTrigger asChild>
                       <Button
                         onClick={handleApplyRecommendations}
-                        disabled={isApplyingRecos || suggestions.length === 0}
+                        disabled={isApplyingRecos || suggestions.length === 0 || recosApplied}
                         variant="outline"
-                        className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                        className={recosApplied 
+                          ? "bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
+                          : "border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                        }
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {isApplyingRecos ? "Application..." : "APPLY RECOS"}
+                        {isApplyingRecos ? "Application..." : recosApplied ? "✓ Appliqué" : "APPLY RECOS"}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">Marque les recommandations comme appliquées.<br/>Nova vérifiera l'impact via les données réelles.</p>
+                      <p className="text-xs">
+                        {recosApplied 
+                          ? "Recommandations appliquées • Nova vérifie l'impact"
+                          : "Marque les recommandations comme appliquées.\nNova vérifiera l'impact via les données réelles."
+                        }
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
