@@ -96,11 +96,14 @@ export default function Results() {
 
                 // Update with translated content
                 setAnalysis(parsedAnalysis);
-              }
-            };
+                }
+                };
 
-            translateContentIfNeeded();
-          }
+                translateContentIfNeeded().catch(error => {
+                // Gracefully handle translation errors (e.g., rate limits)
+                console.log('Background translation skipped:', error?.message);
+                });
+                }
         } else {
           navigate(createPageUrl("Analysis"));
         }
