@@ -44,6 +44,8 @@ export default function Results() {
           // Translate all LLM content if language is French
           if (language === 'fr') {
             const translateContentIfNeeded = async () => {
+              // Add delay to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 1000));
               // Batch translate all texts in one LLM call
               const textsToTranslate = [];
 
