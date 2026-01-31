@@ -12,13 +12,14 @@ import PostureIndicator from "@/components/nova/PostureIndicator";
 import { POSTURES } from "@/components/nova/PostureEngine";
 import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
 import { 
-  ArrowLeft, 
-  RotateCcw,
-  AlertOctagon,
-  ShieldAlert,
-  FileText,
-  CheckCircle2
-} from "lucide-react";
+        ArrowLeft, 
+        RotateCcw,
+        AlertOctagon,
+        ShieldAlert,
+        FileText,
+        CheckCircle2,
+        Loader2
+      } from "lucide-react";
 
 export default function Results() {
   const navigate = useNavigate();
