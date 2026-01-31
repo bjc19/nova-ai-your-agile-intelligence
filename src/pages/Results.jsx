@@ -38,16 +38,42 @@ export default function Results() {
         parsedAnalysis.sourceName = name;
       }
       
-      // Translate summary if language is French
-      const translateSummaryIfNeeded = async () => {
-        if (language === 'fr' && parsedAnalysis.summary) {
-          const prompt = t('translateSummary').replace('{summary}', parsedAnalysis.summary);
-          parsedAnalysis.summary = await invokeLLMWithAutoTranslate(prompt, null, language);
+      // Translate all LLM content if language is French
+      const translateContentIfNeeded = async () => {
+        if (language === 'fr') {
+          // Translate summary
+          if (parsedAnalysis.summary) {
+            const summaryPrompt = t('translateSummary').replace('{summary}', parsedAnalysis.summary);
+            parsedAnalysis.summary = await invokeLLMWithAutoTranslate(summaryPrompt, null, language);
+          }
+          
+          // Translate blockers
+          if (parsedAnalysis.blockers && parsedAnalysis.blockers.length > 0) {
+            parsedAnalysis.blockers = await Promise.all(
+              parsedAnalysis.blockers.map(async (blocker) => ({
+                ...blocker,
+                issue: await invokeLLMWithAutoTranslate(blocker.issue, null, language),
+                action: await invokeLLMWithAutoTranslate(blocker.action, null, language)
+              }))
+            );
+          }
+          
+          // Translate risks
+          if (parsedAnalysis.risks && parsedAnalysis.risks.length > 0) {
+            parsedAnalysis.risks = await Promise.all(
+              parsedAnalysis.risks.map(async (risk) => ({
+                ...risk,
+                description: await invokeLLMWithAutoTranslate(risk.description, null, language),
+                impact: await invokeLLMWithAutoTranslate(risk.impact, null, language),
+                mitigation: await invokeLLMWithAutoTranslate(risk.mitigation, null, language)
+              }))
+            );
+          }
         }
         setAnalysis(parsedAnalysis);
       };
       
-      translateSummaryIfNeeded();
+      translateContentIfNeeded();
     } else {
       navigate(createPageUrl("Analysis"));
     }
