@@ -89,6 +89,10 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
 
   // Translate recommendations if needed
   useEffect(() => {
+    setTranslatedRecommendations(null);
+  }, [language]);
+
+  useEffect(() => {
     if (latestAnalysis?.recommendations && language === 'fr' && !translatedRecommendations) {
       const translateRecommendations = async () => {
         const recList = latestAnalysis.recommendations.map((rec, i) => {
