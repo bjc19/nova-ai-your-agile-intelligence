@@ -35,10 +35,21 @@ export const translations = {
     backendRequiredDescription: "To enable live integrations with external services, you need to activate Backend Functions in your app settings. This requires the Builder plan or higher.",
     
     // Analysis
-    analyzeTitle: "Analyze Your Daily Scrum",
-    analyzeDescription: "Import data from Slack, upload files, or paste your transcript.",
+    analyzeTitle: "Analyser votre Daily Scrum",
+    analyzeDescription: "Importez des données depuis Slack, téléchargez des fichiers ou collez votre transcript.",
     analyzeButton: "Analyser avec Nova",
     analyzing: "Nova analyse la réunion...",
+    backToDashboard: "Retour au Dashboard",
+    liveMode: "Mode en direct",
+    simulationMode: "Mode simulation",
+    slackTab: "Slack",
+    uploadTab: "Télécharger",
+    pasteTab: "Coller",
+    dataReady: "Données prêtes pour l'analyse",
+    characters: "caractères",
+    demoMode: "Mode Démo",
+    demoModeDescription: "Connectez Slack dans",
+    toImportReal: "pour importer de vrais messages. Pour l'instant, utilisez les canaux d'exemple ci-dessus.",
     
     // Sprint Health
     sprintHealthy: "Sprint en bonne santé",
@@ -94,6 +105,17 @@ export const translations = {
     analyzeDescription: "Import data from Slack, upload files, or paste your transcript.",
     analyzeButton: "Analyze with Nova",
     analyzing: "Nova is analyzing the meeting...",
+    backToDashboard: "Back to Dashboard",
+    liveMode: "Live Mode",
+    simulationMode: "Simulation Mode",
+    slackTab: "Slack",
+    uploadTab: "Upload",
+    pasteTab: "Paste",
+    dataReady: "Data Ready for Analysis",
+    characters: "characters",
+    demoMode: "Demo Mode",
+    demoModeDescription: "Connect Slack in",
+    toImportReal: "to import real messages. For now, use the sample channels above.",
     
     // Sprint Health
     sprintHealthy: "Sprint is healthy",

@@ -13,6 +13,7 @@ import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTUR
 import ProductGoalCard from "@/components/nova/ProductGoalCard";
 import { generateAlignmentReport } from "@/components/nova/ProductGoalAlignmentEngine";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { 
   Sparkles, 
   ArrowLeft, 
@@ -28,6 +29,7 @@ import { Link } from "react-router-dom";
 
 export default function Analysis() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [transcript, setTranscript] = useState(SAMPLE_TRANSCRIPT);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
@@ -220,13 +222,13 @@ Provide a detailed analysis in the following JSON format:`;
             className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
           
           <div className="flex items-center gap-3 mb-3">
             <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-blue-50 border-blue-200 text-blue-700">
               <Sparkles className="w-3 h-3 mr-1" />
-              {slackConnected ? "Live Mode" : "Simulation Mode"}
+              {slackConnected ? t('liveMode') : t('simulationMode')}
             </Badge>
             <PostureIndicator postureId={currentPosture.id} size="compact" />
           </div>
@@ -254,10 +256,10 @@ Provide a detailed analysis in the following JSON format:`;
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
-                Analyze Your Daily Scrum
+                {t('analyzeTitle')}
               </h1>
               <p className="text-slate-600">
-                Import data from Slack, upload files, or paste your transcript.
+                {t('analyzeDescription')}
               </p>
             </div>
             <Link to={createPageUrl("Settings")}>
@@ -277,21 +279,21 @@ Provide a detailed analysis in the following JSON format:`;
               className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
             >
               <MessageSquare className="w-4 h-4" />
-              Slack
+              {t('slackTab')}
             </TabsTrigger>
             <TabsTrigger 
               value="upload" 
               className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
             >
               <Upload className="w-4 h-4" />
-              Upload
+              {t('uploadTab')}
             </TabsTrigger>
             <TabsTrigger 
               value="transcript" 
               className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
             >
               <FileText className="w-4 h-4" />
-              Paste
+              {t('pasteTab')}
             </TabsTrigger>
           </TabsList>
 
@@ -303,9 +305,9 @@ Provide a detailed analysis in the following JSON format:`;
             {!slackConnected && (
               <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
                 <p className="text-sm text-blue-900">
-                  <strong>Demo Mode:</strong> Connect Slack in{" "}
-                  <Link to={createPageUrl("Settings")} className="underline">Settings</Link>
-                  {" "}to import real messages. For now, use the sample channels above.
+                  <strong>{t('demoMode')}:</strong> {t('demoModeDescription')}{" "}
+                  <Link to={createPageUrl("Settings")} className="underline">{t('settings')}</Link>
+                  {" "}{t('toImportReal')}
                 </p>
               </div>
             )}
@@ -341,7 +343,7 @@ Provide a detailed analysis in the following JSON format:`;
               className="p-4 rounded-xl bg-slate-50 border border-slate-200"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-700">Data Ready for Analysis</span>
+                <span className="text-sm font-medium text-slate-700">{t('dataReady')}</span>
                 <div className="flex items-center gap-2">
                   {detectedContext && detectedContext.current_ceremony !== "none" && (
                     <Badge variant="outline" className="text-xs bg-indigo-50 border-indigo-200 text-indigo-700">
@@ -349,7 +351,7 @@ Provide a detailed analysis in the following JSON format:`;
                     </Badge>
                   )}
                   <Badge variant="outline" className="text-xs">
-                    {transcript.length.toLocaleString()} characters
+                    {transcript.length.toLocaleString()} {t('characters')}
                   </Badge>
                 </div>
               </div>
@@ -384,12 +386,12 @@ Provide a detailed analysis in the following JSON format:`;
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Nova is analyzing the meeting...
+                  {t('analyzing')}
                 </>
               ) : (
                 <>
                   <Wand2 className="w-5 h-5 mr-2" />
-                  Analyze with Nova
+                  {t('analyzeButton')}
                 </>
               )}
             </Button>
@@ -408,10 +410,10 @@ Provide a detailed analysis in the following JSON format:`;
                 <Loader2 className="w-8 h-8 text-white animate-spin" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                Analyzing Meeting...
+                {t('analyzing')}
               </h3>
               <p className="text-sm text-slate-500">
-                Nova is detecting blockers, risks, and generating recommendations
+                {t('analyzing')}
               </p>
             </div>
           </motion.div>
