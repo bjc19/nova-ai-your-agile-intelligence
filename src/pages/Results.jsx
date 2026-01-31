@@ -78,7 +78,7 @@ export default function Results() {
               <div className="flex items-center gap-3 mb-2">
                 <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-emerald-50 border-emerald-200 text-emerald-700">
                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                   {language === 'fr' ? 'Analyse Complète' : 'Analysis Complete'}
+                   {t('analysisComplete')}
                 </Badge>
                 {analysis.posture && (
                   <PostureIndicator postureId={analysis.posture} size="compact" />
