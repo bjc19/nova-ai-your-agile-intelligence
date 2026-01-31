@@ -14,6 +14,7 @@ import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
+import RealityMapCard from "@/components/nova/RealityMapCard";
 
 import { 
   Mic, 
@@ -198,6 +199,33 @@ export default function Dashboard() {
               }}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)}
+            />
+
+            {/* Organizational Reality Engine */}
+            <RealityMapCard
+              flowData={{
+                assignee_changes: [
+                  { person: "Mary", count: 42 },
+                  { person: "John", count: 12 },
+                ],
+                mention_patterns: [
+                  { person: "Mary", type: "prioritization", count: 35 },
+                  { person: "Dave", type: "unblocking", count: 19 },
+                ],
+                blocked_resolutions: [
+                  { person: "Dave", count: 19 },
+                ],
+                data_days: 30,
+              }}
+              flowMetrics={{
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30,
+              }}
+              onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")}
             />
             
             {/* Sprint Performance Chart */}
