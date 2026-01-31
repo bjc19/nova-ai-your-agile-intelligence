@@ -31,6 +31,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState({});
   const [detailsCache, setDetailsCache] = useState({});
+  const [completedItems, setCompletedItems] = useState({});
   
   // Sample recommendations for demo
   const sampleRecommendations = language === 'fr' ? [
@@ -98,6 +99,14 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     high: "bg-red-100 text-red-700 border-red-200",
     medium: "bg-amber-100 text-amber-700 border-amber-200",
     low: "bg-slate-100 text-slate-600 border-slate-200",
+  };
+
+  const handleItemCheck = (recIndex, itemIndex) => {
+    const key = `${recIndex}-${itemIndex}`;
+    setCompletedItems({
+      ...completedItems,
+      [key]: !completedItems[key]
+    });
   };
 
   const handleRecommendationClick = async (rec, index) => {
@@ -247,22 +256,39 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                                 {language === 'fr' ? 'Plan d\'action suggéré par Nova' : 'Action Plan Suggested by Nova'}
                               </h5>
                               <div className="space-y-2">
-                                {details.map((item, idx) => (
-                                  <div key={idx} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
-                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-700 font-semibold text-xs shrink-0">
-                                      {idx + 1}
-                                    </div>
-                                    <div className="flex-1">
-                                      <p className="font-medium text-slate-900 text-sm mb-1">
-                                        {item.step}
-                                      </p>
-                                      <p className="text-xs text-slate-600">
-                                        {item.description}
-                                      </p>
-                                    </div>
-                                    <CheckCircle2 className="w-4 h-4 text-slate-300 shrink-0 hover:text-green-500 cursor-pointer transition-colors" />
-                                  </div>
-                                ))}
+                                {details.map((item, idx) => {
+                                  const isCompleted = completedItems[`${index}-${idx}`];
+                                  return (
+                                    <motion.div
+                                      key={idx}
+                                      animate={isCompleted ? { opacity: 0.6 } : { opacity: 1 }}
+                                      className="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200 transition-all"
+                                    >
+                                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-700 font-semibold text-xs shrink-0">
+                                        {idx + 1}
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className={`font-medium text-sm mb-1 transition-all ${isCompleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                                          {item.step}
+                                        </p>
+                                        <p className={`text-xs transition-all ${isCompleted ? 'line-through text-slate-400' : 'text-slate-600'}`}>
+                                          {item.description}
+                                        </p>
+                                      </div>
+                                      <motion.div
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => handleItemCheck(index, idx)}
+                                        className="cursor-pointer shrink-0"
+                                      >
+                                        {isCompleted ? (
+                                          <CheckCircle2 className="w-4 h-4 text-green-500 transition-colors" />
+                                        ) : (
+                                          <CheckCircle2 className="w-4 h-4 text-slate-300 hover:text-amber-500 transition-colors" />
+                                        )}
+                                      </motion.div>
+                                    </motion.div>
+                                  );
+                                })}
                               </div>
                             </div>
                           ) : null}
