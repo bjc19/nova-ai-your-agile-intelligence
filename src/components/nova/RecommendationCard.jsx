@@ -78,7 +78,7 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
 
     try {
        const recText = typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec);
-       const prompt = actionPlanPrompt.replace('{rec}', recText);
+       const prompt = getActionPlanPrompt(recText, language);
 
        const result = await invokeLLMWithAutoTranslate(
          prompt,
