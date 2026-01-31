@@ -209,13 +209,13 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
       {sourceUrl && (
         <div className="mt-5 pt-5 border-t border-amber-200">
           <Button
-            onClick={() => window.open(sourceUrl, '_blank')}
-            variant="outline"
-            className="w-full bg-white hover:bg-amber-50 border-amber-300 text-amber-700 hover:text-amber-800"
-          >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            {language === 'fr' ? 'Voir dans' : 'View in'} {sourceName || (language === 'fr' ? 'la source' : 'source')}
-          </Button>
+             onClick={() => window.open(sourceUrl, '_blank')}
+             variant="outline"
+             className="w-full bg-white hover:bg-amber-50 border-amber-300 text-amber-700 hover:text-amber-800"
+           >
+             <ExternalLink className="w-4 h-4 mr-2" />
+             {t('viewIn')} {sourceName || (language === 'fr' ? 'la source' : 'source')}
+           </Button>
         </div>
       )}
     </motion.div>
