@@ -266,11 +266,11 @@ export default function Results() {
                 <div key={index} className="p-4 bg-white rounded-xl border border-amber-100">
                   <p className="font-medium text-slate-900 mb-2">{risk.description}</p>
                   <p className="text-sm text-slate-600 mb-1">
-                    <span className="font-medium">Impact:</span> {risk.impact}
-                  </p>
-                  <p className="text-sm text-amber-700">
-                    <span className="font-medium">Mitigation:</span> {risk.mitigation}
-                  </p>
+                     <span className="font-medium">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
+                   </p>
+                   <p className="text-sm text-amber-700">
+                     <span className="font-medium">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
+                   </p>
                 </div>
               ))}
             </div>
