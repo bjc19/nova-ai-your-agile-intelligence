@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import {
   Lightbulb,
@@ -8,7 +9,8 @@ import {
   AlertTriangle,
   Users,
   Clock,
-  Target
+  Target,
+  ExternalLink
 } from "lucide-react";
 
 const recommendationIcons = {
@@ -19,7 +21,7 @@ const recommendationIcons = {
   default: Lightbulb,
 };
 
-export default function KeyRecommendations({ latestAnalysis = null }) {
+export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, sourceName }) {
   const { t } = useLanguage();
   
   // Sample recommendations for demo
@@ -121,6 +123,20 @@ export default function KeyRecommendations({ latestAnalysis = null }) {
               );
             })}
           </div>
+          
+          {sourceUrl && (
+            <div className="mt-5 pt-5 border-t border-slate-100">
+              <Button
+                onClick={() => window.open(sourceUrl, '_blank')}
+                variant="outline"
+                size="sm"
+                className="w-full hover:bg-slate-50"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Voir dans {sourceName || 'la source'}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
