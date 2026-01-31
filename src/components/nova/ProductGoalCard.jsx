@@ -323,20 +323,23 @@ export default function ProductGoalCard({
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-lg bg-blue-50">
-                <MessageSquare className="w-5 h-5 text-blue-600" />
+              <div className="p-2 rounded-lg bg-indigo-50">
+                <Target className="w-5 h-5 text-indigo-600" />
               </div>
-              <DialogTitle className="text-lg">Répondre à Nova</DialogTitle>
+              <div>
+                <DialogTitle className="text-lg">Réponse du Product Owner</DialogTitle>
+                <p className="text-xs text-slate-500 mt-0.5">Réservé exclusivement au PO</p>
+              </div>
             </div>
             <DialogDescription className="text-sm text-slate-600">
               <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 mb-3">
                 <p className="italic">"{question}"</p>
               </div>
-              <div className="flex items-start gap-2 text-xs text-slate-500">
-                <Shield className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                <Shield className="w-4 h-4 shrink-0 mt-0.5" />
                 <p>
-                  <strong className="text-emerald-700">Réponse anonyme.</strong> Vos insights aident Nova à mieux comprendre 
-                  les dynamiques de votre équipe et à affiner ses recommandations pour tous.
+                  <strong>Identifié.</strong> Votre nom sera enregistré avec cette réponse pour tracer les décisions du Product Owner 
+                  et maintenir la cohérence du Product Goal.
                 </p>
               </div>
             </DialogDescription>
