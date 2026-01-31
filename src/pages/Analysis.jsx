@@ -10,6 +10,8 @@ import FileUpload from "@/components/nova/FileUpload";
 import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
 import PostureIndicator from "@/components/nova/PostureIndicator";
 import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTURES } from "@/components/nova/PostureEngine";
+import ProductGoalCard from "@/components/nova/ProductGoalCard";
+import { generateAlignmentReport } from "@/components/nova/ProductGoalAlignmentEngine";
 import { base44 } from "@/api/base44Client";
 import { 
   Sparkles, 
@@ -34,6 +36,33 @@ export default function Analysis() {
   const [slackConnected, setSlackConnected] = useState(false);
   const [detectedContext, setDetectedContext] = useState(null);
   const [currentPosture, setCurrentPosture] = useState(POSTURES.agile_coach);
+  const [alignmentReport, setAlignmentReport] = useState(null);
+
+  // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
+  const productGoalData = {
+    title: "Améliorer la rétention utilisateur de 20%",
+    description: "Réduire le churn et augmenter l'engagement via onboarding optimisé",
+    version: 3,
+    status: "active",
+    confirmed_date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    change_history: [
+      { date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), previous_title: "Augmenter acquisition", reason: "Pivot vers rétention" },
+      { date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), previous_title: "Améliorer onboarding", reason: "Élargissement scope" },
+    ],
+  };
+
+  const sprintGoalsData = [
+    { sprint_name: "Sprint 14", goal_statement: "Implémenter le nouveau flow d'onboarding pour améliorer rétention", alignment_status: "aligned", sprint_number: 14 },
+    { sprint_name: "Sprint 13", goal_statement: "Ajouter les analytics de comportement utilisateur", alignment_status: "partial", sprint_number: 13 },
+    { sprint_name: "Sprint 12", goal_statement: "Refactoring technique de la base de données", alignment_status: "misaligned", sprint_number: 12 },
+    { sprint_name: "Sprint 11", goal_statement: "Optimiser les emails de réengagement", alignment_status: "aligned", sprint_number: 11 },
+  ];
+
+  // Generate alignment report on mount
+  useEffect(() => {
+    const report = generateAlignmentReport(productGoalData, sprintGoalsData);
+    setAlignmentReport(report);
+  }, []);
 
   // Analyze transcript to detect context and determine posture
   useEffect(() => {
@@ -201,6 +230,26 @@ Provide a detailed analysis in the following JSON format:`;
             </Badge>
             <PostureIndicator postureId={currentPosture.id} size="compact" />
           </div>
+          
+          {/* Product Goal Alignment Card */}
+          {alignmentReport && alignmentReport.risk.id !== "insufficient" && (
+            <div className="mt-6">
+              <ProductGoalCard 
+                alignmentReport={alignmentReport}
+                onConfirmGoal={(response) => {
+                  console.log("Goal confirmed:", response);
+                  setAlignmentReport(prev => ({
+                    ...prev,
+                    risk: { id: "stable", label: "Cap stable et aligné", severity: 0 },
+                    message: "Cap confirmé par le PO – alignement validé 🟢",
+                    productGoal: { ...prev.productGoal, confirmed_date: new Date().toISOString() }
+                  }));
+                }}
+                onAdjustGoal={() => console.log("Adjust sprint goal")}
+                onShareStatus={() => console.log("Share status")}
+              />
+            </div>
+          )}
           
           <div className="flex items-center justify-between">
             <div>
