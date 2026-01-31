@@ -144,6 +144,14 @@ export const translations = {
     viewIn: "Voir dans",
     source: "la source",
     translateSummary: "Traduis en français le résumé suivant de manière concise et claire:\n\n{summary}",
+    noItemsFound: "Aucun élément trouvé",
+    items: "éléments",
+    item: "élément",
+    resolved: "Résolu",
+    action: "Action",
+    impact: "Impact",
+    blockers: "blockers",
+    risks: "risques",
     },
   en: {
     // Navigation
@@ -286,6 +294,14 @@ export const translations = {
     viewIn: "View in",
     source: "source",
     translateSummary: "Translate the following summary into English in a concise and clear way:\n\n{summary}",
+    noItemsFound: "No items found",
+    items: "items",
+    item: "item",
+    resolved: "Resolved",
+    action: "Action",
+    impact: "Impact",
+    blockers: "blockers",
+    risks: "risks",
     }
 
     };

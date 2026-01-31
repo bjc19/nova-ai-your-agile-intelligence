@@ -124,7 +124,7 @@ export default function Details() {
               <div>
                 <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
                 <p className="text-slate-600 mt-1">
-                  {items.length} {items.length === 1 ? "item" : "items"}
+                  {items.length} {items.length === 1 ? t('item') : t('items')}
                 </p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function Details() {
             className="text-center py-12"
           >
             <Filter className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500 text-lg">No items found</p>
+            <p className="text-slate-500 text-lg">{t('noItemsFound')}</p>
           </motion.div>
         ) : (
           <div className="space-y-3">
@@ -165,10 +165,10 @@ export default function Details() {
                         </h3>
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <Badge variant="outline" className="text-xs">
-                            {item.blockers_count} blockers
+                            {item.blockers_count} {t('blockers')}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
-                            {item.risks_count} risks
+                            {item.risks_count} {t('risks')}
                           </Badge>
                           <span className="text-xs text-slate-500">
                             {new Date(item.created_date).toLocaleDateString()}
@@ -197,7 +197,7 @@ export default function Details() {
                           )}
                           {item.status === "resolved" && (
                             <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border-emerald-200">
-                              Resolved
+                              {t('resolved')}
                             </Badge>
                           )}
                         </div>
@@ -206,12 +206,12 @@ export default function Details() {
                         </p>
                         {item.action && (
                           <p className="text-xs text-slate-500 mt-2">
-                            <strong>Action:</strong> {item.action}
+                            <strong>{t('action')}:</strong> {item.action}
                           </p>
                         )}
                         {item.impact && (
                           <p className="text-xs text-slate-500 mt-1">
-                            <strong>Impact:</strong> {item.impact}
+                            <strong>{t('impact')}:</strong> {item.impact}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3">
