@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,9 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [expanded, setExpanded] = useState(false);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [userResponse, setUserResponse] = useState("");
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [acknowledgedBy, setAcknowledgedBy] = useState("");
+  const [acknowledgedDate, setAcknowledgedDate] = useState("");
 
   // Default/demo data if none provided
   const data = sprintHealth || {
@@ -68,6 +72,38 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     historical_sprints_count: 4,
     problematic_tickets: [],
     drift_acknowledged: false,
+  };
+
+  // Load acknowledged state from localStorage
+  useEffect(() => {
+    const storedAck = localStorage.getItem(`sprint_ack_${data.sprint_name}`);
+    if (storedAck) {
+      const ackData = JSON.parse(storedAck);
+      setAcknowledged(true);
+      setAcknowledgedBy(ackData.by);
+      setAcknowledgedDate(ackData.date);
+    }
+  }, [data.sprint_name]);
+
+  const handleAcknowledge = async () => {
+    try {
+      const user = await base44.auth.me();
+      const ackData = {
+        by: user.full_name || user.email,
+        date: new Date().toISOString()
+      };
+      
+      localStorage.setItem(`sprint_ack_${data.sprint_name}`, JSON.stringify(ackData));
+      setAcknowledged(true);
+      setAcknowledgedBy(ackData.by);
+      setAcknowledgedDate(ackData.date);
+      
+      if (onAcknowledge) {
+        onAcknowledge(ackData);
+      }
+    } catch (error) {
+      console.error("Error acknowledging drift:", error);
+    }
   };
 
   // Analyze drift using the engine
@@ -287,40 +323,47 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
           {/* Alert status & CTA - Only for drift */}
           {driftAnalysis.status.id === "potential_drift" && (
             <div className="space-y-3 pt-2">
-              {/* Alert notification status */}
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                {data.drift_acknowledged ? (
-                  <>
-                    <BellOff className="w-4 h-4" />
-                    <span>Signal acquitté le {data.drift_acknowledged_date ? new Date(data.drift_acknowledged_date).toLocaleDateString('fr-FR') : 'récemment'}</span>
-                  </>
-                ) : (
-                  <>
+              {!acknowledged ? (
+                <>
+                  {/* Alert notification status */}
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
                     <Bell className="w-4 h-4 text-amber-500" />
                     <span>Signal actif jusqu'à action humaine</span>
-                  </>
-                )}
-              </div>
+                  </div>
 
-              {/* CTA Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  onClick={onReviewSprint}
-                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                >
-                  Revoir le sprint maintenant
-                  <ExternalLink className="w-4 h-4 ml-2" />
-                </Button>
-                {!data.drift_acknowledged && onAcknowledge && (
-                  <Button
-                    variant="outline"
-                    onClick={onAcknowledge}
-                    className="border-slate-300"
-                  >
-                    Acquitter
-                  </Button>
-                )}
-              </div>
+                  {/* CTA Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={onReviewSprint}
+                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                    >
+                      Revoir le sprint maintenant
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleAcknowledge}
+                      className="border-slate-300"
+                    >
+                      Acquitter
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-start gap-3">
+                    <BellOff className="w-5 h-5 text-slate-400 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-700 mb-1">Signal acquitté</p>
+                      <p className="text-xs text-slate-500">
+                        Par <span className="font-medium">{acknowledgedBy}</span> le{" "}
+                        {new Date(acknowledgedDate).toLocaleDateString('fr-FR')} à{" "}
+                        {new Date(acknowledgedDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
