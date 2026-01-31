@@ -73,7 +73,8 @@ export default function QuickStats({ analysisHistory = [] }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 * index }}
-          className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5"
+          onClick={() => handleStatClick(stat.labelKey)}
+          className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
         >
           <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
           <div className="relative">
