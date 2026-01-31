@@ -85,7 +85,7 @@ export default function Results() {
                 )}
               </div>
               <h1 className="text-3xl font-bold text-slate-900">
-                {language === 'fr' ? 'Résultats de l\'Analyse' : 'Analysis Results'}
+                {t('analysisResults')}
               </h1>
             </div>
             
