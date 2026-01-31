@@ -143,6 +143,8 @@ export const translations = {
     suggestedActionPlan: "Plan d'action suggéré",
     viewIn: "Voir dans",
     translateSummary: "Traduis en français le résumé suivant de manière concise et claire:\n\n{summary}",
+    novaAnalyzing: "Nova analyse...",
+    suggestedActionPlan: "Plan d'action suggéré par Nova",
     },
   en: {
     // Navigation
@@ -284,7 +286,10 @@ export const translations = {
     suggestedActionPlan: "Suggested Action Plan",
     viewIn: "View in",
     translateSummary: "Translate the following summary into English in a concise and clear way:\n\n{summary}",
+    novaAnalyzing: "Nova is analyzing...",
+    suggestedActionPlan: "Action Plan Suggested by Nova",
     }
+
     };
 
 export function LanguageProvider({ children }) {

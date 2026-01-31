@@ -249,14 +249,14 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                             <div className="flex items-center justify-center py-8">
                               <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
                               <span className="ml-2 text-sm text-slate-500">
-                                {language === 'fr' ? 'Nova analyse...' : 'Nova is analyzing...'}
+                                {t('novaAnalyzing')}
                               </span>
                             </div>
                           ) : details ? (
                             <div className="space-y-3">
                               <h5 className="font-semibold text-slate-900 flex items-center gap-2">
                                 <Lightbulb className="w-4 h-4 text-amber-600" />
-                                {language === 'fr' ? 'Plan d\'action suggéré par Nova' : 'Action Plan Suggested by Nova'}
+                                {t('suggestedActionPlan')}
                               </h5>
                               <div className="space-y-2">
                                 {details.map((item, idx) => {
@@ -313,7 +313,7 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                 className="w-full hover:bg-slate-50"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                {language === 'fr' ? 'Voir dans' : 'View in'} {sourceName || (language === 'fr' ? 'la source' : 'source')}
+                {t('viewIn')} {sourceName || t('source')}
               </Button>
             </div>
           )}
