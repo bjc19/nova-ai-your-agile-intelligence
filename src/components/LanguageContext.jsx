@@ -123,6 +123,21 @@ export const translations = {
 
     // Posture Indicator
     novaIsInMode: "Nova est en mode",
+
+    // Results Page
+    analysisComplete: "Analyse Complète",
+    analysisResults: "Résultats de l'Analyse",
+    launchNewSimulation: "Lancer une nouvelle simulation",
+    blockersDetected: "Blockers Détectés",
+    risksIdentified: "Risques Identifiés",
+    blockerDetails: "Détails des Blockers",
+    riskDetails: "Détails des Risques",
+    meetingSummary: "Résumé de la Réunion",
+    detectedBlockersIssues: "Blockers & Problèmes Détectés",
+    identifiedRisks: "Risques Identifiés",
+    wantRealTimeAnalysis: "Veux-tu l'Analyse en Temps Réel ?",
+    inFullVersion: "Dans la version complète, Nova se connecte directement à tes outils et fournit des insights automatiquement, sans entrée manuelle.",
+    comingSoonIntegrations: "Bientôt : Jira · Azure DevOps · Teams · Zoom",
   },
   en: {
     // Navigation
