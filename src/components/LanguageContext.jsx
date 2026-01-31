@@ -124,29 +124,6 @@ export const translations = {
     // Posture Indicator
     novaIsInMode: "Nova est en mode",
 
-    // Posture Characteristics
-    crisisFacilitator_1: "Communication concise et factuelle",
-    crisisFacilitator_2: "Recommandations directives",
-    crisisFacilitator_3: "Accent sur les actions immédiates",
-    agileCoach_1: "Ton calme et réfléchi",
-    agileCoach_2: "Questions ouvertes d'amélioration",
-    agileCoach_3: "Suggère des expériences",
-    facilitator_1: "Langage inclusif et neutre",
-    facilitator_2: "Fait ressortir les tendances",
-    facilitator_3: "Oriente la réflexion structurée",
-    systemicCoach_1: "Curieux et non-moralisateur",
-    systemicCoach_2: "Met en évidence les obstacles systémiques",
-    systemicCoach_3: "Explore les dépendances",
-    observer_1: "Interventions minimales",
-    observer_2: "Observations factuelles uniquement",
-    observer_3: "Demande des données supplémentaires",
-    organizer_1: "Approche structurée",
-    organizer_2: "Axé sur les objectifs",
-    organizer_3: "Clarté des priorités",
-    productAlly_1: "Perspective axée sur la valeur",
-    productAlly_2: "Célèbre les réalisations",
-    productAlly_3: "Sensibilisation aux parties prenantes",
-
     // Results Page
     analysisComplete: "Analyse Complète",
     analysisResults: "Résultats de l'Analyse",
@@ -287,29 +264,6 @@ export const translations = {
 
     // Posture Indicator
     novaIsInMode: "Nova is in",
-
-    // Posture Characteristics
-    crisisFacilitator_1: "Concise and factual communication",
-    crisisFacilitator_2: "Directive recommendations",
-    crisisFacilitator_3: "Focus on immediate actions",
-    agileCoach_1: "Calm and reflective tone",
-    agileCoach_2: "Open-ended improvement questions",
-    agileCoach_3: "Suggests experiments",
-    facilitator_1: "Inclusive and neutral language",
-    facilitator_2: "Surfaces patterns and trends",
-    facilitator_3: "Guides structured reflection",
-    systemicCoach_1: "Curious and non-judgmental",
-    systemicCoach_2: "Highlights systemic impediments",
-    systemicCoach_3: "Explores dependencies",
-    observer_1: "Minimal interventions",
-    observer_2: "Factual observations only",
-    observer_3: "Requests additional data",
-    organizer_1: "Structured approach",
-    organizer_2: "Goal-oriented focus",
-    organizer_3: "Clear prioritization",
-    productAlly_1: "Value-focused perspective",
-    productAlly_2: "Celebrates achievements",
-    productAlly_3: "Stakeholder awareness",
 
     // Results Page
     analysisComplete: "Analysis Complete",
