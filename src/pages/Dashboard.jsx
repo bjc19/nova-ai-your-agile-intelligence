@@ -190,6 +190,12 @@ export default function Dashboard() {
                 deployment_frequency: { current: 1, target: 3 },
                 data_days: 14,
               }}
+              historicalData={{
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true,
+              }}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)}
             />

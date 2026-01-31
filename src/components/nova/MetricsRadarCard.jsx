@@ -21,8 +21,10 @@ import {
   METRIC_TYPES, 
   generateLeverOptions 
 } from "./ActionableMetricsEngine";
+import { detectPilotMode, enrichRecommendationWithPilotWarning } from "./HawthorneAwarenessEngine";
+import PilotModeIndicator from "./PilotModeIndicator";
 
-export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onApplyLever }) {
+export default function MetricsRadarCard({ metricsData, historicalData, onDiscussWithCoach, onApplyLever }) {
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
 
@@ -36,7 +38,22 @@ export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onAp
     data_days: 14,
   };
 
+  const historical = historicalData || {
+    sprints_count: 1,
+    data_days: 7,
+    is_audit_phase: false,
+    is_new_team: true,
+  };
+
+  // Detect pilot mode
+  const pilotMode = detectPilotMode(historical);
+  
   const analysis = analyzeMetricsHealth(data);
+
+  // Enrich levers with pilot warnings
+  const enrichedLevers = analysis.top3Levers.map(lever => 
+    enrichRecommendationWithPilotWarning(lever, pilotMode)
+  );
 
   if (!analysis.canAnalyze) {
     return (
@@ -81,7 +98,7 @@ export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onAp
     >
       <Card className={`overflow-hidden border-2 ${config.borderColor} ${config.bgColor}`}>
         <CardHeader className="pb-2">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-3">
             <div className={`p-2.5 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
               <StatusIcon className={`w-5 h-5 ${config.color}`} />
             </div>
@@ -91,10 +108,16 @@ export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onAp
               </CardTitle>
               <p className="text-sm text-slate-600 mt-0.5">{analysis.message}</p>
             </div>
-            <Badge className={`${config.bgColor} ${config.color} border-0`}>
-              80/20 Analysis
-            </Badge>
+            <div className="flex items-center gap-2">
+              <PilotModeIndicator pilotMode={pilotMode} compact />
+              <Badge className={`${config.bgColor} ${config.color} border-0`}>
+                80/20 Analysis
+              </Badge>
+            </div>
           </div>
+          {pilotMode.isPilot && (
+            <PilotModeIndicator pilotMode={pilotMode} />
+          )}
         </CardHeader>
 
         <CardContent className="pt-4 space-y-4">
@@ -158,7 +181,7 @@ export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onAp
               </div>
 
               <div className="space-y-2">
-                {analysis.top3Levers.map((lever, index) => {
+                {enrichedLevers.map((lever, index) => {
                   const metricInfo = METRIC_TYPES.ACTIONABLE[lever.metric];
                   const isSelected = selectedLever === lever.metric;
                   const options = generateLeverOptions(lever);
@@ -239,6 +262,12 @@ export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onAp
                               </div>
                             ))}
 
+                            {lever.pilotWarning && (
+                              <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 mb-2">
+                                {lever.pilotWarning}
+                              </div>
+                            )}
+
                             <div className="flex gap-2 pt-2">
                               <Button
                                 onClick={() => onDiscussWithCoach?.(lever)}
@@ -251,7 +280,7 @@ export default function MetricsRadarCard({ metricsData, onDiscussWithCoach, onAp
                               <Button
                                 disabled
                                 className="opacity-50 cursor-not-allowed"
-                                title="Requiert validation humaine explicite"
+                                title={lever.requiresValidation ? "Validation Coach/PO requise" : "Requiert validation humaine explicite"}
                               >
                                 APPLY
                               </Button>
