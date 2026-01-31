@@ -89,10 +89,6 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
 
   // Translate recommendations if needed
   useEffect(() => {
-    setTranslatedRecommendations(null);
-  }, [language]);
-
-  useEffect(() => {
     if (latestAnalysis?.recommendations && language === 'fr' && !translatedRecommendations) {
       const translateRecommendations = async () => {
         const recList = latestAnalysis.recommendations.map((rec, i) => {
@@ -131,14 +127,14 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
 
       translateRecommendations();
     }
-  }, [latestAnalysis, language, translatedRecommendations]);
+  }, [latestAnalysis, language]);
 
   const recommendations = translatedRecommendations || (latestAnalysis?.recommendations 
     ? latestAnalysis.recommendations.map((rec, i) => {
         const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
         return {
           type: "default",
-          title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
+          title: language === 'fr' ? recText : recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
           description: recText,
           priority: i === 0 ? "high" : "medium",
         };
