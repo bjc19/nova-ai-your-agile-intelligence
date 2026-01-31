@@ -145,21 +145,11 @@ export default function Settings() {
                 </div>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue />
+                    <SelectValue placeholder="Sélectionner une langue" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fr">
-                      <div className="flex items-center gap-2">
-                        <span>🇫🇷</span>
-                        <span>Français</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="en">
-                      <div className="flex items-center gap-2">
-                        <span>🇬🇧</span>
-                        <span>English</span>
-                      </div>
-                    </SelectItem>
+                    <SelectItem value="fr">Français 🇫🇷</SelectItem>
+                    <SelectItem value="en">English 🇬🇧</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
