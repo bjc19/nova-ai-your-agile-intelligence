@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Network,
   AlertTriangle,
@@ -26,6 +29,8 @@ import {
 export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals }) {
   const [expandedWaste, setExpandedWaste] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
+  const [userResponse, setUserResponse] = useState("");
 
   // Demo data if none provided
   const data = flowData || {
@@ -164,10 +169,76 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
                 <p className="text-sm text-blue-900 mb-2">
                   <strong>Signal observé :</strong> {decisionAnalysis.neutralReading}
                 </p>
-                <div className="flex items-start gap-2 p-2 rounded-lg bg-white border border-blue-200">
-                  <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
-                  <p className="text-xs text-blue-700 italic">{decisionAnalysis.keyQuestion}</p>
-                </div>
+                
+                <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DialogTrigger asChild>
+                          <button className="w-full flex items-start gap-2 p-2 rounded-lg bg-white border border-blue-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer text-left">
+                            <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
+                            <p className="text-xs text-blue-700 italic flex-1">{decisionAnalysis.keyQuestion}</p>
+                            <Shield className="w-4 h-4 text-emerald-500" />
+                          </button>
+                        </DialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <p className="text-xs">🔒 Votre réponse est <strong>100% anonyme</strong> et alimente la base de données de Nova pour améliorer ses analyses.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <MessageSquare className="w-5 h-5 text-blue-600" />
+                        Répondre à Nova
+                      </DialogTitle>
+                      <DialogDescription className="space-y-2">
+                        <p className="text-sm text-slate-600 italic">"{decisionAnalysis.keyQuestion}"</p>
+                        <div className="flex items-start gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                          <Shield className="w-4 h-4 text-emerald-600 mt-0.5" />
+                          <p className="text-xs text-emerald-700">
+                            <strong>100% anonyme</strong> – Votre réponse alimente la base de données de Nova sans identification personnelle. Seules les insights agrégées sont utilisées.
+                          </p>
+                        </div>
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4 py-4">
+                      <Textarea
+                        placeholder="Partagez votre perspective sur ce signal..."
+                        value={userResponse}
+                        onChange={(e) => setUserResponse(e.target.value)}
+                        className="min-h-[120px]"
+                      />
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => {
+                            console.log("Anonymous response:", userResponse);
+                            // Here would be the API call to store anonymized response
+                            setUserResponse("");
+                            setIsResponseDialogOpen(false);
+                          }}
+                          disabled={!userResponse.trim()}
+                          className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600"
+                        >
+                          Envoyer (anonyme)
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setUserResponse("");
+                            setIsResponseDialogOpen(false);
+                          }}
+                        >
+                          Annuler
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           )}
