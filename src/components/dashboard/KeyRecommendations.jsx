@@ -87,12 +87,15 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   ];
 
   const recommendations = latestAnalysis?.recommendations 
-    ? latestAnalysis.recommendations.map((rec, i) => ({
-        type: "default",
-        title: rec.substring(0, 50) + (rec.length > 50 ? "..." : ""),
-        description: rec,
-        priority: i === 0 ? "high" : "medium",
-      }))
+    ? latestAnalysis.recommendations.map((rec, i) => {
+        const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
+        return {
+          type: "default",
+          title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
+          description: recText,
+          priority: i === 0 ? "high" : "medium",
+        };
+      })
     : sampleRecommendations;
 
   const priorityColors = {
