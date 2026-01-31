@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function SprintPerformanceChart({ analysisHistory = [] }) {
+  const { t } = useLanguage();
+  
   // Generate chart data from history or use sample data
   const chartData = analysisHistory.length > 0
     ? analysisHistory.slice(-7).map((item, index) => ({
@@ -34,28 +37,28 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-sm font-medium text-slate-700">Blockers: {data?.blockers || 0}</span>
+              <span className="text-sm font-medium text-slate-700">{t('blockers')}: {data?.blockers || 0}</span>
             </div>
             {data?.blockersData?.length > 0 && (
               <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
                 {data.blockersData.slice(0, 3).map((b, i) => (
                   <li key={i}>• {b.member}: {b.issue?.substring(0, 40)}{b.issue?.length > 40 ? '...' : ''}</li>
                 ))}
-                {data.blockersData.length > 3 && <li className="text-slate-400">+{data.blockersData.length - 3} more</li>}
+                {data.blockersData.length > 3 && <li className="text-slate-400">+{data.blockersData.length - 3} {t('more')}</li>}
               </ul>
             )}
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-sm font-medium text-slate-700">Risks: {data?.risks || 0}</span>
+              <span className="text-sm font-medium text-slate-700">{t('risks')}: {data?.risks || 0}</span>
             </div>
             {data?.risksData?.length > 0 && (
               <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
                 {data.risksData.slice(0, 3).map((r, i) => (
                   <li key={i}>• {r.description?.substring(0, 40)}{r.description?.length > 40 ? '...' : ''}</li>
                 ))}
-                {data.risksData.length > 3 && <li className="text-slate-400">+{data.risksData.length - 3} more</li>}
+                {data.risksData.length > 3 && <li className="text-slate-400">+{data.risksData.length - 3} {t('more')}</li>}
               </ul>
             )}
           </div>
@@ -76,9 +79,9 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
   };
 
   const getTrendText = (trend) => {
-    if (trend > 0) return `+${trend} from yesterday`;
-    if (trend < 0) return `${trend} from yesterday`;
-    return "No change";
+    if (trend > 0) return `+${trend} ${t('fromYesterday')}`;
+    if (trend < 0) return `${trend} ${t('fromYesterday')}`;
+    return t('noChange');
   };
 
   return (
@@ -91,7 +94,7 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-slate-900">
-              Sprint Performance
+              {t('sprintPerformance')}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm">
               {getTrendIcon(blockerTrend)}
@@ -100,7 +103,7 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
               </span>
             </div>
           </div>
-          <p className="text-sm text-slate-500">Blocker and risk trends over the sprint</p>
+          <p className="text-sm text-slate-500">{t('blockerRiskTrends')}</p>
         </CardHeader>
         <CardContent className="pt-4">
           <div className="h-[200px] w-full">
@@ -151,11 +154,11 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
           <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="text-sm text-slate-600">Blockers</span>
+              <span className="text-sm text-slate-600">{t('blockers')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <span className="text-sm text-slate-600">Risks</span>
+              <span className="text-sm text-slate-600">{t('risks')}</span>
             </div>
           </div>
         </CardContent>

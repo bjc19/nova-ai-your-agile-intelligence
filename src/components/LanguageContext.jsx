@@ -35,6 +35,13 @@ export const translations = {
     high: "élevée",
     medium: "moyenne",
     low: "basse",
+    sprintPerformance: "Performance du Sprint",
+    blockerRiskTrends: "Tendances des blockers et risques durant le sprint",
+    blockers: "Blockers",
+    risks: "Risques",
+    fromYesterday: "depuis hier",
+    noChange: "Aucun changement",
+    more: "de plus",
     
     // Settings
     languageSettings: "Langue / Language",
@@ -114,6 +121,13 @@ export const translations = {
     high: "high",
     medium: "medium",
     low: "low",
+    sprintPerformance: "Sprint Performance",
+    blockerRiskTrends: "Blocker and risk trends over the sprint",
+    blockers: "Blockers",
+    risks: "Risks",
+    fromYesterday: "from yesterday",
+    noChange: "No change",
+    more: "more",
     
     // Settings
     languageSettings: "Language / Langue",
