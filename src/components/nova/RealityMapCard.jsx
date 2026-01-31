@@ -508,35 +508,32 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                       return (
                         <div 
                           key={suggestion.id}
-                          onClick={() => {
-                            if (isApplied) return; // Don't allow toggling applied recos
-                            if (isSelected) {
-                              setSelectedRecos(selectedRecos.filter(id => id !== suggestion.id));
-                            } else {
-                              setSelectedRecos([...selectedRecos, suggestion.id]);
-                            }
-                          }}
                           className={`p-3 rounded-lg border-2 transition-all ${
                             isApplied
-                              ? "bg-emerald-50 border-emerald-500 cursor-default"
-                              : isSelected 
-                              ? "bg-blue-50 border-blue-500 cursor-pointer" 
-                              : "bg-white border-slate-200 hover:border-slate-300 cursor-pointer"
+                              ? "bg-emerald-50 border-emerald-500"
+                              : "bg-white border-slate-200 hover:border-slate-300"
                           }`}
                         >
                           <div className="flex items-start gap-2">
-                            <button className="mt-0.5" disabled={isApplied}>
-                              {isApplied ? (
-                                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                              ) : isSelected ? (
-                                <CheckSquare className="w-5 h-5 text-blue-600" />
-                              ) : (
-                                <Square className="w-5 h-5 text-slate-400" />
-                              )}
-                            </button>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {isApplied && <CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+                            </div>
                             <span className="text-slate-400 font-medium">{index + 1}.</span>
                             <div className="flex-1">
-                              <p className="text-sm text-slate-900">{suggestion.text}</p>
+                              <div className="flex items-start justify-between gap-3">
+                                <p className="text-sm text-slate-900 flex-1">{suggestion.text}</p>
+                                {!isApplied && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleApplySingleRecommendation(suggestion)}
+                                    className="shrink-0 border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-xs px-3 h-7"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                                    APPLY RECO
+                                  </Button>
+                                )}
+                              </div>
                               <div className="flex items-center gap-3 mt-1 text-xs">
                                 <span className="text-slate-500">Effort: <span className="font-medium">{suggestion.effort}</span></span>
                                 <span className="text-slate-400">•</span>
