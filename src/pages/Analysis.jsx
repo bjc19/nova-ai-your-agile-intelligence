@@ -29,7 +29,7 @@ import { Link } from "react-router-dom";
 
 export default function Analysis() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [transcript, setTranscript] = useState(SAMPLE_TRANSCRIPT);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
@@ -179,7 +179,14 @@ Provide a detailed analysis in the following JSON format:`;
     });
 
     // Determine title based on detected ceremony
-    const ceremonyTitles = {
+    const ceremonyTitles = language === 'fr' ? {
+      daily_scrum: "Daily Standup",
+      sprint_planning: "Planification de Sprint",
+      backlog_refinement: "Affinage du Backlog",
+      sprint_review: "Sprint Review",
+      retrospective: "Rétrospective",
+      none: "Réunion d'Équipe"
+    } : {
       daily_scrum: "Daily Standup",
       sprint_planning: "Sprint Planning",
       backlog_refinement: "Backlog Refinement",
@@ -187,7 +194,7 @@ Provide a detailed analysis in the following JSON format:`;
       retrospective: "Retrospective",
       none: "Team Meeting"
     };
-    const title = `${ceremonyTitles[context.current_ceremony] || "Daily Standup"} - ${new Date().toLocaleDateString()}`;
+    const title = `${ceremonyTitles[context.current_ceremony] || (language === 'fr' ? "Daily Standup" : "Daily Standup")} - ${new Date().toLocaleDateString(language)}`;
 
     // Save to database for history tracking
     const analysisRecord = {
@@ -211,7 +218,7 @@ Provide a detailed analysis in the following JSON format:`;
         : null,
       name: selectedSlackChannel 
         ? `Slack (#${selectedSlackChannel.name})`
-        : activeTab === "upload" ? "Fichier importé" : "Transcription"
+        : activeTab === "upload" ? (language === 'fr' ? "Fichier importé" : "Imported File") : (language === 'fr' ? "Transcription" : "Transcript")
     };
     sessionStorage.setItem("analysisSource", JSON.stringify(sourceInfo));
 
@@ -277,7 +284,7 @@ Provide a detailed analysis in the following JSON format:`;
             <Link to={createPageUrl("Settings")}>
               <Button variant="outline" size="sm" className="gap-2">
                 <Settings className="w-4 h-4" />
-                Integrations
+                {t('integrations')}
               </Button>
             </Link>
           </div>
@@ -328,7 +335,7 @@ Provide a detailed analysis in the following JSON format:`;
           <TabsContent value="upload" className="mt-6">
             <FileUpload onDataExtracted={handleFileDataExtracted} />
             <p className="text-xs text-slate-500 mt-3">
-              Upload meeting transcripts, exported Jira reports, or any text file with standup notes.
+              {t('fileUploadDescription')}
             </p>
           </TabsContent>
 

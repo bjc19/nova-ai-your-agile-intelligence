@@ -96,6 +96,8 @@ export const translations = {
     demoMode: "Mode Démo",
     demoModeDescription: "Connectez Slack dans",
     toImportReal: "pour importer de vrais messages. Pour l'instant, utilisez les canaux d'exemple ci-dessus.",
+    integrations: "Intégrations",
+    fileUploadDescription: "Téléchargez les transcripts de réunion, les rapports Jira exportés, ou tout fichier texte avec des notes de standup.",
     
     // Sprint Health
     sprintHealthy: "Sprint en bonne santé",
@@ -215,6 +217,8 @@ export const translations = {
     demoMode: "Demo Mode",
     demoModeDescription: "Connect Slack in",
     toImportReal: "to import real messages. For now, use the sample channels above.",
+    integrations: "Integrations",
+    fileUploadDescription: "Upload meeting transcripts, exported Jira reports, or any text file with standup notes.",
     
     // Sprint Health
     sprintHealthy: "Sprint is healthy",
