@@ -114,6 +114,10 @@ export const translations = {
     save: "Enregistrer",
     send: "Envoyer",
     anonymous: "anonyme",
+
+    // Footer
+    aiScrumMaster: "Scrum Master IA",
+    demoVersionNotice: "Version Démo • Mode Simulation • Aucune intégration réelle",
   },
   en: {
     // Navigation
@@ -226,6 +230,10 @@ export const translations = {
     save: "Save",
     send: "Send",
     anonymous: "anonymous",
+
+    // Footer
+    aiScrumMaster: "AI Scrum Master",
+    demoVersionNotice: "Demo Version • Simulation Mode • No real integrations",
   }
 };
 
