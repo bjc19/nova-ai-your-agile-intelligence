@@ -70,7 +70,7 @@ export default function Results() {
             className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            {language === 'fr' ? 'Retour au Dashboard' : 'Back to Dashboard'}
+            {t('backToDashboard')}
           </Link>
           
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
