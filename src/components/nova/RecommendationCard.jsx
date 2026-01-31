@@ -50,21 +50,13 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
     setLoadingDetails({ ...loadingDetails, [index]: true });
 
     try {
-      const recText = typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec);
-      
-      const prompt = language === 'fr' 
-        ? `Tu es Nova, un Scrum Master IA. Détaille cette recommandation avec un plan d'action concret sous forme de to-do items numérotés et actionnables.
+       const recText = typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec);
 
-Recommandation: ${recText}
+       const prompt = language === 'fr' 
+         ? getTranslations('fr').fr.actionPlanPrompt.replace('{rec}', recText)
+         : getTranslations('en').en.actionPlanPrompt.replace('{rec}', recText);
 
-Fournis 3-5 étapes concrètes et spécifiques que l'équipe peut suivre immédiatement. Sois pragmatique et actionnable.`
-        : `You are Nova, an AI Scrum Master. Detail this recommendation with a concrete action plan in the form of numbered, actionable to-do items.
-
-Recommendation: ${recText}
-
-Provide 3-5 concrete and specific steps that the team can follow immediately. Be pragmatic and actionable.`;
-
-      const result = await base44.integrations.Core.InvokeLLM({
+       const result = await base44.integrations.Core.InvokeLLM({
         prompt: prompt,
         response_json_schema: {
           type: "object",
