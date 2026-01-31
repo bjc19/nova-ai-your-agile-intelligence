@@ -334,11 +334,11 @@ export default function Results() {
                   <p className="font-medium text-slate-900 mb-2">{risk.description}</p>
                   <div className="space-y-2 text-sm">
                     <p className="text-slate-600">
-                      <span className="font-medium text-slate-700">Impact:</span> {risk.impact}
-                    </p>
-                    <p className="text-slate-600">
-                      <span className="font-medium text-slate-700">Mitigation:</span> {risk.mitigation}
-                    </p>
+                       <span className="font-medium text-slate-700">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
+                     </p>
+                     <p className="text-slate-600">
+                       <span className="font-medium text-slate-700">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
+                     </p>
                   </div>
                 </motion.div>
               ))}
