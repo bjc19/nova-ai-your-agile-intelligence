@@ -135,17 +135,17 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
         "Blocages prolongés (Muda: 停滞 Teitai)": { target: "blocked_tickets_over_5d", baseline: metrics.blocked_tickets_over_5d },
       };
 
-      // Filter only selected recommendations
-      const selectedSuggestions = suggestions.filter(s => selectedRecos.includes(s.id));
+      // Apply all recommendations (not just selected)
+      const unappliedSuggestions = suggestions.filter(s => !appliedRecos[s.id]);
       
-      if (selectedSuggestions.length === 0) {
-        toast.error("Veuillez sélectionner au moins une recommandation");
+      if (unappliedSuggestions.length === 0) {
+        toast.error("Toutes les recommandations sont déjà appliquées");
         setIsApplyingRecos(false);
         return;
       }
 
       // Create tracking records for each applied recommendation
-      const appliedRecords = selectedSuggestions.map(suggestion => {
+      const appliedRecords = unappliedSuggestions.map(suggestion => {
         const wasteMatch = wastesAnalysis.wastes.find(w => suggestion.text.includes(w.name));
         const metric = wasteMatch ? metricMapping[wasteMatch.name] : null;
         
@@ -164,19 +164,19 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
       // Save all recommendations
       await base44.entities.AppliedRecommendation.bulkCreate(appliedRecords);
 
-      toast.success(`${selectedSuggestions.length} recommandation(s) marquée(s) comme appliquées`, {
+      toast.success(`${unappliedSuggestions.length} recommandation(s) marquée(s) comme appliquées`, {
         description: "Nova vérifiera l'impact dans les prochaines analyses"
       });
 
       // Schedule automatic verification (in production, this would be a background job)
       console.log("Vérification programmée pour:", appliedRecords);
       
-      // Store application info for each selected recommendation
+      // Store application info for each recommendation
       const newAppliedRecos = { ...appliedRecos };
       const appliedDate = new Date().toISOString();
       const appliedBy = user.full_name || user.email;
       
-      selectedSuggestions.forEach(suggestion => {
+      unappliedSuggestions.forEach(suggestion => {
         newAppliedRecos[suggestion.id] = {
           name: appliedBy,
           date: appliedDate
@@ -585,22 +585,22 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                     <TooltipTrigger asChild>
                       <Button
                         onClick={handleApplyRecommendations}
-                        disabled={isApplyingRecos || suggestions.length === 0 || selectedRecos.length === 0}
+                        disabled={isApplyingRecos || suggestions.length === 0 || suggestions.every(s => appliedRecos[s.id])}
                         variant="outline"
                         className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         {isApplyingRecos 
                           ? "Application..." 
-                          : `APPLY RECOS (${selectedRecos.length})`
+                          : "APPLY ALL RECOS"
                         }
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
-                        {selectedRecos.length === 0
-                          ? "Sélectionnez d'abord les recommandations à appliquer"
-                          : `Appliquer ${selectedRecos.length} recommandation(s) sélectionnée(s).\nNova vérifiera l'impact via les données réelles.`
+                        {suggestions.every(s => appliedRecos[s.id])
+                          ? "Toutes les recommandations sont déjà appliquées"
+                          : `Appliquer toutes les recommandations.\nNova vérifiera l'impact via les données réelles.`
                         }
                       </p>
                     </TooltipContent>
