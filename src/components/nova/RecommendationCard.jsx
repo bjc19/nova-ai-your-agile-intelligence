@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
+import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
 
 const getTranslations = (language) => ({
   fr: {
