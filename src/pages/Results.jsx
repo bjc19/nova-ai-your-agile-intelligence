@@ -131,7 +131,7 @@ export default function Results() {
           >
             <MetricCard
               icon={ShieldAlert}
-              label="Risks Identified"
+              label={t('risksIdentified')}
               value={analysis.risks?.length || 0}
               color="amber"
               delay={0.2}
