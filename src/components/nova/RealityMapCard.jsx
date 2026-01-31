@@ -21,6 +21,8 @@ import {
   TrendingDown,
   Users,
   Send,
+  Square,
+  CheckSquare,
 } from "lucide-react";
 import {
   analyzeDecisionReality,
@@ -37,6 +39,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [isSendingNotifications, setIsSendingNotifications] = useState(false);
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
   const [recosApplied, setRecosApplied] = useState(false);
+  const [selectedRecos, setSelectedRecos] = useState([]);
 
   // Demo data if none provided
   const data = flowData || {
@@ -132,8 +135,17 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
         "Blocages prolongés (Muda: 停滞 Teitai)": { target: "blocked_tickets_over_5d", baseline: metrics.blocked_tickets_over_5d },
       };
 
+      // Filter only selected recommendations
+      const selectedSuggestions = suggestions.filter(s => selectedRecos.includes(s.id));
+      
+      if (selectedSuggestions.length === 0) {
+        toast.error("Veuillez sélectionner au moins une recommandation");
+        setIsApplyingRecos(false);
+        return;
+      }
+
       // Create tracking records for each applied recommendation
-      const appliedRecords = suggestions.map(suggestion => {
+      const appliedRecords = selectedSuggestions.map(suggestion => {
         const wasteMatch = wastesAnalysis.wastes.find(w => suggestion.text.includes(w.name));
         const metric = wasteMatch ? metricMapping[wasteMatch.name] : null;
         
@@ -152,7 +164,7 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
       // Save all recommendations
       await base44.entities.AppliedRecommendation.bulkCreate(appliedRecords);
 
-      toast.success(`${suggestions.length} recommandation(s) marquée(s) comme appliquées`, {
+      toast.success(`${selectedSuggestions.length} recommandation(s) marquée(s) comme appliquées`, {
         description: "Nova vérifiera l'impact dans les prochaines analyses"
       });
 
@@ -438,18 +450,36 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
           {/* Actionable Suggestions */}
           {suggestions.length > 0 && (
             <div className="space-y-3 pt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSuggestions(!showSuggestions)}
-                className="w-full justify-between text-slate-600 hover:text-slate-900"
-              >
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-blue-500" />
-                  <span>Pistes possibles à explorer ({suggestions.length})</span>
-                </div>
-                {showSuggestions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </Button>
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSuggestions(!showSuggestions)}
+                  className="flex-1 justify-between text-slate-600 hover:text-slate-900"
+                >
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-blue-500" />
+                    <span>Pistes possibles à explorer ({suggestions.length})</span>
+                  </div>
+                  {showSuggestions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                {showSuggestions && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (selectedRecos.length === suggestions.length) {
+                        setSelectedRecos([]);
+                      } else {
+                        setSelectedRecos(suggestions.map(s => s.id));
+                      }
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    {selectedRecos.length === suggestions.length ? "Désélectionner tout" : "Tout sélectionner"}
+                  </Button>
+                )}
+              </div>
 
               <AnimatePresence>
                 {showSuggestions && (
@@ -459,24 +489,45 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                     exit={{ opacity: 0, height: 0 }}
                     className="space-y-2"
                   >
-                    {suggestions.map((suggestion, index) => (
-                      <div 
-                        key={suggestion.id}
-                        className="p-3 rounded-lg bg-white border border-slate-200"
-                      >
-                        <div className="flex items-start gap-2">
-                          <span className="text-slate-400 font-medium">{index + 1}.</span>
-                          <div className="flex-1">
-                            <p className="text-sm text-slate-900">{suggestion.text}</p>
-                            <div className="flex items-center gap-3 mt-1 text-xs">
-                              <span className="text-slate-500">Effort: <span className="font-medium">{suggestion.effort}</span></span>
-                              <span className="text-slate-400">•</span>
-                              <span className="text-emerald-600">{suggestion.impact}</span>
+                    {suggestions.map((suggestion, index) => {
+                      const isSelected = selectedRecos.includes(suggestion.id);
+                      return (
+                        <div 
+                          key={suggestion.id}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedRecos(selectedRecos.filter(id => id !== suggestion.id));
+                            } else {
+                              setSelectedRecos([...selectedRecos, suggestion.id]);
+                            }
+                          }}
+                          className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                            isSelected 
+                              ? "bg-blue-50 border-blue-500" 
+                              : "bg-white border-slate-200 hover:border-slate-300"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <button className="mt-0.5">
+                              {isSelected ? (
+                                <CheckSquare className="w-5 h-5 text-blue-600" />
+                              ) : (
+                                <Square className="w-5 h-5 text-slate-400" />
+                              )}
+                            </button>
+                            <span className="text-slate-400 font-medium">{index + 1}.</span>
+                            <div className="flex-1">
+                              <p className="text-sm text-slate-900">{suggestion.text}</p>
+                              <div className="flex items-center gap-3 mt-1 text-xs">
+                                <span className="text-slate-500">Effort: <span className="font-medium">{suggestion.effort}</span></span>
+                                <span className="text-slate-400">•</span>
+                                <span className="text-emerald-600">{suggestion.impact}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -497,7 +548,7 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                     <TooltipTrigger asChild>
                       <Button
                         onClick={handleApplyRecommendations}
-                        disabled={isApplyingRecos || suggestions.length === 0 || recosApplied}
+                        disabled={isApplyingRecos || suggestions.length === 0 || recosApplied || selectedRecos.length === 0}
                         variant="outline"
                         className={recosApplied 
                           ? "bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
@@ -505,14 +556,21 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                         }
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {isApplyingRecos ? "Application..." : recosApplied ? "✓ Appliqué" : "APPLY RECOS"}
+                        {isApplyingRecos 
+                          ? "Application..." 
+                          : recosApplied 
+                          ? "✓ Appliqué" 
+                          : `APPLY RECOS (${selectedRecos.length})`
+                        }
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
                         {recosApplied 
                           ? "Recommandations appliquées • Nova vérifie l'impact"
-                          : "Marque les recommandations comme appliquées.\nNova vérifiera l'impact via les données réelles."
+                          : selectedRecos.length === 0
+                          ? "Sélectionnez d'abord les recommandations à appliquer"
+                          : `Appliquer ${selectedRecos.length} recommandation(s) sélectionnée(s).\nNova vérifiera l'impact via les données réelles.`
                         }
                       </p>
                     </TooltipContent>
