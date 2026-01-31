@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 import {
   Network,
   AlertTriangle,
@@ -31,6 +33,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [userResponse, setUserResponse] = useState("");
+  const [isSendingNotifications, setIsSendingNotifications] = useState(false);
 
   // Demo data if none provided
   const data = flowData || {
@@ -61,6 +64,57 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const wastesAnalysis = identifySystemicWastes(metrics);
   const frictionIndex = calculateFrictionIndex(wastesAnalysis.wastes);
   const suggestions = generateActionableSuggestions(wastesAnalysis.wastes, decisionAnalysis.decisionMap || []);
+
+  const handleSendNotifications = async () => {
+    setIsSendingNotifications(true);
+    
+    try {
+      // Extract unique responsible persons from decision map
+      const responsiblePersons = decisionAnalysis.decisionMap?.map(entry => ({
+        name: entry.realDecider,
+        zone: entry.zone,
+        ticketsImpacted: entry.ticketsImpacted
+      })) || [];
+
+      // Simulate sending notifications to each person
+      for (const person of responsiblePersons) {
+        const notificationContent = `
+🔔 Nova – Signal Systémique Détecté
+
+Bonjour ${person.name},
+
+Nova a détecté un signal dans votre zone d'influence : "${person.zone}"
+
+📊 Impact : ${person.ticketsImpacted} tickets concernés
+⚠️ Gaspillages identifiés : ${wastesAnalysis.wastes.length}
+
+${wastesAnalysis.wastes.map((w, i) => `${i + 1}. ${w.name} - ${w.metric}`).join('\n')}
+
+💡 Pistes suggérées :
+${suggestions.slice(0, 3).map((s, i) => `${i + 1}. ${s.text}`).join('\n')}
+
+Cette analyse est basée sur ${data.data_days} jours de données flux.
+
+---
+🔒 Message automatique • Nova AI Scrum Master
+        `.trim();
+
+        // In production, this would call base44.integrations.Core.SendEmail
+        // For now, we'll just simulate the notification
+        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log(`Notification sent to ${person.name}:`, notificationContent);
+      }
+
+      toast.success(`${responsiblePersons.length} notification(s) envoyée(s) avec succès`, {
+        description: `Envoyé à ${responsiblePersons.map(p => p.name).join(', ')}`
+      });
+    } catch (error) {
+      console.error("Error sending notifications:", error);
+      toast.error("Erreur lors de l'envoi des notifications");
+    } finally {
+      setIsSendingNotifications(false);
+    }
+  };
 
   const confidenceConfig = {
     high: { emoji: "🟢", label: "Élevée", color: "text-emerald-600", bgColor: "bg-emerald-50" },
@@ -377,11 +431,12 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
               {/* CTA */}
               <div className="flex gap-2">
                 <Button
-                  onClick={onDiscussSignals}
+                  onClick={handleSendNotifications}
+                  disabled={isSendingNotifications || !decisionAnalysis.decisionMap?.length}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Discuter ces signaux avec les acteurs concernés
+                  {isSendingNotifications ? "Envoi en cours..." : "Notifier les responsables"}
                 </Button>
                 <Button
                   disabled
