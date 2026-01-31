@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { POSTURES } from "./PostureEngine";
+import { useLanguage } from "@/components/LanguageContext";
 import {
   AlertTriangle,
   Sparkles,
@@ -80,6 +81,7 @@ const colorMap = {
 };
 
 export default function PostureIndicator({ postureId, size = "default", showDetails = false }) {
+  const { t } = useLanguage();
   const posture = POSTURES[postureId] || POSTURES.agile_coach;
   const colors = colorMap[posture.color] || colorMap.blue;
   const Icon = iconMap[posture.icon] || Sparkles;
@@ -119,7 +121,7 @@ export default function PostureIndicator({ postureId, size = "default", showDeta
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h4 className={`font-semibold ${colors.text}`}>
-              Nova is in {posture.name} Mode
+              {t('novaIsInMode')} {posture.name}
             </h4>
           </div>
           <p className="text-sm text-slate-600 mb-3">

@@ -118,6 +118,9 @@ export const translations = {
     // Footer
     aiScrumMaster: "Scrum Master IA",
     demoVersionNotice: "Version Démo • Mode Simulation • Aucune intégration réelle",
+
+    // Posture Indicator
+    novaIsInMode: "Nova est en mode",
   },
   en: {
     // Navigation
@@ -234,6 +237,9 @@ export const translations = {
     // Footer
     aiScrumMaster: "AI Scrum Master",
     demoVersionNotice: "Demo Version • Simulation Mode • No real integrations",
+
+    // Posture Indicator
+    novaIsInMode: "Nova is in",
   }
 };
 
