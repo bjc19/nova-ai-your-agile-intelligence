@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import {
   ArrowLeft,
@@ -18,11 +19,19 @@ import {
   FileSpreadsheet,
   Lock,
   Zap,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Languages
 } from "lucide-react";
 
 export default function Settings() {
   const [slackConnected, setSlackConnected] = useState(false);
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('nova_language') || 'fr';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('nova_language', language);
+  }, [language]);
 
   const integrations = [
     {
@@ -117,11 +126,69 @@ export default function Settings() {
           </p>
         </motion.div>
 
-        {/* Backend Functions Notice */}
+        {/* Language Settings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-indigo-100">
+                  <Languages className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">Langue / Language</CardTitle>
+                  <CardDescription className="text-xs">
+                    Choisissez votre langue préférée • Choose your preferred language
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 mb-1">Interface Language</p>
+                  <p className="text-xs text-slate-500">Langue de l'interface utilisateur</p>
+                </div>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fr">
+                      <div className="flex items-center gap-2">
+                        <span>🇫🇷</span>
+                        <span>Français</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="en">
+                      <div className="flex items-center gap-2">
+                        <span>🇬🇧</span>
+                        <span>English</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {language !== localStorage.getItem('nova_language') && (
+                <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    💡 La langue sera appliquée au prochain rafraîchissement de la page
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Backend Functions Notice */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
           className="mb-8"
         >
           <Card className="border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/50">
@@ -151,7 +218,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-6"
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
@@ -212,7 +279,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
           className="mb-6"
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
@@ -263,7 +330,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <Upload className="w-5 h-5 text-slate-500" />
