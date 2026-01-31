@@ -29,7 +29,7 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
 });
 
 export default function RecommendationCard({ recommendations, sourceUrl, sourceName }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState({});
   const [detailsCache, setDetailsCache] = useState({});
