@@ -35,6 +35,38 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
   const [loadingDetails, setLoadingDetails] = useState({});
   const [detailsCache, setDetailsCache] = useState({});
   const [completedItems, setCompletedItems] = useState({});
+  const [translatedRecs, setTranslatedRecs] = useState(null);
+
+  // Translate recommendations on mount or when language changes
+  React.useEffect(() => {
+    const translateRecommendations = async () => {
+      if (language === 'fr' && recommendations && recommendations.length > 0) {
+        const recsToTranslate = recommendations.map(rec => 
+          typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec)
+        );
+        
+        const prompt = `Traduis ces recommandations en français de manière concise:\n\n${recsToTranslate.map((r, i) => `${i + 1}. ${r}`).join('\n\n')}`;
+        
+        const result = await invokeLLMWithAutoTranslate(
+          prompt,
+          {
+            type: "object",
+            properties: {
+              translations: {
+                type: "array",
+                items: { type: "string" }
+              }
+            }
+          },
+          language
+        );
+
+        setTranslatedRecs(result.translations || recsToTranslate);
+      }
+    };
+
+    translateRecommendations();
+  }, [language, recommendations]);
 
   const handleRecommendationClick = async (rec, index) => {
     if (expandedIndex === index) {
