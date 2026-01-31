@@ -6,6 +6,28 @@ import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 
+const getTranslations = (language) => ({
+  fr: {
+    actionPlanPrompt: `Tu es Nova, un Scrum Master IA. Détaille cette recommandation avec un plan d'action concret sous forme de to-do items numérotés et actionnables.
+
+Recommandation: {rec}
+
+Fournis 3-5 étapes concrètes et spécifiques que l'équipe peut suivre immédiatement. Sois pragmatique et actionnable.`,
+    actionPlanPromptEn: `You are Nova, an AI Scrum Master. Detail this recommendation with a concrete action plan in the form of numbered, actionable to-do items.
+
+Recommendation: {rec}
+
+Provide 3-5 concrete and specific steps that the team can follow immediately. Be pragmatic and actionable.`
+  },
+  en: {
+    actionPlanPrompt: `You are Nova, an AI Scrum Master. Detail this recommendation with a concrete action plan in the form of numbered, actionable to-do items.
+
+Recommendation: {rec}
+
+Provide 3-5 concrete and specific steps that the team can follow immediately. Be pragmatic and actionable.`
+  }
+});
+
 export default function RecommendationCard({ recommendations, sourceUrl, sourceName }) {
   const { language } = useLanguage();
   const [expandedIndex, setExpandedIndex] = useState(null);
