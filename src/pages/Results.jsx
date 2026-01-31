@@ -27,78 +27,82 @@ export default function Results() {
   const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
 
   useEffect(() => {
-    const storedAnalysis = sessionStorage.getItem("novaAnalysis");
-    if (storedAnalysis) {
-      const parsedAnalysis = JSON.parse(storedAnalysis);
-      // Add source info from sessionStorage if available
-      const sourceInfo = sessionStorage.getItem("analysisSource");
-      if (sourceInfo) {
-        const { url, name } = JSON.parse(sourceInfo);
-        parsedAnalysis.sourceUrl = url;
-        parsedAnalysis.sourceName = name;
-      }
-      
-      // Translate all LLM content if language is French
-      const translateContentIfNeeded = async () => {
-        if (language === 'fr') {
-          // Batch translate all texts in one LLM call
-          const textsToTranslate = [];
-          const textMap = {};
-          
-          // Collect all texts
-          if (parsedAnalysis.summary) textsToTranslate.push(parsedAnalysis.summary);
-          if (parsedAnalysis.blockers) {
-            parsedAnalysis.blockers.forEach(b => {
-              textsToTranslate.push(b.issue, b.action);
-            });
+        const storedAnalysis = sessionStorage.getItem("novaAnalysis");
+        if (storedAnalysis) {
+          const parsedAnalysis = JSON.parse(storedAnalysis);
+          // Add source info from sessionStorage if available
+          const sourceInfo = sessionStorage.getItem("analysisSource");
+          if (sourceInfo) {
+            const { url, name } = JSON.parse(sourceInfo);
+            parsedAnalysis.sourceUrl = url;
+            parsedAnalysis.sourceName = name;
           }
-          if (parsedAnalysis.risks) {
-            parsedAnalysis.risks.forEach(r => {
-              textsToTranslate.push(r.description, r.impact, r.mitigation);
-            });
-          }
-          
-          if (textsToTranslate.length > 0) {
-            const prompt = `Traduis ces textes en français de manière concise:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
-            const result = await invokeLLMWithAutoTranslate(
-              prompt,
-              {
-                type: "object",
-                properties: {
-                  translations: { type: "array", items: { type: "string" } }
+
+          // Display results immediately, translate in background if needed
+          setAnalysis(parsedAnalysis);
+
+          // Translate all LLM content if language is French
+          if (language === 'fr') {
+            const translateContentIfNeeded = async () => {
+              // Batch translate all texts in one LLM call
+              const textsToTranslate = [];
+
+              // Collect all texts
+              if (parsedAnalysis.summary) textsToTranslate.push(parsedAnalysis.summary);
+              if (parsedAnalysis.blockers) {
+                parsedAnalysis.blockers.forEach(b => {
+                  textsToTranslate.push(b.issue, b.action);
+                });
+              }
+              if (parsedAnalysis.risks) {
+                parsedAnalysis.risks.forEach(r => {
+                  textsToTranslate.push(r.description, r.impact, r.mitigation);
+                });
+              }
+
+              if (textsToTranslate.length > 0) {
+                const prompt = `Traduis ces textes en français de manière concise:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
+                const result = await invokeLLMWithAutoTranslate(
+                  prompt,
+                  {
+                    type: "object",
+                    properties: {
+                      translations: { type: "array", items: { type: "string" } }
+                    }
+                  },
+                  language
+                );
+
+                // Map translations back
+                let idx = 0;
+                if (parsedAnalysis.summary) parsedAnalysis.summary = result.translations[idx++];
+                if (parsedAnalysis.blockers) {
+                  parsedAnalysis.blockers = parsedAnalysis.blockers.map(b => ({
+                    ...b,
+                    issue: result.translations[idx++],
+                    action: result.translations[idx++]
+                  }));
                 }
-              },
-              language
-            );
-            
-            // Map translations back
-            let idx = 0;
-            if (parsedAnalysis.summary) parsedAnalysis.summary = result.translations[idx++];
-            if (parsedAnalysis.blockers) {
-              parsedAnalysis.blockers = parsedAnalysis.blockers.map(b => ({
-                ...b,
-                issue: result.translations[idx++],
-                action: result.translations[idx++]
-              }));
-            }
-            if (parsedAnalysis.risks) {
-              parsedAnalysis.risks = parsedAnalysis.risks.map(r => ({
-                ...r,
-                description: result.translations[idx++],
-                impact: result.translations[idx++],
-                mitigation: result.translations[idx++]
-              }));
-            }
+                if (parsedAnalysis.risks) {
+                  parsedAnalysis.risks = parsedAnalysis.risks.map(r => ({
+                    ...r,
+                    description: result.translations[idx++],
+                    impact: result.translations[idx++],
+                    mitigation: result.translations[idx++]
+                  }));
+                }
+
+                // Update with translated content
+                setAnalysis(parsedAnalysis);
+              }
+            };
+
+            translateContentIfNeeded();
           }
+        } else {
+          navigate(createPageUrl("Analysis"));
         }
-        setAnalysis(parsedAnalysis);
-      };
-      
-      translateContentIfNeeded();
-    } else {
-      navigate(createPageUrl("Analysis"));
-    }
-  }, [navigate, language, t]);
+      }, [navigate, language, t]);
 
   if (!analysis) {
     return (
