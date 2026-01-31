@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import { base44 } from "@/api/base44Client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Lightbulb,
   ArrowRight,
@@ -32,6 +32,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [loadingDetails, setLoadingDetails] = useState({});
   const [detailsCache, setDetailsCache] = useState({});
   const [completedItems, setCompletedItems] = useState({});
+  const [translatedRecommendations, setTranslatedRecommendations] = useState(null);
   
   // Sample recommendations for demo
   const sampleRecommendations = language === 'fr' ? [
@@ -86,7 +87,49 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     },
   ];
 
-  const recommendations = latestAnalysis?.recommendations 
+  // Translate recommendations if needed
+  useEffect(() => {
+    if (latestAnalysis?.recommendations && language === 'fr' && !translatedRecommendations) {
+      const translateRecommendations = async () => {
+        const recList = latestAnalysis.recommendations.map((rec, i) => {
+          const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
+          return {
+            type: "default",
+            title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
+            description: recText,
+            priority: i === 0 ? "high" : "medium",
+          };
+        });
+
+        const translationPrompt = `Traduis chaque recommandation en français de manière concise:\n\n${JSON.stringify(recList.map(r => r.description))}\n\nRetourne un tableau JSON avec les traductions en français.`;
+        
+        try {
+          const translated = await base44.integrations.Core.InvokeLLM({
+            prompt: translationPrompt,
+            response_json_schema: {
+              type: "array",
+              items: { type: "string" }
+            }
+          });
+
+          const translatedList = recList.map((rec, i) => ({
+            ...rec,
+            description: translated[i] || rec.description,
+            title: (translated[i] || rec.description).substring(0, 50) + ((translated[i] || rec.description).length > 50 ? "..." : "")
+          }));
+
+          setTranslatedRecommendations(translatedList);
+        } catch (error) {
+          console.error("Error translating recommendations:", error);
+          setTranslatedRecommendations(recList);
+        }
+      };
+
+      translateRecommendations();
+    }
+  }, [latestAnalysis, language, translatedRecommendations]);
+
+  const recommendations = translatedRecommendations || (latestAnalysis?.recommendations 
     ? latestAnalysis.recommendations.map((rec, i) => {
         const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
         return {
@@ -96,7 +139,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
           priority: i === 0 ? "high" : "medium",
         };
       })
-    : sampleRecommendations;
+    : sampleRecommendations);
 
   const priorityColors = {
     high: "bg-red-100 text-red-700 border-red-200",
