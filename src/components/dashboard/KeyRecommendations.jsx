@@ -22,10 +22,35 @@ const recommendationIcons = {
 };
 
 export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, sourceName }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Sample recommendations for demo
-  const sampleRecommendations = [
+  const sampleRecommendations = language === 'fr' ? [
+    {
+      type: "escalation",
+      title: "Escalader le blocage d'intégration API",
+      description: "Retard de support API tierce affectant 2 membres. Considérer de contacter la gestion fournisseur.",
+      priority: "high",
+    },
+    {
+      type: "collaboration",
+      title: "Planifier une sync inter-équipes",
+      description: "Plusieurs dépendances identifiées entre tâches frontend et backend. Une sync de 15 min pourrait éviter des retards.",
+      priority: "medium",
+    },
+    {
+      type: "timeline",
+      title: "Revoir le calendrier du sprint",
+      description: "3 tâches risquent de manquer la deadline de démo. Considérer ajustement du scope ou réallocation de ressources.",
+      priority: "high",
+    },
+    {
+      type: "priority",
+      title: "Reprioriser les éléments du backlog",
+      description: "Tâches de faible priorité bloquant les éléments critiques. Suggérer de déplacer la tâche d'index de BDD en haut.",
+      priority: "medium",
+    },
+  ] : [
     {
       type: "escalation",
       title: "Escalate API Integration Blocker",
@@ -133,7 +158,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
                 className="w-full hover:bg-slate-50"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Voir dans {sourceName || 'la source'}
+                {language === 'fr' ? 'Voir dans' : 'View in'} {sourceName || (language === 'fr' ? 'la source' : 'source')}
               </Button>
             </div>
           )}
