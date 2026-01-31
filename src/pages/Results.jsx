@@ -105,17 +105,8 @@ export default function Results() {
       }, [navigate, language, t]);
 
   if (!analysis) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-slate-100 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-slate-400" />
-          </div>
-          <p className="text-slate-500">Loading analysis results...</p>
-        </div>
-      </div>
-    );
-  }
+      return null;
+    }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
