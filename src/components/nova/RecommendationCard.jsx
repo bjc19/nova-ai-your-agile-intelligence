@@ -158,7 +158,7 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
                         <div className="space-y-3">
                           <h5 className="font-semibold text-slate-900 flex items-center gap-2 text-sm">
                             <Lightbulb className="w-4 h-4 text-amber-600" />
-                            {language === 'fr' ? 'Plan d\'action suggéré' : 'Suggested Action Plan'}
+                            {t('suggestedActionPlan')}
                           </h5>
                           <div className="space-y-2">
                             {details.map((item, idx) => {
