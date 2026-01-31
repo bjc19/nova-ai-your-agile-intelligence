@@ -10,6 +10,7 @@ import RecommendationCard from "@/components/nova/RecommendationCard";
 import MetricCard from "@/components/nova/MetricCard";
 import PostureIndicator from "@/components/nova/PostureIndicator";
 import { POSTURES } from "@/components/nova/PostureEngine";
+import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
 import { 
   ArrowLeft, 
   RotateCcw,
