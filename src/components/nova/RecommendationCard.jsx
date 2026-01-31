@@ -142,7 +142,8 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
       </div>
       <ul className="space-y-2">
         {recommendations.map((rec, index) => {
-          const recText = typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec);
+          const baseRecText = typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec);
+          const recText = translatedRecs?.[index] || baseRecText;
           const isExpanded = expandedIndex === index;
           const details = detailsCache[index];
           const isLoading = loadingDetails[index];
