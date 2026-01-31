@@ -118,7 +118,7 @@ export default function Results() {
           >
             <MetricCard
               icon={AlertOctagon}
-              label="Blockers Detected"
+              label={t('blockersDetected')}
               value={analysis.blockers?.length || 0}
               color="blue"
               delay={0.1}
