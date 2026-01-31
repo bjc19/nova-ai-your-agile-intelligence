@@ -15,12 +15,20 @@ export default function QuickStats({ analysisHistory = [] }) {
   const navigate = useNavigate();
 
   const handleStatClick = (labelKey) => {
-    if (labelKey === "totalBlockers" || labelKey === "resolved") {
-      navigate(createPageUrl("Analysis"));
+    let detailType = null;
+    if (labelKey === "totalBlockers") {
+      detailType = "blockers";
     } else if (labelKey === "risksIdentified") {
-      navigate(createPageUrl("Analysis"));
+      detailType = "risks";
     } else if (labelKey === "analysesRun") {
-      navigate(createPageUrl("Dashboard"));
+      detailType = "analyses";
+    } else if (labelKey === "resolved") {
+      detailType = "resolved";
+    }
+    
+    if (detailType) {
+      sessionStorage.setItem("detailsType", detailType);
+      navigate(createPageUrl("Details"));
     }
   };
   
