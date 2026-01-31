@@ -1,24 +1,40 @@
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, AlertCircle, Info } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function AnalysisTable({ data }) {
+  const { language } = useLanguage();
+
+  const urgencyLabels = {
+    high: language === 'fr' ? 'Élevée' : 'High',
+    medium: language === 'fr' ? 'Moyenne' : 'Medium',
+    low: language === 'fr' ? 'Basse' : 'Low',
+  };
+
   const urgencyConfig = {
     high: { 
-      label: "High", 
+      label: urgencyLabels.high, 
       className: "bg-red-100 text-red-700 border-red-200",
       icon: AlertTriangle
     },
     medium: { 
-      label: "Medium", 
+      label: urgencyLabels.medium, 
       className: "bg-amber-100 text-amber-700 border-amber-200",
       icon: AlertCircle
     },
     low: { 
-      label: "Low", 
+      label: urgencyLabels.low, 
       className: "bg-slate-100 text-slate-600 border-slate-200",
       icon: Info
     },
+  };
+
+  const columnLabels = {
+    member: language === 'fr' ? 'Membre de l\'équipe' : 'Team Member',
+    issue: language === 'fr' ? 'Problème identifié' : 'Identified Issue',
+    urgency: language === 'fr' ? 'Urgence' : 'Urgency',
+    action: language === 'fr' ? 'Action suggérée' : 'Suggested Action',
   };
 
   return (
