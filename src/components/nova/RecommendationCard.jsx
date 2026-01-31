@@ -149,11 +149,11 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
                     <div className="p-4">
                       {isLoading ? (
                         <div className="flex items-center justify-center py-6">
-                          <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
-                          <span className="ml-2 text-sm text-slate-500">
-                            {language === 'fr' ? 'Nova analyse...' : 'Nova is analyzing...'}
-                          </span>
-                        </div>
+                           <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
+                           <span className="ml-2 text-sm text-slate-500">
+                             {t('novaAnalyzing')}
+                           </span>
+                         </div>
                       ) : details ? (
                         <div className="space-y-3">
                           <h5 className="font-semibold text-slate-900 flex items-center gap-2 text-sm">
