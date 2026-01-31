@@ -5,18 +5,25 @@ import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 
 export default function SprintPerformanceChart({ analysisHistory = [] }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Generate chart data from history or use sample data
   const chartData = analysisHistory.length > 0
     ? analysisHistory.slice(-7).map((item, index) => ({
-        day: `Day ${index + 1}`,
+        day: language === 'fr' ? `Jour ${index + 1}` : `Day ${index + 1}`,
         blockers: item.blockers_count || 0,
         risks: item.risks_count || 0,
         blockersData: item.analysis_data?.blockers || [],
         risksData: item.analysis_data?.risks || [],
       }))
-    : [
+    : language === 'fr' ? [
+        { day: "Lun", blockers: 2, risks: 1, blockersData: [{member: "John", issue: "API timeout"}], risksData: [{description: "Risque de délai"}] },
+        { day: "Mar", blockers: 3, risks: 2, blockersData: [], risksData: [] },
+        { day: "Mer", blockers: 1, risks: 1, blockersData: [], risksData: [] },
+        { day: "Jeu", blockers: 4, risks: 3, blockersData: [], risksData: [] },
+        { day: "Ven", blockers: 2, risks: 1, blockersData: [], risksData: [] },
+        { day: "Aujourd'hui", blockers: 3, risks: 2, blockersData: [], risksData: [] },
+      ] : [
         { day: "Mon", blockers: 2, risks: 1, blockersData: [{member: "John", issue: "API timeout"}], risksData: [{description: "Deadline risk"}] },
         { day: "Tue", blockers: 3, risks: 2, blockersData: [], risksData: [] },
         { day: "Wed", blockers: 1, risks: 1, blockersData: [], risksData: [] },
