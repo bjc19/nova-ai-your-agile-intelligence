@@ -192,7 +192,7 @@ export default function Details() {
                                   : "bg-slate-50 text-slate-600 border-slate-200"
                               }`}
                             >
-                              {item.urgency}
+                              {t(item.urgency)}
                             </Badge>
                           )}
                           {item.status === "resolved" && (
