@@ -245,7 +245,7 @@ export default function Results() {
            >
              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                <ShieldAlert className="w-5 h-5 text-amber-600" />
-               {language === 'fr' ? 'Risques Identifiés' : 'Identified Risks'}
+               {t('identifiedRisks')}
              </h2>
             <div className="grid md:grid-cols-2 gap-4">
               {analysis.risks.map((risk, index) => (
