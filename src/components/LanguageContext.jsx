@@ -140,11 +140,10 @@ export const translations = {
     comingSoonIntegrations: "Bientôt : Jira · Azure DevOps · Teams · Zoom",
     improvementRecommendations: "Recommandations d'Amélioration",
     novaAnalyzing: "Nova analyse...",
-    suggestedActionPlan: "Plan d'action suggéré",
-    viewIn: "Voir dans",
-    translateSummary: "Traduis en français le résumé suivant de manière concise et claire:\n\n{summary}",
-    novaAnalyzing: "Nova analyse...",
     suggestedActionPlan: "Plan d'action suggéré par Nova",
+    viewIn: "Voir dans",
+    source: "la source",
+    translateSummary: "Traduis en français le résumé suivant de manière concise et claire:\n\n{summary}",
     },
   en: {
     // Navigation
@@ -283,11 +282,10 @@ export const translations = {
     comingSoonIntegrations: "Coming Soon: Jira · Azure DevOps · Teams · Zoom",
     improvementRecommendations: "Improvement Recommendations",
     novaAnalyzing: "Nova is analyzing...",
-    suggestedActionPlan: "Suggested Action Plan",
-    viewIn: "View in",
-    translateSummary: "Translate the following summary into English in a concise and clear way:\n\n{summary}",
-    novaAnalyzing: "Nova is analyzing...",
     suggestedActionPlan: "Action Plan Suggested by Nova",
+    viewIn: "View in",
+    source: "source",
+    translateSummary: "Translate the following summary into English in a concise and clear way:\n\n{summary}",
     }
 
     };
