@@ -38,9 +38,8 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [userResponse, setUserResponse] = useState("");
   const [isSendingNotifications, setIsSendingNotifications] = useState(false);
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
-  const [recosApplied, setRecosApplied] = useState(false);
   const [selectedRecos, setSelectedRecos] = useState([]);
-  const [appliedInfo, setAppliedInfo] = useState(null);
+  const [appliedRecos, setAppliedRecos] = useState({}); // { recoId: { name, date } }
 
   // Demo data if none provided
   const data = flowData || {
@@ -172,11 +171,20 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
       // Schedule automatic verification (in production, this would be a background job)
       console.log("Vérification programmée pour:", appliedRecords);
       
-      setRecosApplied(true);
-      setAppliedInfo({
-        name: user.full_name || user.email,
-        date: new Date().toISOString()
+      // Store application info for each selected recommendation
+      const newAppliedRecos = { ...appliedRecos };
+      const appliedDate = new Date().toISOString();
+      const appliedBy = user.full_name || user.email;
+      
+      selectedSuggestions.forEach(suggestion => {
+        newAppliedRecos[suggestion.id] = {
+          name: appliedBy,
+          date: appliedDate
+        };
       });
+      
+      setAppliedRecos(newAppliedRecos);
+      setSelectedRecos([]);
       
     } catch (error) {
       console.error("Error applying recommendations:", error);
@@ -496,25 +504,31 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                   >
                     {suggestions.map((suggestion, index) => {
                       const isSelected = selectedRecos.includes(suggestion.id);
+                      const isApplied = appliedRecos[suggestion.id];
                       return (
                         <div 
                           key={suggestion.id}
                           onClick={() => {
+                            if (isApplied) return; // Don't allow toggling applied recos
                             if (isSelected) {
                               setSelectedRecos(selectedRecos.filter(id => id !== suggestion.id));
                             } else {
                               setSelectedRecos([...selectedRecos, suggestion.id]);
                             }
                           }}
-                          className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${
-                            isSelected 
-                              ? "bg-blue-50 border-blue-500" 
-                              : "bg-white border-slate-200 hover:border-slate-300"
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            isApplied
+                              ? "bg-emerald-50 border-emerald-500 cursor-default"
+                              : isSelected 
+                              ? "bg-blue-50 border-blue-500 cursor-pointer" 
+                              : "bg-white border-slate-200 hover:border-slate-300 cursor-pointer"
                           }`}
                         >
                           <div className="flex items-start gap-2">
-                            <button className="mt-0.5">
-                              {isSelected ? (
+                            <button className="mt-0.5" disabled={isApplied}>
+                              {isApplied ? (
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                              ) : isSelected ? (
                                 <CheckSquare className="w-5 h-5 text-blue-600" />
                               ) : (
                                 <Square className="w-5 h-5 text-slate-400" />
@@ -528,6 +542,24 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                                 <span className="text-slate-400">•</span>
                                 <span className="text-emerald-600">{suggestion.impact}</span>
                               </div>
+                              {isApplied && (
+                                <div className="mt-2 pt-2 border-t border-emerald-200">
+                                  <div className="flex items-center gap-1.5 text-xs text-emerald-700">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>
+                                      Appliqué par <strong>{isApplied.name}</strong> le{" "}
+                                      {new Date(isApplied.date).toLocaleDateString('fr-FR', { 
+                                        day: 'numeric', 
+                                        month: 'short'
+                                      })} à{" "}
+                                      {new Date(isApplied.date).toLocaleTimeString('fr-FR', { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit' 
+                                      })}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -536,27 +568,6 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              {/* Applied Info Display */}
-              {recosApplied && appliedInfo && (
-                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 mb-2">
-                  <div className="flex items-center gap-2 text-xs text-emerald-700">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>
-                      Appliqué par <strong>{appliedInfo.name}</strong> le{" "}
-                      {new Date(appliedInfo.date).toLocaleDateString('fr-FR', { 
-                        day: 'numeric', 
-                        month: 'long', 
-                        year: 'numeric' 
-                      })} à{" "}
-                      {new Date(appliedInfo.date).toLocaleTimeString('fr-FR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </span>
-                  </div>
-                </div>
-              )}
 
               {/* CTA */}
               <div className="flex gap-2">
@@ -574,27 +585,20 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                     <TooltipTrigger asChild>
                       <Button
                         onClick={handleApplyRecommendations}
-                        disabled={isApplyingRecos || suggestions.length === 0 || recosApplied || selectedRecos.length === 0}
+                        disabled={isApplyingRecos || suggestions.length === 0 || selectedRecos.length === 0}
                         variant="outline"
-                        className={recosApplied 
-                          ? "bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
-                          : "border-emerald-600 text-emerald-700 hover:bg-emerald-50"
-                        }
+                        className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" />
                         {isApplyingRecos 
                           ? "Application..." 
-                          : recosApplied 
-                          ? "✓ Appliqué" 
                           : `APPLY RECOS (${selectedRecos.length})`
                         }
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
-                        {recosApplied 
-                          ? "Recommandations appliquées • Nova vérifie l'impact"
-                          : selectedRecos.length === 0
+                        {selectedRecos.length === 0
                           ? "Sélectionnez d'abord les recommandations à appliquer"
                           : `Appliquer ${selectedRecos.length} recommandation(s) sélectionnée(s).\nNova vérifiera l'impact via les données réelles.`
                         }
