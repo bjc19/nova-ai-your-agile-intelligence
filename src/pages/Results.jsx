@@ -150,7 +150,7 @@ export default function Results() {
           >
             <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <AlertOctagon className="w-5 h-5 text-blue-600" />
-              {language === 'fr' ? 'Détails des Blockers' : 'Blocker Details'}
+              {t('blockerDetails')}
             </h3>
             <div className="space-y-3">
               {analysis.blockers.map((blocker, index) => (
