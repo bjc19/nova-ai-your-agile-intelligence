@@ -12,7 +12,7 @@ import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
-import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import RecommendationCard from "@/components/nova/RecommendationCard";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
@@ -248,8 +248,8 @@ export default function Dashboard() {
             <SprintPerformanceChart analysisHistory={analysisHistory} />
             
             {/* Key Recommendations */}
-            <KeyRecommendations 
-            latestAnalysis={latestAnalysis}
+            <RecommendationCard 
+            recommendations={latestAnalysis?.recommendations || []}
             sourceUrl={latestAnalysis?.sourceUrl}
             sourceName={latestAnalysis?.sourceName}
           />
