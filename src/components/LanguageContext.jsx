@@ -283,6 +283,7 @@ export const translations = {
     novaAnalyzing: "Nova is analyzing...",
     suggestedActionPlan: "Suggested Action Plan",
     viewIn: "View in",
+    translateSummary: "Translate the following summary into English in a concise and clear way:\n\n{summary}",
     }
     };
 
