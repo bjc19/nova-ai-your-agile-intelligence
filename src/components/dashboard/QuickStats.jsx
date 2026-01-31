@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import {
   AlertOctagon,
   ShieldAlert,
@@ -10,6 +12,17 @@ import { useLanguage } from "@/components/LanguageContext";
 
 export default function QuickStats({ analysisHistory = [] }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
+  const handleStatClick = (labelKey) => {
+    if (labelKey === "totalBlockers" || labelKey === "resolved") {
+      navigate(createPageUrl("Analysis"));
+    } else if (labelKey === "risksIdentified") {
+      navigate(createPageUrl("Analysis"));
+    } else if (labelKey === "analysesRun") {
+      navigate(createPageUrl("Dashboard"));
+    }
+  };
   
   // Calculate stats from history or use sample data
   const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) || 12;
