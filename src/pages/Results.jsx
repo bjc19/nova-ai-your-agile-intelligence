@@ -229,7 +229,7 @@ export default function Results() {
            >
              <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                <AlertOctagon className="w-5 h-5 text-blue-600" />
-               {language === 'fr' ? 'Blockers & Problèmes Détectés' : 'Detected Blockers & Issues'}
+               {t('detectedBlockersIssues')}
              </h2>
              <AnalysisTable data={analysis.blockers} />
            </motion.div>
