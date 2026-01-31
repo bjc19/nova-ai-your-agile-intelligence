@@ -103,8 +103,8 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
           <Lightbulb className="w-5 h-5 text-amber-600" />
         </div>
         <h3 className="text-lg font-semibold text-slate-900">
-          {language === 'fr' ? 'Recommandations d\'Amélioration' : 'Improvement Recommendations'}
-        </h3>
+           {t('improvementRecommendations')}
+         </h3>
       </div>
       <ul className="space-y-2">
         {recommendations.map((rec, index) => {
