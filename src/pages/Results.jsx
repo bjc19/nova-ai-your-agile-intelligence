@@ -41,10 +41,8 @@ export default function Results() {
       // Translate summary if language is French
       const translateSummaryIfNeeded = async () => {
         if (language === 'fr' && parsedAnalysis.summary) {
-          const { base44 } = await import("@/api/base44Client");
           const prompt = t('translateSummary').replace('{summary}', parsedAnalysis.summary);
-          const result = await base44.integrations.Core.InvokeLLM({ prompt });
-          parsedAnalysis.summary = result;
+          parsedAnalysis.summary = await invokeLLMWithAutoTranslate(prompt, null, language);
         }
         setAnalysis(parsedAnalysis);
       };
