@@ -211,7 +211,7 @@ export default function Results() {
             className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-blue-50/80 to-indigo-50/50 border border-blue-100"
           >
             <h3 className="text-sm font-semibold text-blue-900 uppercase tracking-wider mb-2">
-              {language === 'fr' ? 'Résumé de la Réunion' : 'Meeting Summary'}
+              {t('meetingSummary')}
             </h3>
             <p className="text-slate-700 leading-relaxed">
               {analysis.summary}
