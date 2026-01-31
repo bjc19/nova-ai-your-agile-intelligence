@@ -289,13 +289,13 @@ export default function Results() {
         >
           <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800">
             <h3 className="text-xl font-semibold text-white mb-2">
-              {language === 'fr' ? 'Veux-tu l\'Analyse en Temps Réel ?' : 'Want Real-Time Analysis?'}
+              {t('wantRealTimeAnalysis')}
             </h3>
             <p className="text-slate-400 mb-6 max-w-lg mx-auto">
-              {language === 'fr' ? 'Dans la version complète, Nova se connecte directement à tes outils et fournit des insights automatiquement, sans entrée manuelle.' : 'In the full version, Nova connects directly to your tools and provides insights automatically, without any manual input.'}
+              {t('inFullVersion')}
             </p>
             <Badge variant="outline" className="text-slate-300 border-slate-600">
-              {language === 'fr' ? 'Bientôt : Jira · Azure DevOps · Teams · Zoom' : 'Coming Soon: Jira · Azure DevOps · Teams · Zoom'}
+              {t('comingSoonIntegrations')}
             </Badge>
           </div>
         </motion.div>
