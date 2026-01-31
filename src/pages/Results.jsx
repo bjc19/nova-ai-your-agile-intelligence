@@ -24,7 +24,8 @@ export default function Results() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const [analysis, setAnalysis] = useState(null);
-  const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
+        const [translationComplete, setTranslationComplete] = useState(language !== 'fr');
+        const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
 
   useEffect(() => {
         const storedAnalysis = sessionStorage.getItem("novaAnalysis");
