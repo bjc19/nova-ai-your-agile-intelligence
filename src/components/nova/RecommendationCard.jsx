@@ -57,24 +57,25 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
          ? getTranslations('fr').fr.actionPlanPrompt.replace('{rec}', recText)
          : getTranslations('en').en.actionPlanPrompt.replace('{rec}', recText);
 
-       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            action_plan: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  step: { type: "string" },
-                  description: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
+       const result = await invokeLLMWithAutoTranslate(
+         prompt,
+         {
+           type: "object",
+           properties: {
+             action_plan: {
+               type: "array",
+               items: {
+                 type: "object",
+                 properties: {
+                   step: { type: "string" },
+                   description: { type: "string" }
+                 }
+               }
+             }
+           }
+         },
+         language
+       );
 
       setDetailsCache({ ...detailsCache, [index]: result.action_plan });
     } catch (error) {
