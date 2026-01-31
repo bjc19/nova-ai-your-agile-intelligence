@@ -130,12 +130,16 @@ export default function PostureIndicator({ postureId, size = "default", showDeta
           
           {showDetails && (
             <div className="space-y-1.5">
-              {posture.characteristics.slice(0, 3).map((char, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-slate-500">
-                  <div className={`w-1.5 h-1.5 rounded-full ${colors.bg.replace('100', '500')}`} />
-                  {char}
-                </div>
-              ))}
+              {posture.characteristics.slice(0, 3).map((char, i) => {
+                const postureKey = postureId.replace(/_/g, '_');
+                const translationKey = `${postureKey}_${i + 1}`;
+                return (
+                  <div key={i} className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className={`w-1.5 h-1.5 rounded-full ${colors.bg.replace('100', '500')}`} />
+                    {t(translationKey) || char}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
