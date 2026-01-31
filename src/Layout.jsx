@@ -4,8 +4,10 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn } from "lucide-react";
+import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 
-export default function Layout({ children, currentPageName }) {
+function LayoutContent({ children, currentPageName }) {
+  const { t } = useLanguage();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,19 +46,19 @@ export default function Layout({ children, currentPageName }) {
                   to={createPageUrl("Dashboard")}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  Dashboard
+                  {t('dashboard')}
                 </Link>
                 <Link 
                   to={createPageUrl("Analysis")}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  Analyze
+                  {t('analyze')}
                 </Link>
                 <Link 
                   to={createPageUrl("Settings")}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  Settings
+                  {t('settings')}
                 </Link>
                 <Button 
                   variant="ghost" 
@@ -73,7 +75,7 @@ export default function Layout({ children, currentPageName }) {
                   to={createPageUrl("Demo")}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  Try Demo
+                  {t('tryDemo')}
                 </Link>
                 <Button 
                   size="sm"
@@ -81,7 +83,7 @@ export default function Layout({ children, currentPageName }) {
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
+                  {t('signIn')}
                 </Button>
               </>
             )}
@@ -112,5 +114,13 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </footer>
     </div>
-  );
-}
+    );
+    }
+
+    export default function Layout({ children, currentPageName }) {
+    return (
+    <LanguageProvider>
+    <LayoutContent children={children} currentPageName={currentPageName} />
+    </LanguageProvider>
+    );
+    }

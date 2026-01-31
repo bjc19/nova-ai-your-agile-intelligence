@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import {
   ArrowLeft,
   MessageSquare,
@@ -25,13 +26,7 @@ import {
 
 export default function Settings() {
   const [slackConnected, setSlackConnected] = useState(false);
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('nova_language') || 'fr';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('nova_language', language);
-  }, [language]);
+  const { language, setLanguage, t } = useLanguage();
 
   const integrations = [
     {
@@ -118,11 +113,11 @@ export default function Settings() {
               <SettingsIcon className="w-5 h-5 text-slate-600" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900">
-              Integrations
+              {t('integrations')}
             </h1>
           </div>
           <p className="text-slate-600">
-            Connect your team's tools to enable real-time analysis and insights.
+            {t('integrationsDescription')}
           </p>
         </motion.div>
 
@@ -140,9 +135,9 @@ export default function Settings() {
                   <Languages className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Langue / Language</CardTitle>
+                  <CardTitle className="text-base">{t('languageSettings')}</CardTitle>
                   <CardDescription className="text-xs">
-                    Choisissez votre langue préférée • Choose your preferred language
+                    {t('chooseLanguage')}
                   </CardDescription>
                 </div>
               </div>
@@ -150,8 +145,8 @@ export default function Settings() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 mb-1">Interface Language</p>
-                  <p className="text-xs text-slate-500">Langue de l'interface utilisateur</p>
+                  <p className="text-sm font-medium text-slate-900 mb-1">{t('interfaceLanguage')}</p>
+                  <p className="text-xs text-slate-500">{t('languageDescription')}</p>
                 </div>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="w-[180px]">
@@ -173,13 +168,7 @@ export default function Settings() {
                   </SelectContent>
                 </Select>
               </div>
-              {language !== localStorage.getItem('nova_language') && (
-                <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                  <p className="text-xs text-blue-700">
-                    💡 La langue sera appliquée au prochain rafraîchissement de la page
-                  </p>
-                </div>
-              )}
+
             </CardContent>
           </Card>
         </motion.div>
