@@ -32,7 +32,6 @@ export default function Settings() {
     {
       id: "slack",
       name: "Slack",
-      description: "Capture standup messages from Slack channels. Nova will analyze conversations from your #standup or #daily-scrum channels.",
       icon: MessageSquare,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-100",
@@ -47,7 +46,6 @@ export default function Settings() {
     {
       id: "jira",
       name: "Jira",
-      description: "Import sprint data, issues, and blockers directly from your Jira boards.",
       icon: FileSpreadsheet,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-100",
@@ -58,7 +56,6 @@ export default function Settings() {
     {
       id: "azure",
       name: "Azure DevOps",
-      description: "Sync work items, sprints, and team velocity from Azure DevOps.",
       icon: Zap,
       color: "from-cyan-500 to-cyan-600",
       bgColor: "bg-cyan-100",
@@ -69,7 +66,6 @@ export default function Settings() {
     {
       id: "teams",
       name: "Microsoft Teams",
-      description: "Join and analyze Daily Scrum meetings conducted via Teams.",
       icon: MessageSquare,
       color: "from-indigo-500 to-indigo-600",
       bgColor: "bg-indigo-100",
@@ -80,7 +76,6 @@ export default function Settings() {
     {
       id: "zoom",
       name: "Zoom",
-      description: "Connect to Zoom meetings and analyze transcripts in real-time.",
       icon: MessageSquare,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-100",
@@ -101,11 +96,11 @@ export default function Settings() {
           className="mb-8"
         >
           <Link
-            to={createPageUrl("Home")}
+            to={createPageUrl("Dashboard")}
             className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Back to Dashboard
+            {t('backToDashboard')}
           </Link>
 
           <div className="flex items-center gap-3 mb-3">
@@ -195,7 +190,7 @@ export default function Settings() {
                   </p>
                   <Button variant="outline" size="sm" className="gap-2">
                     <ExternalLink className="w-4 h-4" />
-                    Go to App Settings
+                    {t('goToAppSettings')}
                   </Button>
                 </div>
               </div>
@@ -212,7 +207,7 @@ export default function Settings() {
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            Available Integration
+            {t('availableIntegration')}
           </h2>
           
           <Card className="overflow-hidden border-2 border-purple-200 hover:border-purple-300 transition-colors">
@@ -226,20 +221,20 @@ export default function Settings() {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold text-slate-900">Slack</h3>
                       <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                        Recommended
+                        {t('recommended')}
                       </Badge>
                     </div>
                     <p className="text-sm text-slate-600 mb-3">
-                      Capture standup messages from Slack channels. Nova will analyze conversations from your #standup or #daily-scrum channels as an alternative to Teams/Zoom.
+                      {t('slackDescription')}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                        Read channel messages
+                        {t('readChannelMessages')}
                       </span>
                       <span className="flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                        Post summaries
+                        {t('postSummaries')}
                       </span>
                     </div>
                   </div>
@@ -248,14 +243,14 @@ export default function Settings() {
                   {slackConnected ? (
                     <Badge className="bg-emerald-100 text-emerald-700">
                       <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Connected
+                      {t('connected')}
                     </Badge>
                   ) : (
                     <Button 
                       className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
                       onClick={() => setSlackConnected(true)}
                     >
-                      Connect Slack
+                      {t('connectSlack')}
                     </Button>
                   )}
                 </div>
@@ -273,7 +268,7 @@ export default function Settings() {
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-slate-400" />
-            Coming Soon
+            {t('comingSoon')}
           </h2>
           
           <div className="grid gap-4">
@@ -290,23 +285,23 @@ export default function Settings() {
                           <h3 className="font-semibold text-slate-900">{integration.name}</h3>
                           {integration.requiresBackend && (
                             <Badge variant="outline" className="text-xs">
-                              Requires Backend
+                              {t('requiresBackend')}
                             </Badge>
                           )}
                           {integration.comingSoon && (
                             <Badge variant="outline" className="text-xs bg-slate-100">
-                              Coming Soon
+                              {t('comingSoon')}
                             </Badge>
                           )}
                         </div>
                         <p className="text-sm text-slate-600">
-                          {integration.description}
+                          {t(`${integration.id}Description`)}
                         </p>
                       </div>
                     </div>
                     <Button variant="outline" disabled>
                       <Lock className="w-4 h-4 mr-2" />
-                      Connect
+                      {t('connect')}
                     </Button>
                   </div>
                 </CardContent>
@@ -323,13 +318,13 @@ export default function Settings() {
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <Upload className="w-5 h-5 text-slate-500" />
-            Manual Data Import
+            {t('manualDataImport')}
           </h2>
           
           <Card>
             <CardContent className="p-6">
               <p className="text-sm text-slate-600 mb-4">
-                Don't have integrations enabled? You can still use Nova by manually importing data:
+                {t('manualDataImportDescription')}
               </p>
               <div className="grid md:grid-cols-2 gap-4">
                 <Link to={createPageUrl("Analysis")}>
@@ -339,8 +334,8 @@ export default function Settings() {
                         <MessageSquare className="w-5 h-5 text-slate-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Paste Transcript</p>
-                        <p className="text-xs text-slate-500">Copy/paste meeting notes</p>
+                        <p className="font-medium text-slate-900">{t('pasteTranscript')}</p>
+                        <p className="text-xs text-slate-500">{t('pasteTranscriptDescription')}</p>
                       </div>
                     </div>
                   </div>
@@ -352,8 +347,8 @@ export default function Settings() {
                         <FileSpreadsheet className="w-5 h-5 text-slate-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">Upload File</p>
-                        <p className="text-xs text-slate-500">CSV, JSON, or TXT files</p>
+                        <p className="font-medium text-slate-900">{t('uploadFile')}</p>
+                        <p className="text-xs text-slate-500">{t('uploadFileDescription')}</p>
                       </div>
                     </div>
                   </div>
