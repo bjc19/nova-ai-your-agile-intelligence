@@ -124,6 +124,29 @@ export const translations = {
     // Posture Indicator
     novaIsInMode: "Nova est en mode",
 
+    // Posture Characteristics
+    crisisFacilitator_1: "Communication concise et factuelle",
+    crisisFacilitator_2: "Recommandations directives",
+    crisisFacilitator_3: "Accent sur les actions immédiates",
+    agileCoach_1: "Ton calme et réfléchi",
+    agileCoach_2: "Questions ouvertes d'amélioration",
+    agileCoach_3: "Suggère des expériences",
+    facilitator_1: "Langage inclusif et neutre",
+    facilitator_2: "Fait ressortir les tendances",
+    facilitator_3: "Oriente la réflexion structurée",
+    systemicCoach_1: "Curieux et non-moralisateur",
+    systemicCoach_2: "Met en évidence les obstacles systémiques",
+    systemicCoach_3: "Explore les dépendances",
+    observer_1: "Interventions minimales",
+    observer_2: "Observations factuelles uniquement",
+    observer_3: "Demande des données supplémentaires",
+    organizer_1: "Approche structurée",
+    organizer_2: "Axé sur les objectifs",
+    organizer_3: "Clarté des priorités",
+    productAlly_1: "Perspective axée sur la valeur",
+    productAlly_2: "Célèbre les réalisations",
+    productAlly_3: "Sensibilisation aux parties prenantes",
+
     // Results Page
     analysisComplete: "Analyse Complète",
     analysisResults: "Résultats de l'Analyse",
