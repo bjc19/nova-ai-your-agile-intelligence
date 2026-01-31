@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
@@ -28,6 +29,7 @@ import {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,7 +120,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-3 mb-2">
                   <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700">
                     <Sparkles className="w-3 h-3 mr-1" />
-                    AI-Powered Scrum Master
+                    {t('aiPoweredScrumMaster')}
                   </Badge>
                   <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                     <Calendar className="w-3 h-3 mr-1" />
@@ -126,10 +128,10 @@ export default function Dashboard() {
                   </Badge>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-                  Welcome back, {user?.full_name?.split(' ')[0] || 'there'}! 👋
+                  {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                 </h1>
                 <p className="text-slate-600 mt-2 text-lg">
-                  Here's your sprint overview and latest insights.
+                  {t('sprintOverview')}
                 </p>
               </div>
               
@@ -137,7 +139,7 @@ export default function Dashboard() {
                 <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                   <Clock className="w-4 h-4 text-slate-400" />
                   <span className="text-sm text-slate-600">
-                    <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> days left in sprint
+                    <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
                   </span>
                 </div>
                 <Link to={createPageUrl("Analysis")}>
@@ -146,7 +148,7 @@ export default function Dashboard() {
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
                   >
                     <Mic className="w-4 h-4 mr-2" />
-                    New Analysis
+                    {t('newAnalysis')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
@@ -262,22 +264,22 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  Ready for your Daily Scrum?
+                  {t('readyForDailyScrum')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
-                  Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.
+                  {t('importDataDescription')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
                   <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
                     <Zap className="w-4 h-4 mr-2" />
-                    Connect Slack
+                    {t('connectSlack')}
                   </Button>
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    Start Analysis
+                    {t('startAnalysis')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>

@@ -19,9 +19,17 @@ export const translations = {
     
     // Dashboard
     welcomeBack: "Bon retour",
-    sprintOverview: "Vue d'ensemble du sprint",
+    welcomeBackTitle: "Bienvenue",
+    sprintOverview: "Voici votre vue d'ensemble du sprint et vos dernières analyses.",
     recentAnalyses: "Analyses récentes",
     recommendations: "Recommandations",
+    aiPoweredScrumMaster: "Scrum Master IA",
+    daysLeftInSprint: "jours restants dans le sprint",
+    newAnalysis: "Nouvelle analyse",
+    readyForDailyScrum: "Prêt pour votre Daily Scrum ?",
+    importDataDescription: "Importez des données depuis Slack, téléchargez des transcripts de réunion, ou collez vos notes directement. Nova analysera et fournira des insights actionnables.",
+    connectSlack: "Connecter Slack",
+    startAnalysis: "Démarrer l'analyse",
     
     // Settings
     languageSettings: "Langue / Language",
@@ -85,9 +93,17 @@ export const translations = {
     
     // Dashboard
     welcomeBack: "Welcome back",
-    sprintOverview: "Sprint Overview",
+    welcomeBackTitle: "Welcome back",
+    sprintOverview: "Here's your sprint overview and latest insights.",
     recentAnalyses: "Recent Analyses",
     recommendations: "Recommendations",
+    aiPoweredScrumMaster: "AI-Powered Scrum Master",
+    daysLeftInSprint: "days left in sprint",
+    newAnalysis: "New Analysis",
+    readyForDailyScrum: "Ready for your Daily Scrum?",
+    importDataDescription: "Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.",
+    connectSlack: "Connect Slack",
+    startAnalysis: "Start Analysis",
     
     // Settings
     languageSettings: "Language / Langue",
