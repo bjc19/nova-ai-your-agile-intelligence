@@ -58,7 +58,15 @@ export default function Dashboard() {
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
-      setLatestAnalysis(JSON.parse(stored));
+      const parsedAnalysis = JSON.parse(stored);
+      // Add source info from sessionStorage if available
+      const sourceInfo = sessionStorage.getItem("analysisSource");
+      if (sourceInfo) {
+        const { url, name } = JSON.parse(sourceInfo);
+        parsedAnalysis.sourceUrl = url;
+        parsedAnalysis.sourceName = name;
+      }
+      setLatestAnalysis(parsedAnalysis);
     }
   }, []);
 
