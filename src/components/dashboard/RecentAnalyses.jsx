@@ -4,6 +4,7 @@ import { createPageUrl } from "@/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/LanguageContext";
 import { format } from "date-fns";
 import {
   MessageSquare,
@@ -22,15 +23,45 @@ const sourceIcons = {
   transcript: FileText,
 };
 
-const sourceLabels = {
-  slack: "Slack",
-  file_upload: "File Upload",
-  transcript: "Manual Input",
-};
-
 export default function RecentAnalyses({ analyses = [] }) {
+  const { language } = useLanguage();
+
+  const sourceLabels = language === 'fr' ? {
+    slack: "Slack",
+    file_upload: "Fichier importé",
+    transcript: "Saisie manuelle",
+  } : {
+    slack: "Slack",
+    file_upload: "File Upload",
+    transcript: "Manual Input",
+  };
   // Sample data for demo
-  const sampleAnalyses = [
+  const sampleAnalyses = language === 'fr' ? [
+    {
+      id: "1",
+      title: "Daily Standup - Sprint 14",
+      source: "transcript",
+      blockers_count: 3,
+      risks_count: 2,
+      created_date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: "2",
+      title: "Sync Équipe Dev",
+      source: "slack",
+      blockers_count: 1,
+      risks_count: 1,
+      created_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: "3",
+      title: "Notes Sprint Planning",
+      source: "file_upload",
+      blockers_count: 4,
+      risks_count: 3,
+      created_date: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+    },
+  ] : [
     {
       id: "1",
       title: "Daily Standup - Sprint 14",
@@ -69,12 +100,12 @@ export default function RecentAnalyses({ analyses = [] }) {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-slate-900">
-              Recent Analyses
+              {language === 'fr' ? 'Analyses récentes' : 'Recent Analyses'}
             </CardTitle>
             <Link to={createPageUrl("Analysis")}>
               <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
                 <Plus className="w-4 h-4 mr-1" />
-                New Analysis
+                {language === 'fr' ? 'Nouvelle analyse' : 'New Analysis'}
               </Button>
             </Link>
           </div>
@@ -140,10 +171,12 @@ export default function RecentAnalyses({ analyses = [] }) {
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center">
                 <FileText className="w-6 h-6 text-slate-400" />
               </div>
-              <p className="text-slate-500 text-sm">No analyses yet</p>
+              <p className="text-slate-500 text-sm">
+                {language === 'fr' ? 'Aucune analyse pour le moment' : 'No analyses yet'}
+              </p>
               <Link to={createPageUrl("Analysis")}>
                 <Button variant="link" className="mt-2">
-                  Run your first analysis
+                  {language === 'fr' ? 'Lancer votre première analyse' : 'Run your first analysis'}
                 </Button>
               </Link>
             </div>
