@@ -20,6 +20,7 @@ import {
   Shield,
   TrendingDown,
   Users,
+  Send,
 } from "lucide-react";
 import {
   analyzeDecisionReality,
@@ -435,7 +436,7 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                   disabled={isSendingNotifications || !decisionAnalysis.decisionMap?.length}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                 >
-                  <MessageSquare className="w-4 h-4 mr-2" />
+                  <Send className="w-4 h-4 mr-2" />
                   {isSendingNotifications ? "Envoi en cours..." : "Notifier les responsables"}
                 </Button>
                 <Button
