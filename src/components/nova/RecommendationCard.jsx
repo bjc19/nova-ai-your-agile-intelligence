@@ -28,7 +28,9 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
             className="flex items-start gap-3 text-slate-700"
           >
             <ArrowRight className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-            <span className="text-sm leading-relaxed">{rec}</span>
+            <span className="text-sm leading-relaxed">
+              {typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec)}
+            </span>
           </motion.li>
         ))}
       </ul>
