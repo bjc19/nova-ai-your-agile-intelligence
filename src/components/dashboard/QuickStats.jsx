@@ -6,8 +6,11 @@ import {
   TrendingUp,
   CheckCircle2
 } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 
 export default function QuickStats({ analysisHistory = [] }) {
+  const { t } = useLanguage();
+  
   // Calculate stats from history or use sample data
   const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) || 12;
   const totalRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) || 8;
@@ -16,7 +19,7 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   const stats = [
     {
-      label: "Total Blockers",
+      labelKey: "totalBlockers",
       value: totalBlockers,
       icon: AlertOctagon,
       color: "from-blue-500 to-blue-600",
@@ -24,7 +27,7 @@ export default function QuickStats({ analysisHistory = [] }) {
       textColor: "text-blue-600",
     },
     {
-      label: "Risks Identified",
+      labelKey: "risksIdentified",
       value: totalRisks,
       icon: ShieldAlert,
       color: "from-amber-500 to-amber-600",
@@ -32,7 +35,7 @@ export default function QuickStats({ analysisHistory = [] }) {
       textColor: "text-amber-600",
     },
     {
-      label: "Analyses Run",
+      labelKey: "analysesRun",
       value: analysesCount,
       icon: TrendingUp,
       color: "from-indigo-500 to-indigo-600",
@@ -40,7 +43,7 @@ export default function QuickStats({ analysisHistory = [] }) {
       textColor: "text-indigo-600",
     },
     {
-      label: "Resolved",
+      labelKey: "resolved",
       value: resolvedBlockers,
       icon: CheckCircle2,
       color: "from-emerald-500 to-emerald-600",
@@ -53,7 +56,7 @@ export default function QuickStats({ analysisHistory = [] }) {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {stats.map((stat, index) => (
         <motion.div
-          key={stat.label}
+          key={stat.labelKey}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 * index }}
@@ -65,7 +68,7 @@ export default function QuickStats({ analysisHistory = [] }) {
               <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
             </div>
             <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
-            <p className="text-sm text-slate-500 mt-1">{stat.label}</p>
+            <p className="text-sm text-slate-500 mt-1">{t(stat.labelKey)}</p>
           </div>
         </motion.div>
       ))}

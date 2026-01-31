@@ -42,6 +42,10 @@ export const translations = {
     fromYesterday: "depuis hier",
     noChange: "Aucun changement",
     more: "de plus",
+    totalBlockers: "Blockers totaux",
+    risksIdentified: "Risques identifiés",
+    analysesRun: "Analyses effectuées",
+    resolved: "Résolus",
     
     // Settings
     languageSettings: "Langue / Language",
@@ -128,6 +132,10 @@ export const translations = {
     fromYesterday: "from yesterday",
     noChange: "No change",
     more: "more",
+    totalBlockers: "Total Blockers",
+    risksIdentified: "Risks Identified",
+    analysesRun: "Analyses Run",
+    resolved: "Resolved",
     
     // Settings
     languageSettings: "Language / Langue",
