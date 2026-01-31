@@ -5,6 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
   CheckCircle2,
   AlertTriangle,
   AlertOctagon,
@@ -18,7 +27,8 @@ import {
   MessageSquare,
   Clock,
   Sparkles,
-  Send
+  Send,
+  Shield
 } from "lucide-react";
 import { RISK_LEVELS } from "./ProductGoalAlignmentEngine";
 
@@ -75,6 +85,8 @@ export default function ProductGoalCard({
   const [expanded, setExpanded] = useState(false);
   const [showResponseInput, setShowResponseInput] = useState(false);
   const [response, setResponse] = useState("");
+  const [showQuestionDialog, setShowQuestionDialog] = useState(false);
+  const [questionResponse, setQuestionResponse] = useState("");
 
   if (!alignmentReport) return null;
 
@@ -96,6 +108,14 @@ export default function ProductGoalCard({
     onConfirmGoal?.(response);
     setShowResponseInput(false);
     setResponse("");
+  };
+
+  const handleSubmitQuestionResponse = () => {
+    // Save the response to feed Nova's learning
+    console.log("Question response:", questionResponse);
+    // TODO: Save to database or call API to feed AI learning
+    setShowQuestionDialog(false);
+    setQuestionResponse("");
   };
 
   return (
@@ -149,14 +169,32 @@ export default function ProductGoalCard({
 
           {/* Question for PO */}
           {question && (
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
+            <div 
+              className="p-4 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group"
+              onClick={() => setShowQuestionDialog(true)}
+            >
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-blue-50">
+                <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
                   <MessageSquare className="w-4 h-4 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-700 mb-2">Question pour le Product Owner</p>
-                  <p className="text-sm text-slate-600 italic">"{question}"</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-medium text-slate-700">Question pour le Product Owner</p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Shield className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs max-w-xs">Vos réponses sont anonymes et servent uniquement à améliorer les recommandations de Nova</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <p className="text-sm text-slate-600 italic group-hover:text-slate-900 transition-colors">"{question}"</p>
+                  <p className="text-xs text-blue-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Cliquez pour répondre →
+                  </p>
                 </div>
               </div>
             </div>
@@ -279,6 +317,61 @@ export default function ProductGoalCard({
           )}
         </CardContent>
       </Card>
+
+      {/* Question Response Dialog */}
+      <Dialog open={showQuestionDialog} onOpenChange={setShowQuestionDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-blue-50">
+                <MessageSquare className="w-5 h-5 text-blue-600" />
+              </div>
+              <DialogTitle className="text-lg">Répondre à Nova</DialogTitle>
+            </div>
+            <DialogDescription className="text-sm text-slate-600">
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 mb-3">
+                <p className="italic">"{question}"</p>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-slate-500">
+                <Shield className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <p>
+                  <strong className="text-emerald-700">Réponse anonyme.</strong> Vos insights aident Nova à mieux comprendre 
+                  les dynamiques de votre équipe et à affiner ses recommandations pour tous.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="Partagez votre perspective, vos observations, ou tout contexte pertinent..."
+              value={questionResponse}
+              onChange={(e) => setQuestionResponse(e.target.value)}
+              className="min-h-[150px]"
+            />
+            <div className="flex items-center gap-2 text-xs text-slate-500 p-3 rounded-lg bg-blue-50/50">
+              <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
+              <p>
+                Nova utilise vos réponses pour apprendre et s'améliorer. Plus vous partagez, plus ses recommandations deviennent pertinentes.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowQuestionDialog(false)}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleSubmitQuestionResponse}
+              disabled={!questionResponse.trim()}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Envoyer ma réponse
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
