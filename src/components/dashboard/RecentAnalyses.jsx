@@ -150,13 +150,27 @@ export default function RecentAnalyses({ analyses = [] }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <AlertOctagon className="w-4 h-4 text-blue-500" />
-                        <span className="font-medium text-slate-700">{analysis.blockers_count}</span>
+                      <div className="text-right">
+                        <div className="flex items-center gap-1.5 text-sm mb-1">
+                          <AlertOctagon className="w-4 h-4 text-blue-500" />
+                          <span className="font-medium text-slate-700">{analysis.blockers_count}</span>
+                        </div>
+                        {analysis.analysis_data?.blockers && analysis.analysis_data.blockers.length > 0 && (
+                          <div className="text-xs text-slate-500 max-w-xs">
+                            {analysis.analysis_data.blockers[0].issue}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <ShieldAlert className="w-4 h-4 text-amber-500" />
-                        <span className="font-medium text-slate-700">{analysis.risks_count}</span>
+                      <div className="text-right">
+                        <div className="flex items-center gap-1.5 text-sm mb-1">
+                          <ShieldAlert className="w-4 h-4 text-amber-500" />
+                          <span className="font-medium text-slate-700">{analysis.risks_count}</span>
+                        </div>
+                        {analysis.analysis_data?.risks && analysis.analysis_data.risks.length > 0 && (
+                          <div className="text-xs text-slate-500 max-w-xs">
+                            {analysis.analysis_data.risks[0].description}
+                          </div>
+                        )}
                       </div>
                       <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                     </div>
