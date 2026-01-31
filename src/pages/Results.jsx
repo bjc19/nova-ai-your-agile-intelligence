@@ -36,11 +36,23 @@ export default function Results() {
         parsedAnalysis.sourceUrl = url;
         parsedAnalysis.sourceName = name;
       }
-      setAnalysis(parsedAnalysis);
+      
+      // Translate summary if language is French
+      const translateSummaryIfNeeded = async () => {
+        if (language === 'fr' && parsedAnalysis.summary) {
+          const { base44 } = await import("@/api/base44Client");
+          const prompt = t('translateSummary').replace('{summary}', parsedAnalysis.summary);
+          const result = await base44.integrations.Core.InvokeLLM({ prompt });
+          parsedAnalysis.summary = result;
+        }
+        setAnalysis(parsedAnalysis);
+      };
+      
+      translateSummaryIfNeeded();
     } else {
       navigate(createPageUrl("Analysis"));
     }
-  }, [navigate]);
+  }, [navigate, language, t]);
 
   if (!analysis) {
     return (
