@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { base44 } from "@/api/base44Client";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -87,6 +88,7 @@ export default function ProductGoalCard({
   const [response, setResponse] = useState("");
   const [showQuestionDialog, setShowQuestionDialog] = useState(false);
   const [questionResponse, setQuestionResponse] = useState("");
+  const [questionAnsweredBy, setQuestionAnsweredBy] = useState(null); // {name, date}
 
   if (!alignmentReport) return null;
 
@@ -110,12 +112,32 @@ export default function ProductGoalCard({
     setResponse("");
   };
 
-  const handleSubmitQuestionResponse = () => {
-    // Save the response to feed Nova's learning
-    console.log("Question response:", questionResponse);
-    // TODO: Save to database or call API to feed AI learning
-    setShowQuestionDialog(false);
-    setQuestionResponse("");
+  const handleSubmitQuestionResponse = async () => {
+    try {
+      // Get current user info
+      const user = await base44.auth.me();
+      const responseData = {
+        userName: user.full_name || user.email,
+        responseDate: new Date().toISOString(),
+        response: questionResponse,
+        question: question
+      };
+      
+      // Save the response info to display in UI
+      setQuestionAnsweredBy({
+        name: responseData.userName,
+        date: responseData.responseDate
+      });
+      
+      // Log for AI learning (would be saved to DB in production)
+      console.log("Question response data:", responseData);
+      // TODO: Save to database or call API to feed AI learning
+      
+      setShowQuestionDialog(false);
+      setQuestionResponse("");
+    } catch (error) {
+      console.error("Error submitting response:", error);
+    }
   };
 
   return (
@@ -170,31 +192,59 @@ export default function ProductGoalCard({
           {/* Question for PO */}
           {question && (
             <div 
-              className="p-4 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group"
-              onClick={() => setShowQuestionDialog(true)}
+              className={`p-4 rounded-xl bg-white border transition-all ${
+                questionAnsweredBy 
+                  ? "border-emerald-200 bg-emerald-50/30" 
+                  : "border-slate-200 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 group"
+              }`}
+              onClick={() => !questionAnsweredBy && setShowQuestionDialog(true)}
             >
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                  <MessageSquare className="w-4 h-4 text-blue-600" />
+                <div className={`p-2 rounded-lg ${questionAnsweredBy ? "bg-emerald-100" : "bg-blue-50 group-hover:bg-blue-100"} transition-colors`}>
+                  {questionAnsweredBy ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  ) : (
+                    <MessageSquare className="w-4 h-4 text-blue-600" />
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <p className="text-sm font-medium text-slate-700">Question pour le Product Owner</p>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Shield className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs max-w-xs">Vos réponses sont anonymes et servent uniquement à améliorer les recommandations de Nova</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    {!questionAnsweredBy && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Shield className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs max-w-xs">Réponse identifiée - votre nom sera enregistré</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </div>
-                  <p className="text-sm text-slate-600 italic group-hover:text-slate-900 transition-colors">"{question}"</p>
-                  <p className="text-xs text-blue-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Cliquez pour répondre →
+                  <p className={`text-sm italic ${questionAnsweredBy ? "text-slate-600" : "text-slate-600 group-hover:text-slate-900"} transition-colors`}>
+                    "{question}"
                   </p>
+                  {questionAnsweredBy ? (
+                    <div className="flex items-center gap-2 text-xs text-emerald-700 mt-2 pt-2 border-t border-emerald-200">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>
+                        Répondu par <strong>{questionAnsweredBy.name}</strong> le {new Date(questionAnsweredBy.date).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric'
+                        })} à {new Date(questionAnsweredBy.date).toLocaleTimeString('fr-FR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-blue-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Cliquez pour répondre →
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
