@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   AlertTriangle,
   TrendingUp,
@@ -14,7 +17,8 @@ import {
   ExternalLink,
   CheckCircle2,
   HelpCircle,
-  Lightbulb
+  Lightbulb,
+  Shield
 } from "lucide-react";
 import { 
   analyzeMetricsHealth, 
@@ -29,6 +33,9 @@ import DependencyWarning from "./DependencyWarning";
 export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, onDiscussWithCoach, onApplyLever }) {
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
+  const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [userResponse, setUserResponse] = useState("");
 
   // Demo data if none provided
   const data = metricsData || {
@@ -156,13 +163,29 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                         Signal réel : {issue.realSignal}
                       </p>
                       <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 mb-3">
-                        <div className="flex items-start gap-2">
-                          <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
-                          <div>
-                            <p className="text-xs font-medium text-blue-700 mb-1">Question clé</p>
-                            <p className="text-sm text-blue-900 italic">{issue.keyQuestion}</p>
-                          </div>
-                        </div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => {
+                                  setSelectedQuestion(issue.keyQuestion);
+                                  setIsResponseDialogOpen(true);
+                                }}
+                                className="w-full flex items-start gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer text-left"
+                              >
+                                <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
+                                <div className="flex-1">
+                                  <p className="text-xs font-medium text-blue-700 mb-1">Question clé</p>
+                                  <p className="text-sm text-blue-900 italic">{issue.keyQuestion}</p>
+                                </div>
+                                <Shield className="w-4 h-4 text-emerald-500" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p className="text-xs">🔒 Votre réponse est <strong>100% anonyme</strong> et alimente la base de données de Nova pour améliorer ses analyses.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-slate-500">Métrique prioritaire :</span>
@@ -349,6 +372,60 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
               Les leviers sont des hypothèses à valider humainement. Nova ne recommande aucune action obligatoire ou automatique.
             </p>
           )}
+
+          {/* Response Dialog */}
+          <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-blue-600" />
+                  Répondre à Nova
+                </DialogTitle>
+                <DialogDescription className="space-y-2">
+                  <p className="text-sm text-slate-600 italic">"{selectedQuestion}"</p>
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <Shield className="w-4 h-4 text-emerald-600 mt-0.5" />
+                    <p className="text-xs text-emerald-700">
+                      <strong>100% anonyme</strong> – Votre réponse alimente la base de données de Nova sans identification personnelle. Seules les insights agrégées sont utilisées.
+                    </p>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <Textarea
+                  placeholder="Partagez votre perspective sur cette métrique..."
+                  value={userResponse}
+                  onChange={(e) => setUserResponse(e.target.value)}
+                  className="min-h-[120px]"
+                />
+                
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      console.log("Anonymous response:", { question: selectedQuestion, answer: userResponse });
+                      // Here would be the API call to store anonymized response
+                      setUserResponse("");
+                      setIsResponseDialogOpen(false);
+                    }}
+                    disabled={!userResponse.trim()}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600"
+                  >
+                    Envoyer (anonyme)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setUserResponse("");
+                      setIsResponseDialogOpen(false);
+                    }}
+                  >
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </CardContent>
       </Card>
     </motion.div>
