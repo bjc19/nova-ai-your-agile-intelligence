@@ -89,19 +89,17 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
 
   // Translate recommendations if needed
   useEffect(() => {
+    setTranslatedRecommendations(null);
+  }, [language]);
+
+  useEffect(() => {
     if (latestAnalysis?.recommendations && language === 'fr' && !translatedRecommendations) {
       const translateRecommendations = async () => {
-        const recList = latestAnalysis.recommendations.map((rec, i) => {
-          const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
-          return {
-            type: "default",
-            title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
-            description: recText,
-            priority: i === 0 ? "high" : "medium",
-          };
-        });
+        const descriptions = latestAnalysis.recommendations.map(rec => 
+          typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec)
+        );
 
-        const translationPrompt = `Traduis chaque recommandation en français de manière concise:\n\n${JSON.stringify(recList.map(r => r.description))}\n\nRetourne un tableau JSON avec les traductions en français.`;
+        const translationPrompt = `Traduis chaque recommandation en français de manière concise:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON avec les traductions en français, au même index que l'original.`;
         
         try {
           const translated = await base44.integrations.Core.InvokeLLM({
@@ -112,22 +110,28 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
             }
           });
 
-          const translatedList = recList.map((rec, i) => ({
-            ...rec,
-            description: translated[i] || rec.description,
-            title: (translated[i] || rec.description).substring(0, 50) + ((translated[i] || rec.description).length > 50 ? "..." : "")
+          const translatedList = translated.map((desc, i) => ({
+            type: "default",
+            description: desc,
+            title: desc.substring(0, 50) + (desc.length > 50 ? "..." : ""),
+            priority: i === 0 ? "high" : "medium",
           }));
 
           setTranslatedRecommendations(translatedList);
         } catch (error) {
           console.error("Error translating recommendations:", error);
-          setTranslatedRecommendations(recList);
+          setTranslatedRecommendations(descriptions.map((desc, i) => ({
+            type: "default",
+            description: desc,
+            title: desc.substring(0, 50) + (desc.length > 50 ? "..." : ""),
+            priority: i === 0 ? "high" : "medium",
+          })));
         }
       };
 
       translateRecommendations();
     }
-  }, [latestAnalysis, language]);
+  }, [latestAnalysis, language, translatedRecommendations]);
 
   const recommendations = translatedRecommendations || (latestAnalysis?.recommendations 
     ? latestAnalysis.recommendations.map((rec, i) => {
