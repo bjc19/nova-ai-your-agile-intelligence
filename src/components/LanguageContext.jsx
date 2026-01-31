@@ -278,8 +278,12 @@ export const translations = {
     wantRealTimeAnalysis: "Want Real-Time Analysis?",
     inFullVersion: "In the full version, Nova connects directly to your tools and provides insights automatically, without any manual input.",
     comingSoonIntegrations: "Coming Soon: Jira · Azure DevOps · Teams · Zoom",
-  }
-};
+    improvementRecommendations: "Improvement Recommendations",
+    novaAnalyzing: "Nova is analyzing...",
+    suggestedActionPlan: "Suggested Action Plan",
+    viewIn: "View in",
+    }
+    };
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
