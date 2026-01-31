@@ -1,144 +1,207 @@
 // Sprint Drift Detection Engine
-// Calculates risk score and determines if sprint is at risk
+// Detects early drift signals without judgment - empowers human decision
 
-export const RISK_THRESHOLDS = {
-  AT_RISK: 75,
-  CRITICAL: 90,
-  WIP_MULTIPLIER: 1.3,
+export const DRIFT_THRESHOLDS = {
   MIN_SPRINT_DAYS: 3,
-  TICKET_AGE_THRESHOLD: 3, // days
-  BLOCKED_THRESHOLD: 48, // hours
+  WIP_MULTIPLIER: 1.3, // 30% above historical
+  TICKET_AGE_DAYS: 3,
+  BLOCKED_HOURS: 48,
+  MIN_STALE_TICKETS: 2,
+  MIN_BLOCKED_TICKETS: 1,
+  CONFIDENCE_HIGH: 75,
+  MIN_HISTORICAL_SPRINTS: 2,
 };
 
-export const RISK_WEIGHTS = {
-  WIP: 0.4,
-  BLOCKED: 0.3,
-  AGE: 0.3,
+export const DRIFT_STATUS = {
+  HEALTHY: {
+    id: "healthy",
+    label: "Sprint en bonne santé",
+    emoji: "🟢",
+    color: "emerald",
+  },
+  POTENTIAL_DRIFT: {
+    id: "potential_drift",
+    label: "Dérive potentielle détectée",
+    emoji: "⚠️",
+    color: "amber",
+  },
+  INSUFFICIENT_DATA: {
+    id: "insufficient_data",
+    label: "Données insuffisantes",
+    emoji: "⏳",
+    color: "slate",
+  },
 };
 
-export function calculateRiskScore(sprintData) {
+export function analyzeSprintDrift(sprintData) {
   const {
     wip_count = 0,
     wip_historical_avg = 5,
     tickets_in_progress_over_3d = 0,
     blocked_tickets_over_48h = 0,
-    total_tickets = 10,
+    sprint_day = 0,
+    historical_sprints_count = 0,
   } = sprintData;
 
-  // WIP Score: How much WIP exceeds historical average
-  const wipRatio = wip_historical_avg > 0 ? wip_count / wip_historical_avg : 1;
-  const wipScore = Math.min(100, (wipRatio / RISK_THRESHOLDS.WIP_MULTIPLIER) * 100);
+  // Check for insufficient data
+  if (historical_sprints_count < DRIFT_THRESHOLDS.MIN_HISTORICAL_SPRINTS) {
+    return {
+      status: DRIFT_STATUS.INSUFFICIENT_DATA,
+      confidence: 0,
+      signals: [],
+      message: "Données insuffisantes pour détecter une dérive fiable. En attente de plus d'historique sprint.",
+      canAnalyze: false,
+    };
+  }
 
-  // Blocked Score: Based on number of blocked tickets
-  const blockedScore = Math.min(100, (blocked_tickets_over_48h / Math.max(1, total_tickets * 0.2)) * 100);
+  // Only analyze after day 3
+  if (sprint_day < DRIFT_THRESHOLDS.MIN_SPRINT_DAYS) {
+    return {
+      status: DRIFT_STATUS.HEALTHY,
+      confidence: 0,
+      signals: [],
+      message: `Analyse disponible à partir de J+${DRIFT_THRESHOLDS.MIN_SPRINT_DAYS}`,
+      canAnalyze: false,
+    };
+  }
 
-  // Age Score: Based on stale tickets
-  const ageScore = Math.min(100, (tickets_in_progress_over_3d / Math.max(1, total_tickets * 0.3)) * 100);
+  // Detect convergent signals
+  const signals = [];
+  
+  // Signal 1: WIP exceeds historical average by 30%+
+  const wipExceeded = wip_count > wip_historical_avg * DRIFT_THRESHOLDS.WIP_MULTIPLIER;
+  if (wipExceeded) {
+    signals.push({
+      id: "wip_high",
+      label: `WIP supérieur à l'historique de l'équipe (${wip_count} vs ${Math.round(wip_historical_avg)} moy.)`,
+      severity: "medium",
+    });
+  }
 
-  // Weighted total
-  const totalScore = Math.round(
-    wipScore * RISK_WEIGHTS.WIP +
-    blockedScore * RISK_WEIGHTS.BLOCKED +
-    ageScore * RISK_WEIGHTS.AGE
-  );
+  // Signal 2: Stale tickets (In Progress > 3 days)
+  const hasStaleTickets = tickets_in_progress_over_3d >= DRIFT_THRESHOLDS.MIN_STALE_TICKETS;
+  if (hasStaleTickets) {
+    signals.push({
+      id: "stale_tickets",
+      label: `${tickets_in_progress_over_3d} tickets actifs depuis plus de 3 jours`,
+      severity: "medium",
+    });
+  }
 
+  // Signal 3: Blocked tickets (> 48h)
+  const hasBlockedTickets = blocked_tickets_over_48h >= DRIFT_THRESHOLDS.MIN_BLOCKED_TICKETS;
+  if (hasBlockedTickets) {
+    signals.push({
+      id: "blocked_tickets",
+      label: `${blocked_tickets_over_48h} ticket(s) bloqué(s) depuis plus de 48h`,
+      severity: "high",
+    });
+  }
+
+  // Calculate confidence based on signal convergence
+  const signalCount = signals.length;
+  const confidence = signalCount === 0 ? 0 : Math.min(95, 50 + (signalCount * 15));
+
+  // Determine status
+  const hasDrift = signalCount >= 2 || (signalCount === 1 && hasBlockedTickets);
+  
   return {
-    totalScore: Math.min(100, totalScore),
-    breakdown: {
-      wip: Math.round(wipScore),
-      blocked: Math.round(blockedScore),
-      age: Math.round(ageScore),
+    status: hasDrift ? DRIFT_STATUS.POTENTIAL_DRIFT : DRIFT_STATUS.HEALTHY,
+    confidence,
+    signals,
+    canAnalyze: true,
+  };
+}
+
+export function shouldSendDriftAlert(driftAnalysis, alertSent = false) {
+  // Never spam - only one alert per drift detection
+  if (alertSent) return false;
+  
+  // Only alert on potential drift with high confidence
+  if (driftAnalysis.status.id !== "potential_drift") return false;
+  
+  return driftAnalysis.confidence >= DRIFT_THRESHOLDS.CONFIDENCE_HIGH;
+}
+
+export function generateDriftSuggestions(signals) {
+  // Non-prescriptive suggestions based on detected signals
+  const suggestions = [];
+
+  const hasBlocked = signals.some(s => s.id === "blocked_tickets");
+  const hasStale = signals.some(s => s.id === "stale_tickets");
+  const hasWip = signals.some(s => s.id === "wip_high");
+
+  if (hasBlocked) {
+    suggestions.push({
+      id: "unblock",
+      text: "Identifier un ticket bloquant à débloquer aujourd'hui",
+      effort: "low",
+    });
+  }
+
+  if (hasWip || hasStale) {
+    suggestions.push({
+      id: "reduce_wip",
+      text: "Réduire temporairement le WIP pour finir avant de démarrer",
+      effort: "medium",
+    });
+  }
+
+  if (hasStale) {
+    suggestions.push({
+      id: "check_scope",
+      text: "Vérifier si une User Story est trop large pour le sprint",
+      effort: "low",
+    });
+  }
+
+  // Always suggest sync if drift detected
+  if (suggestions.length === 0) {
+    suggestions.push({
+      id: "sync",
+      text: "Organiser un point de synchronisation rapide avec l'équipe",
+      effort: "low",
+    });
+  }
+
+  return suggestions.slice(0, 3); // Max 3 suggestions
+}
+
+export function formatDriftAlert(sprintName, driftAnalysis) {
+  const { signals, confidence } = driftAnalysis;
+  
+  return {
+    title: `⚠️ Sprint ${sprintName} – dérive potentielle détectée`,
+    confidenceLabel: confidence >= 75 ? "confiance élevée" : "confiance modérée",
+    signals: signals.map(s => s.label),
+    keyQuestion: "Qu'est-ce qui empêche actuellement l'équipe de faire avancer le flux ?",
+    suggestions: generateDriftSuggestions(signals),
+    cta: {
+      label: "Revoir le sprint maintenant",
+      action: "review_sprint",
     },
   };
 }
 
-export function determineSprintStatus(riskScore) {
-  if (riskScore >= RISK_THRESHOLDS.CRITICAL) return "critical";
-  if (riskScore >= RISK_THRESHOLDS.AT_RISK) return "at_risk";
-  return "healthy";
-}
-
-export function shouldSendAlert(sprintHealth) {
-  const { risk_score, status, alert_sent, sprint_start_date } = sprintHealth;
-
-  // Only alert if at risk or critical
-  if (status === "healthy") return false;
-
-  // Don't alert if already sent
-  if (alert_sent) return false;
-
-  // Only alert after day 3
-  const sprintStart = new Date(sprint_start_date);
-  const today = new Date();
-  const daysSinceStart = Math.floor((today - sprintStart) / (1000 * 60 * 60 * 24));
-  
-  if (daysSinceStart < RISK_THRESHOLDS.MIN_SPRINT_DAYS) return false;
-
-  return risk_score >= RISK_THRESHOLDS.AT_RISK;
-}
-
-export function generateRecommendations(sprintData, problematicTickets = []) {
-  const recommendations = [];
-  const { wip_count, wip_historical_avg, blocked_tickets_over_48h } = sprintData;
-
-  // WIP too high
-  if (wip_count > wip_historical_avg * RISK_THRESHOLDS.WIP_MULTIPLIER) {
-    const excess = wip_count - Math.round(wip_historical_avg);
-    recommendations.push(`Réduire le WIP de ${excess} ticket(s) - Focalisez l'équipe sur la finition`);
-  }
-
-  // Blocked tickets
-  if (blocked_tickets_over_48h > 0) {
-    const blockedTickets = problematicTickets.filter(t => t.status === "blocked");
-    if (blockedTickets.length > 0) {
-      const ticket = blockedTickets[0];
-      recommendations.push(`Débloquer en priorité: ${ticket.ticket_id} "${ticket.title}" (bloqué depuis ${ticket.days_in_status}j)`);
-    }
-  }
-
-  // Stale tickets
-  const staleTickets = problematicTickets.filter(t => t.status === "in_progress" && t.days_in_status >= 3);
-  if (staleTickets.length > 0) {
-    const ticket = staleTickets[0];
-    recommendations.push(`Couper ou revoir le scope de: ${ticket.ticket_id} "${ticket.title}" (en cours depuis ${ticket.days_in_status}j)`);
-  }
-
-  // Generic if no specific
-  if (recommendations.length === 0 && sprintData.risk_score >= RISK_THRESHOLDS.AT_RISK) {
-    recommendations.push("Organiser un point de synchronisation d'urgence avec l'équipe");
-  }
-
-  return recommendations;
-}
-
-export function formatAlertMessage(sprintHealth) {
-  const { sprint_name, risk_score, tickets_in_progress_over_3d, blocked_tickets_over_48h, recommendations } = sprintHealth;
-  
-  return {
-    title: `🚨 Sprint "${sprint_name}" À RISQUE`,
-    summary: `Score: ${risk_score}% | ${tickets_in_progress_over_3d} tickets >3j | ${blocked_tickets_over_48h} bloqués`,
-    recommendation: recommendations?.[0] || "Revoir la charge de travail de l'équipe",
-    urgency: risk_score >= RISK_THRESHOLDS.CRITICAL ? "critical" : "high",
-  };
-}
-
-// Simulate Jira data analysis (replace with real Jira integration when available)
-export function analyzeSprintFromTranscript(transcript, existingData = {}) {
-  // Extract signals from transcript
+// Enrich sprint data from transcript analysis
+export function enrichSprintDataFromTranscript(transcript, existingData = {}) {
   const blockedMentions = (transcript.match(/blocked|bloqué|stuck|waiting|en attente/gi) || []).length;
   const wipMentions = (transcript.match(/in progress|en cours|working on|travaille sur/gi) || []).length;
   const delayMentions = (transcript.match(/delayed|retard|taking longer|prend plus de temps/gi) || []).length;
 
-  // Estimate metrics from transcript signals
-  const estimatedWip = Math.max(existingData.wip_count || 0, wipMentions);
-  const estimatedBlocked = Math.max(existingData.blocked_tickets_over_48h || 0, Math.floor(blockedMentions / 2));
-  const estimatedStale = Math.max(existingData.tickets_in_progress_over_3d || 0, delayMentions);
-
   return {
-    wip_count: estimatedWip,
-    blocked_tickets_over_48h: estimatedBlocked,
-    tickets_in_progress_over_3d: estimatedStale,
-    wip_historical_avg: existingData.wip_historical_avg || 5,
-    total_tickets: existingData.total_tickets || 10,
+    ...existingData,
+    wip_count: Math.max(existingData.wip_count || 0, wipMentions),
+    blocked_tickets_over_48h: Math.max(existingData.blocked_tickets_over_48h || 0, Math.floor(blockedMentions / 2)),
+    tickets_in_progress_over_3d: Math.max(existingData.tickets_in_progress_over_3d || 0, delayMentions),
+  };
+}
+
+// Mark drift as acknowledged by human action
+export function acknowledgeDrift(sprintHealth) {
+  return {
+    ...sprintHealth,
+    drift_acknowledged: true,
+    drift_acknowledged_date: new Date().toISOString(),
   };
 }

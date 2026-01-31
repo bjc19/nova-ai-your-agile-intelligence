@@ -7,7 +7,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   AlertTriangle,
   CheckCircle2,
-  XCircle,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -15,9 +14,12 @@ import {
   Ban,
   Lightbulb,
   Bell,
-  BellOff
+  BellOff,
+  HelpCircle,
+  ExternalLink,
+  MessageSquare
 } from "lucide-react";
-import { RISK_THRESHOLDS } from "@/components/nova/SprintDriftDetector";
+import { DRIFT_STATUS, analyzeSprintDrift, generateDriftSuggestions } from "@/components/nova/SprintDriftDetector";
 
 const statusConfig = {
   healthy: {
@@ -25,44 +27,50 @@ const statusConfig = {
     color: "text-emerald-600",
     bgColor: "bg-emerald-50",
     borderColor: "border-emerald-200",
-    label: "En bonne santé",
-    progressColor: "bg-emerald-500"
+    label: "Sprint en bonne santé",
+    emoji: "🟢"
   },
-  at_risk: {
+  potential_drift: {
     icon: AlertTriangle,
     color: "text-amber-600",
     bgColor: "bg-amber-50",
     borderColor: "border-amber-200",
-    label: "À risque",
-    progressColor: "bg-amber-500"
+    label: "Dérive potentielle détectée",
+    emoji: "⚠️"
   },
-  critical: {
-    icon: XCircle,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
-    borderColor: "border-red-200",
-    label: "Critique",
-    progressColor: "bg-red-500"
+  insufficient_data: {
+    icon: HelpCircle,
+    color: "text-slate-500",
+    bgColor: "bg-slate-50",
+    borderColor: "border-slate-200",
+    label: "Données insuffisantes",
+    emoji: "⏳"
   }
 };
 
-export default function SprintHealthCard({ sprintHealth, onAcknowledgeAlert }) {
+export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReviewSprint }) {
   const [expanded, setExpanded] = useState(false);
 
   // Default/demo data if none provided
   const data = sprintHealth || {
-    sprint_name: "Sprint 12",
-    risk_score: 45,
-    status: "healthy",
-    wip_count: 6,
+    sprint_name: "Sprint 14",
+    wip_count: 8,
     wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 1,
-    blocked_tickets_over_48h: 0,
-    recommendations: [],
-    problematic_tickets: []
+    tickets_in_progress_over_3d: 3,
+    blocked_tickets_over_48h: 2,
+    sprint_day: 5,
+    historical_sprints_count: 4,
+    problematic_tickets: [],
+    drift_acknowledged: false,
   };
 
-  const config = statusConfig[data.status] || statusConfig.healthy;
+  // Analyze drift using the engine
+  const driftAnalysis = analyzeSprintDrift(data);
+  const suggestions = driftAnalysis.status.id === "potential_drift" 
+    ? generateDriftSuggestions(driftAnalysis.signals) 
+    : [];
+
+  const config = statusConfig[driftAnalysis.status.id] || statusConfig.healthy;
   const StatusIcon = config.icon;
 
   return (
@@ -75,7 +83,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledgeAlert }) {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl ${config.bgColor}`}>
+              <div className={`p-2.5 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
                 <StatusIcon className={`w-5 h-5 ${config.color}`} />
               </div>
               <div>
@@ -83,47 +91,22 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledgeAlert }) {
                   {data.sprint_name}
                 </CardTitle>
                 <Badge className={`${config.bgColor} ${config.color} border-0 mt-1`}>
-                  {config.label}
+                  {config.emoji} {config.label}
                 </Badge>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-3xl font-bold text-slate-900">{data.risk_score}%</p>
-              <p className="text-xs text-slate-500">Score de risque</p>
-            </div>
+            {driftAnalysis.confidence > 0 && (
+              <div className="text-right">
+                <p className="text-2xl font-bold text-slate-900">{driftAnalysis.confidence}%</p>
+                <p className="text-xs text-slate-500">Confiance</p>
+              </div>
+            )}
           </div>
         </CardHeader>
 
-        <CardContent className="pt-4">
-          {/* Risk Score Progress Bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-xs text-slate-500 mb-1">
-              <span>0%</span>
-              <span className="text-amber-600">{RISK_THRESHOLDS.AT_RISK}%</span>
-              <span className="text-red-600">{RISK_THRESHOLDS.CRITICAL}%</span>
-              <span>100%</span>
-            </div>
-            <div className="relative h-3 bg-slate-200 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${data.risk_score}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className={`absolute h-full ${config.progressColor} rounded-full`}
-              />
-              {/* Threshold markers */}
-              <div 
-                className="absolute top-0 bottom-0 w-0.5 bg-amber-400" 
-                style={{ left: `${RISK_THRESHOLDS.AT_RISK}%` }} 
-              />
-              <div 
-                className="absolute top-0 bottom-0 w-0.5 bg-red-400" 
-                style={{ left: `${RISK_THRESHOLDS.CRITICAL}%` }} 
-              />
-            </div>
-          </div>
-
+        <CardContent className="pt-4 space-y-4">
           {/* Key Metrics */}
-          <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-xl bg-white/60 border border-slate-200">
               <div className="flex items-center gap-2 mb-1">
                 <Layers className="w-4 h-4 text-blue-500" />
@@ -146,7 +129,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledgeAlert }) {
             <div className="p-3 rounded-xl bg-white/60 border border-slate-200">
               <div className="flex items-center gap-2 mb-1">
                 <Ban className="w-4 h-4 text-red-500" />
-                <span className="text-xs text-slate-500">Bloqués</span>
+                <span className="text-xs text-slate-500">Bloqués &gt;48h</span>
               </div>
               <p className="text-lg font-semibold text-slate-900">
                 {data.blocked_tickets_over_48h}
@@ -154,74 +137,50 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledgeAlert }) {
             </div>
           </div>
 
-          {/* Alert Status */}
-          {data.status !== "healthy" && (
-            <div className={`p-3 rounded-xl ${config.bgColor} border ${config.borderColor} mb-4`}>
+          {/* Detected Signals - Only show if drift detected */}
+          {driftAnalysis.status.id === "potential_drift" && driftAnalysis.signals.length > 0 && (
+            <div className={`p-4 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
+              <p className="text-sm font-medium text-slate-700 mb-2">Signaux observés :</p>
+              <ul className="space-y-1">
+                {driftAnalysis.signals.map((signal, index) => (
+                  <li key={index} className="text-sm text-slate-600 flex items-start gap-2">
+                    <span className="text-amber-500 mt-0.5">•</span>
+                    {signal.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Key Question - Only for drift */}
+          {driftAnalysis.status.id === "potential_drift" && (
+            <div className="p-4 rounded-xl bg-white border border-slate-200">
               <div className="flex items-start gap-3">
-                {data.alert_sent ? (
-                  <BellOff className="w-5 h-5 text-slate-400 mt-0.5" />
-                ) : (
-                  <Bell className={`w-5 h-5 ${config.color} mt-0.5`} />
-                )}
-                <div className="flex-1">
-                  <p className={`text-sm font-medium ${config.color}`}>
-                    {data.alert_sent 
-                      ? "Alerte envoyée au SM et PO" 
-                      : "Alerte en attente d'envoi (J3-J5)"}
+                <MessageSquare className="w-5 h-5 text-blue-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-slate-700 mb-1">Question clé</p>
+                  <p className="text-sm text-slate-600 italic">
+                    "Qu'est-ce qui empêche actuellement l'équipe de faire avancer le flux ?"
                   </p>
-                  {data.alert_sent_date && (
-                    <p className="text-xs text-slate-500">
-                      Envoyée le {new Date(data.alert_sent_date).toLocaleDateString('fr-FR')}
-                    </p>
-                  )}
                 </div>
-                {!data.alert_sent && onAcknowledgeAlert && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={onAcknowledgeAlert}
-                    className="text-xs"
-                  >
-                    Acquitter
-                  </Button>
-                )}
               </div>
             </div>
           )}
 
-          {/* Recommendations */}
-          {data.recommendations && data.recommendations.length > 0 && (
+          {/* Suggestions - Non prescriptive */}
+          {suggestions.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-amber-500" />
-                <span className="text-sm font-medium text-slate-700">Recommandation Nova</span>
-              </div>
-              <div className="p-3 rounded-xl bg-white border border-slate-200">
-                <p className="text-sm text-slate-700">{data.recommendations[0]}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Expand for problematic tickets */}
-          {data.problematic_tickets && data.problematic_tickets.length > 0 && (
-            <>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setExpanded(!expanded)}
-                className="w-full mt-3 text-slate-500"
+                className="w-full justify-between text-slate-600 hover:text-slate-900"
               >
-                {expanded ? (
-                  <>
-                    <ChevronUp className="w-4 h-4 mr-1" />
-                    Masquer les détails
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-4 h-4 mr-1" />
-                    Voir les {data.problematic_tickets.length} tickets problématiques
-                  </>
-                )}
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4 text-amber-500" />
+                  <span>{suggestions.length} suggestion(s) Nova</span>
+                </div>
+                {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </Button>
 
               <AnimatePresence>
@@ -230,33 +189,77 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledgeAlert }) {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mt-3 space-y-2"
+                    className="space-y-2"
                   >
-                    {data.problematic_tickets.map((ticket, index) => (
+                    {suggestions.map((suggestion, index) => (
                       <div 
-                        key={index}
-                        className="p-3 rounded-lg bg-white border border-slate-200 text-sm"
+                        key={suggestion.id}
+                        className="p-3 rounded-lg bg-white border border-slate-200 text-sm flex items-start gap-2"
                       >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <span className="font-mono text-xs text-slate-500">{ticket.ticket_id}</span>
-                            <p className="font-medium text-slate-900">{ticket.title}</p>
-                          </div>
-                          <Badge variant="outline" className={
-                            ticket.status === "blocked" ? "text-red-600 border-red-200" : "text-amber-600 border-amber-200"
-                          }>
-                            {ticket.days_in_status}j
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1">
-                          {ticket.assignee} • {ticket.status}
-                        </p>
+                        <span className="text-slate-400">{index + 1}.</span>
+                        <span className="text-slate-700">{suggestion.text}</span>
                       </div>
                     ))}
                   </motion.div>
                 )}
               </AnimatePresence>
-            </>
+            </div>
+          )}
+
+          {/* Insufficient data message */}
+          {driftAnalysis.status.id === "insufficient_data" && (
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
+              <p className="text-sm text-slate-600">{driftAnalysis.message}</p>
+            </div>
+          )}
+
+          {/* Alert status & CTA - Only for drift */}
+          {driftAnalysis.status.id === "potential_drift" && (
+            <div className="space-y-3 pt-2">
+              {/* Alert notification status */}
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                {data.drift_acknowledged ? (
+                  <>
+                    <BellOff className="w-4 h-4" />
+                    <span>Signal acquitté le {data.drift_acknowledged_date ? new Date(data.drift_acknowledged_date).toLocaleDateString('fr-FR') : 'récemment'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-4 h-4 text-amber-500" />
+                    <span>Signal actif jusqu'à action humaine</span>
+                  </>
+                )}
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={onReviewSprint}
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                >
+                  Revoir le sprint maintenant
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+                {!data.drift_acknowledged && onAcknowledge && (
+                  <Button
+                    variant="outline"
+                    onClick={onAcknowledge}
+                    className="border-slate-300"
+                  >
+                    Acquitter
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Healthy sprint - No interruption */}
+          {driftAnalysis.status.id === "healthy" && driftAnalysis.canAnalyze && (
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+              <p className="text-sm text-emerald-700">
+                🟢 Aucun signal de dérive – flow protégé
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
