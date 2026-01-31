@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,50 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
   const [selectedRecos, setSelectedRecos] = useState([]);
   const [appliedRecos, setAppliedRecos] = useState({}); // { recoId: { name, date } }
+  const [persistentIssues, setPersistentIssues] = useState([]); // Recommendations with persistent issues
+
+  // Fetch applied recommendations to check their status
+  const { data: appliedRecommendations = [] } = useQuery({
+    queryKey: ['appliedRecommendations'],
+    queryFn: () => base44.entities.AppliedRecommendation.list('-applied_date', 50),
+    refetchInterval: 30000, // Check every 30 seconds
+  });
+
+  // Verify impact of applied recommendations
+  useEffect(() => {
+    const checkRecommendationImpact = () => {
+      const issues = [];
+      const daysSinceApplication = 7; // Consider recommendations applied 7+ days ago
+
+      appliedRecommendations.forEach(reco => {
+        const appliedDate = new Date(reco.applied_date);
+        const daysSince = Math.floor((Date.now() - appliedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        // Only check recommendations applied 7+ days ago
+        if (daysSince >= daysSinceApplication && reco.verification_status === 'pending') {
+          // Compare current metrics with baseline
+          const currentValue = metrics[reco.target_metric];
+          const baselineValue = reco.baseline_value;
+          
+          if (currentValue !== undefined && currentValue >= baselineValue * 0.9) {
+            // Problem persists (no significant improvement)
+            issues.push({
+              ...reco,
+              currentValue,
+              daysSince,
+              status: currentValue > baselineValue ? 'worsened' : 'no_improvement'
+            });
+          }
+        }
+      });
+
+      setPersistentIssues(issues);
+    };
+
+    if (appliedRecommendations.length > 0) {
+      checkRecommendationImpact();
+    }
+  }, [appliedRecommendations, metrics]);
 
   // Demo data if none provided
   const data = flowData || {
@@ -509,6 +554,88 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
             <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
               <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-emerald-700">{wastesAnalysis.message}</p>
+            </div>
+          )}
+
+          {/* Persistent Issues Alert */}
+          {persistentIssues.length > 0 && (
+            <div className="p-4 rounded-xl bg-red-50 border-2 border-red-300">
+              <div className="flex items-start gap-3 mb-3">
+                <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-red-900 mb-1">
+                    ⚠️ Problème(s) persistant(s) détecté(s)
+                  </h4>
+                  <p className="text-xs text-red-700">
+                    {persistentIssues.length} recommandation(s) appliquée(s) n'ont pas produit l'amélioration attendue.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {persistentIssues.map((issue, idx) => (
+                  <div key={idx} className="p-3 rounded-lg bg-white border border-red-200">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-900">{issue.recommendation_text}</p>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                          <span>Appliqué il y a {issue.daysSince} jours par <strong>{issue.applied_by}</strong></span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300">
+                        {issue.status === 'worsened' ? '📈 Aggravé' : '⏸️ Stagnant'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 p-2 rounded bg-slate-50 text-xs">
+                      <div>
+                        <span className="text-slate-500">Baseline :</span>
+                        <span className="font-semibold text-slate-900 ml-1">{issue.baseline_value.toFixed(1)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">Actuel :</span>
+                        <span className="font-semibold text-red-700 ml-1">{issue.currentValue.toFixed(1)}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 p-2 rounded-lg bg-blue-50 border border-blue-200">
+                      <p className="text-xs font-medium text-blue-900 mb-1">💡 Actions suggérées :</p>
+                      <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                        <li>Organiser un point dédié avec les parties prenantes</li>
+                        <li>Identifier les obstacles à la mise en œuvre effective</li>
+                        <li>Ajuster l'approche ou considérer une alternative</li>
+                      </ul>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await base44.entities.AppliedRecommendation.update(issue.id, {
+                            verification_status: issue.status === 'worsened' ? 'worsened' : 'no_change',
+                            current_value: issue.currentValue,
+                            last_verified_date: new Date().toISOString()
+                          });
+                          
+                          toast.success("Statut mis à jour", {
+                            description: "La recommandation a été marquée comme nécessitant un suivi"
+                          });
+                          
+                          // Refresh the data
+                          window.location.reload();
+                        } catch (error) {
+                          console.error("Error updating recommendation:", error);
+                          toast.error("Erreur lors de la mise à jour");
+                        }
+                      }}
+                      className="w-full mt-2 border-red-600 text-red-700 hover:bg-red-50"
+                    >
+                      Marquer comme nécessitant un suivi
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
