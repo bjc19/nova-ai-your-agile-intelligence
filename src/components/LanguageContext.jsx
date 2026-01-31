@@ -288,6 +288,29 @@ export const translations = {
     // Posture Indicator
     novaIsInMode: "Nova is in",
 
+    // Posture Characteristics
+    crisisFacilitator_1: "Concise and factual communication",
+    crisisFacilitator_2: "Directive recommendations",
+    crisisFacilitator_3: "Focus on immediate actions",
+    agileCoach_1: "Calm and reflective tone",
+    agileCoach_2: "Open-ended improvement questions",
+    agileCoach_3: "Suggests experiments",
+    facilitator_1: "Inclusive and neutral language",
+    facilitator_2: "Surfaces patterns and trends",
+    facilitator_3: "Guides structured reflection",
+    systemicCoach_1: "Curious and non-judgmental",
+    systemicCoach_2: "Highlights systemic impediments",
+    systemicCoach_3: "Explores dependencies",
+    observer_1: "Minimal interventions",
+    observer_2: "Factual observations only",
+    observer_3: "Requests additional data",
+    organizer_1: "Structured approach",
+    organizer_2: "Goal-oriented focus",
+    organizer_3: "Clear prioritization",
+    productAlly_1: "Value-focused perspective",
+    productAlly_2: "Celebrates achievements",
+    productAlly_3: "Stakeholder awareness",
+
     // Results Page
     analysisComplete: "Analysis Complete",
     analysisResults: "Analysis Results",
