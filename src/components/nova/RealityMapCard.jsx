@@ -122,6 +122,55 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
     }
   };
 
+  const handleApplySingleRecommendation = async (suggestion) => {
+    try {
+      const user = await base44.auth.me();
+
+      // Map waste metrics to specific targets
+      const metricMapping = {
+        "Temps d'attente (Muda: 待機 Taiki)": { target: "avg_wait_time_percent", baseline: metrics.avg_wait_time_percent },
+        "Sur-traitement (Muda: 過剰処理 Kajou Shori)": { target: "reopened_tickets", baseline: metrics.reopened_tickets },
+        "Blocages prolongés (Muda: 停滞 Teitai)": { target: "blocked_tickets_over_5d", baseline: metrics.blocked_tickets_over_5d },
+      };
+
+      const wasteMatch = wastesAnalysis.wastes.find(w => suggestion.text.includes(w.name));
+      const metric = wasteMatch ? metricMapping[wasteMatch.name] : null;
+
+      // Create tracking record for this recommendation
+      const appliedRecord = {
+        recommendation_id: suggestion.id,
+        recommendation_text: suggestion.text,
+        applied_date: new Date().toISOString(),
+        applied_by: user.email,
+        target_metric: metric?.target || "general",
+        baseline_value: metric?.baseline || 0,
+        verification_status: "pending",
+        notes: `Effort: ${suggestion.effort} • Impact attendu: ${suggestion.impact}`
+      };
+
+      await base44.entities.AppliedRecommendation.create(appliedRecord);
+
+      toast.success("Recommandation marquée comme appliquée", {
+        description: "Nova vérifiera l'impact dans les prochaines analyses"
+      });
+
+      // Store application info
+      const appliedDate = new Date().toISOString();
+      const appliedBy = user.full_name || user.email;
+      
+      setAppliedRecos({
+        ...appliedRecos,
+        [suggestion.id]: {
+          name: appliedBy,
+          date: appliedDate
+        }
+      });
+    } catch (error) {
+      console.error("Error applying recommendation:", error);
+      toast.error("Erreur lors de l'application de la recommandation");
+    }
+  };
+
   const handleApplyRecommendations = async () => {
     setIsApplyingRecos(true);
     
