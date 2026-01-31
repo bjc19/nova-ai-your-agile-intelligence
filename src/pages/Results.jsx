@@ -242,7 +242,7 @@ export default function Results() {
                   </div>
                   <p className="text-sm text-slate-700 mb-2">{blocker.issue}</p>
                   <p className="text-sm text-blue-700">
-                    <span className="font-medium">Action:</span> {blocker.action}
+                    <span className="font-medium">{language === 'fr' ? 'Action :' : 'Action:'}</span> {blocker.action}
                   </p>
                 </div>
               ))}
