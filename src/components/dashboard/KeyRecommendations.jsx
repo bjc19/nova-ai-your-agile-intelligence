@@ -160,7 +160,32 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
         }
       });
 
-      setDetailsCache({ ...detailsCache, [index]: result.action_plan });
+      // Translate action plan if French
+      let actionPlan = result.action_plan;
+      if (language === 'fr') {
+        const translationPrompt = `Traduis chaque étape en français de manière concise:\n\n${JSON.stringify(actionPlan)}\n\nRetourne le JSON avec les mêmes clés (step, description) mais avec les valeurs traduites en français.`;
+        const translated = await base44.integrations.Core.InvokeLLM({
+          prompt: translationPrompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              action_plan: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    step: { type: "string" },
+                    description: { type: "string" }
+                  }
+                }
+              }
+            }
+          }
+        });
+        actionPlan = translated.action_plan;
+      }
+
+      setDetailsCache({ ...detailsCache, [index]: actionPlan });
     } catch (error) {
       console.error("Error fetching details:", error);
     } finally {
