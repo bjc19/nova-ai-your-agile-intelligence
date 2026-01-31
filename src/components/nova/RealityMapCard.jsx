@@ -37,6 +37,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [userResponse, setUserResponse] = useState("");
   const [isSendingNotifications, setIsSendingNotifications] = useState(false);
+  const [notificationsSent, setNotificationsSent] = useState(false);
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
   const [selectedRecos, setSelectedRecos] = useState([]);
   const [appliedRecos, setAppliedRecos] = useState({}); // { recoId: { name, date } }
@@ -114,6 +115,8 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
       toast.success(`${responsiblePersons.length} notification(s) envoyée(s) avec succès`, {
         description: `Envoyé à ${responsiblePersons.map(p => p.name).join(', ')}`
       });
+      
+      setNotificationsSent(true);
     } catch (error) {
       console.error("Error sending notifications:", error);
       toast.error("Erreur lors de l'envoi des notifications");
@@ -619,11 +622,14 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
               <div className="flex gap-2">
                 <Button
                   onClick={handleSendNotifications}
-                  disabled={isSendingNotifications || !decisionAnalysis.decisionMap?.length}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  disabled={isSendingNotifications || !decisionAnalysis.decisionMap?.length || notificationsSent}
+                  className={notificationsSent 
+                    ? "flex-1 bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
+                    : "flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                  }
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {isSendingNotifications ? "Envoi en cours..." : "Notifier les responsables"}
+                  {isSendingNotifications ? "Envoi en cours..." : notificationsSent ? "✓ Notifications envoyées" : "Notifier les responsables"}
                 </Button>
 
                 <TooltipProvider>
