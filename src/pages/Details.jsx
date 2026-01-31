@@ -9,11 +9,25 @@ import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter } from "lucide-react";
 
+const translateContent = async (text, targetLanguage) => {
+  if (!text || targetLanguage === 'en') return text;
+  
+  try {
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `Traduis ce texte en français de manière concise:\n\n${text}`,
+    });
+    return result || text;
+  } catch (error) {
+    return text;
+  }
+};
+
 export default function Details() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [detailType, setDetailType] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState([]);
+  const [translatedItems, setTranslatedItems] = useState({});
 
   // Get the detail type from sessionStorage
   useEffect(() => {
@@ -34,6 +48,39 @@ export default function Details() {
   useEffect(() => {
     setAnalysisHistory(historyData);
   }, [historyData]);
+
+  // Translate item content when language changes
+  const getTranslatedItem = async (item) => {
+    const cacheKey = `${item.id}-${language}`;
+    if (translatedItems[cacheKey]) {
+      return translatedItems[cacheKey];
+    }
+
+    const translated = { ...item };
+    if (language === 'fr') {
+      if (item.action) {
+        translated.action = await translateContent(item.action, language);
+      }
+      if (item.impact) {
+        translated.impact = await translateContent(item.impact, language);
+      }
+      if (item.description) {
+        translated.description = await translateContent(item.description, language);
+      }
+      if (item.issue) {
+        translated.issue = await translateContent(item.issue, language);
+      }
+      if (item.mitigation) {
+        translated.mitigation = await translateContent(item.mitigation, language);
+      }
+    }
+
+    setTranslatedItems(prev => ({
+      ...prev,
+      [cacheKey]: translated
+    }));
+    return translated;
+  };
 
   // Calculate data based on type
   const getDetailsData = () => {
@@ -145,7 +192,16 @@ export default function Details() {
           </motion.div>
         ) : (
           <div className="space-y-3">
-            {items.map((item, index) => (
+            {items.map((item, index) => {
+              const cacheKey = `${item.id}-${language}`;
+              const displayItem = translatedItems[cacheKey] || item;
+              
+              // Trigger translation if needed
+              if (language === 'fr' && !translatedItems[cacheKey]) {
+                getTranslatedItem(item);
+              }
+              
+              return (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -179,7 +235,7 @@ export default function Details() {
                       <>
                         <div className="flex items-start justify-between gap-3">
                           <h3 className="font-semibold text-slate-900">
-                            {item.member || item.issue || item.description || "-"}
+                            {displayItem.member || displayItem.issue || displayItem.description || "-"}
                           </h3>
                           {item.urgency && (
                             <Badge
@@ -202,16 +258,16 @@ export default function Details() {
                           )}
                         </div>
                         <p className="text-sm text-slate-600 mt-2">
-                          {item.issue || item.description || item.action || item.mitigation || "-"}
+                          {displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-"}
                         </p>
-                        {item.action && (
+                        {displayItem.action && (
                           <p className="text-xs text-slate-500 mt-2">
-                            <strong>{t('action')}:</strong> {item.action}
+                            <strong>{t('action')}:</strong> {displayItem.action}
                           </p>
                         )}
-                        {item.impact && (
+                        {displayItem.impact && (
                           <p className="text-xs text-slate-500 mt-1">
-                            <strong>{t('impact')}:</strong> {item.impact}
+                            <strong>{t('impact')}:</strong> {displayItem.impact}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3">
@@ -227,7 +283,8 @@ export default function Details() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
