@@ -23,8 +23,10 @@ import {
 } from "./ActionableMetricsEngine";
 import { detectPilotMode, enrichRecommendationWithPilotWarning } from "./HawthorneAwarenessEngine";
 import PilotModeIndicator from "./PilotModeIndicator";
+import { enrichRecommendationWithDependency } from "./DependencyAwarenessEngine";
+import DependencyWarning from "./DependencyWarning";
 
-export default function MetricsRadarCard({ metricsData, historicalData, onDiscussWithCoach, onApplyLever }) {
+export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, onDiscussWithCoach, onApplyLever }) {
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
 
@@ -50,10 +52,23 @@ export default function MetricsRadarCard({ metricsData, historicalData, onDiscus
   
   const analysis = analyzeMetricsHealth(data);
 
-  // Enrich levers with pilot warnings
-  const enrichedLevers = analysis.top3Levers.map(lever => 
-    enrichRecommendationWithPilotWarning(lever, pilotMode)
-  );
+  const integration = integrationStatus || {
+    jira_connected: true,
+    slack_connected: false,
+    dora_pipeline: false,
+    flow_metrics_available: true,
+  };
+
+  // Enrich levers with pilot warnings and dependency awareness
+  const enrichedLevers = analysis.top3Levers.map(lever => {
+    const withDependency = enrichRecommendationWithDependency(
+      { ...lever, required_enablers: ["dora_metrics", "flow_metrics"] },
+      integration,
+      70,
+      { impact_percentage: 15 }
+    );
+    return enrichRecommendationWithPilotWarning(withDependency, pilotMode);
+  });
 
   if (!analysis.canAnalyze) {
     return (
@@ -201,9 +216,13 @@ export default function MetricsRadarCard({ metricsData, historicalData, onDiscus
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-lg font-bold text-slate-700">{index + 1}️⃣</span>
                               <span className="font-semibold text-slate-900">{metricInfo.name}</span>
-                              <Badge variant="outline" className="text-xs">
-                                Confiance {lever.confidence}%
-                              </Badge>
+                              {lever.dependency_aware?.warning ? (
+                                <DependencyWarning warning={lever.dependency_aware.warning} compact />
+                              ) : (
+                                <Badge variant="outline" className="text-xs">
+                                  Confiance {lever.dependency_aware?.confidence || lever.confidence}%
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-sm text-slate-600 mb-2">
                               {lever.current}{metricInfo.unit} → {lever.target}{metricInfo.unit}
@@ -262,9 +281,19 @@ export default function MetricsRadarCard({ metricsData, historicalData, onDiscus
                               </div>
                             ))}
 
-                            {lever.pilotWarning && (
+                            {lever.dependency_aware?.warning && (
+                              <DependencyWarning warning={lever.dependency_aware.warning} />
+                            )}
+
+                            {lever.pilotWarning && !lever.dependency_aware?.warning && (
                               <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 mb-2">
                                 {lever.pilotWarning}
+                              </div>
+                            )}
+
+                            {lever.dependency_aware?.requires_validation && (
+                              <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800 mb-2">
+                                ⚠️ Cette recommandation nécessite une validation humaine en raison de {lever.dependency_aware.validation_reason}
                               </div>
                             )}
 
@@ -278,9 +307,15 @@ export default function MetricsRadarCard({ metricsData, historicalData, onDiscus
                                 Discuter / valider avec le Coach
                               </Button>
                               <Button
-                                disabled
-                                className="opacity-50 cursor-not-allowed"
-                                title={lever.requiresValidation ? "Validation Coach/PO requise" : "Requiert validation humaine explicite"}
+                                disabled={!lever.dependency_aware?.can_apply}
+                                className={lever.dependency_aware?.can_apply ? "" : "opacity-50 cursor-not-allowed"}
+                                title={
+                                  !lever.dependency_aware?.can_apply
+                                    ? lever.dependency_aware?.requires_validation
+                                      ? "Validation Coach/PO requise"
+                                      : "Confiance insuffisante – enablers manquants"
+                                    : "Appliquer la recommandation"
+                                }
                               >
                                 APPLY
                               </Button>

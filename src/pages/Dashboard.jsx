@@ -197,6 +197,12 @@ export default function Dashboard() {
                 is_audit_phase: false,
                 is_new_team: true,
               }}
+              integrationStatus={{
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true,
+              }}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)}
             />
