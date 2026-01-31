@@ -44,16 +44,16 @@ export default function AnalysisTable({ data }) {
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50">
               <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Team Member
+                {columnLabels.member}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Identified Issue
+                {columnLabels.issue}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Urgency
+                {columnLabels.urgency}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Suggested Action
+                {columnLabels.action}
               </th>
             </tr>
           </thead>
