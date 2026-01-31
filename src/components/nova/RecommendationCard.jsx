@@ -22,7 +22,7 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
   const [translatedRecs, setTranslatedRecs] = useState(null);
 
   // Translate recommendations on mount or when language changes
-  React.useEffect(() => {
+  useEffect(() => {
     const translateRecommendations = async () => {
       if (language === 'fr' && recommendations && recommendations.length > 0) {
         const recsToTranslate = recommendations.map(rec => 
