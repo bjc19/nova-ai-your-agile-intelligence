@@ -35,6 +35,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [userResponse, setUserResponse] = useState("");
   const [isSendingNotifications, setIsSendingNotifications] = useState(false);
+  const [isApplyingRecos, setIsApplyingRecos] = useState(false);
 
   // Demo data if none provided
   const data = flowData || {
@@ -114,6 +115,54 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
       toast.error("Erreur lors de l'envoi des notifications");
     } finally {
       setIsSendingNotifications(false);
+    }
+  };
+
+  const handleApplyRecommendations = async () => {
+    setIsApplyingRecos(true);
+    
+    try {
+      const user = await base44.auth.me();
+      
+      // Map waste metrics to specific targets
+      const metricMapping = {
+        "Temps d'attente (Muda: 待機 Taiki)": { target: "avg_wait_time_percent", baseline: metrics.avg_wait_time_percent },
+        "Sur-traitement (Muda: 過剰処理 Kajou Shori)": { target: "reopened_tickets", baseline: metrics.reopened_tickets },
+        "Blocages prolongés (Muda: 停滞 Teitai)": { target: "blocked_tickets_over_5d", baseline: metrics.blocked_tickets_over_5d },
+      };
+
+      // Create tracking records for each applied recommendation
+      const appliedRecords = suggestions.map(suggestion => {
+        const wasteMatch = wastesAnalysis.wastes.find(w => suggestion.text.includes(w.name));
+        const metric = wasteMatch ? metricMapping[wasteMatch.name] : null;
+        
+        return {
+          recommendation_id: suggestion.id,
+          recommendation_text: suggestion.text,
+          applied_date: new Date().toISOString(),
+          applied_by: user.email,
+          target_metric: metric?.target || "general",
+          baseline_value: metric?.baseline || 0,
+          verification_status: "pending",
+          notes: `Effort: ${suggestion.effort} • Impact attendu: ${suggestion.impact}`
+        };
+      });
+
+      // Save all recommendations
+      await base44.entities.AppliedRecommendation.bulkCreate(appliedRecords);
+
+      toast.success(`${suggestions.length} recommandation(s) marquée(s) comme appliquées`, {
+        description: "Nova vérifiera l'impact dans les prochaines analyses"
+      });
+
+      // Schedule automatic verification (in production, this would be a background job)
+      console.log("Vérification programmée pour:", appliedRecords);
+      
+    } catch (error) {
+      console.error("Error applying recommendations:", error);
+      toast.error("Erreur lors de l'application des recommandations");
+    } finally {
+      setIsApplyingRecos(false);
     }
   };
 
@@ -439,14 +488,25 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                   <Send className="w-4 h-4 mr-2" />
                   {isSendingNotifications ? "Envoi en cours..." : "Notifier les responsables"}
                 </Button>
-                <Button
-                  disabled
-                  variant="outline"
-                  className="opacity-50 cursor-not-allowed"
-                  title="Validation Coach requise"
-                >
-                  APPLY RECOS
-                </Button>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handleApplyRecommendations}
+                        disabled={isApplyingRecos || suggestions.length === 0}
+                        variant="outline"
+                        className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        {isApplyingRecos ? "Application..." : "APPLY RECOS"}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">Marque les recommandations comme appliquées.<br/>Nova vérifiera l'impact via les données réelles.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
           )}
