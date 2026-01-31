@@ -65,7 +65,7 @@ export default function Results() {
               }
 
               if (textsToTranslate.length > 0) {
-                const prompt = `Traduis ces textes en français de manière concise:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
+                const prompt = `Traduis TOUS ces textes en français de manière concise et naturelle. Réponds EN FRANÇAIS UNIQUEMENT:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
                 const result = await invokeLLMWithAutoTranslate(
                   prompt,
                   {
