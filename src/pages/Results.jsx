@@ -41,33 +41,54 @@ export default function Results() {
       // Translate all LLM content if language is French
       const translateContentIfNeeded = async () => {
         if (language === 'fr') {
-          // Translate summary
-          if (parsedAnalysis.summary) {
-            const summaryPrompt = t('translateSummary').replace('{summary}', parsedAnalysis.summary);
-            parsedAnalysis.summary = await invokeLLMWithAutoTranslate(summaryPrompt, null, language);
+          // Batch translate all texts in one LLM call
+          const textsToTranslate = [];
+          const textMap = {};
+          
+          // Collect all texts
+          if (parsedAnalysis.summary) textsToTranslate.push(parsedAnalysis.summary);
+          if (parsedAnalysis.blockers) {
+            parsedAnalysis.blockers.forEach(b => {
+              textsToTranslate.push(b.issue, b.action);
+            });
+          }
+          if (parsedAnalysis.risks) {
+            parsedAnalysis.risks.forEach(r => {
+              textsToTranslate.push(r.description, r.impact, r.mitigation);
+            });
           }
           
-          // Translate blockers
-          if (parsedAnalysis.blockers && parsedAnalysis.blockers.length > 0) {
-            parsedAnalysis.blockers = await Promise.all(
-              parsedAnalysis.blockers.map(async (blocker) => ({
-                ...blocker,
-                issue: await invokeLLMWithAutoTranslate(blocker.issue, null, language),
-                action: await invokeLLMWithAutoTranslate(blocker.action, null, language)
-              }))
+          if (textsToTranslate.length > 0) {
+            const prompt = `Traduis ces textes en français de manière concise:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
+            const result = await invokeLLMWithAutoTranslate(
+              prompt,
+              {
+                type: "object",
+                properties: {
+                  translations: { type: "array", items: { type: "string" } }
+                }
+              },
+              language
             );
-          }
-          
-          // Translate risks
-          if (parsedAnalysis.risks && parsedAnalysis.risks.length > 0) {
-            parsedAnalysis.risks = await Promise.all(
-              parsedAnalysis.risks.map(async (risk) => ({
-                ...risk,
-                description: await invokeLLMWithAutoTranslate(risk.description, null, language),
-                impact: await invokeLLMWithAutoTranslate(risk.impact, null, language),
-                mitigation: await invokeLLMWithAutoTranslate(risk.mitigation, null, language)
-              }))
-            );
+            
+            // Map translations back
+            let idx = 0;
+            if (parsedAnalysis.summary) parsedAnalysis.summary = result.translations[idx++];
+            if (parsedAnalysis.blockers) {
+              parsedAnalysis.blockers = parsedAnalysis.blockers.map(b => ({
+                ...b,
+                issue: result.translations[idx++],
+                action: result.translations[idx++]
+              }));
+            }
+            if (parsedAnalysis.risks) {
+              parsedAnalysis.risks = parsedAnalysis.risks.map(r => ({
+                ...r,
+                description: result.translations[idx++],
+                impact: result.translations[idx++],
+                mitigation: result.translations[idx++]
+              }));
+            }
           }
         }
         setAnalysis(parsedAnalysis);
