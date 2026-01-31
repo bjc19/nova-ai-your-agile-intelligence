@@ -138,7 +138,11 @@ export const translations = {
     wantRealTimeAnalysis: "Veux-tu l'Analyse en Temps Réel ?",
     inFullVersion: "Dans la version complète, Nova se connecte directement à tes outils et fournit des insights automatiquement, sans entrée manuelle.",
     comingSoonIntegrations: "Bientôt : Jira · Azure DevOps · Teams · Zoom",
-  },
+    improvementRecommendations: "Recommandations d'Amélioration",
+    novaAnalyzing: "Nova analyse...",
+    suggestedActionPlan: "Plan d'action suggéré",
+    viewIn: "Voir dans",
+    },
   en: {
     // Navigation
     dashboard: "Dashboard",
