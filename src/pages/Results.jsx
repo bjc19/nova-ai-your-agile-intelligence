@@ -97,13 +97,17 @@ export default function Results() {
 
                 // Update with translated content
                 setAnalysis(parsedAnalysis);
+                setTranslationComplete(true);
                 }
                 };
 
                 translateContentIfNeeded().catch(error => {
                 // Gracefully handle translation errors (e.g., rate limits)
                 console.log('Background translation skipped:', error?.message);
+                setTranslationComplete(true);
                 });
+                } else {
+                setTranslationComplete(true);
                 }
         } else {
           navigate(createPageUrl("Analysis"));
