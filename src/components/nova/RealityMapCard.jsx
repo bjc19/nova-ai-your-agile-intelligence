@@ -40,6 +40,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
   const [recosApplied, setRecosApplied] = useState(false);
   const [selectedRecos, setSelectedRecos] = useState([]);
+  const [appliedInfo, setAppliedInfo] = useState(null);
 
   // Demo data if none provided
   const data = flowData || {
@@ -172,6 +173,10 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
       console.log("Vérification programmée pour:", appliedRecords);
       
       setRecosApplied(true);
+      setAppliedInfo({
+        name: user.full_name || user.email,
+        date: new Date().toISOString()
+      });
       
     } catch (error) {
       console.error("Error applying recommendations:", error);
@@ -531,6 +536,27 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* Applied Info Display */}
+              {recosApplied && appliedInfo && (
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 mb-2">
+                  <div className="flex items-center gap-2 text-xs text-emerald-700">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>
+                      Appliqué par <strong>{appliedInfo.name}</strong> le{" "}
+                      {new Date(appliedInfo.date).toLocaleDateString('fr-FR', { 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
+                      })} à{" "}
+                      {new Date(appliedInfo.date).toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* CTA */}
               <div className="flex gap-2">
