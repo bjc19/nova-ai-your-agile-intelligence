@@ -197,11 +197,14 @@ Provide a detailed analysis in the following JSON format:`;
     const title = `${ceremonyTitles[context.current_ceremony] || (language === 'fr' ? "Daily Standup" : "Daily Standup")} - ${new Date().toLocaleDateString(language)}`;
 
     // Save to database for history tracking
+    const blockersArray = Array.isArray(result.blockers) ? result.blockers : [];
+    const risksArray = Array.isArray(result.risks) ? result.risks : [];
+    
     const analysisRecord = {
       title,
       source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
-      blockers_count: result.blockers?.length || 0,
-      risks_count: result.risks?.length || 0,
+      blockers_count: blockersArray.length,
+      risks_count: risksArray.length,
       analysis_data: { ...result, posture: posture.id, context },
       transcript_preview: transcript.substring(0, 200),
     };
