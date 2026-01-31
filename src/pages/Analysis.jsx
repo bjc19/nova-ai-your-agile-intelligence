@@ -203,6 +203,18 @@ Provide a detailed analysis in the following JSON format:`;
 
     // Store result in sessionStorage and navigate
     sessionStorage.setItem("novaAnalysis", JSON.stringify({ ...result, posture: posture.id, context }));
+
+    // Store source info for external CTA redirection
+    const sourceInfo = {
+      url: selectedSlackChannel 
+        ? `https://slack.com/app_redirect?channel=${selectedSlackChannel.id}`
+        : null,
+      name: selectedSlackChannel 
+        ? `Slack (#${selectedSlackChannel.name})`
+        : activeTab === "upload" ? "Fichier importé" : "Transcription"
+    };
+    sessionStorage.setItem("analysisSource", JSON.stringify(sourceInfo));
+
     navigate(createPageUrl("Results"));
     setIsAnalyzing(false);
   };

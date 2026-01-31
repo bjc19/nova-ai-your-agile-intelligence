@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Lightbulb, ArrowRight } from "lucide-react";
+import { Lightbulb, ArrowRight, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function RecommendationCard({ recommendations }) {
+export default function RecommendationCard({ recommendations, sourceUrl, sourceName }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -31,6 +32,19 @@ export default function RecommendationCard({ recommendations }) {
           </motion.li>
         ))}
       </ul>
+      
+      {sourceUrl && (
+        <div className="mt-5 pt-5 border-t border-amber-200">
+          <Button
+            onClick={() => window.open(sourceUrl, '_blank')}
+            variant="outline"
+            className="w-full bg-white hover:bg-amber-50 border-amber-300 text-amber-700 hover:text-amber-800"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Voir dans {sourceName || 'la source'}
+          </Button>
+        </div>
+      )}
     </motion.div>
   );
 }

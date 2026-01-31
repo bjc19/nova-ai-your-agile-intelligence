@@ -240,7 +240,11 @@ export default function Dashboard() {
             <SprintPerformanceChart analysisHistory={analysisHistory} />
             
             {/* Key Recommendations */}
-            <KeyRecommendations latestAnalysis={latestAnalysis} />
+            <KeyRecommendations 
+            latestAnalysis={latestAnalysis}
+            sourceUrl={latestAnalysis?.sourceUrl}
+            sourceName={latestAnalysis?.sourceName}
+          />
           </div>
 
           {/* Right Column - Sidebar */}

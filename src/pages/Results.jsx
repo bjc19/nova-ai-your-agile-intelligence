@@ -26,7 +26,15 @@ export default function Results() {
   useEffect(() => {
     const storedAnalysis = sessionStorage.getItem("novaAnalysis");
     if (storedAnalysis) {
-      setAnalysis(JSON.parse(storedAnalysis));
+      const parsedAnalysis = JSON.parse(storedAnalysis);
+      // Add source info from sessionStorage if available
+      const sourceInfo = sessionStorage.getItem("analysisSource");
+      if (sourceInfo) {
+        const { url, name } = JSON.parse(sourceInfo);
+        parsedAnalysis.sourceUrl = url;
+        parsedAnalysis.sourceName = name;
+      }
+      setAnalysis(parsedAnalysis);
     } else {
       navigate(createPageUrl("Analysis"));
     }
@@ -263,7 +271,11 @@ export default function Results() {
 
         {/* Recommendations */}
         {analysis.recommendations && analysis.recommendations.length > 0 && (
-          <RecommendationCard recommendations={analysis.recommendations} />
+          <RecommendationCard 
+            recommendations={analysis.recommendations}
+            sourceUrl={analysis.sourceUrl}
+            sourceName={analysis.sourceName}
+          />
         )}
 
         {/* Footer CTA */}
