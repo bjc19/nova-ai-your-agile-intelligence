@@ -179,7 +179,7 @@ export default function Details() {
                       <>
                         <div className="flex items-start justify-between gap-3">
                           <h3 className="font-semibold text-slate-900">
-                            {item.member || item.issue || item.description || "N/A"}
+                            {item.member || item.issue || item.description || "-"}
                           </h3>
                           {item.urgency && (
                             <Badge
@@ -202,7 +202,7 @@ export default function Details() {
                           )}
                         </div>
                         <p className="text-sm text-slate-600 mt-2">
-                          {item.issue || item.description || item.action || item.mitigation || "N/A"}
+                          {item.issue || item.description || item.action || item.mitigation || "-"}
                         </p>
                         {item.action && (
                           <p className="text-xs text-slate-500 mt-2">
