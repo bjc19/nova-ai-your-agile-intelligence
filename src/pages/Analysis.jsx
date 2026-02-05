@@ -5,6 +5,8 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TranscriptInput, { SAMPLE_TRANSCRIPT } from "@/components/nova/TranscriptInput";
 import FileUpload from "@/components/nova/FileUpload";
 import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
@@ -39,6 +41,7 @@ export default function Analysis() {
   const [detectedContext, setDetectedContext] = useState(null);
   const [currentPosture, setCurrentPosture] = useState(POSTURES.agile_coach);
   const [alignmentReport, setAlignmentReport] = useState(null);
+  const [workshopType, setWorkshopType] = useState("");
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -109,19 +112,49 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
 
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
-      setError("Please enter a transcript to analyze");
+      setError("Aucun texte détecté. Collez le contenu de votre atelier Scrum pour analyse.");
+      return;
+    }
+
+    if (!workshopType) {
+      setError("Veuillez sélectionner un type d'atelier avant d'analyser.");
       return;
     }
 
     setIsAnalyzing(true);
     setError(null);
 
+    // Map workshop type to ceremony context
+    const workshopContextMap = {
+      daily_scrum: "daily_scrum",
+      retrospective: "retrospective", 
+      sprint_planning: "sprint_planning",
+      sprint_review: "sprint_review",
+      other: "daily_scrum"
+    };
+    const ceremonyType = workshopContextMap[workshopType] || "daily_scrum";
+
     // Detect context and get appropriate posture
-    const context = analyzeTranscriptForContext(transcript);
+    const context = { ...analyzeTranscriptForContext(transcript), current_ceremony: ceremonyType };
     const posture = determinePosture(context);
     setCurrentPosture(posture);
 
-    const basePrompt = `You are Nova, an AI Scrum Master analyzing a meeting transcript. Analyze the following transcript and identify:
+    // Define analysis focus based on workshop type
+    const workshopFocusMap = {
+      daily_scrum: "Participation, blocages, répétitions, points opérationnels, signaux de communication",
+      retrospective: "Thèmes récurrents, actions suivies, sentiment général, tendances d'amélioration, engagement équipe",
+      sprint_planning: "Cohérence backlog, alignement priorités, dépendances, risques, estimations, capacité",
+      sprint_review: "Valeur délivrée, feedback stakeholders, démos effectuées, ajustements backlog, satisfaction",
+      other: "Points saillants du contenu, thèmes clés, alertes potentielles, insights génériques"
+    };
+    const analysisFocus = workshopFocusMap[workshopType] || workshopFocusMap.other;
+
+    const basePrompt = `You are Nova, an AI Scrum Master analyzing a meeting transcript. 
+
+Workshop type: ${workshopType.replace('_', ' ').toUpperCase()}
+Analysis focus: ${analysisFocus}
+
+Analyze the following transcript and identify:
 
 1. Blockers - issues preventing team members from making progress
 2. Risks - potential problems that could impact the sprint/project
@@ -178,23 +211,15 @@ Provide a detailed analysis in the following JSON format:`;
       response_json_schema: responseSchema
     });
 
-    // Determine title based on detected ceremony
-    const ceremonyTitles = language === 'fr' ? {
-      daily_scrum: "Daily Standup",
-      sprint_planning: "Planification de Sprint",
-      backlog_refinement: "Affinage du Backlog",
-      sprint_review: "Sprint Review",
+    // Determine title based on workshop type
+    const workshopTypeLabels = {
+      daily_scrum: "Daily Scrum",
       retrospective: "Rétrospective",
-      none: "Réunion d'Équipe"
-    } : {
-      daily_scrum: "Daily Standup",
       sprint_planning: "Sprint Planning",
-      backlog_refinement: "Backlog Refinement",
       sprint_review: "Sprint Review",
-      retrospective: "Retrospective",
-      none: "Team Meeting"
+      other: "Atelier"
     };
-    const title = `${ceremonyTitles[context.current_ceremony] || (language === 'fr' ? "Daily Standup" : "Daily Standup")} - ${new Date().toLocaleDateString(language)}`;
+    const title = `[${workshopTypeLabels[workshopType]}] ${new Date().toLocaleDateString(language)}`;
 
     // Save to database for history tracking
     const blockersArray = Array.isArray(result.blockers) ? result.blockers : [];
@@ -205,7 +230,14 @@ Provide a detailed analysis in the following JSON format:`;
       source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
       blockers_count: blockersArray.length,
       risks_count: risksArray.length,
-      analysis_data: { ...result, posture: posture.id, context },
+      analysis_data: { 
+        ...result, 
+        posture: posture.id, 
+        context,
+        workshop_type: workshopType,
+        workshop_focus: analysisFocus,
+        inserted_at: new Date().toISOString()
+      },
       transcript_preview: transcript.substring(0, 200),
     };
     
@@ -291,6 +323,51 @@ Provide a detailed analysis in the following JSON format:`;
               </Button>
             </Link>
           </div>
+        </motion.div>
+
+        {/* Workshop Type Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-6"
+        >
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+                Type d'atelier Scrum
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-amber-100/50 border border-amber-200 rounded-lg p-3">
+                <p className="text-sm text-amber-800 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    ⚠️ Les analyses manuelles sont considérées comme des données réelles.
+                    Assurez-vous de ne coller que du contenu provenant de réunions ou ateliers effectifs.
+                  </span>
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Sélectionnez le type d'atelier à analyser
+                </label>
+                <Select value={workshopType} onValueChange={setWorkshopType}>
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder="Choisir un type d'atelier..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily_scrum">Daily Scrum</SelectItem>
+                    <SelectItem value="retrospective">Rétrospective</SelectItem>
+                    <SelectItem value="sprint_planning">Sprint Planning</SelectItem>
+                    <SelectItem value="sprint_review">Sprint Review</SelectItem>
+                    <SelectItem value="other">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Input Tabs */}

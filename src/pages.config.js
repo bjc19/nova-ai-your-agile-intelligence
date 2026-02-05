@@ -48,25 +48,25 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Analysis from './pages/Analysis';
+import AntiPatterns from './pages/AntiPatterns';
 import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import AntiPatterns from './pages/AntiPatterns';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Analysis": Analysis,
+    "AntiPatterns": AntiPatterns,
     "Dashboard": Dashboard,
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
     "Results": Results,
     "Settings": Settings,
-    "AntiPatterns": AntiPatterns,
 }
 
 export const pagesConfig = {
