@@ -26,7 +26,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2
+  Loader2,
+  TrendingUp
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -38,6 +39,8 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
 
+  const [sprintContext, setSprintContext] = useState(null);
+
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,6 +48,12 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
+        }
         
         // Vérifier onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
@@ -93,11 +102,25 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Get current sprint info (simulated)
-  const sprintInfo = {
+  // Calculate sprint info from real data
+  const calculateDaysRemaining = (endDate) => {
+    if (!endDate) return 0;
+    const end = new Date(endDate);
+    const now = new Date();
+    const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+    return Math.max(0, diff);
+  };
+
+  const sprintInfo = sprintContext ? {
+    name: sprintContext.sprint_name,
+    daysRemaining: calculateDaysRemaining(sprintContext.end_date),
+    deliveryMode: sprintContext.delivery_mode,
+    throughputPerWeek: sprintContext.throughput_per_week
+  } : {
     name: "Sprint 14",
     daysRemaining: 4,
-    progress: 65,
+    deliveryMode: "scrum",
+    throughputPerWeek: null
   };
 
   // Simulated sprint health data (will come from Jira integration)
@@ -173,12 +196,22 @@ export default function Dashboard() {
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
-                  <Clock className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm text-slate-600">
-                    <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
-                  </span>
-                </div>
+                {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 && (
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600">
+                      <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
+                    </span>
+                  </div>
+                )}
+                {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek && (
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
+                    <Zap className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600">
+                      <span className="font-semibold text-slate-900">{sprintInfo.throughputPerWeek}</span> tickets/semaine
+                    </span>
+                  </div>
+                )}
                 <Link to={createPageUrl("Analysis")}>
                   <Button 
                     size="lg" 
