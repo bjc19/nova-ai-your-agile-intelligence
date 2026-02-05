@@ -21,12 +21,16 @@ import {
   Lock,
   Zap,
   Settings as SettingsIcon,
-  Languages
+  Languages,
+  Target,
+  Layers
 } from "lucide-react";
 
 export default function Settings() {
   const [slackConnected, setSlackConnected] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const [teamConfig, setTeamConfig] = useState(null);
+  const [loadingConfig, setLoadingConfig] = useState(true);
 
   const integrations = [
     {
@@ -85,6 +89,44 @@ export default function Settings() {
     }
   ];
 
+  // Charger config équipe
+  useEffect(() => {
+    const loadTeamConfig = async () => {
+      try {
+        const configs = await base44.entities.TeamConfiguration.list();
+        if (configs.length > 0) {
+          setTeamConfig(configs[0]);
+        }
+      } catch (error) {
+        console.error("Erreur chargement config:", error);
+      } finally {
+        setLoadingConfig(false);
+      }
+    };
+    loadTeamConfig();
+  }, []);
+
+  const handleProjectModeChange = async (newMode) => {
+    try {
+      if (teamConfig) {
+        await base44.entities.TeamConfiguration.update(teamConfig.id, {
+          project_mode: newMode,
+          confirmed_by_admin: true
+        });
+        setTeamConfig({ ...teamConfig, project_mode: newMode });
+      } else {
+        const newConfig = await base44.entities.TeamConfiguration.create({
+          project_mode: newMode,
+          confirmed_by_admin: true,
+          onboarding_completed: true
+        });
+        setTeamConfig(newConfig);
+      }
+    } catch (error) {
+      console.error("Erreur mise à jour config:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-4xl mx-auto px-6 py-12">
@@ -114,6 +156,77 @@ export default function Settings() {
           <p className="text-slate-600">
             {t('integrationsDescription')}
           </p>
+        </motion.div>
+
+        {/* Team & Projects Configuration */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100">
+                  <Layers className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">Équipe & Projets</CardTitle>
+                  <CardDescription className="text-xs">
+                    Configuration de votre mode de gestion pour analyses adaptées
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 mb-1">Mode de gestion de projets</p>
+                  <p className="text-xs text-slate-500">Analyses et métriques adaptées</p>
+                </div>
+                <Select 
+                  value={teamConfig?.project_mode || "auto_detect"}
+                  onValueChange={handleProjectModeChange}
+                  disabled={loadingConfig}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mono_project">
+                      <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Un seul projet
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="multi_projects">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4" />
+                        Plusieurs projets
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="auto_detect">Détection auto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {teamConfig?.detection_confidence > 0 && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-900">
+                    <strong>Dernière détection :</strong> {(teamConfig.detection_confidence * 100).toFixed(0)}% de confiance
+                    {teamConfig.project_count > 1 && ` • ${teamConfig.project_count} projets détectés`}
+                  </p>
+                </div>
+              )}
+
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
+                <p><strong>Mono-projet :</strong> Métriques standards</p>
+                <p><strong>Multi-projets :</strong> Ajustements capacité, alertes dispersion</p>
+                <p><strong>Détection auto :</strong> Nova notifie en cas de détection</p>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Language Settings */}

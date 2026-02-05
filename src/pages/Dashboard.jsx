@@ -14,6 +14,8 @@ import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
+import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
+import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 
@@ -33,6 +35,8 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [multiProjectAlert, setMultiProjectAlert] = useState(null);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
@@ -41,6 +45,25 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        // Vérifier onboarding
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+        
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
       }
       setIsLoading(false);
     };
@@ -110,6 +133,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      {/* Onboarding Modal */}
+      <TeamConfigOnboarding 
+        isOpen={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+      />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent" />
@@ -171,6 +200,20 @@ export default function Dashboard() {
 
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Multi-Project Alert */}
+        {multiProjectAlert && (
+          <div className="mb-6">
+            <MultiProjectAlert 
+              detectionData={multiProjectAlert}
+              onConfirm={() => {
+                setMultiProjectAlert(null);
+                window.location.reload();
+              }}
+              onDismiss={() => setMultiProjectAlert(null)}
+            />
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
