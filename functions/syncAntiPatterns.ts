@@ -1,12 +1,18 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+
 /**
  * Synchronise les anti-patterns depuis le Gist GitHub
  * URL: https://gist.github.com/bjc19/765ffdcc3c067b0cb1333a72a3d99476
  */
-
-export default async function syncAntiPatterns(base44) {
+Deno.serve(async (req) => {
+  const base44 = createClientFromRequest(req);
   const GIST_URL = "https://gist.githubusercontent.com/bjc19/765ffdcc3c067b0cb1333a72a3d99476/raw";
   
   try {
+    // Récupérer le paramètre force depuis le body ou query
+    const url = new URL(req.url);
+    const forceParam = url.searchParams.get('force') === 'true';
+    
     // 1. Récupérer les métadonnées de sync existantes
     const syncMeta = await base44.asServiceRole.entities.SyncMetadata.filter({
       source: "gist_antipatterns"
@@ -21,12 +27,12 @@ export default async function syncAntiPatterns(base44) {
       const daysSinceSync = Math.floor((now - lastSync) / (1000 * 60 * 60 * 24));
       
       // Si < 365 jours (± 7 jours), pas de sync sauf si forcée
-      if (daysSinceSync < 358 && !base44.context.params.force) {
-        return {
+      if (daysSinceSync < 358 && !forceParam) {
+        return Response.json({
           status: "skipped",
           message: `Dernière sync il y a ${daysSinceSync} jours. Prochaine sync dans ${365 - daysSinceSync} jours.`,
           patterns_count: currentMeta.patterns_count
-        };
+        });
       }
     }
     
@@ -49,11 +55,11 @@ export default async function syncAntiPatterns(base44) {
     }
     
     const gistContent = await response.text();
-    const checksum = await hashContent(gistContent);
+    const checksum = hashContent(gistContent);
     
     // 5. Vérifier si le contenu a changé
     if (currentMeta?.checksum === checksum) {
-      const updatedMeta = await base44.asServiceRole.entities.SyncMetadata.update(currentMeta.id, {
+      await base44.asServiceRole.entities.SyncMetadata.update(currentMeta.id, {
         sync_status: "success",
         last_sync_date: now.toISOString(),
         next_sync_date: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString(),
@@ -68,11 +74,11 @@ export default async function syncAntiPatterns(base44) {
         ]
       });
       
-      return {
+      return Response.json({
         status: "no_changes",
         message: "Aucune modification détectée. Référentiel à jour.",
         patterns_count: currentMeta.patterns_count
-      };
+      });
     }
     
     // 6. Parser le contenu du Gist et extraire les patterns
@@ -87,7 +93,7 @@ export default async function syncAntiPatterns(base44) {
     }
     
     // Créer les nouveaux patterns
-    const createdPatterns = await base44.asServiceRole.entities.AntiPattern.bulkCreate(patterns);
+    await base44.asServiceRole.entities.AntiPattern.bulkCreate(patterns);
     
     // 8. Mettre à jour les métadonnées de sync
     const metaToUpdate = currentMeta || (await base44.asServiceRole.entities.SyncMetadata.filter({
@@ -111,12 +117,12 @@ export default async function syncAntiPatterns(base44) {
       ]
     });
     
-    return {
+    return Response.json({
       status: "success",
       message: `${patterns.length} anti-patterns synchronisés avec succès`,
       patterns_count: patterns.length,
       patterns_by_category: getCategoryCounts(patterns)
-    };
+    });
     
   } catch (error) {
     // Enregistrer l'erreur
@@ -140,26 +146,19 @@ export default async function syncAntiPatterns(base44) {
       });
     }
     
-    return {
+    return Response.json({
       status: "error",
       message: `Erreur lors de la synchronisation: ${error.message}`,
       error: error.message
-    };
+    }, { status: 500 });
   }
-}
+});
 
 /**
  * Parse le contenu du Gist et extrait les anti-patterns
  */
 function parseGistContent(content) {
   const patterns = [];
-  
-  // Parser le markdown du Gist
-  // Format attendu: sections par catégorie (## Catégorie A, ## Catégorie B, etc.)
-  // Chaque pattern: ### Nom du pattern
-  
-  const categoryRegex = /##\s*Catégorie\s+([A-K])\s*[:-]\s*(.+?)(?=\n|$)/gi;
-  const patternRegex = /###\s*(.+?)(?=\n|$)/gi;
   
   const lines = content.split('\n');
   let currentCategory = null;
@@ -215,7 +214,6 @@ function parseGistContent(content) {
       if (line.startsWith('**Description:**') || line.startsWith('Description:')) {
         currentPattern.description = line.replace(/\*\*Description:\*\*|Description:/i, '').trim();
       } else if (line.startsWith('**Marqueurs:**') || line.startsWith('Marqueurs:')) {
-        // Les marqueurs peuvent être sur plusieurs lignes
         let markerText = line.replace(/\*\*Marqueurs:\*\*|Marqueurs:/i, '').trim();
         if (markerText) {
           currentPattern.markers.push(markerText);
@@ -230,7 +228,6 @@ function parseGistContent(content) {
       } else if (line.startsWith('**Quick win:**') || line.startsWith('Quick win:')) {
         currentPattern.quick_win = line.replace(/\*\*Quick win:\*\*|Quick win:/i, '').trim();
       } else if (line.startsWith('-') || line.startsWith('•')) {
-        // Liste à puces - peut être marqueur ou action
         const bulletText = line.replace(/^[-•]\s*/, '').trim();
         if (bulletText && currentPattern.markers.length < 5) {
           currentPattern.markers.push(bulletText);
@@ -325,8 +322,7 @@ function getDefaultPatterns() {
 /**
  * Génère un hash simple du contenu pour détecter les changements
  */
-async function hashContent(content) {
-  // Simple hash basé sur la longueur et un échantillon du contenu
+function hashContent(content) {
   const sample = content.substring(0, 1000) + content.substring(content.length - 1000);
   return `${content.length}-${sample.length}`;
 }
