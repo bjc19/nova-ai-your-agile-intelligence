@@ -180,7 +180,7 @@ export default function Dashboard() {
                 <div className="flex items-center gap-3 mb-2">
                   <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700">
                     <Sparkles className="w-3 h-3 mr-1" />
-                    {t('aiPoweredScrumMaster')}
+                    {t('aiPoweredAgileExpert')}
                   </Badge>
                   <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                     <Calendar className="w-3 h-3 mr-1" />
