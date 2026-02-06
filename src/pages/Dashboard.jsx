@@ -117,7 +117,7 @@ export default function Dashboard() {
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : {
-    name: "Sprint 14",
+    name: "Sprint en cours",
     daysRemaining: 4,
     deliveryMode: "scrum",
     throughputPerWeek: null
