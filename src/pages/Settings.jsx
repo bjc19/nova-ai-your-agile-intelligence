@@ -89,6 +89,12 @@ export default function Settings() {
       // Open popup for OAuth
       const popup = window.open(data.authUrl, 'Teams OAuth', 'width=600,height=700');
       
+      if (!popup) {
+        alert('Popup bloquée - veuillez autoriser les popups pour ce site');
+        setConnectingTeams(false);
+        return;
+      }
+      
       // Listen for callback
       const handleMessage = async (event) => {
         if (event.data.type === 'teams_success') {
@@ -109,6 +115,15 @@ export default function Settings() {
       };
       
       window.addEventListener('message', handleMessage);
+      
+      // Cleanup if popup is closed without completing
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          window.removeEventListener('message', handleMessage);
+          setConnectingTeams(false);
+        }
+      }, 500);
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);
