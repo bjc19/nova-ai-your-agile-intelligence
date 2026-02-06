@@ -27,7 +27,8 @@ Deno.serve(async (req) => {
       `&scope=${encodeURIComponent(scopes)}` +
       `&state=${user.email}`;
 
-    return Response.json({ authUrl });
+    // Redirect to Microsoft OAuth (302)
+    return Response.redirect(authUrl, 302);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
