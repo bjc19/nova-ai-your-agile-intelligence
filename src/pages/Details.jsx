@@ -54,17 +54,20 @@ export default function Details() {
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
   });
 
-  // Fetch GDPR markers
-  const { data: gdprMarkersData = [] } = useQuery({
+  // Fetch all markers and separate by source
+  const { data: allMarkersData = [] } = useQuery({
     queryKey: ['gdprMarkers'],
     queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
   });
 
-  // Fetch Teams insights
-  const { data: teamsInsightsData = [] } = useQuery({
-    queryKey: ['teamsInsights'],
-    queryFn: () => base44.entities.TeamsInsight.list('-created_date', 100),
-  });
+  // Separate Slack (GDPR) and Teams markers
+  const gdprMarkersData = allMarkersData.filter(m => 
+    m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
+  );
+  
+  const teamsInsightsData = allMarkersData.filter(m => 
+    m.detection_source === 'teams_daily'
+  );
 
   useEffect(() => {
     // Filter by selected period if available
@@ -150,16 +153,17 @@ export default function Details() {
       ).concat(
         teamsInsightsData
           .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
-          .map((insight, idx) => ({
+          .map((marker, idx) => ({
             id: `teams-blocker-${idx}`,
-            issue: insight.probleme,
-            description: insight.probleme,
-            urgency: insight.criticite === 'critique' ? 'high' : 'medium',
+            issue: marker.probleme,
+            description: marker.probleme,
+            urgency: marker.criticite === 'critique' ? 'high' : 'medium',
             source: 'teams',
-            patterns: insight.patterns || [],
-            criticite: insight.criticite,
+            criticite: marker.criticite,
+            recurrence: marker.recurrence,
+            confidence_score: marker.confidence_score,
             analysisTitle: '#Microsoft Teams',
-            analysisDate: insight.created_date,
+            analysisDate: marker.created_date,
           }))
       );
       icon = AlertOctagon;
@@ -194,17 +198,18 @@ export default function Details() {
           }))
       ).concat(
         teamsInsightsData
-          .filter(i => i.criticite === 'moyenne')
-          .map((insight, idx) => ({
+          .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
+          .map((marker, idx) => ({
             id: `teams-risk-${idx}`,
-            issue: insight.probleme,
-            description: insight.probleme,
+            issue: marker.probleme,
+            description: marker.probleme,
             urgency: 'medium',
             source: 'teams',
-            patterns: insight.patterns || [],
-            criticite: insight.criticite,
+            criticite: marker.criticite,
+            recurrence: marker.recurrence,
+            confidence_score: marker.confidence_score,
             analysisTitle: '#Microsoft Teams',
-            analysisDate: insight.created_date,
+            analysisDate: marker.created_date,
           }))
       );
       icon = ShieldAlert;
