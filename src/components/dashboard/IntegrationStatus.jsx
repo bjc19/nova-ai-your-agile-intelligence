@@ -18,23 +18,34 @@ import {
 
 export default function IntegrationStatus({ integrations = {} }) {
   const [slackConnected, setSlackConnected] = useState(false);
+  const [teamsConnected, setTeamsConnected] = useState(false);
+  
   useEffect(() => {
-    const checkSlackConnection = async () => {
+    const checkConnections = async () => {
       try {
         const authenticated = await base44.auth.isAuthenticated();
         if (authenticated) {
           const user = await base44.auth.me();
-          const connections = await base44.entities.SlackConnection.filter({ 
-            user_email: user.email,
-            is_active: true
-          });
-          setSlackConnected(connections.length > 0);
+          
+          const [slackConns, teamsConns] = await Promise.all([
+            base44.entities.SlackConnection.filter({ 
+              user_email: user.email,
+              is_active: true
+            }),
+            base44.entities.TeamsConnection.filter({ 
+              user_email: user.email,
+              is_active: true
+            })
+          ]);
+          
+          setSlackConnected(slackConns.length > 0);
+          setTeamsConnected(teamsConns.length > 0);
         }
       } catch (error) {
-        console.error("Error checking Slack connection:", error);
+        console.error("Error checking connections:", error);
       }
     };
-    checkSlackConnection();
+    checkConnections();
   }, []);
 
   const defaultIntegrations = {
@@ -43,9 +54,13 @@ export default function IntegrationStatus({ integrations = {} }) {
       label: "Slack", 
       status: slackConnected ? "connected" : "disconnected" 
     },
+    teams: { 
+      connected: teamsConnected, 
+      label: "Microsoft Teams", 
+      status: teamsConnected ? "connected" : "disconnected" 
+    },
     jira: { connected: false, label: "Jira", status: "unavailable" },
     azure: { connected: false, label: "Azure DevOps", status: "unavailable" },
-    teams: { connected: false, label: "Teams", status: "coming_soon" },
     zoom: { connected: false, label: "Zoom", status: "coming_soon" },
   };
 
@@ -75,10 +90,10 @@ export default function IntegrationStatus({ integrations = {} }) {
     },
     coming_soon: {
       icon: Zap,
-      color: "text-purple-500",
-      bgColor: "bg-purple-100",
+      color: "text-slate-500",
+      bgColor: "bg-slate-100",
       label: "Coming Soon",
-      badgeClass: "bg-purple-100 text-purple-700 border-purple-200",
+      badgeClass: "bg-slate-100 text-slate-600 border-slate-200",
     },
   };
 
