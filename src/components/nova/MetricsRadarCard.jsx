@@ -30,21 +30,6 @@ import PilotModeIndicator from "./PilotModeIndicator";
 import { enrichRecommendationWithDependency } from "./DependencyAwarenessEngine";
 import DependencyWarning from "./DependencyWarning";
 
-// Définitions des tooltips - Éditables indépendamment
-const TOOLTIP_DEFINITIONS = {
-  confidence: "Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.",
-  lever: "Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.",
-  impact: "Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.",
-  effort: "Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).",
-  metrics: {
-    cycle_time: "Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?",
-    flow_efficiency: "Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?",
-    deployment_frequency: "À quelle fréquence l'équipe met-elle en production des changements utilisables ?",
-    throughput: "Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.",
-    wip_age: "Âge moyen du travail en cours, révèle les tickets qui stagnent."
-  }
-};
-
 export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, onDiscussWithCoach, onApplyLever }) {
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
@@ -261,7 +246,21 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
                                   <p className="text-xs">
-                                    <strong>{metricInfo.name}</strong> – {TOOLTIP_DEFINITIONS.metrics[lever.metric] || metricInfo.description}
+                                    {lever.metric === "cycle_time" && (
+                                      <><strong>Cycle Time</strong> – Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?</>
+                                    )}
+                                    {lever.metric === "flow_efficiency" && (
+                                      <><strong>Flow Efficiency</strong> – Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?</>
+                                    )}
+                                    {lever.metric === "deployment_frequency" && (
+                                      <><strong>Deployment Frequency</strong> – À quelle fréquence l'équipe met-elle en production des changements utilisables ?</>
+                                    )}
+                                    {lever.metric === "throughput" && (
+                                      <><strong>Throughput</strong> – Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.</>
+                                    )}
+                                    {lever.metric === "wip_age" && (
+                                      <><strong>WIP Age</strong> – Âge moyen du travail en cours, révèle les tickets qui stagnent.</>
+                                    )}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
@@ -277,7 +276,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="max-w-xs">
                                     <p className="text-xs">
-                                      <strong>Confiance de Nova</strong> – {TOOLTIP_DEFINITIONS.confidence}
+                                      <strong>Confiance de Nova</strong> – Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -294,7 +293,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
                                   <p className="text-xs">
-                                    <strong>Levier d'action</strong> – {TOOLTIP_DEFINITIONS.lever}
+                                    <strong>Levier d'action</strong> – Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
@@ -313,7 +312,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               </TooltipTrigger>
                               <TooltipContent side="left" className="max-w-xs">
                                 <p className="text-xs">
-                                  <strong>Impact estimé</strong> – {TOOLTIP_DEFINITIONS.impact}
+                                  <strong>Impact estimé</strong> – Combien de temps s’écoule entre le début d’un travail de l'équipe et sa livraison réelle ? Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
                                 </p>
                               </TooltipContent>
                             </Tooltip>
@@ -326,7 +325,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               </TooltipTrigger>
                               <TooltipContent side="left" className="max-w-xs">
                                 <p className="text-xs">
-                                  <strong>Effort requis</strong> – {TOOLTIP_DEFINITIONS.effort}
+                                  <strong>Effort requis</strong> – Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).
                                 </p>
                               </TooltipContent>
                             </Tooltip>
