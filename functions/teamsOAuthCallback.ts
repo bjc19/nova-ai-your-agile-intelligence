@@ -1,20 +1,22 @@
 // PUBLIC ENDPOINT - No authentication required
 import { createClient } from 'npm:@base44/sdk@0.8.6';
 
-Deno.serve(async (req) => {
+export default async function teamsOAuthCallback(base44) {
   try {
-    const url = new URL(req.url);
-    const code = url.searchParams.get('code');
-    const customerId = url.searchParams.get('state') || 'nova_ai_dev';
+    const code = base44.context?.query?.code;
+    const customerId = base44.context?.query?.state || 'nova_ai_dev';
     
     if (!code) {
-      return new Response('Missing authorization code', { status: 400 });
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'text/html' },
+        body: '<html><body><h1>Missing authorization code</h1></body></html>'
+      };
     }
 
-    const clientId = Deno.env.get("TEAMS_CLIENT_ID");
-    const clientSecret = Deno.env.get("TEAMS_CLIENT_SECRET");
-    const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI") || 
-      `${url.origin}/api/functions/teamsOAuthCallback`;
+    const clientId = process.env.TEAMS_CLIENT_ID;
+    const clientSecret = process.env.TEAMS_CLIENT_SECRET;
+    const redirectUri = process.env.TEAMS_REDIRECT_URI;
 
     // Exchange code for tokens
     const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
@@ -32,27 +34,29 @@ Deno.serve(async (req) => {
     const tokens = await tokenResponse.json();
 
     if (!tokens.access_token) {
-      // Send error to opener window
-      return new Response(`
-        <!DOCTYPE html>
-        <html>
-        <body>
-          <script>
-            window.opener.postMessage({
-              type: 'teams_error',
-              error: 'Token exchange failed'
-            }, '*');
-            window.close();
-          </script>
-        </body>
-        </html>
-      `, { headers: { 'Content-Type': 'text/html' } });
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'text/html' },
+        body: `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <script>
+              window.opener.postMessage({
+                type: 'teams_error',
+                error: 'Token exchange failed'
+              }, '*');
+              window.close();
+            </script>
+          </body>
+          </html>
+        `
+      };
     }
 
-    // Encode connection data and send to opener
     // Store connection in database using service role
-    const base44 = createClient();
-    await base44.asServiceRole.entities.TeamsConnection.create({
+    const client = createClient();
+    await client.asServiceRole.entities.TeamsConnection.create({
       user_email: customerId,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
@@ -67,36 +71,44 @@ Deno.serve(async (req) => {
       success: true
     };
 
-    const encodedData = btoa(JSON.stringify(connectionData));
+    const encodedData = Buffer.from(JSON.stringify(connectionData)).toString('base64');
 
-    return new Response(`
-      <!DOCTYPE html>
-      <html>
-      <body>
-        <script>
-          window.opener.postMessage({
-            type: 'teams_success',
-            data: '${encodedData}'
-          }, '*');
-          window.close();
-        </script>
-      </body>
-      </html>
-    `, { headers: { 'Content-Type': 'text/html' } });
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/html' },
+      body: `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'teams_success',
+              data: '${encodedData}'
+            }, '*');
+            setTimeout(() => window.close(), 2000);
+          </script>
+        </body>
+        </html>
+      `
+    };
   } catch (error) {
-    return new Response(`
-      <!DOCTYPE html>
-      <html>
-      <body>
-        <script>
-          window.opener.postMessage({
-            type: 'teams_error',
-            error: '${error.message}'
-          }, '*');
-          window.close();
-        </script>
-      </body>
-      </html>
-    `, { headers: { 'Content-Type': 'text/html' } });
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'text/html' },
+      body: `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'teams_error',
+              error: '${error.message}'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+        </html>
+      `
+    };
   }
-});
+}
