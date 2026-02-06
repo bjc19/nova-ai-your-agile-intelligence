@@ -133,10 +133,11 @@ export default function Settings() {
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
-      const { data } = await base44.functions.invoke('jiraOAuthStart', { customer_id: user.email });
+      const response = await base44.functions.invoke('jiraOAuthStart', { customer_id: user.email });
       
       // Open popup for OAuth
-      const popup = window.open(data.authorizationUrl, 'Jira OAuth', 'width=600,height=700');
+      const authUrl = response.data?.authorizationUrl || response.data;
+      const popup = window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
       
       // Listen for callback
       const handleMessage = (event) => {
