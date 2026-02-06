@@ -62,6 +62,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [acknowledgedBy, setAcknowledgedBy] = useState("");
   const [acknowledgedDate, setAcknowledgedDate] = useState("");
   const [jiraUrl, setJiraUrl] = useState(null);
+  const [jiraClicked, setJiraClicked] = useState(false);
   const { language } = useLanguage();
 
   // Default/demo data if none provided
@@ -85,6 +86,10 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
       setAcknowledged(true);
       setAcknowledgedBy(ackData.by);
       setAcknowledgedDate(ackData.date);
+    }
+    const storedJiraClick = localStorage.getItem(`jira_clicked_${data.sprint_name}`);
+    if (storedJiraClick) {
+      setJiraClicked(true);
     }
   }, [data.sprint_name]);
 
@@ -379,10 +384,13 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                         } else if (onReviewSprint) {
                           onReviewSprint();
                         }
+                        localStorage.setItem(`jira_clicked_${data.sprint_name}`, 'true');
+                        setJiraClicked(true);
                       }}
-                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                      disabled={jiraClicked}
+                      className={`flex-1 ${jiraClicked ? 'bg-slate-300 text-slate-600 cursor-default' : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white'}`}
                     >
-                      Revoir le sprint maintenant
+                      {jiraClicked ? '✓ Sprint examiné' : 'Revoir le sprint maintenant'}
                       <ExternalLink className="w-4 h-4 ml-2" />
                     </Button>
                     <Button
