@@ -347,35 +347,46 @@ export default function Details() {
                       </>
                     ) : (
                       <>
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start justify-between gap-3 mb-2">
                           <h3 className="font-semibold text-slate-900">
                             {displayItem.member || displayItem.issue || displayItem.description || "-"}
                           </h3>
-                          {item.urgency && (
-                            <Badge
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setUrgencyFilter(item.urgency);
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              className={`shrink-0 cursor-pointer hover:opacity-80 transition-opacity ${
-                                item.urgency === "high"
-                                  ? "bg-red-50 text-red-700 border-red-200"
-                                  : item.urgency === "medium"
-                                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                                  : "bg-slate-50 text-slate-600 border-slate-200"
-                              }`}
-                            >
-                              {t(item.urgency)}
-                            </Badge>
-                          )}
-                          {item.status === "resolved" && (
-                            <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border-emerald-200">
-                              {t('resolved')}
-                            </Badge>
-                          )}
+                          <div className="flex gap-2 flex-wrap justify-end">
+                            {item.urgency && (
+                              <Badge
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setUrgencyFilter(item.urgency);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className={`shrink-0 cursor-pointer hover:opacity-80 transition-opacity text-xs ${
+                                  item.urgency === "high"
+                                    ? "bg-red-50 text-red-700 border-red-200"
+                                    : item.urgency === "medium"
+                                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                                    : "bg-slate-50 text-slate-600 border-slate-200"
+                                }`}
+                              >
+                                {t(item.urgency)}
+                              </Badge>
+                            )}
+                            {item.status === "resolved" && (
+                              <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
+                                {t('resolved')}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
+                        {item.patterns && item.patterns.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {item.patterns.map((pattern, pidx) => (
+                              <Badge key={pidx} variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-200">
+                                {pattern}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                         <p className="text-sm text-slate-600 mt-2">
                           {displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-"}
                         </p>
