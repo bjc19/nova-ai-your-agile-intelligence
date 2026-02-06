@@ -138,10 +138,21 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
               </div>
             </div>
             {driftAnalysis.confidence > 0 && (
-              <div className="text-right">
-                <p className="text-2xl font-bold text-slate-900">{driftAnalysis.confidence}%</p>
-                <p className="text-xs text-slate-500">Confiance</p>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="text-right cursor-help">
+                      <p className="text-2xl font-bold text-slate-900">{driftAnalysis.confidence}%</p>
+                      <p className="text-xs text-slate-500">Confiance</p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="max-w-xs">
+                    <p className="text-xs">
+                      <strong>Fiabilité de la détection</strong> – Plus il y a de signaux convergents (WIP élevé, tickets bloqués, tickets stagnants), plus Nova est confiante qu'il y a une dérive en cours.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </CardHeader>
