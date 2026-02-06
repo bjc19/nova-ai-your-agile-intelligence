@@ -82,11 +82,20 @@ export default function Dashboard() {
   }, [navigate]);
 
   // Fetch analysis history
-  const { data: analysisHistory = [] } = useQuery({
+  const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 20),
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading,
   });
+
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter(analysis => {
+    const analysisDate = new Date(analysis.created_date);
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session
   useEffect(() => {
