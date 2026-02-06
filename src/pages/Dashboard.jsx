@@ -42,6 +42,25 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
+  const [gdprSignals, setGdprSignals] = useState([]);
+
+  // Fetch GDPR signals from last 7 days
+  useEffect(() => {
+    const fetchSignals = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+
+    fetchSignals();
+  }, []);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
@@ -329,12 +348,13 @@ export default function Dashboard() {
                     sprint_name: "Sprint 14",
                     wip_count: 8,
                     wip_historical_avg: 5,
-                    tickets_in_progress_over_3d: 3,
-                    blocked_tickets_over_48h: 2,
+                    tickets_in_progress_over_3d: 3 + gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length,
+                    blocked_tickets_over_48h: 2 + gdprSignals.filter(s => s.criticite === 'moyenne').length,
                     sprint_day: 5,
                     historical_sprints_count: 4,
                     drift_acknowledged: false,
-                    problematic_tickets: sprintHealth.problematic_tickets
+                    problematic_tickets: sprintHealth.problematic_tickets,
+                    gdprSignals: gdprSignals
                   }}
                   onAcknowledge={() => console.log("Drift acknowledged")}
                   onReviewSprint={() => console.log("Review sprint")}
