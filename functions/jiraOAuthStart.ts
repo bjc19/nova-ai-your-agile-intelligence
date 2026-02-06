@@ -4,9 +4,9 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    // Get customer_id from query params
-    const url = new URL(req.url);
-    const customer_id = url.searchParams.get('customer_id');
+    // Get customer_id from request body
+    const body = await req.json();
+    const customer_id = body.customer_id;
     
     if (!customer_id) {
       return Response.json({ error: 'customer_id required' }, { status: 400 });
