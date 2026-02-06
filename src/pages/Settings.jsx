@@ -86,18 +86,19 @@ export default function Settings() {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
       
-      // Listen for popup message
-      const messageHandler = (event) => {
-        if (event.data?.type === 'teams-connected') {
-          window.removeEventListener('message', messageHandler);
+      // Open in popup and poll for completion
+      const popup = window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
+      
+      // Check if popup closed or redirected
+      const checkPopup = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(checkPopup);
           loadTeamsConnection();
           setConnectingTeams(false);
         }
-      };
-      window.addEventListener('message', messageHandler);
+      }, 500);
       
-      // Open in popup window
-      window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
+      setTimeout(() => clearInterval(checkPopup), 60000); // Stop checking after 60s
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);
