@@ -66,52 +66,75 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
     calculatePeriod(defaultPeriod);
   }, [deliveryMode]);
 
+  const calculateCompleteness = (start, end) => {
+    const now = new Date();
+    const daysInMonth = getDaysInMonth(now);
+    const dayOfMonth = now.getDate();
+    return { dayOfMonth, daysInMonth };
+  };
+
+  const getCompletenessColor = (percentage) => {
+    if (percentage < 25) return "bg-orange-100 text-orange-700 border-orange-200";
+    if (percentage < 75) return "bg-blue-100 text-blue-700 border-blue-200";
+    return "bg-green-100 text-green-700 border-green-200";
+  };
+
   const calculatePeriod = (periodType) => {
     const now = new Date();
-    let start, end;
+    let start, end, label = "";
 
     switch (periodType) {
       case "current_sprint":
         // Approximation: 2 semaines
         start = subWeeks(now, 1);
         end = now;
+        label = "Sprint en cours";
         break;
 
       case "last_3_sprints":
         // Approximation: 6 semaines (3 sprints de 2 semaines)
         start = subWeeks(now, 6);
         end = now;
+        label = "3 derniers sprints";
         break;
 
       case "previous_sprint":
         start = subWeeks(now, 3);
         end = subWeeks(now, 1);
+        label = "Sprint précédent";
         break;
 
       case "last_4_weeks":
         start = subWeeks(now, 4);
         end = now;
+        label = "4 dernières semaines";
         break;
 
       case "current_week":
         start = startOfWeek(now, { weekStartsOn: 1 });
         end = endOfWeek(now, { weekStartsOn: 1 });
+        label = "Semaine en cours";
         break;
 
       case "current_month":
         start = startOfMonth(now);
         end = now; // Until today, not end of month
+        const { dayOfMonth, daysInMonth } = calculateCompleteness(start, end);
+        const monthName = format(now, "MMMM", { locale: require("date-fns/locale/fr") });
+        label = `${monthName} (1-${dayOfMonth}) - ${dayOfMonth}/${daysInMonth} jours`;
         break;
 
       case "last_quarter":
         start = subWeeks(now, 13);
         end = now;
+        label = "Trimestre écoulé";
         break;
 
       case "since_retro":
         // Approximation: 2 semaines
         start = subWeeks(now, 2);
         end = now;
+        label = "Depuis le dernier rétro";
         break;
 
       default:
@@ -119,7 +142,8 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
         end = now;
     }
 
-    onPeriodChange({ start, end, type: periodType });
+    setPeriodLabel(label);
+    onPeriodChange({ start, end, type: periodType, label });
   };
 
   const handlePeriodChange = (value) => {
