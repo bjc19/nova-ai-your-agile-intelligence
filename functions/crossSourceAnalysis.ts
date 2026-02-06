@@ -34,14 +34,17 @@ Deno.serve(async (req) => {
     const analysisPrompt = `
 Analyse ces données multi-sources et fournis insights holistiques :
 
-**Données Jira** (${jiraMarkers.length} signaux) :
+${jiraMarkers.length > 0 ? `**Données Jira** (${jiraMarkers.length} signaux) :
 ${jiraMarkers.map(m => `- ${m.probleme} (criticité: ${m.criticite})`).join('\n')}
+` : '**Données Jira** : [Non disponible]\n'}
 
-**Données Slack** (${slackMarkers.length} signaux) :
+${slackMarkers.length > 0 ? `**Données Slack** (${slackMarkers.length} signaux) :
 ${slackMarkers.map(m => `- ${m.probleme} (type: ${m.type})`).join('\n')}
+` : '**Données Slack** : [Non disponible]\n'}
 
-**Données Teams** (${teamsInsights.length} meetings) :
+${teamsInsights.length > 0 ? `**Données Teams** (${teamsInsights.length} meetings) :
 ${teamsInsights.map(m => `- ${m.probleme} (criticité: ${m.criticite})`).join('\n')}
+` : '**Données Teams** : [Non disponible]\n'}
 
 **Contexte équipe** :
 - Mode: ${teamConfig?.project_mode || 'auto'}
@@ -121,10 +124,17 @@ Format JSON strict.
 
 // Matcher les patterns canoniques avec les données brutes
 function matchPatternsAgainstData(allMarkers, antiPatterns) {
+  // Garder seulement les markers valides (même si certaines sources manquent)
+  const validMarkers = allMarkers.filter(m => m && m.probleme);
+  
+  if (validMarkers.length === 0) {
+    return [];
+  }
+
   const detected = [];
   
   antiPatterns.forEach(pattern => {
-    const matchingMarkers = allMarkers.filter(marker => 
+    const matchingMarkers = validMarkers.filter(marker => 
       pattern.markers?.some(m => 
         marker.probleme?.toLowerCase().includes(m.toLowerCase())
       )
@@ -136,7 +146,8 @@ function matchPatternsAgainstData(allMarkers, antiPatterns) {
         name: pattern.name,
         occurrences: matchingMarkers.length,
         severity: pattern.severity,
-        confidence: calculateConfidence(matchingMarkers.length, pattern.source_type?.length || 1)
+        confidence: calculateConfidence(matchingMarkers.length, pattern.source_type?.length || 1),
+        sources: [...new Set(matchingMarkers.map(m => m.detection_source || 'unknown'))]
       });
     }
   });
