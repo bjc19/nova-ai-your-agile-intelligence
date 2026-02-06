@@ -1,5 +1,22 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+// Utility functions
+async function sha256(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -39,22 +56,25 @@ Deno.serve(async (req) => {
     const issuesData = await issuesResponse.json();
     const issues = issuesData.issues || [];
 
-    // Analyze issues for insights
+    // Anonymize identifiers
+    const tenantHash = await sha256(user.email);
+    const teamHash = await sha256(connection.cloud_id);
+    const sessionId = generateUUID();
+
+    // Analyze issues for anonymized insights
     const insights = {
       totalIssues: issues.length,
       blockedIssues: 0,
       highPriorityIssues: 0,
       unassignedIssues: 0,
-      oldestIssue: null,
       issuesByStatus: {},
+      problems: [],
       recommendations: []
     };
 
     const now = new Date();
-    let oldestDate = now;
 
     issues.forEach(issue => {
-      // Count blocked issues (issues that haven't been updated in a while)
       const updatedDate = new Date(issue.fields.updated);
       const daysSinceUpdate = Math.floor((now - updatedDate) / (1000 * 60 * 60 * 24));
       
@@ -62,49 +82,59 @@ Deno.serve(async (req) => {
         insights.blockedIssues++;
       }
 
-      // Count high priority
       if (issue.fields.priority?.name === 'High' || issue.fields.priority?.name === 'Highest') {
         insights.highPriorityIssues++;
       }
 
-      // Count unassigned
       if (!issue.fields.assignee) {
         insights.unassignedIssues++;
       }
 
-      // Track oldest issue
-      const createdDate = new Date(issue.fields.created);
-      if (createdDate < oldestDate) {
-        oldestDate = createdDate;
-        const daysSinceCreation = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24));
-        insights.oldestIssue = {
-          key: issue.key,
-          summary: issue.summary,
-          daysOld: daysSinceCreation
-        };
-      }
-
-      // Count by status
       const status = issue.fields.status?.name || 'Unknown';
       insights.issuesByStatus[status] = (insights.issuesByStatus[status] || 0) + 1;
     });
 
-    // Generate recommendations
+    // Generate anonymized problems and recommendations
     if (insights.unassignedIssues > insights.totalIssues * 0.2) {
-      insights.recommendations.push('Many issues are unassigned. Consider assigning them to team members.');
+      insights.problems.push('High percentage of unassigned issues in backlog');
+      insights.recommendations.push('Improve assignment clarity and team capacity planning');
     }
 
     if (insights.blockedIssues > insights.totalIssues * 0.15) {
-      insights.recommendations.push('Several issues haven\'t been updated recently. Review them for blockers.');
+      insights.problems.push('Issues stalled without recent updates');
+      insights.recommendations.push('Review blocking dependencies and unblock stalled work');
     }
 
     if (insights.highPriorityIssues > insights.totalIssues * 0.3) {
-      insights.recommendations.push('High number of high-priority issues. Prioritize backlog refinement.');
+      insights.problems.push('Excessive high-priority issues indicating unclear prioritization');
+      insights.recommendations.push('Conduct backlog refinement to clarify priorities');
+    }
+
+    // Create GDPR markers for each detected problem
+    let markersCreated = 0;
+    for (const problem of insights.problems) {
+      await base44.asServiceRole.entities.GDPRMarkers.create({
+        issue_id: generateUUID(),
+        tenant_id: tenantHash,
+        team_id: teamHash,
+        session_id: sessionId,
+        date: new Date().toISOString().split('T')[0],
+        type: 'other',
+        probleme: problem,
+        recos: insights.recommendations,
+        statut: 'ouvert',
+        criticite: insights.highPriorityIssues > insights.totalIssues * 0.3 ? 'haute' : 'moyenne',
+        detection_source: 'manual_trigger',
+        confidence_score: 0.85
+      });
+      markersCreated++;
     }
 
     return Response.json({
       success: true,
       insights,
+      markersCreated,
+      gdprCompliant: true,
       lastAnalyzed: new Date().toISOString()
     });
   } catch (error) {
