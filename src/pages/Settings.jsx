@@ -86,9 +86,29 @@ export default function Settings() {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
       
-      // Open in new tab instead of redirect
-      window.open(data.authUrl, '_blank');
-      setConnectingTeams(false);
+      // Open popup for OAuth
+      const popup = window.open(data.authUrl, 'Teams OAuth', 'width=600,height=700');
+      
+      // Listen for callback
+      const handleMessage = async (event) => {
+        if (event.data.type === 'teams_success') {
+          // Decode connection data
+          const connectionData = JSON.parse(atob(event.data.data));
+          
+          // Save connection through authenticated endpoint
+          await base44.functions.invoke('teamsSaveConnection', connectionData);
+          
+          setTeamsConnected(true);
+          window.removeEventListener('message', handleMessage);
+          setConnectingTeams(false);
+        } else if (event.data.type === 'teams_error') {
+          console.error('Teams connection error:', event.data.error);
+          window.removeEventListener('message', handleMessage);
+          setConnectingTeams(false);
+        }
+      };
+      
+      window.addEventListener('message', handleMessage);
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);
