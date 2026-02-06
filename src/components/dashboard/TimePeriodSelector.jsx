@@ -10,10 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, subWeeks, subMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
@@ -164,9 +165,12 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
         </SelectContent>
       </Select>
 
-      <Popover open={showCustom} onOpenChange={setShowCustom}>
-        <PopoverContent className="w-auto p-4" align="end">
-          <div className="space-y-4">
+      <Dialog open={showCustom} onOpenChange={setShowCustom}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Sélectionner une période personnalisée</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Date de début</label>
               <CalendarComponent
@@ -185,12 +189,17 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
                 disabled={(date) => date > new Date() || (customStart && date < customStart)}
               />
             </div>
-            <Button onClick={applyCustomPeriod} className="w-full">
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={applyCustomPeriod} className="flex-1" disabled={!customStart || !customEnd}>
               Appliquer
             </Button>
+            <Button variant="outline" onClick={() => setShowCustom(false)}>
+              Annuler
+            </Button>
           </div>
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
