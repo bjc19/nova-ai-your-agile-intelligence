@@ -80,6 +80,7 @@ export default function IntegrationStatus({ integrations = {} }) {
       status: jiraConnected ? "connected" : "disconnected" 
     },
     azure: { connected: false, label: "Azure DevOps", status: "coming_soon" },
+    trello: { connected: false, label: "Trello", status: "coming_soon" },
     zoom: { connected: false, label: "Zoom", status: "coming_soon" },
   };
 
