@@ -1,10 +1,11 @@
 // PUBLIC ENDPOINT - No authentication required
-export default async function teamsOAuthStartPublic(base44) {
+Deno.serve(async (req) => {
   try {
-    const customerId = base44.context?.query?.customer_id || 'nova_ai_dev';
+    const url = new URL(req.url);
+    const customerId = url.searchParams.get('customer_id') || 'nova_ai_dev';
     
-    const clientId = process.env.TEAMS_CLIENT_ID;
-    const redirectUri = process.env.TEAMS_REDIRECT_URI;
+    const clientId = Deno.env.get("TEAMS_CLIENT_ID");
+    const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI");
     
     const scopes = [
       'Chat.Read',
@@ -24,18 +25,11 @@ export default async function teamsOAuthStartPublic(base44) {
       `&prompt=select_account`;
 
     // Redirection 302 vers Microsoft OAuth
-    return {
-      statusCode: 302,
-      headers: {
-        'Location': authUrl
-      },
-      body: ''
-    };
+    return Response.redirect(authUrl, 302);
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers: { 'Content-Type': 'text/plain' },
-      body: `Error: ${error.message}`
-    };
+    return new Response(`Error: ${error.message}`, {
+      status: 500,
+      headers: { 'Content-Type': 'text/plain' }
+    });
   }
-}
+});
