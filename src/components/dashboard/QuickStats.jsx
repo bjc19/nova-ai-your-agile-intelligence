@@ -16,19 +16,24 @@ export default function QuickStats({ analysisHistory = [] }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [teamsInsights, setTeamsInsights] = useState([]);
 
-  // Fetch GDPR signals from last 7 days
+  // Fetch GDPR signals and Teams insights from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const [markers, insights] = await Promise.all([
+          base44.entities.GDPRMarkers.list('-created_date', 100),
+          base44.entities.TeamsInsight.list('-created_date', 100)
+        ]);
         
         // Filter by period if available
         const selectedPeriod = sessionStorage.getItem("selectedPeriod");
-        let filtered = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        let filteredMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        let filteredInsights = insights.filter(i => new Date(i.created_date) >= sevenDaysAgo);
         
         if (selectedPeriod) {
           const period = JSON.parse(selectedPeriod);
@@ -36,15 +41,21 @@ export default function QuickStats({ analysisHistory = [] }) {
           const endDate = new Date(period.end);
           endDate.setHours(23, 59, 59, 999);
           
-          filtered = markers.filter(m => {
+          filteredMarkers = markers.filter(m => {
             const markerDate = new Date(m.created_date);
             return markerDate >= startDate && markerDate <= endDate;
           });
+          
+          filteredInsights = insights.filter(i => {
+            const insightDate = new Date(i.created_date);
+            return insightDate >= startDate && insightDate <= endDate;
+          });
         }
         
-        setGdprSignals(filtered);
+        setGdprSignals(filteredMarkers);
+        setTeamsInsights(filteredInsights);
       } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
+        console.error("Erreur chargement signaux:", error);
       }
     };
 
@@ -81,8 +92,12 @@ export default function QuickStats({ analysisHistory = [] }) {
   const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
   const gdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne').length;
   
-  const totalBlockers = (analysisBlockers || 0) + gdprBlockers || 12;
-  const totalRisks = (analysisRisks || 0) + gdprRisks || 8;
+  // Count Teams insights: critique/haute → blockers, moyenne → risks
+  const teamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
+  const teamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne').length;
+  
+  const totalBlockers = (analysisBlockers || 0) + gdprBlockers + teamsBlockers || 12;
+  const totalRisks = (analysisRisks || 0) + gdprRisks + teamsRisks || 8;
   const analysesCount = analysisHistory.length || 6;
   const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
 
