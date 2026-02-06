@@ -78,15 +78,26 @@ Deno.serve(async (req) => {
 
               // ========== ANALYZE IN MEMORY ONLY ==========
               // Use LLM to detect patterns WITHOUT storing raw content
+              // IMPORTANT: Account for Hawthorne Effect - team may alter behavior when observed
               const analysisResult = await base44.integrations.Core.InvokeLLM({
-                prompt: `Analyze this Teams meeting transcript for Agile/Scrum anti-patterns. Return ONLY a JSON object with:
+                prompt: `Analyze this Teams meeting transcript for Agile/Scrum anti-patterns.
+
+⚠️ CRITICAL: Account for the Hawthorne Effect - teams often alter their behavior when they know they're being observed/analyzed. Consider:
+- Is the team being unusually formal or structured (vs natural flow)?
+- Are discussions artificially shortened or filtered?
+- Is communication clearer than typical (suppressed complaints)?
+
+Return ONLY a JSON object with:
 {
   "detected_patterns": ["pattern1", "pattern2"],
   "ceremony_type": "daily_scrum|retrospective|planning|review|refinement|other",
   "problem_description": "Generic description without any names or quotes",
   "recommendations": ["Rec1", "Rec2"],
   "criticality": "basse|moyenne|haute|critique",
-  "confidence": 0.0-1.0
+  "confidence": 0.0-1.0,
+  "hawthorne_effect_detected": true|false,
+  "hawthorne_confidence": 0.0-1.0,
+  "hawthorne_note": "Explanation of observed Hawthorne indicators"
 }
 
 Transcript:
@@ -99,7 +110,10 @@ ${transcriptContent.substring(0, 4000)}`,
                     problem_description: { type: 'string' },
                     recommendations: { type: 'array', items: { type: 'string' } },
                     criticality: { type: 'string' },
-                    confidence: { type: 'number' }
+                    confidence: { type: 'number' },
+                    hawthorne_effect_detected: { type: 'boolean' },
+                    hawthorne_confidence: { type: 'number' },
+                    hawthorne_note: { type: 'string' }
                   }
                 }
               });
@@ -116,21 +130,24 @@ ${transcriptContent.substring(0, 4000)}`,
                 const sessionId = generateUUID();
 
                 await base44.asServiceRole.entities.GDPRMarkers.create({
-                  issue_id: issueId,
-                  tenant_id: tenantId,
-                  team_id: teamId,
-                  session_id: sessionId,
-                  date: new Date().toISOString().split('T')[0],
-                  type: analysisResult.ceremony_type || 'other',
-                  probleme: analysisResult.problem_description,
-                  recos: analysisResult.recommendations,
-                  statut: 'ouvert',
-                  recurrence: 1,
-                  criticite: analysisResult.criticality,
-                  slack_workspace_id: null,
-                  confidence_score: analysisResult.confidence,
-                  detection_source: 'teams_daily'
-                });
+                   issue_id: issueId,
+                   tenant_id: tenantId,
+                   team_id: teamId,
+                   session_id: sessionId,
+                   date: new Date().toISOString().split('T')[0],
+                   type: analysisResult.ceremony_type || 'other',
+                   probleme: analysisResult.problem_description,
+                   recos: analysisResult.recommendations,
+                   statut: 'ouvert',
+                   recurrence: 1,
+                   criticite: analysisResult.criticality,
+                   slack_workspace_id: null,
+                   confidence_score: analysisResult.confidence,
+                   detection_source: 'teams_daily',
+                   hawthorne_effect_detected: analysisResult.hawthorne_effect_detected || false,
+                   hawthorne_confidence: analysisResult.hawthorne_confidence || 0,
+                   hawthorne_note: analysisResult.hawthorne_note || ''
+                 });
 
                 console.log(`Created GDPR marker: ${issueId}`);
                 totalRecordsProcessed++;
