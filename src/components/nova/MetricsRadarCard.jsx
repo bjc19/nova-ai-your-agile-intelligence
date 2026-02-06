@@ -312,7 +312,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               </TooltipTrigger>
                               <TooltipContent side="left" className="max-w-xs">
                                 <p className="text-xs">
-                                  <strong>Impact estimé</strong> – Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu’à des périodes où la tâche est simplement en attente ? Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
+                                  <strong>Impact estimé</strong> – Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
                                 </p>
                               </TooltipContent>
                             </Tooltip>
