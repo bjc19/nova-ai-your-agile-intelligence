@@ -84,10 +84,11 @@ export default function Settings() {
   const handleTeamsConnect = async () => {
     try {
       setConnectingTeams(true);
-      const { data } = await base44.functions.invoke('teamsOAuthStart');
       
-      // Open popup for OAuth
-      const popup = window.open(data.authUrl, 'Teams OAuth', 'width=600,height=700');
+      // Open popup directly to OAuth start function (it will redirect to Microsoft)
+      const origin = window.location.origin;
+      const oauthUrl = `${origin}/api/functions/teamsOAuthStart`;
+      const popup = window.open(oauthUrl, 'Teams OAuth', 'width=600,height=700');
       
       if (!popup) {
         alert('Popup bloquée - veuillez autoriser les popups pour ce site');
