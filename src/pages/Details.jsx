@@ -32,7 +32,7 @@ export default function Details() {
 
   // Get the detail type from sessionStorage
   useEffect(() => {
-    const stored = sessionStorage.getItem("detailType");
+    const stored = sessionStorage.getItem("detailsType");
     if (stored) {
       setDetailType(stored);
     } else {
