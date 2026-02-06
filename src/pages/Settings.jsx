@@ -86,9 +86,18 @@ export default function Settings() {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
       
+      // Listen for popup message
+      const messageHandler = (event) => {
+        if (event.data?.type === 'teams-connected') {
+          window.removeEventListener('message', messageHandler);
+          loadTeamsConnection();
+          setConnectingTeams(false);
+        }
+      };
+      window.addEventListener('message', messageHandler);
+      
       // Open in popup window
       window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
-      setConnectingTeams(false);
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);
