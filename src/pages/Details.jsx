@@ -60,6 +60,12 @@ export default function Details() {
     queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
   });
 
+  // Fetch Teams insights
+  const { data: teamsInsightsData = [] } = useQuery({
+    queryKey: ['teamsInsights'],
+    queryFn: () => base44.entities.TeamsInsight.list('-created_date', 100),
+  });
+
   useEffect(() => {
     // Filter by selected period if available
     let filtered = historyData;
@@ -115,7 +121,7 @@ export default function Details() {
     let icon, color, title;
 
     if (detailType === "blockers") {
-      // Analyses blockers + GDPR blockers (critique/haute)
+      // Analyses blockers + GDPR blockers (critique/haute) + Teams blockers (critique/haute)
       items = analysisHistory.flatMap((analysis, idx) => {
         const blockers = analysis.analysis_data?.blockers || [];
         return blockers.map((blocker, bidx) => ({
@@ -138,15 +144,29 @@ export default function Details() {
             criticite: marker.criticite,
             recurrence: marker.recurrence,
             confidence_score: marker.confidence_score,
-            analysisTitle: '#Slack Team Signal',
+            analysisTitle: '#Slack',
             analysisDate: marker.created_date,
+          }))
+      ).concat(
+        teamsInsightsData
+          .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
+          .map((insight, idx) => ({
+            id: `teams-blocker-${idx}`,
+            issue: insight.probleme,
+            description: insight.probleme,
+            urgency: insight.criticite === 'critique' ? 'high' : 'medium',
+            source: 'teams',
+            patterns: insight.patterns || [],
+            criticite: insight.criticite,
+            analysisTitle: '#Microsoft Teams',
+            analysisDate: insight.created_date,
           }))
       );
       icon = AlertOctagon;
       color = "text-blue-600";
       title = t('detectedBlockersIssues');
     } else if (detailType === "risks") {
-      // Analyses risks + GDPR risks (moyenne)
+      // Analyses risks + GDPR risks (moyenne) + Teams risks (moyenne)
       items = analysisHistory.flatMap((analysis, idx) => {
         const risks = analysis.analysis_data?.risks || [];
         return risks.map((risk, ridx) => ({
@@ -169,8 +189,22 @@ export default function Details() {
             criticite: marker.criticite,
             recurrence: marker.recurrence,
             confidence_score: marker.confidence_score,
-            analysisTitle: '#Slack Team Signal',
+            analysisTitle: '#Slack',
             analysisDate: marker.created_date,
+          }))
+      ).concat(
+        teamsInsightsData
+          .filter(i => i.criticite === 'moyenne')
+          .map((insight, idx) => ({
+            id: `teams-risk-${idx}`,
+            issue: insight.probleme,
+            description: insight.probleme,
+            urgency: 'medium',
+            source: 'teams',
+            patterns: insight.patterns || [],
+            criticite: insight.criticite,
+            analysisTitle: '#Microsoft Teams',
+            analysisDate: insight.created_date,
           }))
       );
       icon = ShieldAlert;
@@ -340,8 +374,14 @@ export default function Details() {
                 className="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-md transition-all"
               >
                 <div className="flex items-start gap-4">
-                  <div className={`p-2 rounded-lg ${item.source === 'gdpr' ? 'bg-purple-100' : 'bg-slate-100'}`}>
+                  <div className={`p-2 rounded-lg ${
+                    item.source === 'gdpr' ? 'bg-blue-100' : 
+                    item.source === 'teams' ? 'bg-purple-100' : 
+                    'bg-slate-100'
+                  }`}>
                     {item.source === 'gdpr' ? (
+                      <Shield className={`w-5 h-5 text-blue-600`} />
+                    ) : item.source === 'teams' ? (
                       <Shield className={`w-5 h-5 text-purple-600`} />
                     ) : (
                       <Icon className={`w-5 h-5 ${color}`} />
@@ -421,7 +461,11 @@ export default function Details() {
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3 flex-wrap">
-                          <span className={`text-xs ${item.source === 'gdpr' ? 'text-purple-600 font-medium' : 'text-slate-500'}`}>
+                          <span className={`text-xs ${
+                            item.source === 'gdpr' ? 'text-blue-600 font-medium' : 
+                            item.source === 'teams' ? 'text-purple-600 font-medium' : 
+                            'text-slate-500'
+                          }`}>
                             {item.analysisTitle}
                           </span>
                           {item.source === 'gdpr' && (
@@ -436,8 +480,8 @@ export default function Details() {
                               </span>
                             </>
                           )}
-                          <span className={`text-xs ${item.source === 'gdpr' ? 'text-slate-400' : ''}`}>
-                            {item.source === 'gdpr' ? '•' : '•'} {new Date(item.analysisDate).toLocaleDateString()}
+                          <span className={`text-xs ${(item.source === 'gdpr' || item.source === 'teams') ? 'text-slate-400' : ''}`}>
+                            {(item.source === 'gdpr' || item.source === 'teams') ? '•' : '•'} {new Date(item.analysisDate).toLocaleDateString()}
                           </span>
                         </div>
                       </>

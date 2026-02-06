@@ -31,18 +31,27 @@ export default function RecentAnalyses({ analyses = [] }) {
   const [gdprSignals, setGdprSignals] = useState([]);
   const [allItems, setAllItems] = useState([]);
 
-  // Fetch GDPR markers from last 7 days
+  // Fetch GDPR markers and Teams insights from last 7 days
+  const [teamsInsights, setTeamsInsights] = useState([]);
+  
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 50);
+        const [markers, insights] = await Promise.all([
+          base44.entities.GDPRMarkers.list('-created_date', 50),
+          base44.entities.TeamsInsight.list('-created_date', 50)
+        ]);
+        
         const recentMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        const recentInsights = insights.filter(i => new Date(i.created_date) >= sevenDaysAgo);
+        
         setGdprSignals(recentMarkers);
+        setTeamsInsights(recentInsights);
       } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
+        console.error("Erreur chargement signaux:", error);
       }
     };
 
@@ -115,7 +124,13 @@ export default function RecentAnalyses({ analyses = [] }) {
       ...displayAnalyses,
       ...gdprSignals.map(m => ({
         ...m,
-        type: 'signal'
+        type: 'signal',
+        signalSource: 'slack'
+      })),
+      ...teamsInsights.map(t => ({
+        ...t,
+        type: 'signal',
+        signalSource: 'teams'
       }))
     ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 8);
 
@@ -265,18 +280,23 @@ export default function RecentAnalyses({ analyses = [] }) {
                   </motion.div>
                 );
               } else if (item.type === 'signal') {
+                const isTeams = item.signalSource === 'teams';
                 return (
                   <motion.div
                     key={item.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: 0.1 * index }}
-                    className="p-4 rounded-xl border border-purple-200 bg-purple-50/30 hover:bg-purple-50/50 transition-all"
+                    className={`p-4 rounded-xl border transition-all ${
+                      isTeams 
+                        ? 'border-purple-200 bg-purple-50/30 hover:bg-purple-50/50'
+                        : 'border-blue-200 bg-blue-50/30 hover:bg-blue-50/50'
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-purple-100">
-                          <Shield className="w-4 h-4 text-purple-600" />
+                        <div className={`p-2 rounded-lg ${isTeams ? 'bg-purple-100' : 'bg-blue-100'}`}>
+                          <Shield className={`w-4 h-4 ${isTeams ? 'text-purple-600' : 'text-blue-600'}`} />
                         </div>
                         <div>
                           <h4 className="font-medium text-slate-900">
@@ -288,7 +308,7 @@ export default function RecentAnalyses({ analyses = [] }) {
                               {format(new Date(item.created_date), "MMM d, h:mm a")}
                             </span>
                             <Badge variant="outline" className="text-xs py-0">
-                              #Slack
+                              {isTeams ? '#Microsoft Teams' : '#Slack'}
                             </Badge>
                           </div>
                         </div>
