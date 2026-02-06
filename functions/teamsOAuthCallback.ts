@@ -45,8 +45,20 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Redirect back to settings with success flag
-    return Response.redirect(`${url.origin}/settings?teams=connected`, 302);
+    // Close popup and refresh parent
+    return new Response(`
+      <html>
+        <body>
+          <script>
+            window.opener?.postMessage({ type: 'teams-connected' }, '*');
+            window.close();
+          </script>
+          <p>Connexion réussie ! Cette fenêtre va se fermer...</p>
+        </body>
+      </html>
+    `, {
+      headers: { 'Content-Type': 'text/html' }
+    });
   } catch (error) {
     console.error('Teams OAuth error:', error);
     const url = new URL(req.url);
