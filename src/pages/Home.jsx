@@ -28,19 +28,13 @@ export default function Home() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        setIsAuthenticated(authenticated);
-        
-        // Redirect authenticated users to Dashboard
-        if (authenticated) {
-          navigate(createPageUrl("Dashboard"));
-        }
-      } catch (error) {
-        // Not authenticated, that's fine for a public page
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
+      const authenticated = await base44.auth.isAuthenticated();
+      setIsAuthenticated(authenticated);
+      setIsLoading(false);
+      
+      // Redirect authenticated users to Dashboard
+      if (authenticated) {
+        navigate(createPageUrl("Dashboard"));
       }
     };
     checkAuth();
