@@ -245,8 +245,9 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Badge variant="outline" className="text-xs cursor-help">
+                                      <Badge variant="outline" className="text-xs cursor-help flex items-center gap-1">
                                         Confiance {lever.dependency_aware?.confidence || lever.confidence}%
+                                        <HelpCircle className="w-3 h-3 text-slate-400" />
                                       </Badge>
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="max-w-xs">
@@ -261,11 +262,12 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                             <p className="text-sm text-slate-600 mb-2">
                               {lever.current}{metricInfo.unit} → {lever.target}{metricInfo.unit}
                             </p>
-                            <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-slate-500">Levier suggéré :</span>
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="text-slate-500 cursor-help">Levier suggéré :</span>
+                                    <HelpCircle className="w-3 h-3 text-slate-400 cursor-help" />
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="max-w-xs">
                                     <p className="text-xs">
@@ -281,9 +283,12 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 cursor-help">
-                                    {lever.impact}
-                                  </Badge>
+                                  <div className="inline-flex items-center gap-1 cursor-help">
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                                      {lever.impact}
+                                    </Badge>
+                                    <HelpCircle className="w-3 h-3 text-slate-400" />
+                                  </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" className="max-w-xs">
                                   <p className="text-xs">
@@ -295,7 +300,10 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <p className="text-xs text-slate-500 cursor-help">{lever.effort} effort</p>
+                                  <div className="inline-flex items-center gap-1 cursor-help">
+                                    <p className="text-xs text-slate-500">{lever.effort} effort</p>
+                                    <HelpCircle className="w-3 h-3 text-slate-400" />
+                                  </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" className="max-w-xs">
                                   <p className="text-xs">
