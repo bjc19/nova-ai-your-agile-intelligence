@@ -194,14 +194,14 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
             <Calendar className="w-4 h-4 mr-2" />
             <SelectValue placeholder={getPeriodLabel()} />
           </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {/* Completeness Indicator for Current Month */}
         {isCurrentMonth && (
