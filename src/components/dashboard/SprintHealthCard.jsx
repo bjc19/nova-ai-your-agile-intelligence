@@ -95,23 +95,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
 
   // Load Jira connection URL
   useEffect(() => {
-    const loadJiraUrl = async () => {
-      try {
-        const user = await base44.auth.me();
-        const jiraConnections = await base44.entities.JiraConnection.filter({ 
-          user_email: user.email 
-        });
-        if (jiraConnections.length > 0) {
-          const connection = jiraConnections[0];
-          // Construct proper Jira dashboard URL from cloud_id
-          const jiraDomain = connection.cloud_id || '';
-          setJiraUrl(`https://${jiraDomain}.atlassian.net/jira/for-you`);
-        }
-      } catch (error) {
-        console.error("Error loading Jira URL:", error);
-      }
-    };
-    loadJiraUrl();
+    setJiraUrl('https://jira.atlassian.com/');
   }, []);
 
   const handleAcknowledge = async () => {
