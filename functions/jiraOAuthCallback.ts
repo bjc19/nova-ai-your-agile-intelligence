@@ -84,11 +84,11 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.JiraConnection.create({
       user_email: userEmail,
       access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
+      refresh_token: tokenData.refresh_token || 'none',
       expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
       cloud_id: cloudId,
       is_active: true,
-      scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user'],
+      scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
       connected_at: new Date().toISOString(),
     });
 
