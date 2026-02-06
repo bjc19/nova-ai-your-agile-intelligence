@@ -10,7 +10,8 @@ Deno.serve(async (req) => {
     }
 
     const clientId = Deno.env.get("SLACK_CLIENT_ID");
-    const redirectUri = `${req.headers.get("origin")}/api/functions/slackOAuthCallback`;
+    const url = new URL(req.url);
+    const redirectUri = `${url.origin}/api/functions/slackOAuthCallback`;
     
     const scopes = [
       "channels:history",
