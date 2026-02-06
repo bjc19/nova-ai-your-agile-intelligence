@@ -84,49 +84,11 @@ export default function Settings() {
   const handleTeamsConnect = async () => {
     try {
       setConnectingTeams(true);
+      const { data } = await base44.functions.invoke('teamsOAuthStart');
       
-      // Get current user email as customer_id
-      const user = await base44.auth.me();
-      const customerId = user?.email || 'nova_ai_dev';
-      
-      // Open popup directly to public OAuth start function
-      const origin = window.location.origin;
-      const oauthUrl = `${origin}/api/functions/teamsOAuthStartPublic?customer_id=${encodeURIComponent(customerId)}`;
-      const popup = window.open(oauthUrl, 'Teams OAuth', 'width=600,height=700');
-      
-      if (!popup) {
-        alert('Popup bloquée - veuillez autoriser les popups pour ce site');
-        setConnectingTeams(false);
-        return;
-      }
-      
-      // Listen for callback
-      const handleMessage = async (event) => {
-        if (event.data.type === 'teams_success') {
-          // Decode connection data and save via authenticated endpoint
-          const connectionData = JSON.parse(atob(event.data.data));
-          await base44.functions.invoke('teamsSaveConnection', connectionData);
-          
-          setTeamsConnected(true);
-          window.removeEventListener('message', handleMessage);
-          setConnectingTeams(false);
-        } else if (event.data.type === 'teams_error') {
-          console.error('Teams connection error:', event.data.error);
-          window.removeEventListener('message', handleMessage);
-          setConnectingTeams(false);
-        }
-      };
-      
-      window.addEventListener('message', handleMessage);
-      
-      // Cleanup if popup is closed without completing
-      const checkPopup = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkPopup);
-          window.removeEventListener('message', handleMessage);
-          setConnectingTeams(false);
-        }
-      }, 500);
+      // Open in new tab instead of redirect
+      window.open(data.authUrl, '_blank');
+      setConnectingTeams(false);
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);

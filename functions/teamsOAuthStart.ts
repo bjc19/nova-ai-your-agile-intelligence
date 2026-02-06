@@ -10,16 +10,12 @@ Deno.serve(async (req) => {
     }
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
-    const refererHeader = req.headers.get('referer');
-    const origin = refererHeader ? new URL(refererHeader).origin : new URL(req.url).origin;
+    const origin = new URL(req.url).origin;
     const redirectUri = `${origin}/api/functions/teamsOAuthCallback`;
     
     const scopes = [
       'Calendars.Read',
       'OnlineMeetingTranscript.Read.All',
-      'Chat.Read',
-      'ChannelMessage.Read.All',
-      'Team.ReadBasic.All',
       'offline_access'
     ].join(' ');
 
@@ -28,11 +24,9 @@ Deno.serve(async (req) => {
       `&response_type=code` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&scope=${encodeURIComponent(scopes)}` +
-      `&state=${user.email}` +
-      `&response_mode=query`;
+      `&state=${user.email}`;
 
-    // Redirection 302 vers Microsoft OAuth
-    return Response.redirect(authUrl, 302);
+    return Response.json({ authUrl });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
