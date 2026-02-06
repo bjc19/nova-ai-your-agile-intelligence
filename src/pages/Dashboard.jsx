@@ -19,17 +19,18 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import JiraInsightsCard from "@/components/dashboard/JiraInsightsCard";
 
-import { 
-  Mic, 
+import {
+  Mic,
   Sparkles,
   ArrowRight,
   Zap,
   Calendar,
   Clock,
   Loader2,
-  TrendingUp
-} from "lucide-react";
+  TrendingUp } from
+"lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -50,9 +51,9 @@ export default function Dashboard() {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
+
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
@@ -69,19 +70,19 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        
+
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
         if (activeSprints.length > 0) {
           setSprintContext(activeSprints[0]);
         }
-        
+
         // Vérifier onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
-        
+
         // Vérifier alertes multi-projets en attente
         const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
           admin_response: "pending"
@@ -104,11 +105,11 @@ export default function Dashboard() {
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading,
+    enabled: !isLoading
   });
 
   // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter(analysis => {
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const startDate = new Date(selectedPeriod.start);
     const endDate = new Date(selectedPeriod.end);
@@ -128,14 +129,14 @@ export default function Dashboard() {
         parsedAnalysis.sourceUrl = url;
         parsedAnalysis.sourceName = name;
       }
-      
+
       // Filter by selected period if one is set
       if (selectedPeriod && parsedAnalysis.created_date) {
         const analysisDate = new Date(parsedAnalysis.created_date);
         const startDate = new Date(selectedPeriod.start);
         const endDate = new Date(selectedPeriod.end);
         endDate.setHours(23, 59, 59, 999);
-        
+
         if (analysisDate >= startDate && analysisDate <= endDate) {
           setLatestAnalysis(parsedAnalysis);
         } else {
@@ -175,16 +176,16 @@ export default function Dashboard() {
 
   // Simulated sprint health data (will come from Jira integration)
   // Only show simulated data if there are analyses in the period
-  const sprintHealth = (!selectedPeriod || analysisHistory.length > 0) ? {
+  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
     sprint_name: "Sprint 14",
     sprint_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    risk_score: analysisHistory.length > 0 
-      ? Math.min(100, (analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) * 15) + 
-                       (analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) * 10))
-      : 45,
-    status: analysisHistory.length > 0 && 
-            analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) >= 3 
-      ? "at_risk" : "healthy",
+    risk_score: analysisHistory.length > 0 ?
+    Math.min(100, analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) * 15 +
+    analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) * 10) :
+    45,
+    status: analysisHistory.length > 0 &&
+    analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) >= 3 ?
+    "at_risk" : "healthy",
     wip_count: 6,
     wip_historical_avg: 5,
     tickets_in_progress_over_3d: analysisHistory.length > 0 ? Math.min(3, analysisHistory[0]?.blockers_count || 0) : 1,
@@ -192,26 +193,26 @@ export default function Dashboard() {
     alert_sent: false,
     recommendations: latestAnalysis?.recommendations?.slice(0, 1) || ["Réduire le WIP et prioriser les tickets bloqués"],
     problematic_tickets: [
-      { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
-      { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }
-    ]
+    { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
+    { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }]
+
   } : null;
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Onboarding Modal */}
-      <TeamConfigOnboarding 
+      <TeamConfigOnboarding
         isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)}
-      />
+        onComplete={() => setShowOnboarding(false)} />
+
 
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
@@ -223,8 +224,8 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+            transition={{ duration: 0.6 }}>
+
             {/* Welcome Banner */}
             <div className="flex flex-col gap-6 mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -243,34 +244,34 @@ export default function Dashboard() {
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
                   <p className="text-slate-600 mt-2 text-lg">
-                    {sprintInfo.deliveryMode === "kanban" 
-                      ? "Voici votre vue d'ensemble et vos dernières analyses."
-                      : t('sprintOverview')}
+                    {sprintInfo.deliveryMode === "kanban" ?
+                    "Voici votre vue d'ensemble et vos dernières analyses." :
+                    t('sprintOverview')}
                   </p>
                 </div>
                 
                 <div className="flex items-center gap-3">
-                {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 && (
+                {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 &&
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                     <Clock className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-600">
                       <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
                     </span>
                   </div>
-                )}
-                {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek && (
+                  }
+                {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek &&
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                     <Zap className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-600">
                       <span className="font-semibold text-slate-900">{sprintInfo.throughputPerWeek}</span> tickets/semaine
                     </span>
                   </div>
-                )}
+                  }
                   <Link to={createPageUrl("Analysis")}>
-                    <Button 
-                      size="lg" 
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
-                    >
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+
                       <Mic className="w-4 h-4 mr-2" />
                       {t('newAnalysis')}
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -281,21 +282,21 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end">
-                <TimePeriodSelector 
+                <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
-                  }}
-                />
+                  }} />
+
               </div>
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) && (
-              <QuickStats analysisHistory={analysisHistory} />
-            )}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
@@ -303,22 +304,22 @@ export default function Dashboard() {
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Multi-Project Alert */}
-        {multiProjectAlert && (
-          <div className="mb-6">
-            <MultiProjectAlert 
-              detectionData={multiProjectAlert}
-              onConfirm={() => {
-                setMultiProjectAlert(null);
-                window.location.reload();
-              }}
-              onDismiss={() => setMultiProjectAlert(null)}
-            />
+        {multiProjectAlert &&
+        <div className="mb-6">
+            <MultiProjectAlert
+            detectionData={multiProjectAlert}
+            onConfirm={() => {
+              setMultiProjectAlert(null);
+              window.location.reload();
+            }}
+            onDismiss={() => setMultiProjectAlert(null)} />
+
           </div>
-        )}
+        }
 
         {/* Empty State for No Data in Period */}
-        {selectedPeriod && analysisHistory.length === 0 && (
-          <div className="text-center py-16">
+        {selectedPeriod && analysisHistory.length === 0 &&
+        <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
@@ -335,124 +336,127 @@ export default function Dashboard() {
               </Button>
             </Link>
           </div>
-        )}
+        }
 
         {/* Show content only if there are analyses in the period */}
-        {(!selectedPeriod || analysisHistory.length > 0) && (
-          <div className="grid lg:grid-cols-3 gap-6">
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
-              {sprintHealth && (
-                <SprintHealthCard 
-                  sprintHealth={{
-                    sprint_name: "Sprint 14",
-                    wip_count: 8,
-                    wip_historical_avg: 5,
-                    tickets_in_progress_over_3d: 3 + gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length,
-                    blocked_tickets_over_48h: 2 + gdprSignals.filter(s => s.criticite === 'moyenne').length,
-                    sprint_day: 5,
-                    historical_sprints_count: 4,
-                    drift_acknowledged: false,
-                    problematic_tickets: sprintHealth.problematic_tickets,
-                    gdprSignals: gdprSignals
-                  }}
-                  onAcknowledge={() => console.log("Drift acknowledged")}
-                  onReviewSprint={() => console.log("Review sprint")}
-                />
-              )}
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={{
+                sprint_name: "Sprint 14",
+                wip_count: 8,
+                wip_historical_avg: 5,
+                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+                sprint_day: 5,
+                historical_sprints_count: 4,
+                drift_acknowledged: false,
+                problematic_tickets: sprintHealth.problematic_tickets,
+                gdprSignals: gdprSignals
+              }}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
+
+            }
 
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 && (
-                <MetricsRadarCard 
-                  metricsData={{
-                    velocity: { current: 45, trend: "up", change: 20 },
-                    flow_efficiency: { current: 28, target: 55 },
-                    cycle_time: { current: 9, target: 4 },
-                    throughput: { current: 6, variance: 0.3 },
-                    deployment_frequency: { current: 1, target: 3 },
-                    data_days: 14,
-                  }}
-                  historicalData={{
-                    sprints_count: 1,
-                    data_days: 7,
-                    is_audit_phase: false,
-                    is_new_team: true,
-                  }}
-                  integrationStatus={{
-                    jira_connected: true,
-                    slack_connected: false,
-                    dora_pipeline: false,
-                    flow_metrics_available: true,
-                  }}
-                  onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-                  onApplyLever={(lever) => console.log("Apply lever:", lever)}
-                />
-              )}
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
+              metricsData={{
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
+              }}
+              historicalData={{
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
+              }}
+              integrationStatus={{
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
+              }}
+              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
+              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
+
+            }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 && (
-                <RealityMapCard
-                  flowData={{
-                    assignee_changes: [
-                      { person: "Mary", count: 42 },
-                      { person: "John", count: 12 },
-                    ],
-                    mention_patterns: [
-                      { person: "Mary", type: "prioritization", count: 35 },
-                      { person: "Dave", type: "unblocking", count: 19 },
-                    ],
-                    blocked_resolutions: [
-                      { person: "Dave", count: 19 },
-                    ],
-                    data_days: 30,
-                  }}
-                  flowMetrics={{
-                    blocked_tickets_over_5d: 12,
-                    avg_cycle_time: 8.2,
-                    avg_wait_time_percent: 65,
-                    reopened_tickets: 8,
-                    total_tickets: 100,
-                    data_days: 30,
-                  }}
-                  onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")}
-                />
-              )}
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
+              flowData={{
+                assignee_changes: [
+                { person: "Mary", count: 42 },
+                { person: "John", count: 12 }],
+
+                mention_patterns: [
+                { person: "Mary", type: "prioritization", count: 35 },
+                { person: "Dave", type: "unblocking", count: 19 }],
+
+                blocked_resolutions: [
+                { person: "Dave", count: 19 }],
+
+                data_days: 30
+              }}
+              flowMetrics={{
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30
+              }}
+              onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
+
+            }
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
             
             {/* Key Recommendations */}
-            <KeyRecommendations 
-            latestAnalysis={latestAnalysis}
-            sourceUrl={latestAnalysis?.sourceUrl}
-            sourceName={latestAnalysis?.sourceName}
-          />
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
+
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Jira Insights */}
+            <JiraInsightsCard />
+
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
-            
+
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
         </div>
-        )}
+        }
 
         {/* Quick Actions Footer */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8"
-        >
-          <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 md:p-8">
+          className="mt-8">
+
+          <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyForDailyScrum')}
+                  {t('readyToBoostYourImpact?')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
@@ -476,6 +480,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
