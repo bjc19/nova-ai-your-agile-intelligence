@@ -177,8 +177,8 @@ ${urgencyCriteria}
 
 Analyze the following transcript and identify:
 
-1. Blockers - issues preventing team members from making progress (with urgency level based on ${deliveryMode} context)
-2. Risks - potential problems that could impact delivery (with urgency level based on ${deliveryMode} context)
+1. Blockers - issues preventing team members from making progress (with urgency level based on ${deliveryMode} context, include anti-patterns detected like: blockers, velocity_issues, wip_overload, communication_issues, scope_creep)
+2. Risks - potential problems that could impact delivery (with urgency level based on ${deliveryMode} context, include anti-patterns detected)
 3. Dependencies - tasks that depend on other team members or external factors
 4. Recommended actions for each issue
 
@@ -204,7 +204,12 @@ Provide a detailed analysis in the following JSON format:`;
               member: { type: "string" },
               issue: { type: "string" },
               urgency: { type: "string", enum: ["high", "medium", "low"] },
-              action: { type: "string" }
+              action: { type: "string" },
+              patterns: {
+                type: "array",
+                items: { type: "string" },
+                description: "Anti-patterns detected (e.g., blockers, velocity_issues, wip_overload)"
+              }
             }
           }
         },
@@ -216,7 +221,12 @@ Provide a detailed analysis in the following JSON format:`;
               description: { type: "string" },
               impact: { type: "string" },
               urgency: { type: "string", enum: ["high", "medium", "low"] },
-              mitigation: { type: "string" }
+              mitigation: { type: "string" },
+              patterns: {
+                type: "array",
+                items: { type: "string" },
+                description: "Anti-patterns detected (e.g., communication_issues, scope_creep)"
+              }
             }
           }
         },
