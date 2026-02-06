@@ -30,6 +30,8 @@ export default function Settings() {
   const [slackConnected, setSlackConnected] = useState(false);
   const [slackTeamName, setSlackTeamName] = useState(null);
   const [connectingSlack, setConnectingSlack] = useState(false);
+  const [teamsConnected, setTeamsConnected] = useState(false);
+  const [connectingTeams, setConnectingTeams] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const [teamConfig, setTeamConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
@@ -79,6 +81,28 @@ export default function Settings() {
     }
   };
 
+  const handleTeamsConnect = async () => {
+    try {
+      setConnectingTeams(true);
+      const { data } = await base44.functions.invoke('teamsOAuthStart');
+      
+      // Redirect to Microsoft OAuth
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error('Error starting Teams OAuth:', error);
+      setConnectingTeams(false);
+    }
+  };
+
+  const handleTeamsDisconnect = async () => {
+    try {
+      await base44.functions.invoke('teamsDisconnect');
+      setTeamsConnected(false);
+    } catch (error) {
+      console.error('Error disconnecting Teams:', error);
+    }
+  };
+
   const integrations = [
     {
       id: "slack",
@@ -118,8 +142,9 @@ export default function Settings() {
       color: "from-indigo-500 to-indigo-600",
       bgColor: "bg-indigo-100",
       iconColor: "text-indigo-600",
-      available: false,
-      comingSoon: true
+      available: true,
+      connected: teamsConnected,
+      onConnect: handleTeamsConnect
     },
     {
       id: "zoom",
@@ -143,16 +168,26 @@ export default function Settings() {
           setTeamConfig(configs[0]);
         }
 
-        // Check Slack connection
+        // Check Slack and Teams connections
         const user = await base44.auth.me();
-        const connections = await base44.entities.SlackConnection.filter({ 
-          user_email: user.email,
-          is_active: true
-        });
+        const [slackConns, teamsConns] = await Promise.all([
+          base44.entities.SlackConnection.filter({ 
+            user_email: user.email,
+            is_active: true
+          }),
+          base44.entities.TeamsConnection.filter({ 
+            user_email: user.email,
+            is_active: true
+          })
+        ]);
         
-        if (connections.length > 0) {
+        if (slackConns.length > 0) {
           setSlackConnected(true);
-          setSlackTeamName(connections[0].team_name);
+          setSlackTeamName(slackConns[0].team_name);
+        }
+        
+        if (teamsConns.length > 0) {
+          setTeamsConnected(true);
         }
       } catch (error) {
         console.error("Erreur chargement données:", error);
@@ -358,7 +393,7 @@ export default function Settings() {
           </Card>
         </motion.div>
 
-        {/* Available Integration - Slack */}
+        {/* Available Integrations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -370,6 +405,8 @@ export default function Settings() {
             {t('availableIntegration')}
           </h2>
           
+          <div className="space-y-4">
+          {/* Slack */}
           <Card className="overflow-hidden border-2 border-purple-200 hover:border-purple-300 transition-colors">
             <CardContent className="p-6">
               <div className="flex items-start justify-between gap-4">
@@ -431,6 +468,60 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Teams */}
+          <Card className="overflow-hidden border-2 border-indigo-200 hover:border-indigo-300 transition-colors">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/25`}>
+                    <MessageSquare className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-slate-900">Microsoft Teams</h3>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-3">
+                      {t('teamsDescription')}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        Analyse transcripts réunions
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  {teamsConnected ? (
+                    <>
+                      <Badge className="bg-emerald-100 text-emerald-700">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        {t('connected')}
+                      </Badge>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTeamsDisconnect}
+                        className="text-xs"
+                      >
+                        Déconnecter
+                      </Button>
+                    </>
+                  ) : (
+                    <Button 
+                      className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
+                      onClick={handleTeamsConnect}
+                      disabled={connectingTeams}
+                    >
+                      {connectingTeams ? "Connexion..." : "Connecter Teams"}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          </div>
         </motion.div>
 
         {/* Coming Soon Integrations */}
