@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [acknowledged, setAcknowledged] = useState(false);
   const [acknowledgedBy, setAcknowledgedBy] = useState("");
   const [acknowledgedDate, setAcknowledgedDate] = useState("");
+  const { language } = useLanguage();
 
   // Default/demo data if none provided
   const data = sprintHealth || {
@@ -191,7 +193,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
           </div>
 
           {/* Detected Signals - Only show if drift detected */}
-          {driftAnalysis.status.id === "potential_drift" && driftAnalysis.signals.length > 0 && (
+          {driftAnalysis.status.id === "potential_drift" && (driftAnalysis.signals.length > 0 || data.gdprSignals?.length > 0) && (
             <div className={`p-4 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
               <p className="text-sm font-medium text-slate-700 mb-2">Signaux observés :</p>
               <ul className="space-y-1">
@@ -199,6 +201,12 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                   <li key={index} className="text-sm text-slate-600 flex items-start gap-2">
                     <span className="text-amber-500 mt-0.5">•</span>
                     {signal.label}
+                  </li>
+                ))}
+                {data.gdprSignals?.map((signal, index) => (
+                  <li key={`gdpr-${index}`} className="text-sm text-slate-600 flex items-start gap-2">
+                    <span className="text-purple-500 mt-0.5">•</span>
+                    {language === 'fr' ? 'Signal d\'équipe détecté' : 'Team signal detected'}: {signal.criticite}
                   </li>
                 ))}
               </ul>
