@@ -30,6 +30,21 @@ import PilotModeIndicator from "./PilotModeIndicator";
 import { enrichRecommendationWithDependency } from "./DependencyAwarenessEngine";
 import DependencyWarning from "./DependencyWarning";
 
+// Définitions des tooltips - Éditables indépendamment
+const TOOLTIP_DEFINITIONS = {
+  confidence: "Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.",
+  lever: "Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.",
+  impact: "Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.",
+  effort: "Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).",
+  metrics: {
+    cycle_time: "Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?",
+    flow_efficiency: "Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?",
+    deployment_frequency: "À quelle fréquence l'équipe met-elle en production des changements utilisables ?",
+    throughput: "Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.",
+    wip_age: "Âge moyen du travail en cours, révèle les tickets qui stagnent."
+  }
+};
+
 export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, onDiscussWithCoach, onApplyLever }) {
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
