@@ -1,24 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
-  const url = new URL(req.url);
-  
   try {
+    const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
     
     if (!code || !state) {
-      return new Response(`
-        <html>
-          <body>
-            <script>
-              window.opener?.postMessage({ type: 'teams-error', error: 'missing_params' }, '*');
-              window.close();
-            </script>
-            <p>Erreur: Paramètres manquants. Cette fenêtre va se fermer...</p>
-          </body>
-        </html>
-      `, { headers: { 'Content-Type': 'text/html' } });
+      return Response.redirect(`${url.origin}/settings?error=missing_params`);
     }
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
@@ -40,18 +29,7 @@ Deno.serve(async (req) => {
     const tokens = await tokenResponse.json();
     
     if (!tokens.access_token) {
-      console.error('Token error:', tokens);
-      return new Response(`
-        <html>
-          <body>
-            <script>
-              window.opener?.postMessage({ type: 'teams-error', error: 'token_failed' }, '*');
-              window.close();
-            </script>
-            <p>Erreur d'authentification: ${tokens.error_description || 'Token non reçu'}. Cette fenêtre va se fermer...</p>
-          </body>
-        </html>
-      `, { headers: { 'Content-Type': 'text/html' } });
+      return Response.redirect(`${url.origin}/settings?error=token_failed`);
     }
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
@@ -83,16 +61,7 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Teams OAuth error:', error);
-    return new Response(`
-      <html>
-        <body>
-          <script>
-            window.opener?.postMessage({ type: 'teams-error', error: 'connection_failed' }, '*');
-            window.close();
-          </script>
-          <p>Erreur de connexion: ${error.message}. Cette fenêtre va se fermer...</p>
-        </body>
-      </html>
-    `, { headers: { 'Content-Type': 'text/html' } });
+    const url = new URL(req.url);
+    return Response.redirect(`${url.origin}/settings?error=connection_failed`);
   }
 });
