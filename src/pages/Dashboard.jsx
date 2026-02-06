@@ -285,6 +285,7 @@ export default function Dashboard() {
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
+                    sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }}
                 />

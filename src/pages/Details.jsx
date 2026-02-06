@@ -30,13 +30,21 @@ export default function Details() {
   const [translatedItems, setTranslatedItems] = useState({});
   const [urgencyFilter, setUrgencyFilter] = useState(null);
 
-  // Get the detail type from sessionStorage
+  // Get the detail type and period from sessionStorage
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  
   useEffect(() => {
     const stored = sessionStorage.getItem("detailsType");
     if (stored) {
       setDetailType(stored);
     } else {
       navigate(createPageUrl("Dashboard"));
+    }
+    
+    // Load selected period from sessionStorage
+    const storedPeriod = sessionStorage.getItem("selectedPeriod");
+    if (storedPeriod) {
+      setSelectedPeriod(JSON.parse(storedPeriod));
     }
   }, [navigate]);
 
@@ -53,8 +61,20 @@ export default function Details() {
   });
 
   useEffect(() => {
-    setAnalysisHistory(historyData);
-  }, [historyData]);
+    // Filter by selected period if available
+    let filtered = historyData;
+    if (selectedPeriod) {
+      const startDate = new Date(selectedPeriod.start);
+      const endDate = new Date(selectedPeriod.end);
+      endDate.setHours(23, 59, 59, 999);
+      
+      filtered = historyData.filter(analysis => {
+        const analysisDate = new Date(analysis.created_date);
+        return analysisDate >= startDate && analysisDate <= endDate;
+      });
+    }
+    setAnalysisHistory(filtered);
+  }, [historyData, selectedPeriod]);
 
   // Translate item content when language changes
   const getTranslatedItem = async (item) => {
