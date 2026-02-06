@@ -43,7 +43,7 @@ export default function Details() {
   // Fetch analysis history
   const { data: historyData = [] } = useQuery({
     queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 20),
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
   });
 
   // Fetch GDPR markers
