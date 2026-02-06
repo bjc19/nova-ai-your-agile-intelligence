@@ -83,7 +83,16 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Teams OAuth error:', error);
-    const url = new URL(req.url);
-    return Response.redirect(`${url.origin}/settings?error=connection_failed`);
+    return new Response(`
+      <html>
+        <body>
+          <script>
+            window.opener?.postMessage({ type: 'teams-error', error: 'connection_failed' }, '*');
+            window.close();
+          </script>
+          <p>Erreur de connexion: ${error.message}. Cette fenêtre va se fermer...</p>
+        </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   }
 });
