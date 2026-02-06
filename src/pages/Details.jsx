@@ -28,6 +28,7 @@ export default function Details() {
   const [detailType, setDetailType] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState([]);
   const [translatedItems, setTranslatedItems] = useState({});
+  const [urgencyFilter, setUrgencyFilter] = useState(null);
 
   // Get the detail type from sessionStorage
   useEffect(() => {
@@ -145,6 +146,19 @@ export default function Details() {
 
   const { items, icon: Icon, color, title } = getDetailsData();
 
+  // Filter items by urgency if selected
+  const filteredItems = urgencyFilter 
+    ? items.filter(item => item.urgency === urgencyFilter)
+    : items;
+
+  // Count items by urgency
+  const urgencyCounts = items.reduce((acc, item) => {
+    if (item.urgency) {
+      acc[item.urgency] = (acc[item.urgency] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Header */}
@@ -164,16 +178,70 @@ export default function Details() {
               {t('backToDashboard')}
             </Button>
 
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl bg-opacity-10`}>
-                <Icon className={`w-8 h-8 ${color}`} />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className={`p-3 rounded-xl bg-opacity-10`}>
+                  <Icon className={`w-8 h-8 ${color}`} />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
+                  <p className="text-slate-600 mt-1">
+                    {filteredItems.length} {filteredItems.length === 1 ? t('item') : t('items')}
+                    {urgencyFilter && ` • ${t(urgencyFilter)}`}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
-                <p className="text-slate-600 mt-1">
-                  {items.length} {items.length === 1 ? t('item') : t('items')}
-                </p>
-              </div>
+
+              {(detailType === "blockers" || detailType === "risks") && Object.keys(urgencyCounts).length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => setUrgencyFilter(null)}
+                    className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                      !urgencyFilter 
+                        ? "bg-slate-900 text-white" 
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    Tous ({items.length})
+                  </button>
+                  {urgencyCounts.high && (
+                    <button
+                      onClick={() => setUrgencyFilter("high")}
+                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                        urgencyFilter === "high"
+                          ? "bg-red-600 text-white"
+                          : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                      }`}
+                    >
+                      {t('high')} ({urgencyCounts.high})
+                    </button>
+                  )}
+                  {urgencyCounts.medium && (
+                    <button
+                      onClick={() => setUrgencyFilter("medium")}
+                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                        urgencyFilter === "medium"
+                          ? "bg-amber-600 text-white"
+                          : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+                      }`}
+                    >
+                      {t('medium')} ({urgencyCounts.medium})
+                    </button>
+                  )}
+                  {urgencyCounts.low && (
+                    <button
+                      onClick={() => setUrgencyFilter("low")}
+                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                        urgencyFilter === "low"
+                          ? "bg-slate-600 text-white"
+                          : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      {t('low')} ({urgencyCounts.low})
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -181,7 +249,7 @@ export default function Details() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {items.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -192,7 +260,7 @@ export default function Details() {
           </motion.div>
         ) : (
           <div className="space-y-3">
-            {items.map((item, index) => {
+            {filteredItems.map((item, index) => {
               const cacheKey = `${item.id}-${language}`;
               const displayItem = translatedItems[cacheKey] || item;
               
@@ -240,7 +308,12 @@ export default function Details() {
                           {item.urgency && (
                             <Badge
                               variant="outline"
-                              className={`shrink-0 ${
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setUrgencyFilter(item.urgency);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className={`shrink-0 cursor-pointer hover:opacity-80 transition-opacity ${
                                 item.urgency === "high"
                                   ? "bg-red-50 text-red-700 border-red-200"
                                   : item.urgency === "medium"
