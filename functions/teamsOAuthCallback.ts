@@ -85,7 +85,8 @@ Deno.serve(async (req) => {
     }
 
     // Store connection in database using service role
-    const client = createClient();
+    const appId = Deno.env.get("BASE44_APP_ID");
+    const client = createClient({ appId });
     await client.asServiceRole.entities.TeamsConnection.create({
       user_email: customerId,
       access_token: tokens.access_token,
