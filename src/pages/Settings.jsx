@@ -131,13 +131,32 @@ export default function Settings() {
 
   const handleJiraConnect = async () => {
     try {
+      setConnectingJira(true);
       const user = await base44.auth.me();
-      const { data } = await base44.functions.invoke('jiraOAuthStart', { customer_id: user.email });
+      const response = await base44.functions.invoke('jiraOAuthStart', { customer_id: user.email });
       
-      // Redirect to OAuth (will come back to callback)
-      window.location.href = data.authorizationUrl;
+      // Open popup for OAuth
+      const authUrl = response.data?.authorizationUrl || response.data;
+      const popup = window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
+      
+      // Listen for callback
+      const handleMessage = (event) => {
+        if (event.data?.success) {
+          loadJiraConnection();
+          setConnectingJira(false);
+          popup?.close();
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data?.error) {
+          console.error('Jira connection error:', event.data.error);
+          setConnectingJira(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      
+      window.addEventListener('message', handleMessage);
     } catch (error) {
       console.error('Error starting Jira OAuth:', error);
+      setConnectingJira(false);
     }
   };
 
