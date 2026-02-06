@@ -43,16 +43,23 @@ export default function Settings() {
       const popup = window.open(data.authUrl, 'Slack OAuth', 'width=600,height=700');
       
       // Listen for callback
-      const handleMessage = (event) => {
+      const handleMessage = async (event) => {
         if (event.data.type === 'slack_success') {
+          // Decode connection data
+          const connectionData = JSON.parse(atob(event.data.data));
+          
+          // Save connection through authenticated endpoint
+          await base44.functions.invoke('slackSaveConnection', connectionData);
+          
           setSlackConnected(true);
           setSlackTeamName(event.data.team);
           window.removeEventListener('message', handleMessage);
+          setConnectingSlack(false);
         } else if (event.data.type === 'slack_error') {
           console.error('Slack connection error:', event.data.error);
           window.removeEventListener('message', handleMessage);
+          setConnectingSlack(false);
         }
-        setConnectingSlack(false);
       };
       
       window.addEventListener('message', handleMessage);

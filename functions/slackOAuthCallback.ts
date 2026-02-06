@@ -43,55 +43,22 @@ Deno.serve(async (req) => {
       throw new Error(tokenData.error || "Failed to get access token");
     }
 
-    // Use service role to store connection (OAuth callback is public endpoint)
-    const appId = Deno.env.get("BASE44_APP_ID");
-    const base44Url = Deno.env.get("BASE44_URL") || "https://api.base44.com";
-    
-    // Check if connection exists
-    const checkResponse = await fetch(`${base44Url}/api/apps/${appId}/entities/SlackConnection?user_email=${user_email}&is_active=true`, {
-      headers: {
-        "Authorization": `Bearer ${Deno.env.get("BASE44_SERVICE_ROLE_KEY")}`
-      }
-    });
-    
-    const existing = await checkResponse.json();
-
+    // Return connection data to frontend - the authenticated frontend will save it
     const connectionData = {
       user_email: user_email,
       access_token: tokenData.access_token,
       team_id: tokenData.team.id,
       team_name: tokenData.team.name,
       bot_user_id: tokenData.bot_user_id,
-      is_active: true,
-      scopes: tokenData.scope.split(","),
-      connected_at: new Date().toISOString()
+      scopes: tokenData.scope
     };
 
-    if (existing.length > 0) {
-      // Update existing connection
-      await fetch(`${base44Url}/api/apps/${appId}/entities/SlackConnection/${existing[0].id}`, {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${Deno.env.get("BASE44_SERVICE_ROLE_KEY")}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(connectionData)
-      });
-    } else {
-      // Create new connection
-      await fetch(`${base44Url}/api/apps/${appId}/entities/SlackConnection`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${Deno.env.get("BASE44_SERVICE_ROLE_KEY")}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(connectionData)
-      });
-    }
+    // Encode data to pass back to frontend
+    const encodedData = btoa(JSON.stringify(connectionData));
 
-    // Return success page that closes popup
+    // Return success page that sends data back and closes popup
     return new Response(
-      `<html><body><script>window.opener.postMessage({type:'slack_success',team:'${tokenData.team.name}'},'*');window.close();</script><p>Connexion réussie! Vous pouvez fermer cette fenêtre.</p></body></html>`,
+      `<html><body><script>window.opener.postMessage({type:'slack_success',team:'${tokenData.team.name}',data:'${encodedData}'},'*');window.close();</script><p>Connexion réussie! Vous pouvez fermer cette fenêtre.</p></body></html>`,
       { headers: { "Content-Type": "text/html" } }
     );
   } catch (error) {
