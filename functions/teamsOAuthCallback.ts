@@ -34,19 +34,31 @@ export default async function teamsOAuthCallback(base44) {
     const tokens = await tokenResponse.json();
 
     if (!tokens.access_token) {
+      const errorMsg = tokens.error_description || tokens.error || 'Token exchange failed';
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'text/html' },
         body: `
           <!DOCTYPE html>
           <html>
+          <head>
+            <style>
+              body { font-family: system-ui; padding: 40px; text-align: center; }
+              .error { background: #fee; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            </style>
+          </head>
           <body>
+            <h2>❌ Échec de la connexion Teams</h2>
+            <div class="error">
+              <p>${errorMsg}</p>
+            </div>
+            <p>Cette fenêtre va se fermer automatiquement...</p>
             <script>
               window.opener.postMessage({
                 type: 'teams_error',
-                error: 'Token exchange failed'
+                error: '${errorMsg}'
               }, '*');
-              window.close();
+              setTimeout(() => window.close(), 3000);
             </script>
           </body>
           </html>
@@ -71,7 +83,7 @@ export default async function teamsOAuthCallback(base44) {
       success: true
     };
 
-    const encodedData = Buffer.from(JSON.stringify(connectionData)).toString('base64');
+    const encodedData = btoa(JSON.stringify(connectionData));
 
     return {
       statusCode: 200,
@@ -79,7 +91,33 @@ export default async function teamsOAuthCallback(base44) {
       body: `
         <!DOCTYPE html>
         <html>
+        <head>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              margin: 0;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .card {
+              background: white;
+              padding: 40px;
+              border-radius: 20px;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+              text-align: center;
+            }
+            .success-icon { font-size: 60px; margin-bottom: 20px; }
+          </style>
+        </head>
         <body>
+          <div class="card">
+            <div class="success-icon">✅</div>
+            <h1>Teams Connecté !</h1>
+            <p>Cette fenêtre va se fermer automatiquement...</p>
+          </div>
           <script>
             window.opener.postMessage({
               type: 'teams_success',
