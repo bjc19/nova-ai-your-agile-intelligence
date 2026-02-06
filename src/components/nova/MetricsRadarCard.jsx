@@ -238,7 +238,35 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-lg font-bold text-slate-700">{index + 1}️⃣</span>
-                              <span className="font-semibold text-slate-900">{metricInfo.name}</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-1 cursor-help">
+                                      <span className="font-semibold text-slate-900">{metricInfo.name}</span>
+                                      <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs">
+                                    <p className="text-xs">
+                                      {lever.metric === "cycle_time" && (
+                                        <><strong>Cycle Time</strong> – Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?</>
+                                      )}
+                                      {lever.metric === "flow_efficiency" && (
+                                        <><strong>Flow Efficiency</strong> – Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?</>
+                                      )}
+                                      {lever.metric === "deployment_frequency" && (
+                                        <><strong>Deployment Frequency</strong> – À quelle fréquence l'équipe met-elle en production des changements utilisables ?</>
+                                      )}
+                                      {lever.metric === "throughput" && (
+                                        <><strong>Throughput</strong> – Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.</>
+                                      )}
+                                      {lever.metric === "wip_age" && (
+                                        <><strong>WIP Age</strong> – Âge moyen du travail en cours, révèle les tickets qui stagnent.</>
+                                      )}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               {lever.dependency_aware?.warning ? (
                                 <DependencyWarning warning={lever.dependency_aware.warning} compact />
                               ) : (
