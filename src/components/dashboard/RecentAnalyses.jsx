@@ -24,6 +24,7 @@ const sourceIcons = {
   slack: MessageSquare,
   file_upload: Upload,
   transcript: FileText,
+  jira: AlertOctagon,
 };
 
 export default function RecentAnalyses({ analyses = [] }) {
@@ -48,9 +49,13 @@ export default function RecentAnalyses({ analyses = [] }) {
         const teamsMarkers = allMarkers.filter(m => 
           m.detection_source === 'teams_daily'
         ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        
+
+        const jiraMarkers = allMarkers.filter(m => 
+          m.detection_source === 'jira_backlog'
+        ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
+
         setGdprSignals(slackMarkers);
-        setTeamsInsights(teamsMarkers);
+        setTeamsInsights([...teamsMarkers, ...jiraMarkers]);
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -132,8 +137,8 @@ export default function RecentAnalyses({ analyses = [] }) {
       ...teamsInsights.map(t => ({
         ...t,
         type: 'signal',
-        signalSource: 'teams',
-        id: t.id || `teams-${t.issue_id}`
+        signalSource: t.detection_source === 'jira_backlog' ? 'jira' : 'teams',
+        id: t.id || `${t.detection_source}-${t.issue_id}`
       }))
     ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 8);
 
@@ -283,45 +288,50 @@ export default function RecentAnalyses({ analyses = [] }) {
                   </motion.div>
                 );
               } else if (item.type === 'signal') {
-                const isTeams = item.signalSource === 'teams';
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 * index }}
-                    className={`p-4 rounded-xl border transition-all ${
-                      isTeams 
-                        ? 'border-purple-200 bg-purple-50/30 hover:bg-purple-50/50'
-                        : 'border-blue-200 bg-blue-50/30 hover:bg-blue-50/50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-lg ${isTeams ? 'bg-purple-100' : 'bg-blue-100'}`}>
-                          <Shield className={`w-4 h-4 ${isTeams ? 'text-purple-600' : 'text-blue-600'}`} />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-slate-900">
-                            {item.probleme}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            <span className="flex items-center gap-1 text-xs text-slate-500">
-                              <Clock className="w-3 h-3" />
-                              {format(new Date(item.created_date), "MMM d, h:mm a")}
-                            </span>
-                            <Badge variant="outline" className="text-xs py-0">
-                              {isTeams ? '#Microsoft Teams' : '#Slack'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge className={`shrink-0 text-xs border ${criticityColor[item.criticite] || criticityColor.basse}`}>
-                        {item.criticite}
-                      </Badge>
-                    </div>
-                  </motion.div>
-                );
+               const isTeams = item.signalSource === 'teams';
+               const isJira = item.signalSource === 'jira';
+               const bgColor = isJira 
+                 ? 'border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50/50'
+                 : isTeams 
+                 ? 'border-purple-200 bg-purple-50/30 hover:bg-purple-50/50'
+                 : 'border-blue-200 bg-blue-50/30 hover:bg-blue-50/50';
+               const iconBg = isJira ? 'bg-emerald-100' : isTeams ? 'bg-purple-100' : 'bg-blue-100';
+               const iconColor = isJira ? 'text-emerald-600' : isTeams ? 'text-purple-600' : 'text-blue-600';
+
+               return (
+                 <motion.div
+                   key={item.id}
+                   initial={{ opacity: 0, x: -10 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   transition={{ duration: 0.3, delay: 0.1 * index }}
+                   className={`p-4 rounded-xl border transition-all ${bgColor}`}
+                 >
+                   <div className="flex items-start justify-between gap-4">
+                     <div className="flex items-start gap-3">
+                       <div className={`p-2 rounded-lg ${iconBg}`}>
+                         <Shield className={`w-4 h-4 ${iconColor}`} />
+                       </div>
+                       <div>
+                         <h4 className="font-medium text-slate-900">
+                           {item.probleme}
+                         </h4>
+                         <div className="flex items-center gap-3 mt-1 flex-wrap">
+                           <span className="flex items-center gap-1 text-xs text-slate-500">
+                             <Clock className="w-3 h-3" />
+                             {format(new Date(item.created_date), "MMM d, h:mm a")}
+                           </span>
+                           <Badge variant="outline" className="text-xs py-0">
+                             {isJira ? '#Jira' : isTeams ? '#Microsoft Teams' : '#Slack'}
+                           </Badge>
+                         </div>
+                       </div>
+                     </div>
+                     <Badge className={`shrink-0 text-xs border ${criticityColor[item.criticite] || criticityColor.basse}`}>
+                       {item.criticite}
+                     </Badge>
+                   </div>
+                 </motion.div>
+               );
               }
             })}
           </div>
