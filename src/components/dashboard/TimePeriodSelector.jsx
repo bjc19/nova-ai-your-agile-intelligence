@@ -93,7 +93,7 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
 
       case "current_month":
         start = startOfMonth(now);
-        end = endOfMonth(now);
+        end = now; // Until today, not end of month
         break;
 
       case "last_quarter":
