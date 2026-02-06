@@ -85,9 +85,13 @@ export default function Settings() {
     try {
       setConnectingTeams(true);
       
-      // Open popup directly to OAuth start function (it will redirect to Microsoft)
+      // Get current user email as customer_id
+      const user = await base44.auth.me();
+      const customerId = user?.email || 'nova_ai_dev';
+      
+      // Open popup directly to public OAuth start function
       const origin = window.location.origin;
-      const oauthUrl = `${origin}/api/functions/teamsOAuthStart`;
+      const oauthUrl = `${origin}/api/functions/teamsOAuthStartPublic?customer_id=${encodeURIComponent(customerId)}`;
       const popup = window.open(oauthUrl, 'Teams OAuth', 'width=600,height=700');
       
       if (!popup) {
@@ -99,12 +103,7 @@ export default function Settings() {
       // Listen for callback
       const handleMessage = async (event) => {
         if (event.data.type === 'teams_success') {
-          // Decode connection data
-          const connectionData = JSON.parse(atob(event.data.data));
-          
-          // Save connection through authenticated endpoint
-          await base44.functions.invoke('teamsSaveConnection', connectionData);
-          
+          // Connection already saved by callback function
           setTeamsConnected(true);
           window.removeEventListener('message', handleMessage);
           setConnectingTeams(false);

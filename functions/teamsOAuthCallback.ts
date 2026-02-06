@@ -1,8 +1,11 @@
+// PUBLIC ENDPOINT - No authentication required
+import { createClient } from 'npm:@base44/sdk@0.8.6';
+
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
-    const state = url.searchParams.get('state');
+    const customerId = url.searchParams.get('state') || 'nova_ai_dev';
     
     if (!code) {
       return new Response('Missing authorization code', { status: 400 });
@@ -10,8 +13,8 @@ Deno.serve(async (req) => {
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
     const clientSecret = Deno.env.get("TEAMS_CLIENT_SECRET");
-    const origin = new URL(req.url).origin;
-    const redirectUri = `${origin}/api/functions/teamsOAuthCallback`;
+    const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI") || 
+      `${url.origin}/api/functions/teamsOAuthCallback`;
 
     // Exchange code for tokens
     const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
@@ -47,12 +50,21 @@ Deno.serve(async (req) => {
     }
 
     // Encode connection data and send to opener
-    const connectionData = {
+    // Store connection in database using service role
+    const base44 = createClient();
+    await base44.asServiceRole.entities.TeamsConnection.create({
+      user_email: customerId,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
       tenant_id: tokens.id_token_claims?.tid || 'common',
-      scopes: tokens.scope?.split(' ') || []
+      scopes: tokens.scope?.split(' ') || [],
+      is_active: true
+    });
+
+    const connectionData = {
+      customer_id: customerId,
+      success: true
     };
 
     const encodedData = btoa(JSON.stringify(connectionData));
