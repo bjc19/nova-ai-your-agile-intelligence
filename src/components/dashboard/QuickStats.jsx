@@ -34,11 +34,16 @@ export default function QuickStats({ analysisHistory = [] }) {
         const teamsMarkers = allMarkers.filter(m => 
           m.detection_source === 'teams_daily'
         );
+
+        const jiraMarkers = allMarkers.filter(m => 
+          m.detection_source === 'jira_backlog'
+        );
         
         // Filter by period if available
         const selectedPeriod = sessionStorage.getItem("selectedPeriod");
         let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        let filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         
         if (selectedPeriod) {
           const period = JSON.parse(selectedPeriod);
@@ -55,10 +60,17 @@ export default function QuickStats({ analysisHistory = [] }) {
             const markerDate = new Date(m.created_date);
             return markerDate >= startDate && markerDate <= endDate;
           });
+
+          filteredJira = jiraMarkers.filter(m => {
+            const markerDate = new Date(m.created_date);
+            return markerDate >= startDate && markerDate <= endDate;
+          });
         }
         
         setGdprSignals(filteredSlack);
         setTeamsInsights(filteredTeams);
+        // Store Jira data in gdprSignals too (will be separated by detection_source)
+        setGdprSignals(prev => [...filteredSlack, ...filteredJira]);
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -93,16 +105,20 @@ export default function QuickStats({ analysisHistory = [] }) {
     (a.analysis_data?.risks || [])
   ).length;
   
-  // Count GDPR markers: critique/haute → blockers, moyenne → risks
-  const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-  const gdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
+  // Count GDPR markers (Slack): critique/haute → blockers, moyenne → risks
+  const slackBlockers = gdprSignals.filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily').filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
+  const slackRisks = gdprSignals.filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily').filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
+  
+  // Count Jira markers: critique/haute → blockers, moyenne/basse → risks
+  const jiraBlockers = gdprSignals.filter(s => s.detection_source === 'jira_backlog').filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
+  const jiraRisks = gdprSignals.filter(s => s.detection_source === 'jira_backlog').filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
   
   // Count Teams markers: critique/haute → blockers, moyenne/basse → risks
   const teamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
   const teamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne' || i.criticite === 'basse').length;
   
-  const totalBlockers = (analysisBlockers || 0) + gdprBlockers + teamsBlockers || 12;
-  const totalRisks = (analysisRisks || 0) + gdprRisks + teamsRisks || 8;
+  const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers || 12;
+  const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks || 8;
   const analysesCount = analysisHistory.length || 6;
   const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
 
