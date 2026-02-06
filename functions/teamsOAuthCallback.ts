@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
     const clientSecret = Deno.env.get("TEAMS_CLIENT_SECRET");
-    const redirectUri = `${url.origin}/api/functions/teamsOAuthCallback`;
+    const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI");
 
     const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
       method: 'POST',
