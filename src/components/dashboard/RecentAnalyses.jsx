@@ -29,6 +29,7 @@ const sourceIcons = {
 export default function RecentAnalyses({ analyses = [] }) {
   const { language } = useLanguage();
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [teamsInsights, setTeamsInsights] = useState([]);
   const [allItems, setAllItems] = useState([]);
 
   useEffect(() => {
@@ -137,7 +138,7 @@ export default function RecentAnalyses({ analyses = [] }) {
     ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 8);
 
     setAllItems(combined);
-  }, [analyses, gdprSignals, language]);
+  }, [analyses, gdprSignals, teamsInsights, language]);
 
   const sourceLabels = language === 'fr' ? {
     slack: "Slack",
