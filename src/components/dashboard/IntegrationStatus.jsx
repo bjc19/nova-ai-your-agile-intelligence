@@ -20,32 +20,40 @@ export default function IntegrationStatus({ integrations = {} }) {
   const [slackConnected, setSlackConnected] = useState(false);
   const [teamsConnected, setTeamsConnected] = useState(false);
   
-  useEffect(() => {
-    const checkConnections = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        if (authenticated) {
-          const user = await base44.auth.me();
-          
-          const [slackConns, teamsConns] = await Promise.all([
-            base44.entities.SlackConnection.filter({ 
-              user_email: user.email,
-              is_active: true
-            }),
-            base44.entities.TeamsConnection.filter({ 
-              user_email: user.email,
-              is_active: true
-            })
-          ]);
-          
-          setSlackConnected(slackConns.length > 0);
-          setTeamsConnected(teamsConns.length > 0);
-        }
-      } catch (error) {
-        console.error("Error checking connections:", error);
+  const checkConnections = async () => {
+    try {
+      const authenticated = await base44.auth.isAuthenticated();
+      if (authenticated) {
+        const user = await base44.auth.me();
+        
+        const [slackConns, teamsConns] = await Promise.all([
+          base44.entities.SlackConnection.filter({ 
+            user_email: user.email,
+            is_active: true
+          }),
+          base44.entities.TeamsConnection.filter({ 
+            user_email: user.email,
+            is_active: true
+          })
+        ]);
+        
+        setSlackConnected(slackConns.length > 0);
+        setTeamsConnected(teamsConns.length > 0);
       }
-    };
+    } catch (error) {
+      console.error("Error checking connections:", error);
+    }
+  };
+
+  useEffect(() => {
     checkConnections();
+    
+    // Listen for connection updates from Settings page
+    const handleStorageChange = () => {
+      checkConnections();
+    };
+    window.addEventListener('focus', handleStorageChange);
+    return () => window.removeEventListener('focus', handleStorageChange);
   }, []);
 
   const defaultIntegrations = {
