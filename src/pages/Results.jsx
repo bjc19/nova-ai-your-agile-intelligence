@@ -9,6 +9,7 @@ import AnalysisTable from "@/components/nova/AnalysisTable";
 import RecommendationCard from "@/components/nova/RecommendationCard";
 import MetricCard from "@/components/nova/MetricCard";
 import PostureIndicator from "@/components/nova/PostureIndicator";
+import GDPRMarkersSection from "@/components/nova/GDPRMarkersSection";
 import { POSTURES } from "@/components/nova/PostureEngine";
 import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
 import { 
@@ -495,14 +496,22 @@ export default function Results() {
          </motion.div>
         )}
 
-        {/* Recommendations */}
-        {analysis.recommendations && analysis.recommendations.length > 0 && (
-          <RecommendationCard 
-            recommendations={analysis.recommendations}
-            sourceUrl={analysis.sourceUrl}
-            sourceName={analysis.sourceName}
+        {/* GDPR Markers Section (if from Slack) */}
+        {analysis.sourceName === "Slack" && (
+          <GDPRMarkersSection 
+            sessionId={analysis.sessionId}
+            analysisDate={analysis.created_date || new Date().toISOString()}
           />
         )}
+
+        {/* Recommendations */}
+         {analysis.recommendations && analysis.recommendations.length > 0 && (
+           <RecommendationCard 
+             recommendations={analysis.recommendations}
+             sourceUrl={analysis.sourceUrl}
+             sourceName={analysis.sourceName}
+           />
+         )}
 
         {/* Footer CTA */}
         <motion.div
