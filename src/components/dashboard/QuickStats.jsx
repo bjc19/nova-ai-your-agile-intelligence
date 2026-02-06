@@ -53,9 +53,15 @@ export default function QuickStats({ analysisHistory = [] }) {
     }
   };
   
-  // Calculate stats from history + GDPR signals
-  const analysisBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
-  const analysisRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0);
+  // Calculate stats from history + GDPR signals (same logic as Details)
+  const analysisBlockers = analysisHistory.flatMap((a) => {
+    const blockers = a.analysis_data?.blockers || [];
+    return blockers.filter(b => b.urgency); // Count only items with urgency
+  }).length;
+  const analysisRisks = analysisHistory.flatMap((a) => {
+    const risks = a.analysis_data?.risks || [];
+    return risks.filter(r => r.urgency); // Count only items with urgency
+  }).length;
   
   // Count GDPR signals: critique/haute → blockers, moyenne → risks
   const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
