@@ -31,25 +31,25 @@ export default function RecentAnalyses({ analyses = [] }) {
   const [gdprSignals, setGdprSignals] = useState([]);
   const [allItems, setAllItems] = useState([]);
 
-  // Fetch GDPR markers and Teams insights from last 7 days
-  const [teamsInsights, setTeamsInsights] = useState([]);
-  
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const [markers, insights] = await Promise.all([
-          base44.entities.GDPRMarkers.list('-created_date', 50),
-          base44.entities.TeamsInsight.list('-created_date', 50)
-        ]);
+        const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 50);
         
-        const recentMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        const recentInsights = insights.filter(i => new Date(i.created_date) >= sevenDaysAgo);
+        // Separate Slack and Teams markers
+        const slackMarkers = allMarkers.filter(m => 
+          m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
+        ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
         
-        setGdprSignals(recentMarkers);
-        setTeamsInsights(recentInsights);
+        const teamsMarkers = allMarkers.filter(m => 
+          m.detection_source === 'teams_daily'
+        ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        
+        setGdprSignals(slackMarkers);
+        setTeamsInsights(teamsMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -125,12 +125,14 @@ export default function RecentAnalyses({ analyses = [] }) {
       ...gdprSignals.map(m => ({
         ...m,
         type: 'signal',
-        signalSource: 'slack'
+        signalSource: 'slack',
+        id: m.id || `slack-${m.issue_id}`
       })),
       ...teamsInsights.map(t => ({
         ...t,
         type: 'signal',
-        signalSource: 'teams'
+        signalSource: 'teams',
+        id: t.id || `teams-${t.issue_id}`
       }))
     ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, 8);
 
