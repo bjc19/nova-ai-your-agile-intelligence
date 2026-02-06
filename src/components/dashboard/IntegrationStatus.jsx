@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,8 +17,32 @@ import {
 } from "lucide-react";
 
 export default function IntegrationStatus({ integrations = {} }) {
+  const [slackConnected, setSlackConnected] = useState(false);
+  useEffect(() => {
+    const checkSlackConnection = async () => {
+      try {
+        const authenticated = await base44.auth.isAuthenticated();
+        if (authenticated) {
+          const user = await base44.auth.me();
+          const connections = await base44.entities.SlackConnection.filter({ 
+            user_email: user.email,
+            is_active: true
+          });
+          setSlackConnected(connections.length > 0);
+        }
+      } catch (error) {
+        console.error("Error checking Slack connection:", error);
+      }
+    };
+    checkSlackConnection();
+  }, []);
+
   const defaultIntegrations = {
-    slack: { connected: false, label: "Slack", status: "disconnected" },
+    slack: { 
+      connected: slackConnected, 
+      label: "Slack", 
+      status: slackConnected ? "connected" : "disconnected" 
+    },
     jira: { connected: false, label: "Jira", status: "unavailable" },
     azure: { connected: false, label: "Azure DevOps", status: "unavailable" },
     teams: { connected: false, label: "Teams", status: "coming_soon" },
