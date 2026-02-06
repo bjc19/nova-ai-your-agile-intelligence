@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
 import {
   AlertOctagon,
   ShieldAlert,
@@ -13,6 +15,25 @@ import { useLanguage } from "@/components/LanguageContext";
 export default function QuickStats({ analysisHistory = [] }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [gdprSignals, setGdprSignals] = useState([]);
+
+  // Fetch GDPR signals from last 7 days
+  useEffect(() => {
+    const fetchSignals = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+
+    fetchSignals();
+  }, []);
 
   const handleStatClick = (labelKey) => {
     let detailType = null;
@@ -32,9 +53,16 @@ export default function QuickStats({ analysisHistory = [] }) {
     }
   };
   
-  // Calculate stats from history or use sample data
-  const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) || 12;
-  const totalRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) || 8;
+  // Calculate stats from history + GDPR signals
+  const analysisBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
+  const analysisRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0);
+  
+  // Count GDPR signals: critique/haute → blockers, moyenne → risks
+  const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
+  const gdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne').length;
+  
+  const totalBlockers = (analysisBlockers || 0) + gdprBlockers || 12;
+  const totalRisks = (analysisRisks || 0) + gdprRisks || 8;
   const analysesCount = analysisHistory.length || 6;
   const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
 
