@@ -27,6 +27,7 @@ export default function Results() {
   const [analysis, setAnalysis] = useState(null);
         const [translationComplete, setTranslationComplete] = useState(language !== 'fr');
         const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
+  const [riskUrgencyFilter, setRiskUrgencyFilter] = useState(null);
 
   useEffect(() => {
         const storedAnalysis = sessionStorage.getItem("novaAnalysis");
@@ -257,14 +258,88 @@ export default function Results() {
             exit={{ opacity: 0, height: 0 }}
             className="mb-8 p-6 rounded-2xl bg-amber-50/50 border border-amber-200"
           >
-            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-amber-600" />
-              {t('riskDetails')}
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-amber-600" />
+                {t('riskDetails')}
+              </h3>
+              {(() => {
+                const urgencyCounts = analysis.risks.reduce((acc, r) => {
+                  if (r.urgency) acc[r.urgency] = (acc[r.urgency] || 0) + 1;
+                  return acc;
+                }, {});
+                return Object.keys(urgencyCounts).length > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setRiskUrgencyFilter(null)}
+                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                        !riskUrgencyFilter 
+                          ? "bg-slate-900 text-white" 
+                          : "bg-white text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      Tous
+                    </button>
+                    {urgencyCounts.high && (
+                      <button
+                        onClick={() => setRiskUrgencyFilter("high")}
+                        className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                          riskUrgencyFilter === "high"
+                            ? "bg-red-600 text-white"
+                            : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                        }`}
+                      >
+                        {t('high')} ({urgencyCounts.high})
+                      </button>
+                    )}
+                    {urgencyCounts.medium && (
+                      <button
+                        onClick={() => setRiskUrgencyFilter("medium")}
+                        className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                          riskUrgencyFilter === "medium"
+                            ? "bg-amber-600 text-white"
+                            : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+                        }`}
+                      >
+                        {t('medium')} ({urgencyCounts.medium})
+                      </button>
+                    )}
+                    {urgencyCounts.low && (
+                      <button
+                        onClick={() => setRiskUrgencyFilter("low")}
+                        className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                          riskUrgencyFilter === "low"
+                            ? "bg-slate-600 text-white"
+                            : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {t('low')} ({urgencyCounts.low})
+                      </button>
+                    )}
+                  </div>
+                ) : null;
+              })()}
+            </div>
             <div className="space-y-3">
-              {analysis.risks.map((risk, index) => (
+              {analysis.risks
+                .filter(risk => !riskUrgencyFilter || risk.urgency === riskUrgencyFilter)
+                .map((risk, index) => (
                 <div key={index} className="p-4 bg-white rounded-xl border border-amber-100">
-                  <p className="font-medium text-slate-900 mb-2">{risk.description}</p>
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="font-medium text-slate-900 flex-1">{risk.description}</p>
+                    {risk.urgency && (
+                      <Badge 
+                        onClick={() => setRiskUrgencyFilter(risk.urgency)}
+                        className={`shrink-0 ml-3 cursor-pointer hover:opacity-80 transition-opacity ${
+                          risk.urgency === "high" ? "bg-red-100 text-red-700 border-red-200" :
+                          risk.urgency === "medium" ? "bg-amber-100 text-amber-700 border-amber-200" :
+                          "bg-slate-100 text-slate-700 border-slate-200"
+                        }`}
+                      >
+                        {t(risk.urgency)}
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-slate-600 mb-1">
                      <span className="font-medium">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
                    </p>
@@ -318,32 +393,106 @@ export default function Results() {
              transition={{ duration: 0.5, delay: 0.25 }}
              className="mb-8"
            >
-             <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-               <ShieldAlert className="w-5 h-5 text-amber-600" />
-               {t('identifiedRisks')}
-             </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {analysis.risks.map((risk, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                  className="p-5 rounded-xl border border-slate-200 bg-white"
-                >
-                  <p className="font-medium text-slate-900 mb-2">{risk.description}</p>
-                  <div className="space-y-2 text-sm">
+             <div className="flex items-center justify-between mb-4">
+               <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                 <ShieldAlert className="w-5 h-5 text-amber-600" />
+                 {t('identifiedRisks')}
+               </h2>
+               {(() => {
+                 const urgencyCounts = analysis.risks.reduce((acc, r) => {
+                   if (r.urgency) acc[r.urgency] = (acc[r.urgency] || 0) + 1;
+                   return acc;
+                 }, {});
+                 return Object.keys(urgencyCounts).length > 0 ? (
+                   <div className="flex items-center gap-2 flex-wrap">
+                     <button
+                       onClick={() => setRiskUrgencyFilter(null)}
+                       className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                         !riskUrgencyFilter 
+                           ? "bg-slate-900 text-white" 
+                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                       }`}
+                     >
+                       Tous
+                     </button>
+                     {urgencyCounts.high && (
+                       <button
+                         onClick={() => setRiskUrgencyFilter("high")}
+                         className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                           riskUrgencyFilter === "high"
+                             ? "bg-red-600 text-white"
+                             : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                         }`}
+                       >
+                         {t('high')} ({urgencyCounts.high})
+                       </button>
+                     )}
+                     {urgencyCounts.medium && (
+                       <button
+                         onClick={() => setRiskUrgencyFilter("medium")}
+                         className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                           riskUrgencyFilter === "medium"
+                             ? "bg-amber-600 text-white"
+                             : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+                         }`}
+                       >
+                         {t('medium')} ({urgencyCounts.medium})
+                       </button>
+                     )}
+                     {urgencyCounts.low && (
+                       <button
+                         onClick={() => setRiskUrgencyFilter("low")}
+                         className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
+                           riskUrgencyFilter === "low"
+                             ? "bg-slate-600 text-white"
+                             : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
+                         }`}
+                       >
+                         {t('low')} ({urgencyCounts.low})
+                       </button>
+                     )}
+                   </div>
+                 ) : null;
+               })()}
+             </div>
+           <div className="grid md:grid-cols-2 gap-4">
+             {analysis.risks
+               .filter(risk => !riskUrgencyFilter || risk.urgency === riskUrgencyFilter)
+               .map((risk, index) => (
+               <motion.div
+                 key={index}
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
+                 className="p-5 rounded-xl border border-slate-200 bg-white"
+               >
+                 <div className="flex items-start justify-between mb-2">
+                   <p className="font-medium text-slate-900 flex-1">{risk.description}</p>
+                   {risk.urgency && (
+                     <Badge 
+                       onClick={() => setRiskUrgencyFilter(risk.urgency)}
+                       className={`shrink-0 ml-3 cursor-pointer hover:opacity-80 transition-opacity ${
+                         risk.urgency === "high" ? "bg-red-100 text-red-700 border-red-200" :
+                         risk.urgency === "medium" ? "bg-amber-100 text-amber-700 border-amber-200" :
+                         "bg-slate-100 text-slate-700 border-slate-200"
+                       }`}
+                     >
+                       {t(risk.urgency)}
+                     </Badge>
+                   )}
+                 </div>
+                 <div className="space-y-2 text-sm">
+                   <p className="text-slate-600">
+                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
+                    </p>
                     <p className="text-slate-600">
-                       <span className="font-medium text-slate-700">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
-                     </p>
-                     <p className="text-slate-600">
-                       <span className="font-medium text-slate-700">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
-                     </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
+                    </p>
+                 </div>
+               </motion.div>
+             ))}
+           </div>
+         </motion.div>
         )}
 
         {/* Recommendations */}
