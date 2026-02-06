@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
+import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 
 import { 
   Mic, 
@@ -38,6 +39,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
 
@@ -180,27 +182,28 @@ export default function Dashboard() {
             transition={{ duration: 0.6 }}
           >
             {/* Welcome Banner */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    {t('Your AI Agile Expert')}
-                  </Badge>
-                  <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
-                    <Calendar className="w-3 h-3 mr-1" />
-                    {sprintInfo.name}
-                  </Badge>
+            <div className="flex flex-col gap-6 mb-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      {t('Your AI Agile Expert')}
+                    </Badge>
+                    <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {sprintInfo.name}
+                    </Badge>
+                  </div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
+                    {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
+                  </h1>
+                  <p className="text-slate-600 mt-2 text-lg">
+                    {t('sprintOverview')}
+                  </p>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-                  {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
-                </h1>
-                <p className="text-slate-600 mt-2 text-lg">
-                  {t('sprintOverview')}
-                </p>
-              </div>
-              
-              <div className="flex items-center gap-3">
+                
+                <div className="flex items-center gap-3">
                 {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 && (
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                     <Clock className="w-4 h-4 text-slate-400" />
@@ -217,16 +220,28 @@ export default function Dashboard() {
                     </span>
                   </div>
                 )}
-                <Link to={createPageUrl("Analysis")}>
-                  <Button 
-                    size="lg" 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
-                  >
-                    <Mic className="w-4 h-4 mr-2" />
-                    {t('newAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button 
+                      size="lg" 
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+                    >
+                      <Mic className="w-4 h-4 mr-2" />
+                      {t('newAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Time Period Selector */}
+              <div className="flex justify-end">
+                <TimePeriodSelector 
+                  deliveryMode={sprintInfo.deliveryMode}
+                  onPeriodChange={(period) => {
+                    setSelectedPeriod(period);
+                    console.log("Period changed:", period);
+                  }}
+                />
               </div>
             </div>
 
