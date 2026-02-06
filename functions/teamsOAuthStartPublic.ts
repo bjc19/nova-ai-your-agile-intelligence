@@ -1,3 +1,6 @@
+/**
+ * @public
+ */
 // PUBLIC ENDPOINT - No authentication required
 Deno.serve(async (req) => {
   try {
