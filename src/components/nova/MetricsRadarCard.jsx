@@ -242,24 +242,68 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               {lever.dependency_aware?.warning ? (
                                 <DependencyWarning warning={lever.dependency_aware.warning} compact />
                               ) : (
-                                <Badge variant="outline" className="text-xs">
-                                  Confiance {lever.dependency_aware?.confidence || lever.confidence}%
-                                </Badge>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge variant="outline" className="text-xs cursor-help">
+                                        Confiance {lever.dependency_aware?.confidence || lever.confidence}%
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs">
+                                      <p className="text-xs">
+                                        <strong>Confiance de Nova</strong> – Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               )}
                             </div>
                             <p className="text-sm text-slate-600 mb-2">
                               {lever.current}{metricInfo.unit} → {lever.target}{metricInfo.unit}
                             </p>
                             <div className="flex items-center gap-3 text-xs">
-                              <span className="text-slate-500">Levier suggéré :</span>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="text-slate-500 cursor-help">Levier suggéré :</span>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs">
+                                    <p className="text-xs">
+                                      <strong>Levier d'action</strong> – Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <span className="font-medium text-blue-600">{lever.lever}</span>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 mb-1">
-                              {lever.impact}
-                            </Badge>
-                            <p className="text-xs text-slate-500">{lever.effort} effort</p>
+                          <div className="text-right space-y-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 cursor-help">
+                                    {lever.impact}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs">
+                                  <p className="text-xs">
+                                    <strong>Impact estimé</strong> – Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <p className="text-xs text-slate-500 cursor-help">{lever.effort} effort</p>
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs">
+                                  <p className="text-xs">
+                                    <strong>Effort requis</strong> – Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                       </button>
