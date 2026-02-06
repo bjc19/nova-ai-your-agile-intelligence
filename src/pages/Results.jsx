@@ -243,6 +243,15 @@ export default function Results() {
                     </Badge>
                   </div>
                   <p className="text-sm text-slate-700 mb-2">{blocker.issue}</p>
+                  {blocker.patterns && blocker.patterns.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {blocker.patterns.map((pattern, pidx) => (
+                        <Badge key={pidx} variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
+                          {pattern}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-sm text-blue-700">
                     <span className="font-medium">{language === 'fr' ? 'Action :' : 'Action:'}</span> {blocker.action}
                   </p>
@@ -341,6 +350,15 @@ export default function Results() {
                       </Badge>
                     )}
                   </div>
+                  {risk.patterns && risk.patterns.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {risk.patterns.map((pattern, pidx) => (
+                        <Badge key={pidx} variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200">
+                          {pattern}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-sm text-slate-600 mb-1">
                      <span className="font-medium">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
                    </p>
@@ -481,15 +499,24 @@ export default function Results() {
                        {t(risk.urgency)}
                      </Badge>
                    )}
-                 </div>
-                 <div className="space-y-2 text-sm">
+                   </div>
+                   {risk.patterns && risk.patterns.length > 0 && (
+                   <div className="flex flex-wrap gap-1 mb-2">
+                     {risk.patterns.map((pattern, pidx) => (
+                       <Badge key={pidx} variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200">
+                         {pattern}
+                       </Badge>
+                     ))}
+                   </div>
+                   )}
+                   <div className="space-y-2 text-sm">
                    <p className="text-slate-600">
                       <span className="font-medium text-slate-700">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
                     </p>
                     <p className="text-slate-600">
                       <span className="font-medium text-slate-700">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
                     </p>
-                 </div>
+                   </div>
                </motion.div>
              ))}
            </div>
