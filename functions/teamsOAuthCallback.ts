@@ -84,22 +84,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Store connection in database using service role
-    const appId = Deno.env.get("BASE44_APP_ID");
-    const client = createClient({ appId });
-    await client.asServiceRole.entities.TeamsConnection.create({
-      user_email: customerId,
+    // Prepare connection data to send to frontend
+    const connectionData = {
+      customer_id: customerId,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
       tenant_id: tokens.id_token_claims?.tid || 'common',
-      scopes: tokens.scope?.split(' ') || [],
-      is_active: true
-    });
-
-    const connectionData = {
-      customer_id: customerId,
-      success: true
+      scopes: tokens.scope?.split(' ') || []
     };
 
     const encodedData = btoa(JSON.stringify(connectionData));
