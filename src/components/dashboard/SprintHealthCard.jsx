@@ -103,7 +103,9 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
         });
         if (jiraConnections.length > 0) {
           const connection = jiraConnections[0];
-          setJiraUrl(`https://${connection.cloud_id}.atlassian.net/jira/software/c/projects/`);
+          // Construct proper Jira dashboard URL from cloud_id
+          const jiraDomain = connection.cloud_id || '';
+          setJiraUrl(`https://${jiraDomain}.atlassian.net/jira/for-you`);
         }
       } catch (error) {
         console.error("Error loading Jira URL:", error);
