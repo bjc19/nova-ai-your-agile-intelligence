@@ -246,21 +246,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
                                   <p className="text-xs">
-                                    {lever.metric === "cycle_time" && (
-                                      <><strong>Cycle Time</strong> – Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?</>
-                                    )}
-                                    {lever.metric === "flow_efficiency" && (
-                                      <><strong>Flow Efficiency</strong> – Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?</>
-                                    )}
-                                    {lever.metric === "deployment_frequency" && (
-                                      <><strong>Deployment Frequency</strong> – À quelle fréquence l'équipe met-elle en production des changements utilisables ?</>
-                                    )}
-                                    {lever.metric === "throughput" && (
-                                      <><strong>Throughput</strong> – Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.</>
-                                    )}
-                                    {lever.metric === "wip_age" && (
-                                      <><strong>WIP Age</strong> – Âge moyen du travail en cours, révèle les tickets qui stagnent.</>
-                                    )}
+                                    <strong>{metricInfo.name}</strong> – {TOOLTIP_DEFINITIONS.metrics[lever.metric] || metricInfo.description}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
@@ -276,7 +262,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="max-w-xs">
                                     <p className="text-xs">
-                                      <strong>Confiance de Nova</strong> – Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.
+                                      <strong>Confiance de Nova</strong> – {TOOLTIP_DEFINITIONS.confidence}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -293,7 +279,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs">
                                   <p className="text-xs">
-                                    <strong>Levier d'action</strong> – Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.
+                                    <strong>Levier d'action</strong> – {TOOLTIP_DEFINITIONS.lever}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
@@ -325,7 +311,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               </TooltipTrigger>
                               <TooltipContent side="left" className="max-w-xs">
                                 <p className="text-xs">
-                                  <strong>Effort requis</strong> – Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).
+                                  <strong>Effort requis</strong> – {TOOLTIP_DEFINITIONS.effort}
                                 </p>
                               </TooltipContent>
                             </Tooltip>
