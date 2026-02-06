@@ -25,8 +25,24 @@ export default function QuickStats({ analysisHistory = [] }) {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
+        
+        // Filter by period if available
+        const selectedPeriod = sessionStorage.getItem("selectedPeriod");
+        let filtered = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        
+        if (selectedPeriod) {
+          const period = JSON.parse(selectedPeriod);
+          const startDate = new Date(period.start);
+          const endDate = new Date(period.end);
+          endDate.setHours(23, 59, 59, 999);
+          
+          filtered = markers.filter(m => {
+            const markerDate = new Date(m.created_date);
+            return markerDate >= startDate && markerDate <= endDate;
+          });
+        }
+        
+        setGdprSignals(filtered);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
       }
