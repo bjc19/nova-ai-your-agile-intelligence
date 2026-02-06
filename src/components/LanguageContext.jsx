@@ -44,7 +44,7 @@ export const translations = {
     more: "de plus",
     totalBlockers: "Blockers totaux",
     risksIdentified: "Risques identifiés",
-    analysesRun: "Analyses effectuées",
+    analysesRun: "Analyses manuelles effectuées",
     resolved: "Résolus",
     
     // Settings
