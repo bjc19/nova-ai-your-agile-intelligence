@@ -43,13 +43,18 @@ Deno.serve(async (req) => {
       throw new Error(tokenData.error || "Failed to get access token");
     }
 
-    // Store connection in database
-    const base44 = createClientFromRequest(req);
+    // Use service role to store connection (OAuth callback is public endpoint)
+    const appId = Deno.env.get("BASE44_APP_ID");
+    const base44Url = Deno.env.get("BASE44_URL") || "https://api.base44.com";
     
     // Check if connection exists
-    const existing = await base44.asServiceRole.entities.SlackConnection.filter({ 
-      user_email: user_email 
+    const checkResponse = await fetch(`${base44Url}/api/apps/${appId}/entities/SlackConnection?user_email=${user_email}&is_active=true`, {
+      headers: {
+        "Authorization": `Bearer ${Deno.env.get("BASE44_SERVICE_ROLE_KEY")}`
+      }
     });
+    
+    const existing = await checkResponse.json();
 
     const connectionData = {
       user_email: user_email,
@@ -63,9 +68,25 @@ Deno.serve(async (req) => {
     };
 
     if (existing.length > 0) {
-      await base44.asServiceRole.entities.SlackConnection.update(existing[0].id, connectionData);
+      // Update existing connection
+      await fetch(`${base44Url}/api/apps/${appId}/entities/SlackConnection/${existing[0].id}`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${Deno.env.get("BASE44_SERVICE_ROLE_KEY")}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(connectionData)
+      });
     } else {
-      await base44.asServiceRole.entities.SlackConnection.create(connectionData);
+      // Create new connection
+      await fetch(`${base44Url}/api/apps/${appId}/entities/SlackConnection`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${Deno.env.get("BASE44_SERVICE_ROLE_KEY")}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(connectionData)
+      });
     }
 
     // Return success page that closes popup
