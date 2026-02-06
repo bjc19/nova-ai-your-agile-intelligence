@@ -188,10 +188,11 @@ export default function Details() {
 
   const { items, icon: Icon, color, title } = getDetailsData();
 
-  // Filter items by urgency if selected
-  const filteredItems = urgencyFilter 
+  // Filter and sort items by urgency and date (most recent first)
+  const filteredItems = (urgencyFilter 
     ? items.filter(item => item.urgency === urgencyFilter)
-    : items;
+    : items
+  ).sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
 
   // Count items by urgency
   const urgencyCounts = items.reduce((acc, item) => {
