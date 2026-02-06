@@ -23,7 +23,8 @@ import {
   Settings as SettingsIcon,
   Languages,
   Target,
-  Layers
+  Layers,
+  Database
 } from "lucide-react";
 
 export default function Settings() {
@@ -32,6 +33,8 @@ export default function Settings() {
   const [connectingSlack, setConnectingSlack] = useState(false);
   const [teamsConnected, setTeamsConnected] = useState(false);
   const [connectingTeams, setConnectingTeams] = useState(false);
+  const [jiraConnected, setJiraConnected] = useState(false);
+  const [connectingJira, setConnectingJira] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const [teamConfig, setTeamConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
@@ -126,6 +129,65 @@ export default function Settings() {
     }
   };
 
+  const handleJiraConnect = async () => {
+    try {
+      setConnectingJira(true);
+      const user = await base44.auth.me();
+      const { data } = await base44.functions.invoke('jiraOAuthStart', { customer_id: user.email });
+      
+      // Open popup for OAuth
+      const popup = window.open(data.authorizationUrl, 'Jira OAuth', 'width=600,height=700');
+      
+      // Listen for callback
+      const handleMessage = (event) => {
+        if (event.data?.success) {
+          loadJiraConnection();
+          setConnectingJira(false);
+          popup?.close();
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data?.error) {
+          console.error('Jira connection error:', event.data.error);
+          setConnectingJira(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      
+      window.addEventListener('message', handleMessage);
+    } catch (error) {
+      console.error('Error starting Jira OAuth:', error);
+      setConnectingJira(false);
+    }
+  };
+
+  const loadJiraConnection = async () => {
+    try {
+      const user = await base44.auth.me();
+      const jiraConns = await base44.entities.JiraConnection.filter({ 
+        user_email: user.email,
+        is_active: true
+      });
+      setJiraConnected(jiraConns.length > 0);
+    } catch (error) {
+      console.error('Error loading Jira connection:', error);
+    }
+  };
+
+  const handleJiraDisconnect = async () => {
+    try {
+      const user = await base44.auth.me();
+      const jiraConns = await base44.entities.JiraConnection.filter({ 
+        user_email: user.email,
+        is_active: true
+      });
+      if (jiraConns.length > 0) {
+        await base44.entities.JiraConnection.update(jiraConns[0].id, { is_active: false });
+        setJiraConnected(false);
+      }
+    } catch (error) {
+      console.error('Error disconnecting Jira:', error);
+    }
+  };
+
   const integrations = [
     {
       id: "slack",
@@ -141,12 +203,13 @@ export default function Settings() {
     {
       id: "jira",
       name: "Jira",
-      icon: FileSpreadsheet,
+      icon: Database,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600",
-      available: false,
-      requiresBackend: true
+      available: true,
+      connected: jiraConnected,
+      onConnect: handleJiraConnect
     },
     {
       id: "azure",
@@ -191,14 +254,18 @@ export default function Settings() {
           setTeamConfig(configs[0]);
         }
 
-        // Check Slack and Teams connections
+        // Check Slack, Teams and Jira connections
         const user = await base44.auth.me();
-        const [slackConns, teamsConns] = await Promise.all([
+        const [slackConns, teamsConns, jiraConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
             user_email: user.email,
             is_active: true
           }),
           base44.entities.TeamsConnection.filter({ 
+            user_email: user.email,
+            is_active: true
+          }),
+          base44.entities.JiraConnection.filter({ 
             user_email: user.email,
             is_active: true
           })
@@ -211,6 +278,10 @@ export default function Settings() {
         
         if (teamsConns.length > 0) {
           setTeamsConnected(true);
+        }
+
+        if (jiraConns.length > 0) {
+          setJiraConnected(true);
         }
       } catch (error) {
         console.error("Erreur chargement données:", error);
@@ -493,59 +564,119 @@ export default function Settings() {
           </Card>
 
           {/* Teams */}
-          <Card className="overflow-hidden border-2 border-indigo-200 hover:border-indigo-300 transition-colors">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/25`}>
-                    <MessageSquare className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-slate-900">Microsoft Teams</h3>
-                    </div>
-                    <p className="text-sm text-slate-600 mb-3">
-                      {t('teamsDescription')}
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                        Analyse transcripts réunions
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  {teamsConnected ? (
-                    <>
-                      <Badge className="bg-emerald-100 text-emerald-700">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                        {t('connected')}
-                      </Badge>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={handleTeamsDisconnect}
-                        className="text-xs"
-                      >
-                        Déconnecter
-                      </Button>
-                    </>
-                  ) : (
-                    <Button 
-                      className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
-                      onClick={handleTeamsConnect}
-                      disabled={connectingTeams}
-                    >
-                      {connectingTeams ? "Connexion..." : "Connecter Teams"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          </div>
-        </motion.div>
+           <Card className="overflow-hidden border-2 border-indigo-200 hover:border-indigo-300 transition-colors">
+             <CardContent className="p-6">
+               <div className="flex items-start justify-between gap-4">
+                 <div className="flex items-start gap-4">
+                   <div className={`p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-lg shadow-indigo-500/25`}>
+                     <MessageSquare className="w-6 h-6 text-white" />
+                   </div>
+                   <div>
+                     <div className="flex items-center gap-2 mb-1">
+                       <h3 className="font-semibold text-slate-900">Microsoft Teams</h3>
+                     </div>
+                     <p className="text-sm text-slate-600 mb-3">
+                       {t('teamsDescription')}
+                     </p>
+                     <div className="flex items-center gap-2 text-xs text-slate-500">
+                       <span className="flex items-center gap-1">
+                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                         Analyse transcripts réunions
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+                 <div className="flex flex-col items-end gap-2">
+                   {teamsConnected ? (
+                     <>
+                       <Badge className="bg-emerald-100 text-emerald-700">
+                         <CheckCircle2 className="w-3 h-3 mr-1" />
+                         {t('connected')}
+                       </Badge>
+                       <Button 
+                         variant="outline"
+                         size="sm"
+                         onClick={handleTeamsDisconnect}
+                         className="text-xs"
+                       >
+                         Déconnecter
+                       </Button>
+                     </>
+                   ) : (
+                     <Button 
+                       className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
+                       onClick={handleTeamsConnect}
+                       disabled={connectingTeams}
+                     >
+                       {connectingTeams ? "Connexion..." : "Connecter Teams"}
+                     </Button>
+                   )}
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+
+           {/* Jira */}
+           <Card className="overflow-hidden border-2 border-emerald-200 hover:border-emerald-300 transition-colors">
+             <CardContent className="p-6">
+               <div className="flex items-start justify-between gap-4">
+                 <div className="flex items-start gap-4">
+                   <div className={`p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25`}>
+                     <Database className="w-6 h-6 text-white" />
+                   </div>
+                   <div>
+                     <div className="flex items-center gap-2 mb-1">
+                       <h3 className="font-semibold text-slate-900">Jira</h3>
+                       <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                         {t('recommended')}
+                       </Badge>
+                     </div>
+                     <p className="text-sm text-slate-600 mb-3">
+                       {t('jiraDescription')}
+                     </p>
+                     <div className="flex items-center gap-2 text-xs text-slate-500">
+                       <span className="flex items-center gap-1">
+                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                         Analyse backlog & issues
+                       </span>
+                       <span className="flex items-center gap-1">
+                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                         GDPR compliant
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+                 <div className="flex flex-col items-end gap-2">
+                   {jiraConnected ? (
+                     <>
+                       <Badge className="bg-emerald-100 text-emerald-700">
+                         <CheckCircle2 className="w-3 h-3 mr-1" />
+                         {t('connected')}
+                       </Badge>
+                       <Button 
+                         variant="outline"
+                         size="sm"
+                         onClick={handleJiraDisconnect}
+                         className="text-xs"
+                       >
+                         Déconnecter
+                       </Button>
+                     </>
+                   ) : (
+                     <Button 
+                       className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+                       onClick={handleJiraConnect}
+                       disabled={connectingJira}
+                     >
+                       {connectingJira ? "Connexion..." : "Connecter Jira"}
+                     </Button>
+                   )}
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+           </div>
+          </motion.div>
 
         {/* Coming Soon Integrations */}
         <motion.div
