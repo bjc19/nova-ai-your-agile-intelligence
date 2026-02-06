@@ -152,14 +152,7 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
       </Badge>
 
       <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-        <SelectTrigger 
-          className="w-[220px]"
-          onClick={() => {
-            if (selectedPeriod === "custom") {
-              setShowCustom(true);
-            }
-          }}
-        >
+        <SelectTrigger className="w-[220px]">
           <Calendar className="w-4 h-4 mr-2" />
           <SelectValue placeholder={getPeriodLabel()} />
         </SelectTrigger>
