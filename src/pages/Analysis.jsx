@@ -194,6 +194,7 @@ Provide a detailed analysis in the following JSON format:`;
             properties: {
               description: { type: "string" },
               impact: { type: "string" },
+              urgency: { type: "string", enum: ["high", "medium", "low"] },
               mitigation: { type: "string" }
             }
           }
