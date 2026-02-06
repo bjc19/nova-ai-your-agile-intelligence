@@ -113,13 +113,12 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
   const StatusIcon = config.icon;
 
   return (
-    <TooltipProvider>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className={`overflow-hidden border-2 ${config.borderColor} ${config.bgColor}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className={`overflow-hidden border-2 ${config.borderColor} ${config.bgColor}`}>
         <CardHeader className="pb-2">
           <div className="flex items-center gap-3 mb-3">
             <div className={`p-2.5 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
@@ -164,27 +163,29 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                         Signal réel : {issue.realSignal}
                       </p>
                       <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 mb-3">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => {
-                                setSelectedQuestion(issue.keyQuestion);
-                                setIsResponseDialogOpen(true);
-                              }}
-                              className="w-full flex items-start gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer text-left"
-                            >
-                              <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
-                              <div className="flex-1">
-                                <p className="text-xs font-medium text-blue-700 mb-1">Question clé</p>
-                                <p className="text-sm text-blue-900 italic">{issue.keyQuestion}</p>
-                              </div>
-                              <Shield className="w-4 h-4 text-emerald-500" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-xs">
-                            <p className="text-xs">🔒 Votre réponse est <strong>100% anonyme</strong> et alimente la base de données de Nova pour améliorer ses analyses.</p>
-                          </TooltipContent>
-                        </Tooltip>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => {
+                                  setSelectedQuestion(issue.keyQuestion);
+                                  setIsResponseDialogOpen(true);
+                                }}
+                                className="w-full flex items-start gap-2 p-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer text-left"
+                              >
+                                <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
+                                <div className="flex-1">
+                                  <p className="text-xs font-medium text-blue-700 mb-1">Question clé</p>
+                                  <p className="text-sm text-blue-900 italic">{issue.keyQuestion}</p>
+                                </div>
+                                <Shield className="w-4 h-4 text-emerald-500" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p className="text-xs">🔒 Votre réponse est <strong>100% anonyme</strong> et alimente la base de données de Nova pour améliorer ses analyses.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-slate-500">Métrique prioritaire :</span>
@@ -237,49 +238,53 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-lg font-bold text-slate-700">{index + 1}️⃣</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1 cursor-help">
-                                    <span className="font-semibold text-slate-900">{metricInfo.name}</span>
-                                    <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-xs">
-                                  <p className="text-xs">
-                                    {lever.metric === "cycle_time" && (
-                                      <><strong>Cycle Time</strong> – Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?</>
-                                    )}
-                                    {lever.metric === "flow_efficiency" && (
-                                      <><strong>Flow Efficiency</strong> – Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?</>
-                                    )}
-                                    {lever.metric === "deployment_frequency" && (
-                                      <><strong>Deployment Frequency</strong> – À quelle fréquence l'équipe met-elle en production des changements utilisables ?</>
-                                    )}
-                                    {lever.metric === "throughput" && (
-                                      <><strong>Throughput</strong> – Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.</>
-                                    )}
-                                    {lever.metric === "wip_age" && (
-                                      <><strong>WIP Age</strong> – Âge moyen du travail en cours, révèle les tickets qui stagnent.</>
-                                    )}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                              {lever.dependency_aware?.warning ? (
-                                <DependencyWarning warning={lever.dependency_aware.warning} compact />
-                              ) : (
+                              <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Badge variant="outline" className="text-xs cursor-help flex items-center gap-1">
-                                      Confiance {lever.dependency_aware?.confidence || lever.confidence}%
-                                      <HelpCircle className="w-3 h-3 text-slate-400" />
-                                    </Badge>
+                                    <div className="flex items-center gap-1 cursor-help">
+                                      <span className="font-semibold text-slate-900">{metricInfo.name}</span>
+                                      <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
+                                    </div>
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="max-w-xs">
                                     <p className="text-xs">
-                                      <strong>Confiance de Nova</strong> – Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.
+                                      {lever.metric === "cycle_time" && (
+                                        <><strong>Cycle Time</strong> – Combien de temps s'écoule entre le début d'un travail de l'équipe et sa livraison réelle ?</>
+                                      )}
+                                      {lever.metric === "flow_efficiency" && (
+                                        <><strong>Flow Efficiency</strong> – Quelle part du parcours de travail correspond réellement à de la progression active plutôt qu'à des périodes où la tâche est simplement en attente ?</>
+                                      )}
+                                      {lever.metric === "deployment_frequency" && (
+                                        <><strong>Deployment Frequency</strong> – À quelle fréquence l'équipe met-elle en production des changements utilisables ?</>
+                                      )}
+                                      {lever.metric === "throughput" && (
+                                        <><strong>Throughput</strong> – Nombre d'items terminés par unité de temps, indicateur de prévisibilité du flux.</>
+                                      )}
+                                      {lever.metric === "wip_age" && (
+                                        <><strong>WIP Age</strong> – Âge moyen du travail en cours, révèle les tickets qui stagnent.</>
+                                      )}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
+                              </TooltipProvider>
+                              {lever.dependency_aware?.warning ? (
+                                <DependencyWarning warning={lever.dependency_aware.warning} compact />
+                              ) : (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Badge variant="outline" className="text-xs cursor-help flex items-center gap-1">
+                                        Confiance {lever.dependency_aware?.confidence || lever.confidence}%
+                                        <HelpCircle className="w-3 h-3 text-slate-400" />
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs">
+                                      <p className="text-xs">
+                                        <strong>Confiance de Nova</strong> – Fiabilité de la recommandation basée sur la qualité et la quantité de données disponibles. Plus le score est élevé, plus l'analyse est robuste.
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               )}
                             </div>
                             <p className="text-sm text-slate-600 mb-2">
@@ -287,48 +292,54 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                             </p>
                             <div className="flex items-center gap-2 text-xs">
                               <span className="text-slate-500">Levier suggéré :</span>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <HelpCircle className="w-3 h-3 text-slate-400 cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-xs">
-                                  <p className="text-xs">
-                                    <strong>Levier d'action</strong> – Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="w-3 h-3 text-slate-400 cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs">
+                                    <p className="text-xs">
+                                      <strong>Levier d'action</strong> – Approche concrète pour améliorer la métrique. Les leviers sont des hypothèses à valider avec l'équipe, pas des prescriptions obligatoires.
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                               <span className="font-medium text-blue-600">{lever.lever}</span>
                             </div>
                           </div>
                           <div className="text-right space-y-1">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="inline-flex items-center gap-1 cursor-help">
-                                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                                    {lever.impact}
-                                  </Badge>
-                                  <HelpCircle className="w-3 h-3 text-slate-400" />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="left" className="max-w-xs">
-                                <p className="text-xs">
-                                  <strong>Impact estimé</strong> – Combien de temps s’écoule entre le début d’un travail de l'équipe et sa livraison réelle ? Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="inline-flex items-center gap-1 cursor-help">
-                                  <p className="text-xs text-slate-500">{lever.effort} effort</p>
-                                  <HelpCircle className="w-3 h-3 text-slate-400" />
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="left" className="max-w-xs">
-                                <p className="text-xs">
-                                  <strong>Effort requis</strong> – Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="inline-flex items-center gap-1 cursor-help">
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                                      {lever.impact}
+                                    </Badge>
+                                    <HelpCircle className="w-3 h-3 text-slate-400" />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs">
+                                  <p className="text-xs">
+                                    <strong>Impact estimé</strong> – Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="inline-flex items-center gap-1 cursor-help">
+                                    <p className="text-xs text-slate-500">{lever.effort} effort</p>
+                                    <HelpCircle className="w-3 h-3 text-slate-400" />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs">
+                                  <p className="text-xs">
+                                    <strong>Effort requis</strong> – Complexité de mise en œuvre : faible (quick win), moyen (coordination d'équipe), ou élevé (changement systémique).
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                       </button>
@@ -498,6 +509,5 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
         </CardContent>
       </Card>
     </motion.div>
-    </TooltipProvider>
   );
 }
