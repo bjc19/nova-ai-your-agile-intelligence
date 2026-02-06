@@ -164,40 +164,33 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
         </SelectContent>
       </Select>
 
-      {showCustom && (
-        <Popover open={showCustom} onOpenChange={setShowCustom}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm">
-              Choisir les dates
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-4" align="end">
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Date de début</label>
-                <CalendarComponent
-                  mode="single"
-                  selected={customStart}
-                  onSelect={setCustomStart}
-                  disabled={(date) => date > new Date()}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Date de fin</label>
-                <CalendarComponent
-                  mode="single"
-                  selected={customEnd}
-                  onSelect={setCustomEnd}
-                  disabled={(date) => date > new Date() || (customStart && date < customStart)}
-                />
-              </div>
-              <Button onClick={applyCustomPeriod} className="w-full">
-                Appliquer
-              </Button>
+      <Popover open={showCustom} onOpenChange={setShowCustom}>
+        <PopoverContent className="w-auto p-4" align="end">
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Date de début</label>
+              <CalendarComponent
+                mode="single"
+                selected={customStart}
+                onSelect={setCustomStart}
+                disabled={(date) => date > new Date()}
+              />
             </div>
-          </PopoverContent>
-        </Popover>
-      )}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Date de fin</label>
+              <CalendarComponent
+                mode="single"
+                selected={customEnd}
+                onSelect={setCustomEnd}
+                disabled={(date) => date > new Date() || (customStart && date < customStart)}
+              />
+            </div>
+            <Button onClick={applyCustomPeriod} className="w-full">
+              Appliquer
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
