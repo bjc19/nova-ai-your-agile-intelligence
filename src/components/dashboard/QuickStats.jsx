@@ -53,15 +53,13 @@ export default function QuickStats({ analysisHistory = [] }) {
     }
   };
   
-  // Calculate stats from history + GDPR signals (same logic as Details)
-  const analysisBlockers = analysisHistory.flatMap((a) => {
-    const blockers = a.analysis_data?.blockers || [];
-    return blockers.filter(b => b.urgency); // Count only items with urgency
-  }).length;
-  const analysisRisks = analysisHistory.flatMap((a) => {
-    const risks = a.analysis_data?.risks || [];
-    return risks.filter(r => r.urgency); // Count only items with urgency
-  }).length;
+  // Calculate stats from history + GDPR signals (all items, not just those with urgency)
+  const analysisBlockers = analysisHistory.flatMap((a) => 
+    a.analysis_data?.blockers || []
+  ).length;
+  const analysisRisks = analysisHistory.flatMap((a) => 
+    a.analysis_data?.risks || []
+  ).length;
   
   // Count GDPR signals: critique/haute → blockers, moyenne → risks
   const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
