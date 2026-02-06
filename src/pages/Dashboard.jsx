@@ -155,7 +155,8 @@ export default function Dashboard() {
   }
 
   // Simulated sprint health data (will come from Jira integration)
-  const sprintHealth = {
+  // Only show simulated data if there are analyses in the period
+  const sprintHealth = (!selectedPeriod || analysisHistory.length > 0) ? {
     sprint_name: "Sprint 14",
     sprint_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     risk_score: analysisHistory.length > 0 
@@ -175,7 +176,7 @@ export default function Dashboard() {
       { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
       { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }
     ]
-  };
+  } : null;
 
   if (isLoading) {
     return (
