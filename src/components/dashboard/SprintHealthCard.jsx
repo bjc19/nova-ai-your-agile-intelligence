@@ -61,6 +61,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [acknowledged, setAcknowledged] = useState(false);
   const [acknowledgedBy, setAcknowledgedBy] = useState("");
   const [acknowledgedDate, setAcknowledgedDate] = useState("");
+  const [jiraUrl, setJiraUrl] = useState(null);
   const { language } = useLanguage();
 
   // Default/demo data if none provided
@@ -86,6 +87,25 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
       setAcknowledgedDate(ackData.date);
     }
   }, [data.sprint_name]);
+
+  // Load Jira connection URL
+  useEffect(() => {
+    const loadJiraUrl = async () => {
+      try {
+        const user = await base44.auth.me();
+        const jiraConnections = await base44.entities.JiraConnection.filter({ 
+          user_email: user.email 
+        });
+        if (jiraConnections.length > 0) {
+          const connection = jiraConnections[0];
+          setJiraUrl(`https://${connection.cloud_id}.atlassian.net/jira/software/c/projects/`);
+        }
+      } catch (error) {
+        console.error("Error loading Jira URL:", error);
+      }
+    };
+    loadJiraUrl();
+  }, []);
 
   const handleAcknowledge = async () => {
     try {
@@ -353,7 +373,13 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                   {/* CTA Buttons */}
                   <div className="flex gap-2">
                     <Button
-                      onClick={onReviewSprint}
+                      onClick={() => {
+                        if (jiraUrl) {
+                          window.open(jiraUrl, '_blank');
+                        } else if (onReviewSprint) {
+                          onReviewSprint();
+                        }
+                      }}
                       className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
                     >
                       Revoir le sprint maintenant
