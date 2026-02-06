@@ -97,7 +97,7 @@ export default function Dashboard() {
     return analysisDate >= startDate && analysisDate <= endDate;
   }) : allAnalysisHistory;
 
-  // Check for stored analysis from session
+  // Check for stored analysis from session and filter by period
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -109,9 +109,24 @@ export default function Dashboard() {
         parsedAnalysis.sourceUrl = url;
         parsedAnalysis.sourceName = name;
       }
-      setLatestAnalysis(parsedAnalysis);
+      
+      // Filter by selected period if one is set
+      if (selectedPeriod && parsedAnalysis.created_date) {
+        const analysisDate = new Date(parsedAnalysis.created_date);
+        const startDate = new Date(selectedPeriod.start);
+        const endDate = new Date(selectedPeriod.end);
+        endDate.setHours(23, 59, 59, 999);
+        
+        if (analysisDate >= startDate && analysisDate <= endDate) {
+          setLatestAnalysis(parsedAnalysis);
+        } else {
+          setLatestAnalysis(null);
+        }
+      } else {
+        setLatestAnalysis(parsedAnalysis);
+      }
     }
-  }, []);
+  }, [selectedPeriod]);
 
   // Calculate sprint info from real data
   const calculateDaysRemaining = (endDate) => {
@@ -278,11 +293,34 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Sprint Health Card - Drift Detection */}
-            <SprintHealthCard 
+        {/* Empty State for No Data in Period */}
+        {selectedPeriod && analysisHistory.length === 0 && (
+          <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+              <Calendar className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              Aucune analyse pour cette période
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
+            </p>
+            <Link to={createPageUrl("Analysis")}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                <Mic className="w-4 h-4 mr-2" />
+                Créer une analyse
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {/* Show content only if there are analyses in the period */}
+        {(!selectedPeriod || analysisHistory.length > 0) && (
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Sprint Health Card - Drift Detection */}
+              <SprintHealthCard 
               sprintHealth={{
                 sprint_name: "Sprint 14",
                 wip_count: 8,
@@ -371,6 +409,7 @@ export default function Dashboard() {
             <IntegrationStatus />
           </div>
         </div>
+        )}
 
         {/* Quick Actions Footer */}
         <motion.div
