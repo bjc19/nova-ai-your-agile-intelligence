@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import { base44 } from "@/api/base44Client";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Lightbulb,
   ArrowRight,
@@ -33,6 +34,12 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [detailsCache, setDetailsCache] = useState({});
   const [completedItems, setCompletedItems] = useState({});
   const [translatedRecommendations, setTranslatedRecommendations] = useState(null);
+  
+  // Fetch GDPR markers and Teams insights for all recommendations
+  const { data: allMarkersData = [] } = useQuery({
+    queryKey: ['gdprMarkers'],
+    queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
+  });
   
   // Sample recommendations for demo
   const sampleRecommendations = language === 'fr' ? [
@@ -93,10 +100,11 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   }, [language]);
 
   useEffect(() => {
-    if (latestAnalysis?.recommendations && language === 'fr' && !translatedRecommendations) {
+    const allRecs = getRecommendations();
+    if (allRecs.length > 0 && language === 'fr' && !translatedRecommendations && allRecs[0]?.source !== undefined) {
       const translateRecommendations = async () => {
-        const descriptions = latestAnalysis.recommendations.map(rec => 
-          typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec)
+        const descriptions = allRecs.map(rec => 
+          typeof rec === 'string' ? rec : rec?.description || rec?.title || JSON.stringify(rec)
         );
 
         const translationPrompt = `Traduis chaque recommandation en français de manière concise:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON avec les traductions en français, au même index que l'original.`;
@@ -131,19 +139,58 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
 
       translateRecommendations();
     }
-  }, [latestAnalysis, language, translatedRecommendations]);
+  }, [allMarkersData, language, translatedRecommendations]);
 
-  const recommendations = translatedRecommendations || (latestAnalysis?.recommendations 
-    ? latestAnalysis.recommendations.map((rec, i) => {
+  // Combine recommendations from manual analysis + GDPR markers
+  const getRecommendations = () => {
+    const allRecs = [];
+    
+    // Add manual analysis recommendations if available
+    if (latestAnalysis?.recommendations && latestAnalysis.recommendations.length > 0) {
+      allRecs.push(...latestAnalysis.recommendations.map((rec, i) => {
         const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
         return {
           type: "default",
-          title: language === 'fr' ? recText : recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
+          title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
           description: recText,
           priority: i === 0 ? "high" : "medium",
+          source: 'analysis'
         };
-      })
-    : sampleRecommendations);
+      }));
+    }
+    
+    // Add GDPR markers recommendations (from Slack and Teams)
+    const recosFromMarkers = [];
+    allMarkersData.forEach(marker => {
+      if (marker.recos && Array.isArray(marker.recos)) {
+        marker.recos.forEach((reco, idx) => {
+          recosFromMarkers.push({
+            type: "default",
+            title: typeof reco === 'string' ? reco : reco?.substring(0, 50) + (reco?.length > 50 ? "..." : ""),
+            description: typeof reco === 'string' ? reco : reco,
+            priority: marker.criticite === 'critique' || marker.criticite === 'haute' ? 'high' : 'medium',
+            source: marker.detection_source?.includes('teams') ? 'teams' : 'slack'
+          });
+        });
+      }
+    });
+    
+    allRecs.push(...recosFromMarkers);
+    
+    // If no recommendations from any source, use samples
+    if (allRecs.length === 0) {
+      return sampleRecommendations;
+    }
+    
+    // Apply translation if needed
+    if (translatedRecommendations) {
+      return translatedRecommendations;
+    }
+    
+    return allRecs;
+  };
+
+  const recommendations = getRecommendations();
 
   const priorityColors = {
     high: "bg-red-100 text-red-700 border-red-200",
