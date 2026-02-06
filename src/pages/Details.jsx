@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
-import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter } from "lucide-react";
+import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield } from "lucide-react";
 
 const translateContent = async (text, targetLanguage) => {
   if (!text || targetLanguage === 'en') return text;
@@ -44,6 +44,12 @@ export default function Details() {
   const { data: historyData = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 20),
+  });
+
+  // Fetch GDPR markers
+  const { data: gdprMarkersData = [] } = useQuery({
+    queryKey: ['gdprMarkers'],
+    queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
   });
 
   useEffect(() => {
@@ -89,28 +95,64 @@ export default function Details() {
     let icon, color, title;
 
     if (detailType === "blockers") {
+      // Analyses blockers + GDPR blockers (critique/haute)
       items = analysisHistory.flatMap((analysis, idx) => {
         const blockers = analysis.analysis_data?.blockers || [];
         return blockers.map((blocker, bidx) => ({
           id: `${idx}-${bidx}`,
           ...blocker,
+          source: 'analysis',
           analysisTitle: analysis.title,
           analysisDate: analysis.created_date,
         }));
-      });
+      }).concat(
+        gdprMarkersData
+          .filter(m => m.criticite === 'critique' || m.criticite === 'haute')
+          .map((marker, idx) => ({
+            id: `gdpr-blocker-${idx}`,
+            issue: marker.probleme,
+            description: marker.probleme,
+            urgency: marker.criticite === 'critique' ? 'high' : 'medium',
+            source: 'gdpr',
+            marker_id: marker.id,
+            criticite: marker.criticite,
+            recurrence: marker.recurrence,
+            confidence_score: marker.confidence_score,
+            analysisTitle: '#Slack Team Signal',
+            analysisDate: marker.created_date,
+          }))
+      );
       icon = AlertOctagon;
       color = "text-blue-600";
       title = t('detectedBlockersIssues');
     } else if (detailType === "risks") {
+      // Analyses risks + GDPR risks (moyenne)
       items = analysisHistory.flatMap((analysis, idx) => {
         const risks = analysis.analysis_data?.risks || [];
         return risks.map((risk, ridx) => ({
           id: `${idx}-${ridx}`,
           ...risk,
+          source: 'analysis',
           analysisTitle: analysis.title,
           analysisDate: analysis.created_date,
         }));
-      });
+      }).concat(
+        gdprMarkersData
+          .filter(m => m.criticite === 'moyenne')
+          .map((marker, idx) => ({
+            id: `gdpr-risk-${idx}`,
+            issue: marker.probleme,
+            description: marker.probleme,
+            urgency: 'medium',
+            source: 'gdpr',
+            marker_id: marker.id,
+            criticite: marker.criticite,
+            recurrence: marker.recurrence,
+            confidence_score: marker.confidence_score,
+            analysisTitle: '#Slack Team Signal',
+            analysisDate: marker.created_date,
+          }))
+      );
       icon = ShieldAlert;
       color = "text-amber-600";
       title = t('identifiedRisks');
@@ -278,8 +320,12 @@ export default function Details() {
                 className="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-md transition-all"
               >
                 <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-slate-100">
-                    <Icon className={`w-5 h-5 ${color}`} />
+                  <div className={`p-2 rounded-lg ${item.source === 'gdpr' ? 'bg-purple-100' : 'bg-slate-100'}`}>
+                    {item.source === 'gdpr' ? (
+                      <Shield className={`w-5 h-5 text-purple-600`} />
+                    ) : (
+                      <Icon className={`w-5 h-5 ${color}`} />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     {detailType === "analyses" ? (
@@ -343,12 +389,24 @@ export default function Details() {
                             <strong>{t('impact')}:</strong> {displayItem.impact}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mt-3">
-                          <span className="text-xs text-slate-500">
+                        <div className="flex items-center gap-2 mt-3 flex-wrap">
+                          <span className={`text-xs ${item.source === 'gdpr' ? 'text-purple-600 font-medium' : 'text-slate-500'}`}>
                             {item.analysisTitle}
                           </span>
-                          <span className="text-xs text-slate-400">
-                            • {new Date(item.analysisDate).toLocaleDateString()}
+                          {item.source === 'gdpr' && (
+                            <>
+                              <span className="text-xs text-slate-400">•</span>
+                              <span className="text-xs text-slate-500">
+                                Récurrence: {item.recurrence}x
+                              </span>
+                              <span className="text-xs text-slate-400">•</span>
+                              <span className="text-xs text-slate-500">
+                                Confiance: {Math.round(item.confidence_score * 100)}%
+                              </span>
+                            </>
+                          )}
+                          <span className={`text-xs ${item.source === 'gdpr' ? 'text-slate-400' : ''}`}>
+                            {item.source === 'gdpr' ? '•' : '•'} {new Date(item.analysisDate).toLocaleDateString()}
                           </span>
                         </div>
                       </>
