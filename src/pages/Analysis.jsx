@@ -124,6 +124,11 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
     setIsAnalyzing(true);
     setError(null);
 
+    // Fetch active sprint context to get delivery mode
+    const sprintContexts = await base44.entities.SprintContext.filter({ is_active: true });
+    const activeSprintContext = sprintContexts[0] || { delivery_mode: "scrum" };
+    const deliveryMode = activeSprintContext.delivery_mode;
+
     // Map workshop type to ceremony context
     const workshopContextMap = {
       daily_scrum: "daily_scrum",
@@ -149,15 +154,31 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
     };
     const analysisFocus = workshopFocusMap[workshopType] || workshopFocusMap.other;
 
+    // Define urgency evaluation criteria based on delivery mode
+    const urgencyCriteria = deliveryMode === "kanban" 
+      ? `
+URGENCY EVALUATION (Kanban mode - Flow continuous):
+- HIGH: Bloque le flow, crée un goulot d'étranglement, menace le throughput/semaine, WIP critique
+- MEDIUM: Ralentit le cycle time, affecte plusieurs tickets, risque d'accumulation
+- LOW: Impact limité, peut être résolu progressivement, n'affecte pas le flow immédiat`
+      : `
+URGENCY EVALUATION (Scrum mode - Sprint timeboxé):
+- HIGH: Bloque le Sprint Goal, empêche la complétion avant la fin du sprint, bloquant critique
+- MEDIUM: Ralentit la vélocité, risque de déborder du sprint, dépendance non résolue
+- LOW: Impact mineur, peut attendre le prochain sprint, pas critique pour le goal actuel`;
+
     const basePrompt = `You are Nova, an AI Scrum Master analyzing a meeting transcript. 
 
 Workshop type: ${workshopType.replace('_', ' ').toUpperCase()}
 Analysis focus: ${analysisFocus}
+Delivery mode: ${deliveryMode.toUpperCase()}
+
+${urgencyCriteria}
 
 Analyze the following transcript and identify:
 
-1. Blockers - issues preventing team members from making progress
-2. Risks - potential problems that could impact the sprint/project
+1. Blockers - issues preventing team members from making progress (with urgency level based on ${deliveryMode} context)
+2. Risks - potential problems that could impact delivery (with urgency level based on ${deliveryMode} context)
 3. Dependencies - tasks that depend on other team members or external factors
 4. Recommended actions for each issue
 
