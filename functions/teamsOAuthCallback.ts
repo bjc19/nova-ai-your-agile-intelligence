@@ -1,13 +1,24 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
+  const url = new URL(req.url);
+  
   try {
-    const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
     
     if (!code || !state) {
-      return Response.redirect(`${url.origin}/settings?error=missing_params`);
+      return new Response(`
+        <html>
+          <body>
+            <script>
+              window.opener?.postMessage({ type: 'teams-error', error: 'missing_params' }, '*');
+              window.close();
+            </script>
+            <p>Erreur: Paramètres manquants. Cette fenêtre va se fermer...</p>
+          </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html' } });
     }
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
@@ -29,7 +40,18 @@ Deno.serve(async (req) => {
     const tokens = await tokenResponse.json();
     
     if (!tokens.access_token) {
-      return Response.redirect(`${url.origin}/settings?error=token_failed`);
+      console.error('Token error:', tokens);
+      return new Response(`
+        <html>
+          <body>
+            <script>
+              window.opener?.postMessage({ type: 'teams-error', error: 'token_failed' }, '*');
+              window.close();
+            </script>
+            <p>Erreur d'authentification: ${tokens.error_description || 'Token non reçu'}. Cette fenêtre va se fermer...</p>
+          </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html' } });
     }
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
