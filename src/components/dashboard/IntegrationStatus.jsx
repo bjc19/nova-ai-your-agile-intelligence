@@ -79,7 +79,7 @@ export default function IntegrationStatus({ integrations = {} }) {
       label: "Jira", 
       status: jiraConnected ? "connected" : "disconnected" 
     },
-    azure: { connected: false, label: "Azure DevOps", status: "unavailable" },
+    azure: { connected: false, label: "Azure DevOps", status: "coming_soon" },
     zoom: { connected: false, label: "Zoom", status: "coming_soon" },
   };
 
