@@ -13,8 +13,7 @@ Deno.serve(async (req) => {
     const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI");
     
     const scopes = [
-      'Calendars.Read',
-      'OnlineMeetingTranscript.Read.All',
+      'Files.Read.All',
       'offline_access'
     ].join(' ');
 

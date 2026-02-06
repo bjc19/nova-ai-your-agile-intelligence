@@ -40,55 +40,41 @@ Deno.serve(async (req) => {
         // Get access token for this user
         const accessToken = connection.access_token;
         
-        // Fetch recent meetings from Microsoft Graph
-        const meetingsResponse = await fetch(
-          'https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=' + 
-          new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() + 
-          '&endDateTime=' + new Date().toISOString(),
+        // Search OneDrive for Teams transcripts (*.vtt files saved by Teams)
+        const searchResponse = await fetch(
+          'https://graph.microsoft.com/v1.0/me/drive/root:/Microsoft Teams Chat Files/Transcripts:/children',
           {
             headers: { 'Authorization': `Bearer ${accessToken}` }
           }
         );
 
-        if (!meetingsResponse.ok) {
-          console.error('Failed to fetch meetings:', meetingsResponse.status);
+        if (!searchResponse.ok) {
+          console.log('Transcripts folder not found for user');
           continue;
         }
 
-        const meetingsData = await meetingsResponse.json();
-        const meetings = meetingsData.value || [];
+        const filesData = await searchResponse.json();
+        const transcriptFiles = filesData.value || [];
 
-        for (const meeting of meetings) {
+        // Filter VTT/TXT transcript files from last 24h
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        for (const file of transcriptFiles) {
+          if (!file.name.match(/\.(vtt|txt)$/i)) continue;
+          if (new Date(file.lastModifiedDateTime) < oneDayAgo) continue;
+
           try {
-            // Check if meeting has Teams recording/transcript
-            if (!meeting.isOnlineMeeting) continue;
-
-            // Get meeting transcript
-            const meetingId = meeting.id;
-            const transcriptResponse = await fetch(
-              `https://graph.microsoft.com/v1.0/me/events/${meetingId}/transcripts`,
+            // Download transcript content from OneDrive
+            const contentResponse = await fetch(
+              `https://graph.microsoft.com/v1.0/me/drive/items/${file.id}/content`,
               {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
               }
             );
 
-            if (!transcriptResponse.ok) continue;
+            if (!contentResponse.ok) continue;
 
-            const transcriptData = await transcriptResponse.json();
-            const transcripts = transcriptData.value || [];
-
-            for (const transcript of transcripts) {
-              // Get full transcript content
-              const contentResponse = await fetch(
-                `https://graph.microsoft.com/v1.0/me/events/${meetingId}/transcripts/${transcript.id}/content`,
-                {
-                  headers: { 'Authorization': `Bearer ${accessToken}` }
-                }
-              );
-
-              if (!contentResponse.ok) continue;
-
-              const transcriptContent = await contentResponse.text();
+            const transcriptContent = await contentResponse.text();
 
               // ========== ANALYZE IN MEMORY ONLY ==========
               // Use LLM to detect patterns WITHOUT storing raw content
