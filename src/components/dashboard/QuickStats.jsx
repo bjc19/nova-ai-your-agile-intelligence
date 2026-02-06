@@ -53,12 +53,12 @@ export default function QuickStats({ analysisHistory = [] }) {
     }
   };
   
-  // Calculate stats from history + GDPR signals (all items, not just those with urgency)
+  // Count only items with urgency defined (match Details page logic)
   const analysisBlockers = analysisHistory.flatMap((a) => 
-    a.analysis_data?.blockers || []
+    (a.analysis_data?.blockers || []).filter(b => b.urgency)
   ).length;
   const analysisRisks = analysisHistory.flatMap((a) => 
-    a.analysis_data?.risks || []
+    (a.analysis_data?.risks || []).filter(r => r.urgency)
   ).length;
   
   // Count GDPR signals: critique/haute → blockers, moyenne → risks
