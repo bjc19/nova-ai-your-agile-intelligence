@@ -103,7 +103,10 @@ export default function Settings() {
       // Listen for callback
       const handleMessage = async (event) => {
         if (event.data.type === 'teams_success') {
-          // Connection already saved by callback function
+          // Decode connection data and save via authenticated endpoint
+          const connectionData = JSON.parse(atob(event.data.data));
+          await base44.functions.invoke('teamsSaveConnection', connectionData);
+          
           setTeamsConnected(true);
           window.removeEventListener('message', handleMessage);
           setConnectingTeams(false);
