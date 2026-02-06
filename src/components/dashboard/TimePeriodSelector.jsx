@@ -203,6 +203,36 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
         </SelectContent>
       </Select>
 
+        {/* Completeness Indicator for Current Month */}
+        {isCurrentMonth && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2">
+                <Badge 
+                  className={`${getCompletenessColor(completenessPercentage)} border`}
+                >
+                  🔸 {dayOfMonth}/{daysInMonth}
+                </Badge>
+                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all ${
+                      completenessPercentage < 25 ? 'bg-orange-400' :
+                      completenessPercentage < 75 ? 'bg-blue-400' : 'bg-green-400'
+                    }`}
+                    style={{ width: `${completenessPercentage}%` }}
+                  />
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-xs">
+              <p className="text-xs">
+                Analyse basée sur les données disponibles ({dayOfMonth} jours sur {daysInMonth})
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
       <Dialog open={showCustom} onOpenChange={setShowCustom}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -238,6 +268,6 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </TooltipProvider>
   );
 }
