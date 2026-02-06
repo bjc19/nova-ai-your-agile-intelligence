@@ -28,9 +28,49 @@ import {
 
 export default function Settings() {
   const [slackConnected, setSlackConnected] = useState(false);
+  const [slackTeamName, setSlackTeamName] = useState(null);
+  const [connectingSlack, setConnectingSlack] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const [teamConfig, setTeamConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
+
+  const handleSlackConnect = async () => {
+    try {
+      setConnectingSlack(true);
+      const { data } = await base44.functions.invoke('slackOAuthStart');
+      
+      // Open popup for OAuth
+      const popup = window.open(data.authUrl, 'Slack OAuth', 'width=600,height=700');
+      
+      // Listen for callback
+      const handleMessage = (event) => {
+        if (event.data.type === 'slack_success') {
+          setSlackConnected(true);
+          setSlackTeamName(event.data.team);
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data.type === 'slack_error') {
+          console.error('Slack connection error:', event.data.error);
+          window.removeEventListener('message', handleMessage);
+        }
+        setConnectingSlack(false);
+      };
+      
+      window.addEventListener('message', handleMessage);
+    } catch (error) {
+      console.error('Error starting Slack OAuth:', error);
+      setConnectingSlack(false);
+    }
+  };
+
+  const handleSlackDisconnect = async () => {
+    try {
+      await base44.functions.invoke('slackDisconnect');
+      setSlackConnected(false);
+      setSlackTeamName(null);
+    } catch (error) {
+      console.error('Error disconnecting Slack:', error);
+    }
+  };
 
   const integrations = [
     {
@@ -42,10 +82,7 @@ export default function Settings() {
       iconColor: "text-purple-600",
       available: true,
       connected: slackConnected,
-      onConnect: () => {
-        // This will work once backend functions are enabled
-        window.open(base44.agents.getWhatsAppConnectURL('slack'), '_blank');
-      }
+      onConnect: handleSlackConnect
     },
     {
       id: "jira",
@@ -89,21 +126,34 @@ export default function Settings() {
     }
   ];
 
-  // Charger config équipe
+  // Charger config équipe et statut Slack
   useEffect(() => {
-    const loadTeamConfig = async () => {
+    const loadData = async () => {
       try {
+        // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
           setTeamConfig(configs[0]);
         }
+
+        // Check Slack connection
+        const user = await base44.auth.me();
+        const connections = await base44.entities.SlackConnection.filter({ 
+          user_email: user.email,
+          is_active: true
+        });
+        
+        if (connections.length > 0) {
+          setSlackConnected(true);
+          setSlackTeamName(connections[0].team_name);
+        }
       } catch (error) {
-        console.error("Erreur chargement config:", error);
+        console.error("Erreur chargement données:", error);
       } finally {
         setLoadingConfig(false);
       }
     };
-    loadTeamConfig();
+    loadData();
   }, []);
 
   const handleProjectModeChange = async (newMode) => {
@@ -344,16 +394,30 @@ export default function Settings() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   {slackConnected ? (
-                    <Badge className="bg-emerald-100 text-emerald-700">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      {t('connected')}
-                    </Badge>
+                    <>
+                      <Badge className="bg-emerald-100 text-emerald-700">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        {t('connected')}
+                      </Badge>
+                      {slackTeamName && (
+                        <p className="text-xs text-slate-500">{slackTeamName}</p>
+                      )}
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSlackDisconnect}
+                        className="text-xs"
+                      >
+                        Déconnecter
+                      </Button>
+                    </>
                   ) : (
                     <Button 
                       className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
-                      onClick={() => setSlackConnected(true)}
+                      onClick={handleSlackConnect}
+                      disabled={connectingSlack}
                     >
-                      {t('connectSlack')}
+                      {connectingSlack ? "Connexion..." : t('connectSlack')}
                     </Button>
                   )}
                 </div>
