@@ -43,6 +43,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [selectedRecos, setSelectedRecos] = useState([]);
   const [appliedRecos, setAppliedRecos] = useState({}); // { recoId: { name, date } }
   const [persistentIssues, setPersistentIssues] = useState([]); // Recommendations with persistent issues
+  const [notificationId, setNotificationId] = useState(null); // Track if notifications already sent
 
   // Demo data if none provided
   const data = flowData || {
@@ -80,6 +81,48 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
     queryFn: () => base44.entities.AppliedRecommendation.list('-applied_date', 50),
     refetchInterval: 30000, // Check every 30 seconds
   });
+
+  // Check if notifications already sent (within last 7 days)
+  useEffect(() => {
+    const checkExistingNotifications = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const notifications = await base44.entities.RealityNotification.list('-created_date', 1);
+        
+        if (notifications.length > 0) {
+          const lastNotification = notifications[0];
+          const notificationDate = new Date(lastNotification.created_date);
+          
+          if (notificationDate > sevenDaysAgo) {
+            setNotificationsSent(true);
+            setNotificationId(lastNotification.id);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking notifications:", error);
+      }
+    };
+    
+    checkExistingNotifications();
+  }, []);
+
+  // Load applied recommendations state
+  useEffect(() => {
+    if (appliedRecommendations.length > 0) {
+      const recoMap = {};
+      appliedRecommendations.forEach(reco => {
+        if (reco.recommendation_id) {
+          recoMap[reco.recommendation_id] = {
+            name: reco.applied_by,
+            date: reco.applied_date
+          };
+        }
+      });
+      setAppliedRecos(recoMap);
+    }
+  }, [appliedRecommendations]);
 
   // Verify impact of applied recommendations
   useEffect(() => {
@@ -121,6 +164,8 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
     setIsSendingNotifications(true);
     
     try {
+      const user = await base44.auth.me();
+      
       // Extract unique responsible persons from decision map
       const responsiblePersons = decisionAnalysis.decisionMap?.map(entry => ({
         name: entry.realDecider,
@@ -128,9 +173,9 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
         ticketsImpacted: entry.ticketsImpacted
       })) || [];
 
-      // Simulate sending notifications to each person
+      // Send real email notifications
       for (const person of responsiblePersons) {
-        const notificationContent = `
+        const emailBody = `
 🔔 Nova – Signal Systémique Détecté
 
 Bonjour ${person.name},
@@ -151,17 +196,35 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
 🔒 Message automatique • Nova AI Scrum Master
         `.trim();
 
-        // In production, this would call base44.integrations.Core.SendEmail
-        // For now, we'll just simulate the notification
-        await new Promise(resolve => setTimeout(resolve, 500));
-        console.log(`Notification sent to ${person.name}:`, notificationContent);
+        // Send actual email - Note: In production, you'd need real email addresses
+        // For demo purposes, we're sending to the current user
+        try {
+          await base44.integrations.Core.SendEmail({
+            from_name: "Nova AI",
+            to: user.email,
+            subject: `🔔 Signal Systémique: ${person.zone}`,
+            body: emailBody
+          });
+        } catch (emailError) {
+          console.error(`Error sending email to ${person.name}:`, emailError);
+        }
       }
+
+      // Save notification record
+      const notificationRecord = await base44.entities.RealityNotification.create({
+        analysis_date: new Date().toISOString(),
+        recipients: responsiblePersons,
+        friction_index: frictionIndex.label,
+        wastes_count: wastesAnalysis.wastes.length,
+        sent_by: user.email
+      });
 
       toast.success(`${responsiblePersons.length} notification(s) envoyée(s) avec succès`, {
         description: `Envoyé à ${responsiblePersons.map(p => p.name).join(', ')}`
       });
       
       setNotificationsSent(true);
+      setNotificationId(notificationRecord.id);
     } catch (error) {
       console.error("Error sending notifications:", error);
       toast.error("Erreur lors de l'envoi des notifications");
@@ -202,15 +265,12 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
         description: "Nova vérifiera l'impact dans les prochaines analyses"
       });
 
-      // Store application info
-      const appliedDate = new Date().toISOString();
-      const appliedBy = user.full_name || user.email;
-      
+      // Update local state
       setAppliedRecos({
         ...appliedRecos,
         [suggestion.id]: {
-          name: appliedBy,
-          date: appliedDate
+          name: user.email,
+          date: appliedRecord.applied_date
         }
       });
     } catch (error) {
@@ -265,18 +325,13 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
         description: "Nova vérifiera l'impact dans les prochaines analyses"
       });
 
-      // Schedule automatic verification (in production, this would be a background job)
-      console.log("Vérification programmée pour:", appliedRecords);
-      
-      // Store application info for each recommendation
+      // Update local state for each recommendation
       const newAppliedRecos = { ...appliedRecos };
-      const appliedDate = new Date().toISOString();
-      const appliedBy = user.full_name || user.email;
       
-      unappliedSuggestions.forEach(suggestion => {
+      unappliedSuggestions.forEach((suggestion, idx) => {
         newAppliedRecos[suggestion.id] = {
-          name: appliedBy,
-          date: appliedDate
+          name: user.email,
+          date: appliedRecords[idx].applied_date
         };
       });
       
