@@ -10,7 +10,8 @@ Deno.serve(async (req) => {
     }
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
-    const redirectUri = `${req.headers.get('origin')}/api/functions/teamsOAuthCallback`;
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/api')[0] || new URL(req.url).origin;
+    const redirectUri = `${origin}/api/functions/teamsOAuthCallback`;
     
     const scopes = [
       'Calendars.Read',
