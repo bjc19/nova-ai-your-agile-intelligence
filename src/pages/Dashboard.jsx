@@ -117,11 +117,16 @@ export default function Dashboard() {
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : {
-    name: "Sprint en cours",
+    name: null, // Will be set below based on delivery mode
     daysRemaining: 4,
     deliveryMode: "scrum",
     throughputPerWeek: null
   };
+
+  // Set generic name for dummy data based on delivery mode
+  if (!sprintContext) {
+    sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
+  }
 
   // Simulated sprint health data (will come from Jira integration)
   const sprintHealth = {
