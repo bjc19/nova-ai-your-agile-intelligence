@@ -17,6 +17,9 @@ Deno.serve(async (req) => {
     const scopes = [
       'Calendars.Read',
       'OnlineMeetingTranscript.Read.All',
+      'Chat.Read',
+      'ChannelMessage.Read.All',
+      'Team.ReadBasic.All',
       'offline_access'
     ].join(' ');
 
@@ -25,9 +28,11 @@ Deno.serve(async (req) => {
       `&response_type=code` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
       `&scope=${encodeURIComponent(scopes)}` +
-      `&state=${user.email}`;
+      `&state=${user.email}` +
+      `&response_mode=query`;
 
-    return Response.json({ authUrl });
+    // Redirection 302 vers Microsoft OAuth
+    return Response.redirect(authUrl, 302);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
