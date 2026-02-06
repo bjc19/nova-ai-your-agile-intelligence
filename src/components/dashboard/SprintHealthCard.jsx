@@ -135,6 +135,15 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     }
   };
 
+  const handleResetForTesting = () => {
+    localStorage.removeItem(`jira_clicked_${data.sprint_name}`);
+    localStorage.removeItem(`sprint_ack_${data.sprint_name}`);
+    setJiraClicked(false);
+    setAcknowledged(false);
+    setAcknowledgedBy("");
+    setAcknowledgedDate("");
+  };
+
   // Analyze drift using the engine
   const driftAnalysis = analyzeSprintDrift(data);
   const suggestions = driftAnalysis.status.id === "potential_drift" 
@@ -153,6 +162,14 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
       <Card className={`overflow-hidden border-2 ${config.borderColor} ${config.bgColor}`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={handleResetForTesting}
+                className="text-xs text-slate-400 hover:text-slate-600 underline absolute top-2 right-2 z-10"
+              >
+                🔄 Reset
+              </button>
+            )}
             <div className="flex items-center gap-3">
               <div className={`p-2.5 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
                 <StatusIcon className={`w-5 h-5 ${config.color}`} />
