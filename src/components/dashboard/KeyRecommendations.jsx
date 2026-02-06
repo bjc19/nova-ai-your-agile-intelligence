@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import { base44 } from "@/api/base44Client";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Lightbulb,
   ArrowRight,
@@ -34,12 +33,23 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [detailsCache, setDetailsCache] = useState({});
   const [completedItems, setCompletedItems] = useState({});
   const [translatedRecommendations, setTranslatedRecommendations] = useState(null);
-  
-  // Fetch GDPR markers and Teams insights for all recommendations
-  const { data: allMarkersData = [] } = useQuery({
-    queryKey: ['gdprMarkers'],
-    queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
-  });
+  const [allSourceRecommendations, setAllSourceRecommendations] = useState([]);
+
+  // Fetch all recommendations from all sources via unified endpoint
+  useEffect(() => {
+    const fetchAllRecommendations = async () => {
+      try {
+        const response = await base44.functions.invoke('getAllRecommendations', {});
+        if (response.data?.recommendations) {
+          setAllSourceRecommendations(response.data.recommendations);
+        }
+      } catch (error) {
+        console.error("Error fetching all recommendations:", error);
+      }
+    };
+
+    fetchAllRecommendations();
+  }, []);
   
   // Sample recommendations for demo
   const sampleRecommendations = language === 'fr' ? [
@@ -139,9 +149,9 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
 
       translateRecommendations();
     }
-  }, [allMarkersData, language, translatedRecommendations]);
+  }, [allSourceRecommendations, language, translatedRecommendations]);
 
-  // Combine recommendations from manual analysis + GDPR markers
+  // Combine recommendations from manual analysis + all unified sources
   const getRecommendations = () => {
     const allRecs = [];
     
@@ -159,23 +169,17 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
       }));
     }
     
-    // Add GDPR markers recommendations (from Slack and Teams)
-    const recosFromMarkers = [];
-    allMarkersData.forEach(marker => {
-      if (marker.recos && Array.isArray(marker.recos)) {
-        marker.recos.forEach((reco, idx) => {
-          recosFromMarkers.push({
-            type: "default",
-            title: typeof reco === 'string' ? reco : reco?.substring(0, 50) + (reco?.length > 50 ? "..." : ""),
-            description: typeof reco === 'string' ? reco : reco,
-            priority: marker.criticite === 'critique' || marker.criticite === 'haute' ? 'high' : 'medium',
-            source: marker.detection_source?.includes('teams') ? 'teams' : 'slack'
-          });
-        });
-      }
+    // Add recommendations from all unified sources (backend handles new sources automatically)
+    allSourceRecommendations.forEach((rec, idx) => {
+      allRecs.push({
+        type: "default",
+        title: rec.text?.substring(0, 50) + (rec.text?.length > 50 ? "..." : ""),
+        description: rec.text,
+        priority: rec.priority || 'medium',
+        source: rec.source,
+        entityType: rec.entityType
+      });
     });
-    
-    allRecs.push(...recosFromMarkers);
     
     // If no recommendations from any source, use samples
     if (allRecs.length === 0) {
