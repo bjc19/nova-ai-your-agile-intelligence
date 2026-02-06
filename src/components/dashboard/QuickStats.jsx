@@ -18,22 +18,27 @@ export default function QuickStats({ analysisHistory = [] }) {
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
 
-  // Fetch GDPR signals and Teams insights from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const [markers, insights] = await Promise.all([
-          base44.entities.GDPRMarkers.list('-created_date', 100),
-          base44.entities.TeamsInsight.list('-created_date', 100)
-        ]);
+        const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        
+        // Separate by source
+        const slackMarkers = allMarkers.filter(m => 
+          m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
+        );
+        
+        const teamsMarkers = allMarkers.filter(m => 
+          m.detection_source === 'teams_daily'
+        );
         
         // Filter by period if available
         const selectedPeriod = sessionStorage.getItem("selectedPeriod");
-        let filteredMarkers = markers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        let filteredInsights = insights.filter(i => new Date(i.created_date) >= sevenDaysAgo);
+        let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+        let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         
         if (selectedPeriod) {
           const period = JSON.parse(selectedPeriod);
@@ -41,19 +46,19 @@ export default function QuickStats({ analysisHistory = [] }) {
           const endDate = new Date(period.end);
           endDate.setHours(23, 59, 59, 999);
           
-          filteredMarkers = markers.filter(m => {
+          filteredSlack = slackMarkers.filter(m => {
             const markerDate = new Date(m.created_date);
             return markerDate >= startDate && markerDate <= endDate;
           });
           
-          filteredInsights = insights.filter(i => {
-            const insightDate = new Date(i.created_date);
-            return insightDate >= startDate && insightDate <= endDate;
+          filteredTeams = teamsMarkers.filter(m => {
+            const markerDate = new Date(m.created_date);
+            return markerDate >= startDate && markerDate <= endDate;
           });
         }
         
-        setGdprSignals(filteredMarkers);
-        setTeamsInsights(filteredInsights);
+        setGdprSignals(filteredSlack);
+        setTeamsInsights(filteredTeams);
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -88,13 +93,13 @@ export default function QuickStats({ analysisHistory = [] }) {
     (a.analysis_data?.risks || [])
   ).length;
   
-  // Count GDPR signals: critique/haute → blockers, moyenne → risks
+  // Count GDPR markers: critique/haute → blockers, moyenne → risks
   const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-  const gdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne').length;
+  const gdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
   
-  // Count Teams insights: critique/haute → blockers, moyenne → risks
+  // Count Teams markers: critique/haute → blockers, moyenne/basse → risks
   const teamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
-  const teamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne').length;
+  const teamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne' || i.criticite === 'basse').length;
   
   const totalBlockers = (analysisBlockers || 0) + gdprBlockers + teamsBlockers || 12;
   const totalRisks = (analysisRisks || 0) + gdprRisks + teamsRisks || 8;
