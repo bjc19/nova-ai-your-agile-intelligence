@@ -3,12 +3,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
+import { base44 } from "@/api/base44Client";
+import { useEffect, useState } from "react";
 
 export default function SprintPerformanceChart({ analysisHistory = [] }) {
   const { t, language } = useLanguage();
-  
-  // Generate chart data from history or use sample data
-  const chartData = analysisHistory.length > 0
+  const [jiraData, setJiraData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch real data from Jira backend function
+  useEffect(() => {
+    const fetchJiraData = async () => {
+      try {
+        const response = await base44.functions.invoke('getSprintPerformanceData');
+        if (response.data?.data) {
+          setJiraData(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching Jira performance data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchJiraData();
+  }, []);
+
+  // Use Jira data if available, otherwise fall back to analysisHistory, then sample data
+  const chartData = jiraData.length > 0
+    ? jiraData
+    : analysisHistory.length > 0
     ? analysisHistory.slice(-7).map((item, index) => ({
         day: language === 'fr' ? `Jour ${index + 1}` : `Day ${index + 1}`,
         blockers: item.blockers_count || 0,
