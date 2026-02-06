@@ -13,12 +13,14 @@ import {
   AlertCircle,
   Settings,
   Zap,
-  RefreshCw
+  RefreshCw,
+  Database
 } from "lucide-react";
 
 export default function IntegrationStatus({ integrations = {} }) {
   const [slackConnected, setSlackConnected] = useState(false);
   const [teamsConnected, setTeamsConnected] = useState(false);
+  const [jiraConnected, setJiraConnected] = useState(false);
   
   const checkConnections = async () => {
     try {
@@ -26,7 +28,7 @@ export default function IntegrationStatus({ integrations = {} }) {
       if (authenticated) {
         const user = await base44.auth.me();
         
-        const [slackConns, teamsConns] = await Promise.all([
+        const [slackConns, teamsConns, jiraConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
             user_email: user.email,
             is_active: true
@@ -34,11 +36,16 @@ export default function IntegrationStatus({ integrations = {} }) {
           base44.entities.TeamsConnection.filter({ 
             user_email: user.email,
             is_active: true
+          }),
+          base44.entities.JiraConnection.filter({ 
+            user_email: user.email,
+            is_active: true
           })
         ]);
         
         setSlackConnected(slackConns.length > 0);
         setTeamsConnected(teamsConns.length > 0);
+        setJiraConnected(jiraConns.length > 0);
       }
     } catch (error) {
       console.error("Error checking connections:", error);
@@ -67,7 +74,11 @@ export default function IntegrationStatus({ integrations = {} }) {
       label: "Microsoft Teams", 
       status: teamsConnected ? "connected" : "disconnected" 
     },
-    jira: { connected: false, label: "Jira", status: "unavailable" },
+    jira: { 
+      connected: jiraConnected, 
+      label: "Jira", 
+      status: jiraConnected ? "connected" : "disconnected" 
+    },
     azure: { connected: false, label: "Azure DevOps", status: "unavailable" },
     zoom: { connected: false, label: "Zoom", status: "coming_soon" },
   };
@@ -138,6 +149,9 @@ export default function IntegrationStatus({ integrations = {} }) {
               const status = statusConfig[integration.status] || statusConfig.disconnected;
               const StatusIcon = status.icon;
 
+              const icon = key === 'jira' ? Database : MessageSquare;
+              const IconComponent = icon;
+
               return (
                 <motion.div
                   key={key}
@@ -148,7 +162,7 @@ export default function IntegrationStatus({ integrations = {} }) {
                 >
                   <div className="flex items-center gap-3">
                     <div className={`p-1.5 rounded-lg ${status.bgColor}`}>
-                      <MessageSquare className={`w-4 h-4 ${status.color}`} />
+                      <IconComponent className={`w-4 h-4 ${status.color}`} />
                     </div>
                     <span className="font-medium text-slate-700">{integration.label}</span>
                   </div>
