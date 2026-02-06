@@ -1,19 +1,19 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
     
-    if (!code || !state) {
-      return Response.redirect(`${url.origin}/settings?error=missing_params`);
+    if (!code) {
+      return new Response('Missing authorization code', { status: 400 });
     }
 
     const clientId = Deno.env.get("TEAMS_CLIENT_ID");
     const clientSecret = Deno.env.get("TEAMS_CLIENT_SECRET");
-    const redirectUri = `${url.origin}/api/functions/teamsOAuthCallback`;
+    const origin = new URL(req.url).origin;
+    const redirectUri = `${origin}/api/functions/teamsOAuthCallback`;
 
+    // Exchange code for tokens
     const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -27,28 +27,64 @@ Deno.serve(async (req) => {
     });
 
     const tokens = await tokenResponse.json();
-    
+
     if (!tokens.access_token) {
-      return Response.redirect(`${url.origin}/settings?error=token_failed`);
+      // Send error to opener window
+      return new Response(`
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'teams_error',
+              error: 'Token exchange failed'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html' } });
     }
 
-    const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
-    const base44 = createClientFromRequest(req);
-    
-    await base44.asServiceRole.entities.TeamsConnection.create({
-      user_email: state,
+    // Encode connection data and send to opener
+    const connectionData = {
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-      tenant_id: tenantId,
-      scopes: tokens.scope.split(' '),
-      is_active: true
-    });
+      tenant_id: tokens.id_token_claims?.tid || 'common',
+      scopes: tokens.scope?.split(' ') || []
+    };
 
-    return Response.redirect(`${url.origin}/settings?teams=connected`);
+    const encodedData = btoa(JSON.stringify(connectionData));
+
+    return new Response(`
+      <!DOCTYPE html>
+      <html>
+      <body>
+        <script>
+          window.opener.postMessage({
+            type: 'teams_success',
+            data: '${encodedData}'
+          }, '*');
+          window.close();
+        </script>
+      </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   } catch (error) {
-    console.error('Teams OAuth error:', error);
-    const url = new URL(req.url);
-    return Response.redirect(`${url.origin}/settings?error=connection_failed`);
+    return new Response(`
+      <!DOCTYPE html>
+      <html>
+      <body>
+        <script>
+          window.opener.postMessage({
+            type: 'teams_error',
+            error: '${error.message}'
+          }, '*');
+          window.close();
+        </script>
+      </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   }
 });
