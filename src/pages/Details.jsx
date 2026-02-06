@@ -195,11 +195,10 @@ export default function Details() {
   ).sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
 
   // Count items by urgency
-  const urgencyCounts = items.reduce((acc, item) => {
-    if (item.urgency) {
-      acc[item.urgency] = (acc[item.urgency] || 0) + 1;
-    }
-    return acc;
+  const itemsWithUrgency = items.filter(item => item.urgency);
+  const urgencyCounts = itemsWithUrgency.reduce((acc, item) => {
+   acc[item.urgency] = (acc[item.urgency] || 0) + 1;
+   return acc;
   }, {});
 
   return (
@@ -245,7 +244,7 @@ export default function Details() {
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
-                    Tous ({items.length})
+                    Tous ({itemsWithUrgency.length})
                   </button>
                   {urgencyCounts.high && (
                     <button
