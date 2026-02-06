@@ -313,7 +313,7 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               </TooltipTrigger>
                               <TooltipContent side="left" className="max-w-xs">
                                 <p className="text-xs">
-                                  <strong>Impact estimé</strong> – Combien de temps s’écoule entre le début d’un travail de l'équipe et sa livraison réelle ? Amélioration attendue sur la métrique si le levier est appliqué. Basé sur l'analyse des données actuelles.
+                                  <strong>Impact estimé</strong> – {TOOLTIP_DEFINITIONS.impact}
                                 </p>
                               </TooltipContent>
                             </Tooltip>
