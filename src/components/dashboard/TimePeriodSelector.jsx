@@ -172,21 +172,28 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
   };
 
   const getPeriodLabel = () => {
-    const option = options.find(opt => opt.value === selectedPeriod);
-    return option?.label || "Sélectionner une période";
+    return periodLabel;
   };
 
-  return (
-    <div className="flex items-center gap-3">
-      <Badge variant="outline" className="text-xs">
-        {deliveryMode === "scrum" ? "Scrum" : "Kanban"}
-      </Badge>
+  const isCurrentMonth = selectedPeriod === "current_month";
+  const now = new Date();
+  const { dayOfMonth = 0, daysInMonth = 0 } = isCurrentMonth 
+    ? calculateCompleteness(startOfMonth(now), now)
+    : {};
+  const completenessPercentage = isCurrentMonth ? (dayOfMonth / daysInMonth) * 100 : 0;
 
-      <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-        <SelectTrigger className="w-[220px]">
-          <Calendar className="w-4 h-4 mr-2" />
-          <SelectValue placeholder={getPeriodLabel()} />
-        </SelectTrigger>
+  return (
+    <TooltipProvider>
+      <div className="flex items-center gap-3">
+        <Badge variant="outline" className="text-xs">
+          {deliveryMode === "scrum" ? "Scrum" : "Kanban"}
+        </Badge>
+
+        <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+          <SelectTrigger className="w-[280px]">
+            <Calendar className="w-4 h-4 mr-2" />
+            <SelectValue placeholder={getPeriodLabel()} />
+          </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
