@@ -78,14 +78,11 @@ Deno.serve(async (req) => {
 
     const cloudId = instances[0].id; // Use first instance
 
-    // Store Jira connection (encrypted)
-    const user = await base44.auth.me();
-    if (!user) {
-      return new Response('Unauthorized', { status: 401 });
-    }
+    // Store Jira connection using email from state (callback is before auth)
+    const userEmail = state; // state contains the user email
 
     await base44.asServiceRole.entities.JiraConnection.create({
-      user_email: user.email,
+      user_email: userEmail,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
