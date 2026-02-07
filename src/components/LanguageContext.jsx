@@ -153,6 +153,8 @@ export const translations = {
     impact: "Impact",
     blockers: "blockers",
     risks: "risques",
+    lastSyncCheck: "Dernière vérification",
+    refresh: "Actualiser",
     },
   en: {
     // Navigation
