@@ -165,13 +165,6 @@ export default function Results() {
                 {t('analysisResults')}
               </h1>
             </div>
-            
-            <Link to={createPageUrl("Analysis")}>
-              <Button variant="outline" className="rounded-xl">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                {t('launchNewSimulation')}
-              </Button>
-            </Link>
           </div>
         </motion.div>
 
