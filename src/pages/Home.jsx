@@ -78,7 +78,7 @@ const translations = {
     blockersDesc: "Identifiez automatiquement les blocages et les obstacles à partir des conversations de standup",
     riskAnalysis: "Analyse des Risques",
     riskDesc: "Surfacez proactivement les risques avant qu'ils n'impactent la livraison de votre sprint",
-    sprintInsights: "Insights du Sprint",
+    sprintInsights: "Insights du Sprint / Cycle",
     insightsDesc: "Suivez les tendances et les modèles sur vos standups quotidiens au fil du temps",
     recommendations: "Recommandations",
     recommendationsDesc: "Obtenez des suggestions alimentées par l'IA pour débloquer votre équipe et accélérer la livraison"
