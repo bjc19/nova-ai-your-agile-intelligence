@@ -56,13 +56,15 @@ const CEREMONY_SPECIFIC_VERBS = {
       'démontrer', 'demonstrate', 'présenter', 'present', 'montrer', 'show',
       'expliquer', 'explain', 'recevoir', 'receive', 'collecter', 'collect',
       'valider', 'validate', 'illustrer', 'illustrate', 'partager', 'share',
-      'questionner', 'question', 'adapter', 'adapt', 'mesurer', 'measure'
+      'questionner', 'question', 'intégrer', 'integrate', 'prioriser', 'prioritize',
+      'ajuster', 'adjust', 'déployer', 'deploy', 'livrer', 'deliver'
     ],
     patterns: [
       /démontrer|demonstrate|présenter|present|montrer|show/gi,
       /expliquer|explain|recevoir|receive|collecter|collect/gi,
       /valider|validate|illustrer|illustrate|partager|share/gi,
-      /questionner|question|adapter|adapt|mesurer|measure/gi
+      /questionner|question|intégrer|integrate|prioriser|prioritize/gi,
+      /ajuster|adjust|déployer|deploy|livrer|deliver/gi
     ]
   }
 };
