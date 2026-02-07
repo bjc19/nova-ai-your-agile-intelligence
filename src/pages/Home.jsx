@@ -61,7 +61,7 @@ const translations = {
     daysLeft: "jours restants dans le sprint",
     noReg: "Aucune inscription requise • 2 analyses de démo gratuites par 24h",
     everythingNeeds: "Tout ce dont votre équipe a besoin",
-    novaUnderstandsNuances: "Nova comprend les nuances des cérémonies agiles et fournit des insights intelligents.",
+    novaUnderstandsNuances: "Nova comprend les nuances de votre travail d'équipe au quotidien et fournit des insights intelligents.",
     whatNovaAnalyzes: "Ce que Nova analyse",
     demoVisualizations: "Exemples de visualisations de démo",
     sprintPerformance: "Performance Sprint",
