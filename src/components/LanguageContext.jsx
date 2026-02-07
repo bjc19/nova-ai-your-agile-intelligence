@@ -231,6 +231,8 @@ export const translations = {
     azureDescription: "Sync work items, sprints, and team velocity from Azure DevOps.",
     teamsDescription: "Join and analyze Daily Scrum meetings conducted via Teams.",
     zoomDescription: "Connect to Zoom meetings and analyze transcripts in real-time.",
+    trelloDescription: "Sync your Trello boards and analyze cards and workflows.",
+    confluenceDescription: "Import team documentation and detect gaps with reality.",
     
     // Analysis
     analyzeTitle: "Analyze Your Daily Scrum",
