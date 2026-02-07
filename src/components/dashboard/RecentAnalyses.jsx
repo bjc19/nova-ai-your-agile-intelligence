@@ -222,17 +222,9 @@ export default function RecentAnalyses({ analyses = [] }) {
     >
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-slate-900">
-              {language === 'fr' ? 'Analyses & Signaux' : 'Analyses & Signals'}
-            </CardTitle>
-            <Link to={createPageUrl("Analysis")}>
-              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
-                <Plus className="w-4 h-4 mr-1" />
-                {language === 'fr' ? 'Nouvelle analyse' : 'New Analysis'}
-              </Button>
-            </Link>
-          </div>
+          <CardTitle className="text-lg font-semibold text-slate-900">
+            {language === 'fr' ? 'Analyses & Signaux' : 'Analyses & Signals'}
+          </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-3">
