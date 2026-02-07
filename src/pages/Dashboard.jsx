@@ -296,23 +296,6 @@ export default function Dashboard() {
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <QuickStats analysisHistory={analysisHistory} />
             }
-
-            {/* Recent Analyses - Full Width */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <div className="mt-6">
-              <RecentAnalyses analyses={analysisHistory} />
-            </div>
-            }
-
-            {/* Key Recommendations - Full Width */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <div className="mt-6">
-              <KeyRecommendations
-                latestAnalysis={latestAnalysis}
-                sourceUrl={latestAnalysis?.sourceUrl}
-                sourceName={latestAnalysis?.sourceName} />
-            </div>
-            }
           </motion.div>
         </div>
       </div>
@@ -438,11 +421,20 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
@@ -460,7 +452,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyToBoostYourImpact?')}
+                  {t('readyToBoostYourImpact')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
