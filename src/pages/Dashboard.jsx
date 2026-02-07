@@ -104,7 +104,9 @@ export default function Dashboard() {
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
+    enabled: !isLoading,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000 // 30 minutes
   });
 
   // Filter analysis history based on selected period
@@ -339,17 +341,7 @@ export default function Dashboard() {
 
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="space-y-6">
-            {/* Recent Analyses - Full Width */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Key Recommendations - Full Width */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
-
-            <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
@@ -431,16 +423,24 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
         </div>
-          </div>
         }
 
         {/* Quick Actions Footer */}
@@ -454,7 +454,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyToBoostYourImpact')}
+                  {t('readyToBoostYourImpact?')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
