@@ -276,9 +276,11 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               <Textarea
                 value={input}
                 onChange={(e) => {
-                  setInput(e.target.value);
-                  if (e.target.value.trim().length > 20) {
-                    setDetection(detectWorkshopType(e.target.value));
+                  const newValue = e.target.value;
+                  setInput(newValue);
+                  if (newValue.trim().length > 20) {
+                    const result = detectWorkshopType(newValue);
+                    setDetection(result);
                   } else {
                     setDetection(null);
                   }
