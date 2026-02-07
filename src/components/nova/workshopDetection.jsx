@@ -398,7 +398,7 @@ export function detectWorkshopType(text) {
     const keywordDensity = (keywordMatches / Math.max(keywords.length, 1)) * 100;
     score += Math.min(keywordDensity * 0.3, 15); // Max 15 points
 
-    // Intelligence boost: Planning-specific multi-variable analysis (8 variables)
+    // Intelligence boost: Planning-specific multi-variable analysis (8+ variables)
     if (ceremonyType === 'SPRINT_PLANNING') {
       let intelligenceBonus = 0;
       
@@ -420,6 +420,18 @@ export function detectWorkshopType(text) {
       
       if (futureReferences >= 4 && estimationLanguage >= 2 && futureReferences > pastReferences) {
         intelligenceBonus += 10; // Strong future-focus + estimation language = strong planning signal
+      }
+      
+      // LAYER: Ceremony-specific verbs (strongest semantic signal for Planning)
+      const planningVerbMatches = CEREMONY_SPECIFIC_VERBS.SPRINT_PLANNING.patterns.reduce((count, pattern) => {
+        const matches = text.match(pattern) || [];
+        return count + matches.length;
+      }, 0);
+      
+      if (planningVerbMatches >= 3) {
+        intelligenceBonus += 15; // Very strong signal - multiple planning-specific verbs
+      } else if (planningVerbMatches >= 1) {
+        intelligenceBonus += 8;
       }
       
       score = Math.min(score + intelligenceBonus, 100);
