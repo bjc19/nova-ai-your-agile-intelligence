@@ -193,6 +193,12 @@ export function PricingSection() {
             </CardHeader>
 
             <CardContent className="flex-1 space-y-6">
+              {plan.highlight && (
+                <p className="text-xs text-red-600 font-semibold text-center">
+                  ⚠️ {plan.highlight}
+                </p>
+              )}
+
               <Button 
                 onClick={() => setSelectedPlan(plan)}
                 className={`w-full ${
@@ -205,12 +211,6 @@ export function PricingSection() {
               >
                 {t(plan.ctaKey)}
               </Button>
-
-              {plan.highlight && (
-                <p className="text-xs text-red-600 font-semibold text-center">
-                  ⚠️ {plan.highlight}
-                </p>
-              )}
 
               {plan.roiValue && (
                 <div className="bg-green-50 p-3 rounded border border-green-200">
