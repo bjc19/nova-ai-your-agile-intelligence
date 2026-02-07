@@ -79,6 +79,8 @@ export const translations = {
     azureDescription: "Synchronisez les work items, sprints et vélocité d'équipe depuis Azure DevOps.",
     teamsDescription: "Rejoignez et analysez les réunions Daily Scrum menées via Teams.",
     zoomDescription: "Connectez-vous aux réunions Zoom et analysez les transcripts en temps réel.",
+    trelloDescription: "Synchronisez vos boards Trello et analysez les cartes et workflows.",
+    confluenceDescription: "Importez la documentation d'équipe et détectez les écarts avec la réalité.",
     
     // Analysis
     analyzeTitle: "Analyser votre Daily Scrum",
