@@ -545,22 +545,22 @@ export default function Results() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  Ready to Boost Your Impact?
+                  {t('readyToBoostYourImpact')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
-                  Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.
+                  {t('importDataDescription')}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
                   <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
                     <Zap className="w-4 h-4 mr-2" />
-                    Connect Slack
+                    {t('connectSlack')}
                   </Button>
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    Start Analysis
+                    {t('startAnalysis')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
