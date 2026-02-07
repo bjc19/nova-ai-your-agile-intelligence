@@ -134,6 +134,14 @@ const plans = [
 
 export function PricingSection() {
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [lang, setLang] = useState("en");
+
+  React.useEffect(() => {
+    const browserLang = navigator.language || navigator.userLanguage;
+    setLang(browserLang.startsWith("fr") ? "fr" : "en");
+  }, []);
+
+  const t = (key) => translations[lang][key] || translations["en"][key];
 
   return (
     <div className="space-y-8">
