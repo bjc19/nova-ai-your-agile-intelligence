@@ -594,41 +594,55 @@ export function detectWorkshopType(text) {
     };
   }
 
-  // Special handling: Planning vs others with close scores
-  if (bestType === 'SPRINT_PLANNING' && bestScore.score >= 40) {
-    // Verify strong Planning signals
-    const planningSignals = [
-      /sprint goal|objectif.*sprint/gi.test(text),
-      /estimation|points?|story point/gi.test(text),
-      /horizon|sprint|itération|2 semaines/gi.test(text),
-      /engagement|commitment|assigner|responsable/gi.test(text)
-    ];
-    const planningSignalCount = planningSignals.filter(s => s).length;
+  // ============ CONFLICT RESOLUTION: Planning vs Retrospective ============
+  // CRITICAL: If Retrospective is close to Planning, apply differential penalty to Planning
+  if (bestType === 'SPRINT_PLANNING' && scores.RETROSPECTIVE) {
+    const planningScore = bestScore.score;
+    const retroScore = scores.RETROSPECTIVE.score;
     
-    if (planningSignalCount >= 2) {
-      bestScore.score = Math.min(bestScore.score + 15, 100);
+    // If retro is within 15 points but NOT the best, it means Planning is falsely winning
+    if (retroScore > planningScore - 15 && retroScore < planningScore) {
+      // Check if Retrospective has stronger multi-layer signals
+      if (intention.isRetrospectiveIntention && comparative.noPlanningMarkers) {
+        // Retrospective should win - flip the scores
+        bestScore.score = scores.RETROSPECTIVE.score + 10;
+        bestType = 'RETROSPECTIVE';
+      } else if (comparative.retroSimilarity > 0 && !intention.isPlanningIntention) {
+        // No clear Planning intent, likely retro
+        bestType = 'RETROSPECTIVE';
+        bestScore = scores.RETROSPECTIVE;
+      }
     }
   }
 
-  // Special handling: Retrospective vs others with close scores
+  // Prevent Planning from winning if key Planning markers are absent
+  if (bestType === 'SPRINT_PLANNING' && bestScore.score >= 40) {
+    const hasCriticalPlanningMarkers = /backlog|user stor|estim|points|story point/gi.test(text);
+    
+    if (!hasCriticalPlanningMarkers && scores.RETROSPECTIVE && scores.RETROSPECTIVE.score >= 35) {
+      // Retrospective is more likely
+      bestType = 'RETROSPECTIVE';
+      bestScore = scores.RETROSPECTIVE;
+    }
+  }
+
+  // Boost Retrospective if it has clear multi-layer signals
   if (bestType === 'RETROSPECTIVE' && bestScore.score >= 40) {
-    // Verify strong Retrospective signals (multi-variable confirmation)
-    const retroSignals = [
+    const retroSignalCount = [
       /fin de sprint|ce sprint|cycle complété|dernier sprint/gi.test(text),
       /qu'est-ce qui|what went|bien|mal|positive|negative|went well|went wrong/gi.test(text),
       /amélioration|improvement|améliorer|process change/gi.test(text),
       /résolution|resolution|responsable|owner|action/gi.test(text),
       /équipe|team|nous|we|collectif/gi.test(text)
-    ];
-    const retroSignalCount = retroSignals.filter(s => s).length;
+    ].filter(s => s).length;
     
-    // Verb-based confirmation
     const retroVerbCount = CEREMONY_SPECIFIC_VERBS.RETROSPECTIVE.patterns.reduce((count, pattern) => {
       return count + (text.match(pattern) || []).length;
     }, 0);
     
-    if (retroSignalCount >= 3 || retroVerbCount >= 3) {
-      bestScore.score = Math.min(bestScore.score + 15, 100);
+    // Strong multi-layer confirmation
+    if (retroSignalCount >= 3 || retroVerbCount >= 2) {
+      bestScore.score = Math.min(bestScore.score + 20, 100);
     }
   }
 
