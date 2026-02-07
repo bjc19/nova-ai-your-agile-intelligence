@@ -148,18 +148,18 @@ export default function Home() {
           >
             <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700 mb-6">
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              AI-Powered Scrum Intelligence
+              {t("aiPoweredScrum")}
             </Badge>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight mb-6">
-              Turn Daily Standups into{" "}
+              {t("heroPart1")}{" "}
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Actionable Insights
+                {t("heroPart2")}
               </span>
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-              Nova analyzes your team's standup conversations to detect blockers, identify risks, and provide recommendations — so you can focus on delivering value.
+              {t("heroSubtitle")}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
