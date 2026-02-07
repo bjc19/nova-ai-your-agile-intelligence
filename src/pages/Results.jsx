@@ -14,12 +14,13 @@ import { POSTURES } from "@/components/nova/PostureEngine";
 import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
 import { 
         ArrowLeft, 
-        RotateCcw,
         AlertOctagon,
         ShieldAlert,
         FileText,
         CheckCircle2,
-        Loader2
+        Loader2,
+        Zap,
+        ArrowRight
       } from "lucide-react";
 
 export default function Results() {
@@ -533,23 +534,38 @@ export default function Results() {
            />
          )}
 
-        {/* Footer CTA */}
+        {/* Quick Actions Footer */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-12 text-center"
+          className="mt-8"
         >
-          <div className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800">
-            <h3 className="text-xl font-semibold text-white mb-2">
-              {t('wantRealTimeAnalysis')}
-            </h3>
-            <p className="text-slate-400 mb-6 max-w-lg mx-auto">
-              {t('inFullVersion')}
-            </p>
-            <Badge variant="outline" className="text-slate-300 border-slate-600">
-              {t('comingSoonIntegrations')}
-            </Badge>
+          <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  {t('readyToBoostYourImpact?')}
+                </h3>
+                <p className="text-slate-400 max-w-lg">
+                  {t('importDataDescription')}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link to={createPageUrl("Settings")}>
+                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <Zap className="w-4 h-4 mr-2" />
+                    {t('connectSlack')}
+                  </Button>
+                </Link>
+                <Link to={createPageUrl("Analysis")}>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                    {t('startAnalysis')}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>
