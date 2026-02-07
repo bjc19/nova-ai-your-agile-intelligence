@@ -253,113 +253,194 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
            {/* Sprint Performance Chart */}
-           <Card className="border-slate-200">
-             <CardContent className="p-6">
-               <div className="flex items-center justify-between mb-4">
-                 <h3 className="font-semibold text-slate-900">{t("sprintPerformance")}</h3>
-                 <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
-               </div>
-               <div className="h-32 flex items-end justify-between gap-1">
-                 {[30, 35, 45, 50, 65, 72, 85, 90, 88].map((h, i) => (
-                   <div key={i} className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t" style={{ height: `${h}%` }} />
-                 ))}
-               </div>
-               <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
-             </CardContent>
-           </Card>
-
-            {/* Anti-patterns Trends */}
-            <Card className="border-slate-200">
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             whileInView={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.6, delay: 0 }}
+             viewport={{ once: true }}
+           >
+             <Card className="border-slate-200 h-full">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-900">{t("antiPatterns")}</h3>
+                  <h3 className="font-semibold text-slate-900">{t("sprintPerformance")}</h3>
                   <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
                 </div>
-                <div className="space-y-3">
-                  {[
-                    { name: "WIP Overload", count: 12, color: "bg-red-500" },
-                    { name: "Context Switch", count: 8, color: "bg-amber-500" },
-                    { name: "Blocked Items", count: 5, color: "bg-yellow-500" }
-                  ].map(item => (
-                    <div key={item.name} className="text-sm">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-slate-600">{item.name}</span>
-                        <span className="font-semibold">{item.count}</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div className={`h-full ${item.color}`} style={{ width: `${(item.count/12)*100}%` }} />
-                      </div>
-                    </div>
+                <div className="h-32 flex items-end justify-between gap-1">
+                  {[30, 35, 45, 50, 65, 72, 85, 90, 88].map((h, i) => (
+                    <motion.div 
+                      key={i} 
+                      className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t"
+                      initial={{ height: 0 }}
+                      whileInView={{ height: `${h}%` }}
+                      transition={{ duration: 0.8, delay: i * 0.08 }}
+                      viewport={{ once: true }}
+                    />
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
               </CardContent>
             </Card>
+           </motion.div>
 
-            {/* Sprint Tracking */}
-            <Card className="border-slate-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-900">{t("sprintTracking")}</h3>
-                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
-                </div>
-                <div className="relative h-32 flex items-end justify-between gap-0.5">
-                  {/* Burndown curve background grid */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="burndownGradient" x1="0" y1="0" x2="100" y2="100">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    {/* Burndown line */}
-                    <polyline points="0,85 14,75 28,60 42,48 56,35 70,20 85,15 100,12" fill="url(#burndownGradient)" stroke="#10b981" strokeWidth="2" />
-                    {/* Ideal line reference */}
-                    <line x1="0" y1="100" x2="100" y2="0" stroke="#9ca3af" strokeWidth="1" strokeDasharray="2" opacity="0.5" />
-                  </svg>
-                  {/* Bar chart overlay */}
-                  {[
-                    { day: "Mon", value: 15 },
-                    { day: "Tue", value: 18 },
-                    { day: "Wed", value: 22 },
-                    { day: "Thu", value: 28 },
-                    { day: "Fri", value: 32 }
-                  ].map((item, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center relative z-10">
-                      <div className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80" style={{ height: `${(item.value/32)*100}%` }} />
-                      <span className="text-xs text-slate-500 mt-1">{item.day}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
-              </CardContent>
-            </Card>
+             {/* Anti-patterns Trends */}
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.6, delay: 0.1 }}
+               viewport={{ once: true }}
+             >
+               <Card className="border-slate-200 h-full">
+                 <CardContent className="p-6">
+                   <div className="flex items-center justify-between mb-4">
+                     <h3 className="font-semibold text-slate-900">{t("antiPatterns")}</h3>
+                     <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
+                   </div>
+                   <div className="space-y-3">
+                     {[
+                       { name: "WIP Overload", count: 12, color: "bg-red-500" },
+                       { name: "Context Switch", count: 8, color: "bg-amber-500" },
+                       { name: "Blocked Items", count: 5, color: "bg-yellow-500" }
+                     ].map((item, i) => (
+                       <motion.div 
+                         key={item.name} 
+                         className="text-sm"
+                         initial={{ opacity: 0, x: -10 }}
+                         whileInView={{ opacity: 1, x: 0 }}
+                         transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
+                         viewport={{ once: true }}
+                       >
+                         <div className="flex justify-between mb-1">
+                           <span className="text-slate-600">{item.name}</span>
+                           <span className="font-semibold">{item.count}</span>
+                         </div>
+                         <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                           <motion.div 
+                             className={`h-full ${item.color}`}
+                             initial={{ width: 0 }}
+                             whileInView={{ width: `${(item.count/12)*100}%` }}
+                             transition={{ duration: 0.8, delay: 0.15 + i * 0.1 }}
+                             viewport={{ once: true }}
+                           />
+                         </div>
+                       </motion.div>
+                     ))}
+                   </div>
+                   <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            {/* KPIs */}
-            <Card className="border-slate-200">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">{t("keyKPIs")}</h3>
-                <div className="space-y-4">
-                  {[
-                    { label: "Stabilité Sprint Goal", value: "85%", emoji: "🎮" },
-                    { label: "Adoption Recommandations", value: "65%", emoji: "🎮" },
-                    { label: "Dérives Anticipées", value: "80%", emoji: "🎮" }
-                  ].map(kpi => (
-                    <div key={kpi.label}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs text-slate-600">{kpi.label} {kpi.emoji}</span>
-                        <span className="text-sm font-bold text-blue-600">{kpi.value}</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500" style={{ width: kpi.value }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-slate-500 mt-4 text-center">{t("demoData")}</p>
-              </CardContent>
-            </Card>
-          </div>
+             {/* Sprint Tracking */}
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.6, delay: 0.2 }}
+               viewport={{ once: true }}
+             >
+               <Card className="border-slate-200 h-full">
+                 <CardContent className="p-6">
+                   <div className="flex items-center justify-between mb-4">
+                     <h3 className="font-semibold text-slate-900">{t("sprintTracking")}</h3>
+                     <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
+                   </div>
+                   <div className="relative h-32 flex items-end justify-between gap-0.5">
+                     {/* Burndown curve background grid */}
+                     <motion.svg 
+                       className="absolute inset-0 w-full h-full" 
+                       viewBox="0 0 100 100" 
+                       preserveAspectRatio="none"
+                       initial={{ opacity: 0 }}
+                       whileInView={{ opacity: 1 }}
+                       transition={{ duration: 0.8, delay: 0.25 }}
+                       viewport={{ once: true }}
+                     >
+                       <defs>
+                         <linearGradient id="burndownGradient" x1="0" y1="0" x2="100" y2="100">
+                           <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                           <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                         </linearGradient>
+                       </defs>
+                       {/* Burndown line */}
+                       <polyline points="0,85 14,75 28,60 42,48 56,35 70,20 85,15 100,12" fill="url(#burndownGradient)" stroke="#10b981" strokeWidth="2" />
+                       {/* Ideal line reference */}
+                       <line x1="0" y1="100" x2="100" y2="0" stroke="#9ca3af" strokeWidth="1" strokeDasharray="2" opacity="0.5" />
+                     </motion.svg>
+                     {/* Bar chart overlay */}
+                     {[
+                       { day: "Mon", value: 15 },
+                       { day: "Tue", value: 18 },
+                       { day: "Wed", value: 22 },
+                       { day: "Thu", value: 28 },
+                       { day: "Fri", value: 32 }
+                     ].map((item, i) => (
+                       <motion.div 
+                         key={i} 
+                         className="flex-1 flex flex-col items-center relative z-10"
+                         initial={{ opacity: 0 }}
+                         whileInView={{ opacity: 1 }}
+                         transition={{ duration: 0.5, delay: 0.25 + i * 0.08 }}
+                         viewport={{ once: true }}
+                       >
+                         <motion.div 
+                           className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80"
+                           initial={{ height: 0 }}
+                           whileInView={{ height: `${(item.value/32)*100}%` }}
+                           transition={{ duration: 0.8, delay: 0.25 + i * 0.08 }}
+                           viewport={{ once: true }}
+                         />
+                         <span className="text-xs text-slate-500 mt-1">{item.day}</span>
+                       </motion.div>
+                     ))}
+                   </div>
+                   <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
+                 </CardContent>
+               </Card>
+             </motion.div>
+
+             {/* KPIs */}
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.6, delay: 0.3 }}
+               viewport={{ once: true }}
+             >
+               <Card className="border-slate-200 h-full">
+                 <CardContent className="p-6">
+                   <h3 className="font-semibold text-slate-900 mb-4">{t("keyKPIs")}</h3>
+                   <div className="space-y-4">
+                     {[
+                       { label: "Stabilité Sprint Goal", value: "85%", emoji: "🎮" },
+                       { label: "Adoption Recommandations", value: "65%", emoji: "🎮" },
+                       { label: "Dérives Anticipées", value: "80%", emoji: "🎮" }
+                     ].map((kpi, i) => (
+                       <motion.div 
+                         key={kpi.label}
+                         initial={{ opacity: 0, x: -10 }}
+                         whileInView={{ opacity: 1, x: 0 }}
+                         transition={{ duration: 0.5, delay: 0.35 + i * 0.1 }}
+                         viewport={{ once: true }}
+                       >
+                         <div className="flex justify-between items-center mb-1">
+                           <span className="text-xs text-slate-600">{kpi.label} {kpi.emoji}</span>
+                           <span className="text-sm font-bold text-blue-600">{kpi.value}</span>
+                         </div>
+                         <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                           <motion.div 
+                             className="h-full bg-green-500"
+                             initial={{ width: 0 }}
+                             whileInView={{ width: kpi.value }}
+                             transition={{ duration: 0.8, delay: 0.35 + i * 0.1 }}
+                             viewport={{ once: true }}
+                           />
+                         </div>
+                       </motion.div>
+                     ))}
+                   </div>
+                   <p className="text-xs text-slate-500 mt-4 text-center">{t("demoData")}</p>
+                 </CardContent>
+               </Card>
+             </motion.div>
+           </div>
         </div>
       </div>
 
