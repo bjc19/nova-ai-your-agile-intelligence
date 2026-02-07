@@ -564,16 +564,16 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge variant="outline" className="text-xs cursor-help">
+                              <button className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md border text-xs font-semibold bg-white border-slate-200 hover:bg-slate-50 cursor-help transition-colors">
                                 {waste.confidence}% confiance
-                              </Badge>
+                              </button>
                             </TooltipTrigger>
                             <TooltipContent side="left" className="max-w-xs">
-                              <p className="text-xs">Ce score indique la fiabilité de la détection. Il est basé sur :</p>
-                              <ul className="text-xs mt-1 space-y-0.5">
-                                <li>• Cohérence des données flux (30 jours)</li>
-                                <li>• Alignement avec les commentaires terrain</li>
-                                <li>• Absence de données manquantes</li>
+                              <p className="text-xs font-medium mb-1">Ce score indique la fiabilité de la détection</p>
+                              <ul className="text-xs space-y-0.5">
+                                <li>• Cohérence des données (30j)</li>
+                                <li>• Alignement terrain</li>
+                                <li>• Complétude des données</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
