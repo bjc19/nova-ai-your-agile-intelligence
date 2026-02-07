@@ -351,7 +351,7 @@ export function detectWorkshopType(text) {
       score = Math.min(score + intelligenceBonus, 100);
     }
 
-    // Intelligence boost: Retrospective-specific multi-variable analysis (7 variables)
+    // Intelligence boost: Retrospective-specific multi-variable analysis (8 variables)
     if (ceremonyType === 'RETROSPECTIVE') {
       let retroBonus = 0;
       
@@ -388,6 +388,15 @@ export function detectWorkshopType(text) {
       // 7. Team reflection (équipe, nous, ensemble, collectif)
       if (/équipe|team|nous|we|on|notre|our|ensemble|together|collectif|collaborative/gi.test(text)) {
         retroBonus += 7;
+      }
+      
+      // 8. CRUCIAL: Temporal focus on PAST (key differentiator from Planning)
+      // Retrospective focuses on what happened, Planning focuses on what WILL happen
+      const pastReferences = (text.match(/s'est|a été|a fonctionné|a échoué|on a|nous avons|we had|we were|during|pendant|au cours|lors du|l'impact|the impact/gi) || []).length;
+      const futureReferences = (text.match(/sera|will be|va|going to|planning|prévoir|estimé|estimation|planning poker|t-shirt|sizing|buffer|unknowns/gi) || []).length;
+      
+      if (pastReferences > futureReferences && pastReferences >= 4) {
+        retroBonus += 10; // Strong past-focus = strong retro signal
       }
       
       score = Math.min(score + retroBonus, 100);
