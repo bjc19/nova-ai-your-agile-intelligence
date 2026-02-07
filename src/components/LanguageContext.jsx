@@ -304,6 +304,8 @@ export const translations = {
     impact: "Impact",
     blockers: "blockers",
     risks: "risks",
+    lastSyncCheck: "Last sync check",
+    refresh: "Refresh",
     }
 
     };
