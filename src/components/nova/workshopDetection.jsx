@@ -277,25 +277,37 @@ export function detectWorkshopType(text) {
     // Check exclusion markers first
     const markerEntries = Object.entries(config.markers);
     let exclusionCount = 0;
+    const hasExclusions = [];
 
     markerEntries.forEach(([markerName, markerFn]) => {
       if (markerName.startsWith('no_') && markerFn(text)) {
         exclusionCount++;
+        hasExclusions.push(markerName);
       }
     });
 
     // Base score reduced by exclusions
-    score = Math.max(20 - exclusionCount * 10, 0);
+    score = Math.max(15 - exclusionCount * 12, 0);
 
-    // Score positive markers
+    // Score positive markers with higher precision for Planning
+    let positiveMarkerCount = 0;
     markerEntries.forEach(([markerName, markerFn]) => {
       if (!markerName.startsWith('no_')) {
         if (markerFn(text)) {
-          score += 24; // ~4 markers for perfect match
+          const markerWeight = ceremonyType === 'SPRINT_PLANNING' ? 20 : 24;
+          score += markerWeight;
           matchedMarkers.push(markerName.replace(/_/g, ' '));
+          positiveMarkerCount++;
         }
       }
     });
+
+    // Bonus for multiple positive markers (multi-variable detection)
+    if (positiveMarkerCount >= 5) {
+      score += 10; // Strong confidence with 5+ markers
+    } else if (positiveMarkerCount >= 3) {
+      score += 5;
+    }
 
     // Keyword density (refined)
     const keywords = config.keywords || [];
