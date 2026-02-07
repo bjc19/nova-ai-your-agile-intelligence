@@ -351,6 +351,48 @@ export function detectWorkshopType(text) {
       score = Math.min(score + intelligenceBonus, 100);
     }
 
+    // Intelligence boost: Retrospective-specific multi-variable analysis (7 variables)
+    if (ceremonyType === 'RETROSPECTIVE') {
+      let retroBonus = 0;
+      
+      // 1. End-of-cycle language (fin de sprint, bilan)
+      if (/fin de sprint|end of sprint|ce sprint|this sprint|cycle complété|dernier sprint|last sprint|bilan/gi.test(text)) {
+        retroBonus += 8;
+      }
+      
+      // 2. Process evaluation (fokus on how we work)
+      if (/processus|process|méthode|method|workflow|façon de travailler|équipe|team|collaboration/gi.test(text)) {
+        retroBonus += 7;
+      }
+      
+      // 3. What worked + what didn't (positive/negative reflection)
+      if (/qu'est-ce qui|what went|bien|mal|positive|negative|went well|went wrong|succès|difficulty|fonctionné|échoué/gi.test(text)) {
+        retroBonus += 8;
+      }
+      
+      // 4. Root cause analysis (5 whys, why, causale)
+      if (/pourquoi|why|cause|root cause|analyse|analysis|5 whys|trop|pas assez|why didn't|how come/gi.test(text)) {
+        retroBonus += 8;
+      }
+      
+      // 5. Continuous improvement focus
+      if (/amélioration|improvement|améliorer|optimize|enhance|adapter|adapt|faire autrement/gi.test(text)) {
+        retroBonus += 7;
+      }
+      
+      // 6. Action and ownership (résolution, responsable, porteur)
+      if (/résolution|resolution|action|décision|engagement|s'engager|responsable|owner|porteur|assigné/gi.test(text)) {
+        retroBonus += 8;
+      }
+      
+      // 7. Team reflection (équipe, nous, ensemble, collectif)
+      if (/équipe|team|nous|we|on|notre|our|ensemble|together|collectif|collaborative/gi.test(text)) {
+        retroBonus += 7;
+      }
+      
+      score = Math.min(score + retroBonus, 100);
+    }
+
     scores[ceremonyType] = {
       score: Math.max(0, Math.min(score, 100)),
       markers: matchedMarkers.slice(0, 4)
