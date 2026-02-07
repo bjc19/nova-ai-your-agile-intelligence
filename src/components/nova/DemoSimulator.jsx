@@ -62,11 +62,15 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       // Déterminer le type de réunion (simulé ou forcé)
       const meetingType = forceType || detected.type;
 
+      // Récupérer anti-patterns spécifiques au type d'atelier
+      const ceremonyPatterns = getAntiPatternsByCeremonyType(meetingType);
+      const selectedPatterns = ceremonyPatterns.patterns.slice(0, 2 + Math.floor(Math.random() * 2));
+
       // Résultats simulés
       setResults({
         meetingType,
-        patterns: DEMO_PATTERNS.slice(0, 2 + Math.floor(Math.random() * 2)),
-        recommendations: DEMO_RECOMMENDATIONS.slice(0, 3 + Math.floor(Math.random() * 2)),
+        patterns: selectedPatterns,
+        recommendations: selectedPatterns.flatMap(p => p.suggestions.slice(0, 2)),
         confidence: 75 + Math.floor(Math.random() * 20),
         analysisNote: "Ces résultats sont simulés pour la démonstration",
         detectionConfidence: detected.confidence,
