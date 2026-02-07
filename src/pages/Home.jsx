@@ -169,7 +169,7 @@ export default function Home() {
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
               >
                 <Play className="w-5 h-5 mr-2" />
-                Try Demo ({demoTriesLeft}/2)
+                {t("tryDemo")} ({demoTriesLeft}/2)
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button 
@@ -177,12 +177,12 @@ export default function Home() {
                 size="lg"
                 className="px-8 py-6 text-lg rounded-xl"
               >
-                <a href="#pricing" className="flex items-center">Sign In</a>
+                <a href="#pricing" className="flex items-center">{t("signIn")}</a>
               </Button>
             </div>
 
             <p className="text-sm text-slate-500 mt-4">
-              🎮 No registration required • 2 free demo analyses per 24h per IP
+              🎮 {t("noReg")}
             </p>
           </motion.div>
         </div>
