@@ -18,6 +18,14 @@ function LayoutContent({ children, currentPageName }) {
       setIsLoading(false);
     };
     checkAuth();
+    
+    // Recheck auth when URL changes (after logout redirect)
+    const handleRouteChange = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('popstate', handleRouteChange);
+    return () => window.removeEventListener('popstate', handleRouteChange);
   }, []);
 
   const isPublicPage = currentPageName === "Home" || currentPageName === "Demo";
