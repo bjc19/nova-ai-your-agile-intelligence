@@ -61,13 +61,16 @@ function LayoutContent({ children, currentPageName }) {
                   {t('settings')}
                 </Link>
                 <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => base44.auth.logout(createPageUrl("Home"))}
-                  className="text-slate-500 hover:text-slate-700"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                   variant="ghost" 
+                   size="sm"
+                   onClick={() => {
+                     base44.auth.logout();
+                     window.location.href = createPageUrl("Home");
+                   }}
+                   className="text-slate-500 hover:text-slate-700"
+                 >
+                   <LogOut className="w-4 h-4" />
+                 </Button>
               </>
             ) : (
               <>
