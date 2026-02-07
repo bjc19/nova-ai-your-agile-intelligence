@@ -89,10 +89,16 @@ export default function Home() {
   const [lang, setLang] = useState("en");
 
   useEffect(() => {
+    // Détecter la langue du navigateur
+    const browserLang = navigator.language || navigator.userLanguage;
+    setLang(browserLang.startsWith("fr") ? "fr" : "en");
+
     // Vérifier tries de démo (localStorage + IP-based)
     const tries = localStorage.getItem("nova_demo_tries") || "2";
     setDemoTriesLeft(parseInt(tries));
   }, []);
+
+  const t = (key) => translations[lang][key] || translations["en"][key];
 
   const features = [
     {
