@@ -492,6 +492,45 @@ function analyzeComparative(text, semanticDensity) {
 
 export { CEREMONY_SPECIFIC_VERBS, DETECTION_PATTERNS };
 
+// ============ HELPER: Analyser la présence de termes SAFe exclusifs ============
+function analyzeSAFeExclusiveTerms(text) {
+  const exclusiveTerms = {
+    pi: (text.match(/\bpi\b/gi) || []).length,
+    rte: (text.match(/\brte\b/gi) || []).length,
+    wsjf: (text.match(/\bwsjf\b/gi) || []).length,
+    roam: (text.match(/\broam/gi) || []).length,
+    art: (text.match(/\bart\b/gi) || []).length
+  };
+
+  const totalExclusiveTerms = Object.values(exclusiveTerms).reduce((a, b) => a + b, 0);
+  const hasExclusiveTerms = totalExclusiveTerms >= 1;
+
+  return {
+    terms: exclusiveTerms,
+    totalCount: totalExclusiveTerms,
+    hasExclusiveTerms,
+    safeScore: Math.min(100, totalExclusiveTerms * 35) // Each exclusive term = 35 points
+  };
+}
+
+// ============ HELPER: Analyser l'échelle (multi-équipes vs équipe seule) ============
+function analyzeScale(text) {
+  const teamMatches = (text.match(/team\s+[a-z]|team\s+\d/gi) || []).length;
+  const multiTeamLanguage = /multi-équipes|multi-teams|cross-team|cross-équipes|plusieurs équipes|multiple teams|synchronized|release.?train/gi.test(text);
+  const isMultiTeam = teamMatches >= 2 || multiTeamLanguage;
+
+  const programmeLanguage = /programme|program|portfolio|release.?train|large.?scale|scaled.?agile/gi.test(text);
+  const equipLanguage = /sprint|standup|daily|réunion équipe|team meeting/gi.test(text);
+
+  return {
+    isMultiTeam,
+    teamCount: teamMatches,
+    hasProgrammeVocab: programmeLanguage,
+    hasEquipVocab: equipLanguage,
+    scaleScore: isMultiTeam ? 80 : 20
+  };
+}
+
 export function detectWorkshopType(text) {
   if (!text || text.trim().length < 20) {
     return {
@@ -505,7 +544,42 @@ export function detectWorkshopType(text) {
 
   const scores = {};
 
-  // Step 1: Check for non-Scrum frameworks first (decision tree logic)
+  // ============ STEP 1: Check for SAFe FIRST (exclusivity rule) ============
+  const safeAnalysis = analyzeSAFeExclusiveTerms(text);
+  const scaleAnalysis = analyzeScale(text);
+
+  // SAFe has EXCLUSIVE markers that definitively identify it
+  if (safeAnalysis.hasExclusiveTerms && scaleAnalysis.isMultiTeam) {
+    const safeScore = safeAnalysis.safeScore + scaleAnalysis.scaleScore;
+    return {
+      type: 'Autre',
+      subtype: '#SAFe',
+      confidence: Math.round(Math.min(safeScore, 95)),
+      justifications: [
+        `Présence de termes SAFe exclusifs : ${Object.entries(safeAnalysis.terms)
+          .filter(([_, count]) => count > 0)
+          .map(([term, count]) => `${term.toUpperCase()} (${count}x)`)
+          .join(', ')}`,
+        'Structure multi-équipes et coordination programme détectée',
+        'Absence de patterns d\'amélioration processus d\'équipe'
+      ],
+      tags: ['#SAFe', '#GrandeEchelle', '#Programme']
+    };
+  }
+
+  // Fallback: Check for SAFe-like patterns even without exclusive terms
+  if (/pi.?planning|agile release train|safe framework|release train/gi.test(text) ||
+      (scaleAnalysis.hasProgrammeVocab && scaleAnalysis.isMultiTeam && /synchron|align|programme/gi.test(text))) {
+    return {
+      type: 'Autre',
+      subtype: '#SAFe',
+      confidence: 75,
+      justifications: ['Vocabulaire SAFe et structure programme détectés', 'Framework de scaling identifié'],
+      tags: ['#SAFe', '#GrandeEchelle', '#Programme']
+    };
+  }
+
+  // Step 2: Check for Kanban (non-Scrum, before Scrum ceremonies)
   if (/wip|work.?in.?progress|kanban|lead time|cycle time|flux|flow/gi.test(text) &&
       !/sprint|planning|story point|vélocité|velocity/gi.test(text)) {
     return {
@@ -514,17 +588,6 @@ export function detectWorkshopType(text) {
       confidence: 85,
       justifications: ['Présence de vocabulaire Kanban (WIP, lead time, flux)', 'Absence de patterns Scrum'],
       tags: ['#Kanban', '#FluxContinu', '#WIP']
-    };
-  }
-
-  if (/pi.?planning|agile release train|art\b|safe framework/gi.test(text) ||
-      (/programme|program|train|portfolio|multi-équipes/gi.test(text) && /grande échelle|large scale|scaled agile/gi.test(text))) {
-    return {
-      type: 'Autre',
-      subtype: '#SAFe',
-      confidence: 85,
-      justifications: ['Vocabulaire SAFe détecté', 'Framework de scaling'],
-      tags: ['#SAFe', '#GrandeEchelle', '#Programme']
     };
   }
 
