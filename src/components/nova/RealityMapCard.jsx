@@ -561,9 +561,23 @@ Cette analyse est basée sur ${data.data_days} jours de données flux.
                             <span className="font-medium">{waste.impact}</span>
                           </div>
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          {waste.confidence}% confiance
-                        </Badge>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="outline" className="text-xs cursor-help">
+                                {waste.confidence}% confiance
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs">
+                              <p className="text-xs">Ce score indique la fiabilité de la détection. Il est basé sur :</p>
+                              <ul className="text-xs mt-1 space-y-0.5">
+                                <li>• Cohérence des données flux (30 jours)</li>
+                                <li>• Alignement avec les commentaires terrain</li>
+                                <li>• Absence de données manquantes</li>
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </button>
 
