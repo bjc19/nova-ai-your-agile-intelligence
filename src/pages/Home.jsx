@@ -18,9 +18,75 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
+const translations = {
+  en: {
+    aiPoweredScrum: "AI-Powered Scrum Intelligence",
+    heroPart1: "Turn Daily Standups into",
+    heroPart2: "Actionable Insights",
+    heroSubtitle: "Nova analyzes your team's standup conversations to detect blockers, identify risks, and provide recommendations — so you can focus on delivering value.",
+    tryDemo: "Try Demo",
+    signIn: "Sign In",
+    daysLeft: "days left in sprint",
+    noReg: "No registration required • 2 free demo analyses per 24h per IP",
+    everythingNeeds: "Everything Your Scrum Master Needs",
+    novaUnderstandsNuances: "Nova understands the nuances of agile ceremonies and provides intelligent insights.",
+    whatNovaAnalyzes: "What Nova Analyzes",
+    demoVisualizations: "Example demo visualizations",
+    sprintPerformance: "Sprint Performance",
+    simulated: "Simulated",
+    antiPatterns: "Anti-patterns",
+    demoData: "Demo data only",
+    keyKPIs: "Key KPIs",
+    ready: "Ready to transform your standups?",
+    tryNovaFree: "Try Nova for free with 2 demo analyses. Then choose the plan that suits your team.",
+    launchDemo: "Launch Demo",
+    seePlans: "See Plans",
+    blockersDetection: "Blocker Detection",
+    blockersDesc: "Automatically identify blockers and impediments from standup conversations",
+    riskAnalysis: "Risk Analysis",
+    riskDesc: "Proactively surface risks before they impact your sprint delivery",
+    sprintInsights: "Sprint Insights",
+    insightsDesc: "Track trends and patterns across your daily standups over time",
+    recommendations: "Recommendations",
+    recommendationsDesc: "Get AI-powered suggestions to unblock your team and accelerate delivery"
+  },
+  fr: {
+    aiPoweredScrum: "Intelligence Scrum Alimentée par l'IA",
+    heroPart1: "Transformez vos Standups en",
+    heroPart2: "Insights Actionnables",
+    heroSubtitle: "Nova analyse les conversations de standup de votre équipe pour détecter les blocages, identifier les risques et proposer des recommandations — afin que vous puissiez vous concentrer sur la création de valeur.",
+    tryDemo: "Essayer la Démo",
+    signIn: "Se Connecter",
+    daysLeft: "jours restants dans le sprint",
+    noReg: "Aucune inscription requise • 2 analyses de démo gratuites par 24h par IP",
+    everythingNeeds: "Tout ce dont votre Scrum Master a besoin",
+    novaUnderstandsNuances: "Nova comprend les nuances des cérémonies agiles et fournit des insights intelligents.",
+    whatNovaAnalyzes: "Ce que Nova analyse",
+    demoVisualizations: "Exemples de visualisations de démo",
+    sprintPerformance: "Performance Sprint",
+    simulated: "Simulé",
+    antiPatterns: "Anti-patterns",
+    demoData: "Données de démo uniquement",
+    keyKPIs: "KPIs Clés",
+    ready: "Prêt à transformer vos standups?",
+    tryNovaFree: "Essayez Nova gratuitement avec 2 analyses de démo. Puis choisissez le plan qui convient à votre équipe.",
+    launchDemo: "Lancer la Démo",
+    seePlans: "Voir les Plans",
+    blockersDetection: "Détection des Blocages",
+    blockersDesc: "Identifiez automatiquement les blocages et les obstacles à partir des conversations de standup",
+    riskAnalysis: "Analyse des Risques",
+    riskDesc: "Surfacez proactivement les risques avant qu'ils n'impactent la livraison de votre sprint",
+    sprintInsights: "Insights du Sprint",
+    insightsDesc: "Suivez les tendances et les modèles sur vos standups quotidiens au fil du temps",
+    recommendations: "Recommandations",
+    recommendationsDesc: "Obtenez des suggestions alimentées par l'IA pour débloquer votre équipe et accélérer la livraison"
+  }
+};
+
 export default function Home() {
   const [showDemoSimulator, setShowDemoSimulator] = useState(false);
   const [demoTriesLeft, setDemoTriesLeft] = useState(2);
+  const [lang, setLang] = useState("en");
 
   useEffect(() => {
     // Vérifier tries de démo (localStorage + IP-based)
