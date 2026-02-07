@@ -5,6 +5,22 @@
 
 // Verb-based detection layer - specific verbs for each ceremony
 const CEREMONY_SPECIFIC_VERBS = {
+  SAFE: {
+    verbs: [
+      'aligner', 'align', 'coordonner', 'coordinate', 'planifier', 'plan',
+      'synchroniser', 'synchronize', 'valider', 'validate', 'négocier', 'negotiate',
+      'engager', 'commit', 'dépendre', 'depend', 'intégrer', 'integrate',
+      'livrer', 'deliver', 'finaliser', 'finalize', 'consolider', 'consolidate',
+      'optimiser', 'optimize', 'prioriser', 'prioritize'
+    ],
+    patterns: [
+      /aligner|align|coordonner|coordinate|synchroniser|synchronize/gi,
+      /planifier|plan|valider|validate|négocier|negotiate/gi,
+      /engager|commit|dépendre|depend|intégrer|integrate/gi,
+      /livrer|deliver|finaliser|finalize|consolider|consolidate/gi,
+      /optimiser|optimize|prioriser|prioritize/gi
+    ]
+  },
   RETROSPECTIVE: {
     verbs: [
       'améliorer', 'improve', 'arrêter', 'stop', 'cesser', 'cease',
