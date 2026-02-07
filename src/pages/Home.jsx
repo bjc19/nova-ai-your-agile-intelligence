@@ -315,7 +315,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-4 text-center">Données de démo uniquement</p>
+                <p className="text-xs text-slate-500 mt-4 text-center">{t("demoData")}</p>
               </CardContent>
             </Card>
           </div>
