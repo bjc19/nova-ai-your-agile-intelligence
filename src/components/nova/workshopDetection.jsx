@@ -265,7 +265,7 @@ export function detectWorkshopType(text) {
     };
   }
 
-  // Step 2: Score each Scrum ceremony type with precise markers
+  // Step 2: Score each Scrum ceremony type with precise multi-variable detection
   Object.entries(DETECTION_PATTERNS).forEach(([ceremonyType, config]) => {
     let score = 0;
     const matchedMarkers = [];
@@ -273,6 +273,14 @@ export function detectWorkshopType(text) {
     if (ceremonyType === 'KANBAN' || ceremonyType === 'SAFE') {
       return; // Already handled above
     }
+
+    // Intelligence: Detect temporal horizon (key differentiator for Planning)
+    const hasFutureHorizon = ceremonyType === 'SPRINT_PLANNING' &&
+      /horizon|sprint|itération|2 semaines|semaines|week|cycle|planning horizon|upcoming/gi.test(text);
+    const hasCommitmentLanguage = ceremonyType === 'SPRINT_PLANNING' &&
+      /s'engager|commitment|assigner|assigned|responsable|owner/gi.test(text);
+    const hasNegotiationLanguage = ceremonyType === 'SPRINT_PLANNING' &&
+      /inclure|exclure|négocier|scope|priorité|can we|can't we|must have|should have/gi.test(text);
 
     // Check exclusion markers first
     const markerEntries = Object.entries(config.markers);
