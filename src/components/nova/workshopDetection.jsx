@@ -446,7 +446,7 @@ export function detectWorkshopType(text) {
   const intention = analyzeIntention(text);
   const comparative = analyzeComparative(text, semanticDensity);
 
-  // Step 2: Score each Scrum ceremony type with precise multi-variable detection
+  // Step 2: Score each Scrum ceremony type with 4-layer analysis
   Object.entries(DETECTION_PATTERNS).forEach(([ceremonyType, config]) => {
     let score = 0;
     const matchedMarkers = [];
@@ -455,167 +455,118 @@ export function detectWorkshopType(text) {
       return; // Already handled above
     }
 
-    // Intelligence: Detect temporal horizon (key differentiator for Planning)
-    const hasFutureHorizon = ceremonyType === 'SPRINT_PLANNING' &&
-      /horizon|sprint|itération|2 semaines|semaines|week|cycle|planning horizon|upcoming/gi.test(text);
-    const hasCommitmentLanguage = ceremonyType === 'SPRINT_PLANNING' &&
-      /s'engager|commitment|assigner|assigned|responsable|owner/gi.test(text);
-    const hasNegotiationLanguage = ceremonyType === 'SPRINT_PLANNING' &&
-      /inclure|exclure|négocier|scope|priorité|can we|can't we|must have|should have/gi.test(text);
+    // ============ COUCHE 1: ANALYSE LEXICALE (Semantic density) ============
+    let lexicalScore = 0;
+    if (ceremonyType === 'RETROSPECTIVE') {
+      lexicalScore = semanticDensity.retroEval * 2; // Boost semantic field matches
+    } else if (ceremonyType === 'SPRINT_PLANNING') {
+      lexicalScore = semanticDensity.planningSelect * 2;
+    }
+    score += Math.min(lexicalScore, 25);
 
-    // Check exclusion markers first
+    // ============ COUCHE 2: ANALYSE STRUCTURELLE (Conversational structure) ============
+    if (ceremonyType === 'RETROSPECTIVE' && conversationalStructure.likesFacilitatedRetro) {
+      score += 20; // Strong signal: facilitation structure + open questions
+      matchedMarkers.push('structure de facilitation détectée');
+    }
+
+    // ============ COUCHE 3: ANALYSE INTENTIONNELLE (Psychological intention) ============
+    if (ceremonyType === 'RETROSPECTIVE') {
+      if (intention.isRetrospectiveIntention) {
+        score += 25;
+        matchedMarkers.push('intention rétrospective détectée');
+      }
+      if (intention.reflectionDominant) {
+        score += 15;
+        matchedMarkers.push('réflexion dominante');
+      }
+    }
+
+    if (ceremonyType === 'SPRINT_PLANNING') {
+      if (intention.isPlanningIntention) {
+        score += 25;
+        matchedMarkers.push('intention de planification détectée');
+      }
+      if (!intention.isRetrospectiveIntention) {
+        score += 10;
+        matchedMarkers.push('absence d\'intention rétrospective');
+      }
+    }
+
+    // ============ COUCHE 4: ANALYSE COMPARATIVE (Knowledge base matching) ============
+    if (ceremonyType === 'RETROSPECTIVE') {
+      score += comparative.retroSimilarity;
+      if (comparative.noPlanningMarkers) {
+        score += 15; // Bonus: no critical planning markers
+        matchedMarkers.push('absence de patterns de planification');
+      }
+      if (comparative.differentialScore > 10) {
+        score += 10;
+        matchedMarkers.push('forte différenciation vs Planning');
+      }
+    }
+
+    if (ceremonyType === 'SPRINT_PLANNING') {
+      score += comparative.planningSimilarity;
+      if (!comparative.noPlanningMarkers && comparative.planningSimilarity > comparative.retroSimilarity) {
+        score += 10;
+      }
+    }
+
+    // ============ TRADITIONAL MARKERS (Legacy scoring, kept for fallback) ============
     const markerEntries = Object.entries(config.markers);
     let exclusionCount = 0;
-    const hasExclusions = [];
 
     markerEntries.forEach(([markerName, markerFn]) => {
       if (markerName.startsWith('no_') && markerFn(text)) {
         exclusionCount++;
-        hasExclusions.push(markerName);
       }
     });
 
-    // Base score reduced by exclusions (but not as harsh for Retrospective)
-    if (ceremonyType === 'RETROSPECTIVE') {
-      score = Math.max(20 - exclusionCount * 8, 0); // Lighter penalty for retro
-    } else {
-      score = Math.max(15 - exclusionCount * 12, 0);
+    // Exclusions less severe now (multi-layer analysis compensates)
+    if (ceremonyType === 'RETROSPECTIVE' && exclusionCount > 2) {
+      score = Math.max(score - exclusionCount * 3, 0);
     }
 
-    // Score positive markers with higher precision for Planning
+    // Positive markers
     let positiveMarkerCount = 0;
     markerEntries.forEach(([markerName, markerFn]) => {
-      if (!markerName.startsWith('no_')) {
-        if (markerFn(text)) {
-          const markerWeight = ceremonyType === 'SPRINT_PLANNING' ? 20 : 24;
-          score += markerWeight;
-          matchedMarkers.push(markerName.replace(/_/g, ' '));
-          positiveMarkerCount++;
-        }
+      if (!markerName.startsWith('no_') && markerFn(text)) {
+        score += 8; // Lower weight than multi-layer analysis
+        positiveMarkerCount++;
       }
     });
 
-    // Bonus for multiple positive markers (multi-variable detection)
-    if (positiveMarkerCount >= 5) {
-      score += 10; // Strong confidence with 5+ markers
-    } else if (positiveMarkerCount >= 3) {
-      score += 5;
-    }
-
-    // Keyword density (refined)
-    const keywords = config.keywords || [];
-    const keywordMatches = keywords.filter(kw =>
-      new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi').test(text)
-    ).length;
-
-    const keywordDensity = (keywordMatches / Math.max(keywords.length, 1)) * 100;
-    score += Math.min(keywordDensity * 0.3, 15); // Max 15 points
-
-    // Intelligence boost: Planning-specific multi-variable analysis (8+ variables)
-    if (ceremonyType === 'SPRINT_PLANNING') {
-      let intelligenceBonus = 0;
-      
-      // Multi-variable detection for Planning (projection future + engagement + négociation)
-      if (hasFutureHorizon) intelligenceBonus += 8;
-      if (hasCommitmentLanguage) intelligenceBonus += 8;
-      if (hasNegotiationLanguage) intelligenceBonus += 8;
-      
-      // Temporal horizon is a strong differentiator
-      if (/sprint.*dur|2 semaines|itération|planning horizon|upcoming sprint|le prochain sprint/gi.test(text)) {
-        intelligenceBonus += 10;
-      }
-      
-      // CRUCIAL: Temporal focus on FUTURE (key differentiator from Retrospective)
-      // Planning focuses on what WILL happen, with unknowns, uncertainties, estimations
-      const futureReferences = (text.match(/sera|will be|va|going to|planning|prévoir|le prochain|next|upcoming|va faire|will do/gi) || []).length;
-      const estimationLanguage = (text.match(/planning poker|t-shirt sizing|sizing|estimation|points?|story point|buffer|unknowns|incertitude|incertitudes|on ne sait|risks?|dépendances|dependencies/gi) || []).length;
-      const pastReferences = (text.match(/s'est|a été|a fonctionné|lors du|pendant|au cours|l'impact|the impact/gi) || []).length;
-      
-      if (futureReferences >= 4 && estimationLanguage >= 2 && futureReferences > pastReferences) {
-        intelligenceBonus += 10; // Strong future-focus + estimation language = strong planning signal
-      }
-      
-      // LAYER: Ceremony-specific verbs (strongest semantic signal for Planning)
-      const planningVerbMatches = CEREMONY_SPECIFIC_VERBS.SPRINT_PLANNING.patterns.reduce((count, pattern) => {
-        const matches = text.match(pattern) || [];
-        return count + matches.length;
-      }, 0);
-      
-      if (planningVerbMatches >= 3) {
-        intelligenceBonus += 15; // Very strong signal - multiple planning-specific verbs
-      } else if (planningVerbMatches >= 1) {
-        intelligenceBonus += 8;
-      }
-      
-      score = Math.min(score + intelligenceBonus, 100);
-    }
-
-    // Intelligence boost: Retrospective-specific multi-variable analysis (8+ variables)
+    // Verb-specific bonuses (strong semantic signals)
     if (ceremonyType === 'RETROSPECTIVE') {
-      let retroBonus = 0;
-      
-      // 1. End-of-cycle language (fin de sprint, bilan)
-      if (/fin de sprint|end of sprint|ce sprint|this sprint|cycle complété|dernier sprint|last sprint|bilan/gi.test(text)) {
-        retroBonus += 8;
-      }
-      
-      // 2. Process evaluation (fokus on how we work)
-      if (/processus|process|méthode|method|workflow|façon de travailler|équipe|team|collaboration/gi.test(text)) {
-        retroBonus += 7;
-      }
-      
-      // 3. What worked + what didn't (positive/negative reflection)
-      if (/qu'est-ce qui|what went|bien|mal|positive|negative|went well|went wrong|succès|difficulty|fonctionné|échoué/gi.test(text)) {
-        retroBonus += 8;
-      }
-      
-      // 4. Root cause analysis (5 whys, why, causale)
-      if (/pourquoi|why|cause|root cause|analyse|analysis|5 whys|trop|pas assez|why didn't|how come/gi.test(text)) {
-        retroBonus += 8;
-      }
-      
-      // 5. Continuous improvement focus
-      if (/amélioration|improvement|améliorer|optimize|enhance|adapter|adapt|faire autrement/gi.test(text)) {
-        retroBonus += 7;
-      }
-      
-      // 6. Action and ownership (résolution, responsable, porteur)
-      if (/résolution|resolution|action|décision|engagement|s'engager|responsable|owner|porteur|assigné/gi.test(text)) {
-        retroBonus += 8;
-      }
-      
-      // 7. Team reflection (équipe, nous, ensemble, collectif)
-      if (/équipe|team|nous|we|on|notre|our|ensemble|together|collectif|collaborative/gi.test(text)) {
-        retroBonus += 7;
-      }
-      
-      // 8. CRUCIAL: Temporal focus on PAST (key differentiator from Planning)
-      // Retrospective focuses on what happened, Planning focuses on what WILL happen
-      const pastReferences = (text.match(/s'est|a été|a fonctionné|a échoué|on a|nous avons|we had|we were|during|pendant|au cours|lors du|l'impact|the impact/gi) || []).length;
-      const futureReferences = (text.match(/sera|will be|va|going to|planning|prévoir|estimé|estimation|planning poker|t-shirt|sizing|buffer|unknowns/gi) || []).length;
-      
-      if (pastReferences > futureReferences && pastReferences >= 4) {
-        retroBonus += 10; // Strong past-focus = strong retro signal
-      }
-      
-      // 9. LAYER: Ceremony-specific verbs (strongest semantic signal)
       const retroVerbMatches = CEREMONY_SPECIFIC_VERBS.RETROSPECTIVE.patterns.reduce((count, pattern) => {
-        const matches = text.match(pattern) || [];
-        return count + matches.length;
+        return count + (text.match(pattern) || []).length;
       }, 0);
       
       if (retroVerbMatches >= 3) {
-        retroBonus += 15; // Very strong signal - multiple retro-specific verbs
+        score += 20; // Very strong signal
+        matchedMarkers.push('verbes rétrospectifs détectés');
       } else if (retroVerbMatches >= 1) {
-        retroBonus += 8;
+        score += 10;
       }
+    }
+
+    if (ceremonyType === 'SPRINT_PLANNING') {
+      const planningVerbMatches = CEREMONY_SPECIFIC_VERBS.SPRINT_PLANNING.patterns.reduce((count, pattern) => {
+        return count + (text.match(pattern) || []).length;
+      }, 0);
       
-      score = Math.min(score + retroBonus, 100);
+      if (planningVerbMatches >= 3) {
+        score += 20;
+        matchedMarkers.push('verbes de planification détectés');
+      } else if (planningVerbMatches >= 1) {
+        score += 10;
+      }
     }
 
     scores[ceremonyType] = {
       score: Math.max(0, Math.min(score, 100)),
-      markers: matchedMarkers.slice(0, 4)
+      markers: matchedMarkers.slice(0, 5)
     };
   });
 
