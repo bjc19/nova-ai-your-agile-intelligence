@@ -3,6 +3,70 @@
 // Updated with precise Scrum framework distinctions based on ceremony objectives
 // Reference: Distinctions claires entre Sprint Planning, Daily Scrum, Sprint Review, Retrospective
 
+// Verb-based detection layer - specific verbs for each ceremony
+const CEREMONY_SPECIFIC_VERBS = {
+  RETROSPECTIVE: {
+    verbs: [
+      'améliorer', 'improve', 'arrêter', 'stop', 'cesser', 'cease',
+      'commencer', 'start', 'continuer', 'continue', 'corriger', 'correct',
+      'expérimenter', 'experiment', 'itérer', 'iterate', 'optimiser', 'optimize',
+      'résoudre', 'resolve', 'simplifier', 'simplify', 'tester', 'test',
+      'changer', 'change', 'évoluer', 'evolve', 'adapter', 'adapt'
+    ],
+    patterns: [
+      /améliorer|improve|arrêter|stop|cesser|cease/gi,
+      /commencer|start|continuer|continue|corriger|correct/gi,
+      /expérimenter|experiment|itérer|iterate|optimiser|optimize/gi,
+      /résoudre|resolve|simplifier|simplify|tester|test/gi,
+      /changer|change|évoluer|evolve|adapter|adapt/gi
+    ]
+  },
+  SPRINT_PLANNING: {
+    verbs: [
+      'estimer', 'estimate', 'prioriser', 'prioritize', 'sélectionner', 'select',
+      'engager', 'commit', 'décomposer', 'decompose', 'affecter', 'assign',
+      'valider', 'validate', 'définir', 'define', 'négocier', 'negotiate',
+      'planifier', 'plan', 'allouer', 'allocate', 'accepter', 'accept',
+      'découper', 'split', 'inclure', 'include', 'exclure', 'exclude'
+    ],
+    patterns: [
+      /estimer|estimate|prioriser|prioritize|sélectionner|select/gi,
+      /engager|commit|décomposer|decompose|affecter|assign/gi,
+      /valider|validate|définir|define|négocier|negotiate/gi,
+      /planifier|plan|allouer|allocate|accepter|accept/gi,
+      /découper|split|inclure|include|exclure|exclude/gi
+    ]
+  },
+  DAILY_SCRUM: {
+    verbs: [
+      'terminer', 'finish', 'commencer', 'start', 'bloquer', 'block',
+      'aider', 'help', 'coordonner', 'coordinate', 'reporter', 'defer',
+      'avancer', 'progress', 'résoudre', 'resolve', 'tester', 'test',
+      'déployer', 'deploy', 'reviewer', 'review', 'documenter', 'document'
+    ],
+    patterns: [
+      /terminer|finish|commencer|start|bloquer|block/gi,
+      /aider|help|coordonner|coordinate|reporter|defer/gi,
+      /avancer|progress|résoudre|resolve|tester|test/gi,
+      /déployer|deploy|reviewer|review|documenter|document/gi
+    ]
+  },
+  SPRINT_REVIEW: {
+    verbs: [
+      'démontrer', 'demonstrate', 'présenter', 'present', 'montrer', 'show',
+      'expliquer', 'explain', 'recevoir', 'receive', 'collecter', 'collect',
+      'valider', 'validate', 'illustrer', 'illustrate', 'partager', 'share',
+      'questionner', 'question', 'adapter', 'adapt', 'mesurer', 'measure'
+    ],
+    patterns: [
+      /démontrer|demonstrate|présenter|present|montrer|show/gi,
+      /expliquer|explain|recevoir|receive|collecter|collect/gi,
+      /valider|validate|illustrer|illustrate|partager|share/gi,
+      /questionner|question|adapter|adapt|mesurer|measure/gi
+    ]
+  }
+};
+
 const DETECTION_PATTERNS = {
   SPRINT_PLANNING: {
     // Objectif: Déterminer CE QUI sera livré et COMMENT le livrer
