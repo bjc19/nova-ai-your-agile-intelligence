@@ -254,15 +254,15 @@ export default function Home() {
             <Card className="border-slate-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-900">Performance Sprint</h3>
-                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 Simulé</Badge>
+                  <h3 className="font-semibold text-slate-900">{t("sprintPerformance")}</h3>
+                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
                 </div>
                 <div className="h-32 flex items-end justify-between gap-1">
                   {[30, 35, 45, 50, 65, 72, 85, 90, 88].map((h, i) => (
                     <div key={i} className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t" style={{ height: `${h}%` }} />
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-3 text-center">Données simulées pour démonstration</p>
+                <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
               </CardContent>
             </Card>
 
@@ -270,8 +270,8 @@ export default function Home() {
             <Card className="border-slate-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-900">Anti-patterns</h3>
-                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 Simulé</Badge>
+                  <h3 className="font-semibold text-slate-900">{t("antiPatterns")}</h3>
+                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
                 </div>
                 <div className="space-y-3">
                   {[
