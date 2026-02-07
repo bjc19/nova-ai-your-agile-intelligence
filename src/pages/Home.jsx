@@ -296,6 +296,31 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            {/* Sprint Tracking */}
+            <Card className="border-slate-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-slate-900">{t("sprintTracking")}</h3>
+                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
+                </div>
+                <div className="h-32 flex items-end justify-between gap-0.5">
+                  {[
+                    { day: "Mon", value: 15 },
+                    { day: "Tue", value: 18 },
+                    { day: "Wed", value: 22 },
+                    { day: "Thu", value: 28 },
+                    { day: "Fri", value: 32 }
+                  ].map((item, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center">
+                      <div className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t" style={{ height: `${(item.value/32)*100}%` }} />
+                      <span className="text-xs text-slate-500 mt-1">{item.day}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
+              </CardContent>
+            </Card>
+
             {/* KPIs */}
             <Card className="border-slate-200">
               <CardContent className="p-6">
