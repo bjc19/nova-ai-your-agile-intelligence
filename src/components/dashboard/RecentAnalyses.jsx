@@ -36,6 +36,8 @@ export default function RecentAnalyses({ analyses = [] }) {
   const [allItems, setAllItems] = useState([]);
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [patternDetails, setPatternDetails] = useState(null);
+  const [contextualActions, setContextualActions] = useState(null);
+  const [loadingActions, setLoadingActions] = useState(false);
 
   useEffect(() => {
     const fetchSignals = async () => {
@@ -368,83 +370,129 @@ export default function RecentAnalyses({ analyses = [] }) {
           </Card>
 
           {/* Signal Details Modal */}
-          <Dialog open={!!selectedSignal} onOpenChange={() => setSelectedSignal(null)}>
-          <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
-              {selectedSignal?.probleme}
-            </DialogTitle>
-            <DialogDescription>
-              {language === 'fr' ? 'Détails et actions recommandées' : 'Details and recommended actions'}
-            </DialogDescription>
-          </DialogHeader>
+          <Dialog open={!!selectedSignal} onOpenChange={() => {
+            setSelectedSignal(null);
+            setContextualActions(null);
+          }}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                  {selectedSignal?.probleme}
+                </DialogTitle>
+                <DialogDescription>
+                  {language === 'fr' ? 'Détails et actions recommandées contextualisées' : 'Details and contextual recommended actions'}
+                </DialogDescription>
+              </DialogHeader>
 
-          {selectedSignal && (
-            <div className="space-y-6">
-              {/* Pattern Information */}
-              {patternDetails && (
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <h3 className="font-semibold text-slate-900 mb-2">
-                    {language === 'fr' ? 'Pattern détecté' : 'Detected Pattern'}
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Nom:' : 'Name:'}</span>{' '}
-                      <span className="text-slate-600">{patternDetails.name}</span>
+              {selectedSignal && (
+                <div className="space-y-6">
+                  {/* Pattern Information */}
+                  {patternDetails && (
+                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                      <h3 className="font-semibold text-slate-900 mb-2">
+                        {language === 'fr' ? 'Pattern détecté' : 'Detected Pattern'}
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="font-medium text-slate-700">{language === 'fr' ? 'Nom:' : 'Name:'}</span>{' '}
+                          <span className="text-slate-600">{patternDetails.name}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-slate-700">{language === 'fr' ? 'Catégorie:' : 'Category:'}</span>{' '}
+                          <Badge variant="outline">{patternDetails.pattern_id}</Badge>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Catégorie:' : 'Category:'}</span>{' '}
-                      <Badge variant="outline">{patternDetails.pattern_id}</Badge>
+                  )}
+
+                  {/* Contextual Actions - Loading or Display */}
+                  <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                    <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4" />
+                      {language === 'fr' ? 'Actions contextualisées' : 'Contextual Actions'}
+                    </h3>
+
+                    {loadingActions ? (
+                      <div className="flex items-center gap-2 text-sm text-green-900">
+                        <div className="w-4 h-4 rounded-full border-2 border-green-900 border-t-transparent animate-spin" />
+                        {language === 'fr' ? 'Génération des actions...' : 'Generating actions...'}
+                      </div>
+                    ) : contextualActions ? (
+                      <ul className="space-y-2">
+                        {contextualActions.map((action, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm text-green-900">
+                            <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <span>{action}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={async () => {
+                          setLoadingActions(true);
+                          try {
+                            const prompt = `Tu es un Scrum Master expert. Voici un problème détecté dans l'équipe:
+
+          Problème: ${selectedSignal.probleme}
+          Pattern: ${patternDetails?.name || 'N/A'}
+          Sévérité: ${selectedSignal.criticite}
+          Personnes impliquées: ${[selectedSignal.assignee_first_name, selectedSignal.blocked_by_first_name, ...(selectedSignal.team_members_involved || [])].filter(Boolean).join(', ')}
+          ${selectedSignal.jira_ticket_key ? `Ticket Jira: ${selectedSignal.jira_ticket_key}` : ''}
+
+          Génère 3-4 actions spécifiques et contextualisées pour CETTE situation (pas des conseils génériques). Les actions doivent être:
+          - Concrètes et immédiatement applicables
+          - Basées sur le contexte du problème
+          - Avec les prénoms des personnes impliquées si pertinent
+          - Realistes et mesurables
+
+          Retourne UNIQUEMENT une liste JSON d'actions, ex: ["Action 1", "Action 2"]`;
+
+                            const result = await base44.integrations.Core.InvokeLLM({
+                              prompt,
+                              response_json_schema: {
+                                type: 'array',
+                                items: { type: 'string' }
+                              }
+                            });
+
+                            setContextualActions(result);
+                          } catch (error) {
+                            console.error('Error generating actions:', error);
+                          } finally {
+                            setLoadingActions(false);
+                          }
+                        }}
+                      >
+                        {language === 'fr' ? '✨ Générer actions contextualisées' : '✨ Generate Contextual Actions'}
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Quick Win */}
+                  {patternDetails?.quick_win && (
+                    <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                      <h3 className="font-semibold text-blue-900 mb-2">
+                        {language === 'fr' ? '⚡ Quick Win (≤48h)' : '⚡ Quick Win (≤48h)'}
+                      </h3>
+                      <p className="text-sm text-blue-900">{patternDetails.quick_win}</p>
                     </div>
-                    <div>
-                      <span className="font-medium text-slate-700 block mb-1">{language === 'fr' ? 'Description:' : 'Description:'}</span>
-                      <p className="text-slate-600">{patternDetails.description}</p>
-                    </div>
+                  )}
+
+                  {/* Severity */}
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-slate-100">
+                    <span className="font-medium text-slate-700">
+                      {language === 'fr' ? 'Sévérité:' : 'Severity:'}
+                    </span>
+                    <Badge className={criticityColor[selectedSignal?.criticite] || criticityColor.basse}>
+                      {selectedSignal?.criticite}
+                    </Badge>
                   </div>
                 </div>
               )}
-
-              {/* Recommended Actions */}
-              {(selectedSignal?.recos?.length > 0 || patternDetails?.recommended_actions?.length > 0) && (
-                <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                  <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4" />
-                    {language === 'fr' ? 'Actions recommandées' : 'Recommended Actions'}
-                  </h3>
-                  <ul className="space-y-2">
-                    {(selectedSignal?.recos || patternDetails?.recommended_actions || []).map((action, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm text-green-900">
-                        <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                        <span>{action}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Quick Win */}
-              {patternDetails?.quick_win && (
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2">
-                    {language === 'fr' ? '⚡ Quick Win (≤48h)' : '⚡ Quick Win (≤48h)'}
-                  </h3>
-                  <p className="text-sm text-blue-900">{patternDetails.quick_win}</p>
-                </div>
-              )}
-
-              {/* Severity */}
-              <div className="flex items-center justify-between p-4 rounded-lg bg-slate-100">
-                <span className="font-medium text-slate-700">
-                  {language === 'fr' ? 'Sévérité:' : 'Severity:'}
-                </span>
-                <Badge className={criticityColor[selectedSignal?.criticite] || criticityColor.basse}>
-                  {selectedSignal?.criticite}
-                </Badge>
-              </div>
-            </div>
-          )}
-          </DialogContent>
+            </DialogContent>
           </Dialog>
           </motion.div>
           );
