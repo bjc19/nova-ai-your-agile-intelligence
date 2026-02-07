@@ -356,37 +356,37 @@ export default function Home() {
 
       {/* CTA Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 md:p-12 text-center"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            {t("ready")}
-          </h2>
-          <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            {t("tryNovaFree")}
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              onClick={() => setShowDemoSimulator(true)}
-              size="lg" 
-              className="bg-white text-slate-900 hover:bg-slate-100 px-8"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              {t("launchDemo")}
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-8"
-            >
-              <a href="#pricing">{t("seePlans")}</a>
-            </Button>
-          </div>
-        </motion.div>
+       <motion.div
+         initial={{ opacity: 0, y: 20 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.5, delay: 0.4 }}
+         className="rounded-3xl bg-gradient-to-br from-[#197aed] to-[#0f5bbf] p-8 md:p-12 text-center"
+       >
+         <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+           {t("ready")}
+         </h2>
+         <p className="text-blue-100 mb-8 max-w-xl mx-auto">
+           {t("tryNovaFree")}
+         </p>
+         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+           <Button 
+             onClick={() => setShowDemoSimulator(true)}
+             size="lg" 
+             className="bg-white text-[#197aed] hover:bg-blue-50 px-8 font-semibold"
+           >
+             <Play className="w-4 h-4 mr-2" />
+             {t("launchDemo")}
+           </Button>
+           <Button 
+             variant="outline" 
+             size="lg"
+             className="border-blue-200 text-white hover:bg-blue-600 px-8"
+           >
+             <a href="#pricing">{t("seePlans")}</a>
+           </Button>
+         </div>
+       </motion.div>
       </div>
-    </div>
-  );
-}
+      </div>
+      );
+      }
