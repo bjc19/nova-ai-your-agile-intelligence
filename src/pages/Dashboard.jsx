@@ -342,6 +342,15 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Recent Analyses */}
+              <RecentAnalyses analyses={analysisHistory} />
+
+              {/* Key Recommendations */}
+              <KeyRecommendations
+                latestAnalysis={latestAnalysis}
+                sourceUrl={latestAnalysis?.sourceUrl}
+                sourceName={latestAnalysis?.sourceName} />
+
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -418,23 +427,13 @@ export default function Dashboard() {
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
             }
-            
+
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
-
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
