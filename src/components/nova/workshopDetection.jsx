@@ -301,6 +301,8 @@ const DETECTION_PATTERNS = {
   }
 };
 
+export { CEREMONY_SPECIFIC_VERBS, DETECTION_PATTERNS };
+
 export function detectWorkshopType(text) {
   if (!text || text.trim().length < 20) {
     return {
