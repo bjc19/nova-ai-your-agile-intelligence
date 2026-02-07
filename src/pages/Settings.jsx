@@ -692,9 +692,9 @@ export default function Settings() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-slate-900">{integration.name}</h3>
-                          {integration.requiresBackend && (
-                            <Badge variant="outline" className="text-xs">
-                              {t('requiresBackend')}
+                          {integration.comingSoon && (
+                            <Badge variant="outline" className="text-xs bg-slate-100">
+                              Prochainement
                             </Badge>
                           )}
                           {integration.comingSoon && (
