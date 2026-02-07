@@ -242,7 +242,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-semibold text-slate-900 block mb-2">
-                Collez votre transcript de standup
+                Collez un transcript de daily standup ou un autre type d'atelier
               </label>
               <Textarea
                 value={input}
