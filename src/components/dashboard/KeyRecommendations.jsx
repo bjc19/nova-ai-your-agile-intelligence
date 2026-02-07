@@ -35,13 +35,27 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [translatedRecommendations, setTranslatedRecommendations] = useState(null);
   const [allSourceRecommendations, setAllSourceRecommendations] = useState([]);
 
-  // Fetch all recommendations from all sources via unified endpoint
+  // Fetch all recommendations from all sources via unified endpoint with cache
   useEffect(() => {
     const fetchAllRecommendations = async () => {
+      const cacheKey = 'all_recommendations';
+      const cached = sessionStorage.getItem(cacheKey);
+      const cacheTimestamp = sessionStorage.getItem(`${cacheKey}_timestamp`);
+      
+      if (cached && cacheTimestamp) {
+        const age = Date.now() - parseInt(cacheTimestamp);
+        if (age < 5 * 60 * 1000) {
+          setAllSourceRecommendations(JSON.parse(cached));
+          return;
+        }
+      }
+      
       try {
         const response = await base44.functions.invoke('getAllRecommendations', {});
         if (response.data?.recommendations) {
           setAllSourceRecommendations(response.data.recommendations);
+          sessionStorage.setItem(cacheKey, JSON.stringify(response.data.recommendations));
+          sessionStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
         }
       } catch (error) {
         console.error("Error fetching all recommendations:", error);
