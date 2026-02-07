@@ -36,19 +36,24 @@ const DETECTION_PATTERNS = {
       'estimation', 'points', 'story points', 'vélocité', 'velocity', 'capacité',
       'definition of done', 'dod', 'stories', 'tâches', 'tasks',
       'inclure', 'exclure', 'priorité', 'priority', 'scope',
-      'planning', 'planification'
+      'planning', 'planification', 'assigner', 'assigné', 'assigned', 'owner',
+      'combien de temps', 'how long', 'taille', 'size'
     ],
     patterns: [
       /sprint goal|objectif du sprint|goal statement/gi,
       /user stor(ies|y)|backlog item|story|tâche|task/gi,
       /estim|points?|story point|capacité|velocity|vélocité/gi,
       /inclure|exclure|ajouter|retirer|priorit/gi,
+      /assigner|assigné|assigned|owner|responsable/gi,
+      /combien de temps|how long|taille|size/gi
     ],
     markers: {
       planning_vocab: (text) => /sprint goal|backlog|user stor|estimation|points|capacité|definition of done|dod/gi.test(text),
       prioritization: (text) => /inclure|exclure|priorit|scope|ajouter|retirer|négocier/gi.test(text),
       effort_discussion: (text) => /estim|points|capacité|effort|complexity|difficul/gi.test(text),
-      fixed_horizon: (text) => /sprint de|2 semaines|itération|2 weeks|iteration|sprint duration/gi.test(text)
+      fixed_horizon: (text) => /sprint de|2 semaines|itération|2 weeks|iteration|sprint duration/gi.test(text),
+      future_focus: (text) => /va faire|will do|prochain|next|planning|commitments|s'engager/gi.test(text),
+      no_retrospective_markers: (text) => !/amélior|apprentiss|fonctionn[ée]|plan d'action|action.*amélioration/gi.test(text)
     }
   },
 
