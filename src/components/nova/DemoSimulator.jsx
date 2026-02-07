@@ -46,6 +46,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   const [results, setResults] = useState(null);
   const [tries, setTries] = useState(2);
   const [loading, setLoading] = useState(true);
+  const [detection, setDetection] = useState(null);
+  const [forceType, setForceType] = useState(null);
 
   useEffect(() => {
     // Vérifier tries restantes
