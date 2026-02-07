@@ -694,7 +694,7 @@ export default function Settings() {
                           <h3 className="font-semibold text-slate-900">{integration.name}</h3>
                           {integration.requiresBackend && (
                             <Badge variant="outline" className="text-xs">
-                              {t('requiresBackend')}
+                              Prochainement
                             </Badge>
                           )}
                           {integration.comingSoon && (
