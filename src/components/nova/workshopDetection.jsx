@@ -166,16 +166,40 @@ export function detectWorkshopType(text) {
 
   const scores = {};
 
-  // Score each ceremony type
+  // Score each ceremony type with exclusion rules
   Object.entries(DETECTION_PATTERNS).forEach(([ceremonyType, config]) => {
     let score = 0;
     const justifications = [];
 
+    // Check for disqualifying factors first
+    const markerEntries = Object.entries(config.markers);
+    let hasDisqualifier = false;
+    
+    markerEntries.forEach(([markerName, markerFn]) => {
+      if (markerName.startsWith('no_')) {
+        // These are exclusion markers
+        if (markerFn(text)) {
+          hasDisqualifier = true;
+        }
+      }
+    });
+
+    // If disqualified, give lower base score
+    let baseScore = hasDisqualifier ? 0 : 20;
+    score = baseScore;
+
     // Check markers (weighted)
-    Object.entries(config.markers).forEach(([markerName, markerFn]) => {
-      if (markerFn(text)) {
-        score += 20;
-        justifications.push(`${markerName.replace(/_/g, ' ')}`);
+    markerEntries.forEach(([markerName, markerFn]) => {
+      if (!markerName.startsWith('no_')) {
+        if (markerFn(text)) {
+          score += 22; // 22 points per positive marker (allows ~4.5 markers max)
+          justifications.push(`${markerName.replace(/_/g, ' ')}`);
+        }
+      } else {
+        // Negative markers reduce score
+        if (markerFn(text)) {
+          score -= 15; // Penalty for having contrary markers
+        }
       }
     });
 
@@ -186,10 +210,10 @@ export function detectWorkshopType(text) {
     ).length;
     
     const keywordDensity = (keywordMatches / Math.max(keywords.length, 1)) * 100;
-    score += Math.min(keywordDensity * 0.3, 25); // Max 25 points for keywords
+    score += Math.min(keywordDensity * 0.35, 20); // Max 20 points for keywords
 
     scores[ceremonyType] = {
-      score: Math.min(score, 100),
+      score: Math.max(0, Math.min(score, 100)),
       justifications: justifications.slice(0, 3) // Top 3 justifications
     };
   });
