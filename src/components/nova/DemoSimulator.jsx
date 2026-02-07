@@ -163,23 +163,45 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
             {/* Patterns Detected */}
             <div>
-              <p className="text-sm font-semibold text-slate-900 mb-3">Anti-patterns Détectés</p>
+              <p className="text-sm font-semibold text-slate-900 mb-3">Anti-patterns Détectés pour <span className="text-blue-600">{results.meetingType}</span></p>
               <div className="space-y-2">
                 {results.patterns.map((pattern, idx) => (
-                  <Card key={idx} className="border-slate-200">
-                    <CardContent className="p-3 flex items-start justify-between">
-                      <div>
-                        <p className="font-medium text-slate-900">{pattern.name}</p>
-                        <p className="text-sm text-slate-600">{pattern.description}</p>
+                  <Card key={idx} className={`border-slate-200 cursor-pointer hover:shadow-md transition-all ${expandedPattern === idx ? 'ring-2 ring-blue-400' : ''}`}>
+                    <button
+                      onClick={() => setExpandedPattern(expandedPattern === idx ? null : idx)}
+                      className="w-full text-left"
+                    >
+                      <CardContent className="p-3 flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-900">{pattern.name}</p>
+                          <p className="text-sm text-slate-600">{pattern.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`ml-2 ${
+                            pattern.severity === 'high' 
+                              ? 'bg-red-100 text-red-800' 
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {pattern.severity === 'high' ? '🔴' : '🟡'} {pattern.severity}
+                          </Badge>
+                          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${expandedPattern === idx ? 'rotate-180' : ''}`} />
+                        </div>
+                      </CardContent>
+                    </button>
+                    
+                    {expandedPattern === idx && (
+                      <div className="border-t border-slate-200 px-3 py-3 bg-blue-50">
+                        <p className="text-xs font-semibold text-slate-900 mb-2">💡 Suggestions d'amélioration :</p>
+                        <ul className="space-y-1.5">
+                          {pattern.suggestions.map((suggestion, sidx) => (
+                            <li key={sidx} className="flex gap-2 text-xs text-slate-700">
+                              <span className="text-blue-600 font-bold">✓</span>
+                              <span>{suggestion}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <Badge className={`ml-2 ${
-                        pattern.severity === 'high' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {pattern.severity === 'high' ? '🔴' : '🟡'} {pattern.severity}
-                      </Badge>
-                    </CardContent>
+                    )}
                   </Card>
                 ))}
               </div>
