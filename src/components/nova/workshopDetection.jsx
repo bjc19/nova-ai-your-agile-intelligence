@@ -439,6 +439,23 @@ export function detectWorkshopType(text) {
     }
   }
 
+  // Special handling: Retrospective vs others with close scores
+  if (bestType === 'RETROSPECTIVE' && bestScore.score >= 40) {
+    // Verify strong Retrospective signals (multi-variable confirmation)
+    const retroSignals = [
+      /fin de sprint|ce sprint|cycle complété|dernier sprint/gi.test(text),
+      /qu'est-ce qui|what went|bien|mal|positive|negative|went well|went wrong/gi.test(text),
+      /amélioration|improvement|améliorer|process change/gi.test(text),
+      /résolution|resolution|responsable|owner|action/gi.test(text),
+      /équipe|team|nous|we|collectif/gi.test(text)
+    ];
+    const retroSignalCount = retroSignals.filter(s => s).length;
+    
+    if (retroSignalCount >= 3) {
+      bestScore.score = Math.min(bestScore.score + 12, 100);
+    }
+  }
+
   return {
     type: mapping.display,
     subtype: null,
