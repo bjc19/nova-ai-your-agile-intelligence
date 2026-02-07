@@ -336,10 +336,10 @@ export default function Home() {
           className="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 md:p-12 text-center"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Prêt à transformer vos standups?
+            {t("ready")}
           </h2>
           <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            Essayez Nova gratuitement avec 2 analyses de démo. Puis choisissez le plan qui convient à votre équipe.
+            {t("tryNovaFree")}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button 
@@ -348,14 +348,14 @@ export default function Home() {
               className="bg-white text-slate-900 hover:bg-slate-100 px-8"
             >
               <Play className="w-4 h-4 mr-2" />
-              Lancer la Démo
+              {t("launchDemo")}
             </Button>
             <Button 
               variant="outline" 
               size="lg"
               className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-8"
             >
-              <a href="#pricing">Voir les Plans</a>
+              <a href="#pricing">{t("seePlans")}</a>
             </Button>
           </div>
         </motion.div>
