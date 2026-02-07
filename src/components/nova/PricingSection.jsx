@@ -23,7 +23,7 @@ const plans = [
     badge: "RECOMMANDÉ POUR DÉBUTER",
     badgeColor: "bg-green-100 text-green-800",
     subtitle: "Découvrez la puissance de Nova",
-    price: "50",
+    price: "49",
     users: "5 utilisateurs inclus",
     addOn: "+10 CAD/utilisateur/mois (max 10)",
     included: [
