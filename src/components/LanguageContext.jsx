@@ -13,7 +13,7 @@ export const translations = {
     tryDemo: "Essayer la démo",
     
     // Home Page
-    homeTitle: "Nova – Votre Scrum Master IA",
+    homeTitle: "Nova – Votre Expert Agile IA",
     homeSubtitle: "Détectez les blocages et risques en temps réel, sans jugement. Nova analyse vos Daily Scrums et propose des recommandations actionnables.",
     demoButton: "Voir la démo",
     
