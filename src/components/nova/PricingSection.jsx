@@ -5,6 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
 import { ContactSalesModal } from "@/components/nova/ContactSalesModal";
 
+const translations = {
+  en: {
+    contactSales: "Contact Sales",
+    contactTeam: "Contact Sales"
+  },
+  fr: {
+    contactSales: "Contact Sales",
+    contactTeam: "Contactez notre équipe commerciale"
+  }
+};
+
 const plans = [
   {
     id: "starter",
@@ -33,7 +44,7 @@ const plans = [
       "Pas de KPIs détaillés"
     ],
     highlight: "NON renouvelable - Upgrade vers Growth requis",
-    cta: "Contact Sales"
+    ctaKey: "contactSales"
   },
   {
     id: "growth",
@@ -62,7 +73,7 @@ const plans = [
       "Pas de KPIs détaillés",
       "Pas d'analyses organisationnelles"
     ],
-    cta: "Contact Sales"
+    ctaKey: "contactSales"
   },
   {
     id: "pro",
@@ -92,7 +103,7 @@ const plans = [
       "Support prioritaire"
     ],
     roiValue: "ROI mesurable : anticipation dérives, optimisation capacité",
-    cta: "Contact Sales"
+    ctaKey: "contactSales"
   },
   {
     id: "enterprise",
@@ -105,6 +116,7 @@ const plans = [
     priceNote: "À partir de 500 CAD/mois",
     structure: "Base + 25 CAD/utilisateur (min 50 utilisateurs)",
     degressiveNote: "≈15-20 CAD/utilisateur à 100+ utilisateurs",
+    enterpriseIntro: "Tous les éléments de Pro, +",
     included: [
       "Analyses organisationnelles & systémiques",
       "Cartographie équipes/projets/dépendances",
@@ -116,7 +128,7 @@ const plans = [
       "Add-ons usage-based (API calls, analyses)"
     ],
     target: "Entreprises, banques, grandes techs, organisations multi-produits",
-    cta: "Contactez notre équipe commerciale"
+    ctaKey: "contactTeam"
   }
 ];
 
