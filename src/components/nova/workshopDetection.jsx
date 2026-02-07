@@ -598,7 +598,8 @@ export function detectWorkshopType(text) {
 
   // Step 3: Determine best match with confidence threshold
   const sorted = Object.entries(scores).sort(([, a], [, b]) => b.score - a.score);
-  const [bestType, bestScore] = sorted[0];
+  let bestType = sorted[0][0];
+  let bestScore = sorted[0][1];
 
   const typeMapping = {
     DAILY_SCRUM: { display: 'Daily Scrum', tags: ['#Standup', '#Quotidien', '#TourDeTable'] },
