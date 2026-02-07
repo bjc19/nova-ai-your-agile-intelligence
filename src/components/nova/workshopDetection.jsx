@@ -487,6 +487,25 @@ export function detectWorkshopType(text) {
         score += 15;
         matchedMarkers.push('réflexion dominante');
       }
+      // Penalty if Daily or Planning intentions detected
+      if (intention.isDailyIntention) {
+        score = Math.max(score - 20, 0);
+      }
+    }
+
+    if (ceremonyType === 'DAILY_SCRUM') {
+      if (intention.isDailyIntention) {
+        score += 30;
+        matchedMarkers.push('intention de coordination quotidienne');
+      }
+      if (intention.hasCoordinationIntent) {
+        score += 15;
+        matchedMarkers.push('déblocages opérationnels détectés');
+      }
+      // Penalty if Retrospective intention detected
+      if (intention.isRetrospectiveIntention) {
+        score = Math.max(score - 25, 0);
+      }
     }
 
     if (ceremonyType === 'SPRINT_PLANNING') {
