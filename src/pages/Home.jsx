@@ -303,7 +303,21 @@ export default function Home() {
                   <h3 className="font-semibold text-slate-900">{t("sprintTracking")}</h3>
                   <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 {t("simulated")}</Badge>
                 </div>
-                <div className="h-32 flex items-end justify-between gap-0.5">
+                <div className="relative h-32 flex items-end justify-between gap-0.5">
+                  {/* Burndown curve background grid */}
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="burndownGradient" x1="0" y1="0" x2="100" y2="100">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Burndown line */}
+                    <polyline points="0,85 14,75 28,60 42,48 56,35 70,20 85,15 100,12" fill="url(#burndownGradient)" stroke="#10b981" strokeWidth="2" />
+                    {/* Ideal line reference */}
+                    <line x1="0" y1="100" x2="100" y2="0" stroke="#9ca3af" strokeWidth="1" strokeDasharray="2" opacity="0.5" />
+                  </svg>
+                  {/* Bar chart overlay */}
                   {[
                     { day: "Mon", value: 15 },
                     { day: "Tue", value: 18 },
@@ -311,8 +325,8 @@ export default function Home() {
                     { day: "Thu", value: 28 },
                     { day: "Fri", value: 32 }
                   ].map((item, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center">
-                      <div className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t" style={{ height: `${(item.value/32)*100}%` }} />
+                    <div key={i} className="flex-1 flex flex-col items-center relative z-10">
+                      <div className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80" style={{ height: `${(item.value/32)*100}%` }} />
                       <span className="text-xs text-slate-500 mt-1">{item.day}</span>
                     </div>
                   ))}
