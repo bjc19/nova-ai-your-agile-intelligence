@@ -296,6 +296,13 @@ export default function Dashboard() {
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <QuickStats analysisHistory={analysisHistory} />
             }
+
+            {/* Recent Analyses - Full Width */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <div className="mt-6">
+              <RecentAnalyses analyses={analysisHistory} />
+            </div>
+            }
           </motion.div>
         </div>
       </div>
@@ -452,7 +459,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyForDailyScrum')}
+                  {t('readyToBoostYourImpact?')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
