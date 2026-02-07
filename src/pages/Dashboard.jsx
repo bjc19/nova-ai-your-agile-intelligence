@@ -303,16 +303,6 @@ export default function Dashboard() {
               <RecentAnalyses analyses={analysisHistory} />
             </div>
             }
-
-            {/* Key Recommendations - Full Width */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <div className="mt-6">
-              <KeyRecommendations
-                latestAnalysis={latestAnalysis}
-                sourceUrl={latestAnalysis?.sourceUrl}
-                sourceName={latestAnalysis?.sourceName} />
-            </div>
-            }
           </motion.div>
         </div>
       </div>
@@ -449,9 +439,6 @@ export default function Dashboard() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
