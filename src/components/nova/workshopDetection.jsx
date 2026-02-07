@@ -537,6 +537,25 @@ export function detectWorkshopType(text) {
       }
     }
 
+    if (ceremonyType === 'SPRINT_REVIEW') {
+      if (intention.isReviewIntention) {
+        score += 35;
+        matchedMarkers.push('intention de review et démonstration produit');
+      }
+      if (intention.hasExternalParticipation) {
+        score += 20;
+        matchedMarkers.push('participation de parties prenantes externes');
+      }
+      if (intention.hasBacklogImpact) {
+        score += 15;
+        matchedMarkers.push('impact sur backlog produit');
+      }
+      // Penalty if Retrospective intention detected
+      if (intention.isRetrospectiveIntention) {
+        score = Math.max(score - 30, 0);
+      }
+    }
+
     // ============ COUCHE 4: ANALYSE COMPARATIVE (Knowledge base matching) ============
     if (ceremonyType === 'RETROSPECTIVE') {
       score += comparative.retroSimilarity;
