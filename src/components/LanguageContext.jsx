@@ -5,9 +5,9 @@ const LanguageContext = createContext();
 export const translations = {
   fr: {
     // Navigation
-    dashboard: "Dashboard",
-    analyze: "Analyze",
-    settings: "Settings",
+    dashboard: "Tableau de bord",
+    analyze: "Analyser",
+    settings: "Paramètres",
     signIn: "Se connecter",
     signOut: "Se déconnecter",
     tryDemo: "Essayer la démo",
