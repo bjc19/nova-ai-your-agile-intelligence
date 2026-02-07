@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertCircle, ChevronRight, Lightbulb } from "lucide-react";
 
 const sourceIcons = {
   slack: MessageSquare,
@@ -28,10 +30,12 @@ const sourceIcons = {
 };
 
 export default function RecentAnalyses({ analyses = [] }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
   const [allItems, setAllItems] = useState([]);
+  const [selectedSignal, setSelectedSignal] = useState(null);
+  const [patternDetails, setPatternDetails] = useState(null);
 
   useEffect(() => {
     const fetchSignals = async () => {
@@ -39,7 +43,10 @@ export default function RecentAnalyses({ analyses = [] }) {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 50);
+        const [allMarkers, allPatterns] = await Promise.all([
+          base44.entities.GDPRMarkers.list('-created_date', 50),
+          base44.entities.AntiPattern.filter({ is_active: true })
+        ]);
         
         // Separate Slack and Teams markers
         const slackMarkers = allMarkers.filter(m => 
@@ -54,8 +61,15 @@ export default function RecentAnalyses({ analyses = [] }) {
           m.detection_source === 'jira_backlog'
         ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
 
-        setGdprSignals(slackMarkers);
-        setTeamsInsights([...teamsMarkers, ...jiraMarkers]);
+        // Attach pattern details to markers
+        const enrichMarkers = (markers) => 
+          markers.map(m => ({
+            ...m,
+            patternDetails: allPatterns.find(p => p.pattern_id === m.pattern_id)
+          }));
+
+        setGdprSignals(enrichMarkers(slackMarkers));
+        setTeamsInsights([...enrichMarkers(teamsMarkers), ...enrichMarkers(jiraMarkers)]);
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -291,39 +305,46 @@ export default function RecentAnalyses({ analyses = [] }) {
                const iconColor = isJira ? 'text-emerald-600' : isTeams ? 'text-purple-600' : 'text-blue-600';
 
                return (
-                 <motion.div
-                   key={item.id}
-                   initial={{ opacity: 0, x: -10 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   transition={{ duration: 0.3, delay: 0.1 * index }}
-                   className={`p-4 rounded-xl border transition-all ${bgColor}`}
-                 >
-                   <div className="flex items-start justify-between gap-4">
-                     <div className="flex items-start gap-3">
-                       <div className={`p-2 rounded-lg ${iconBg}`}>
-                         <Shield className={`w-4 h-4 ${iconColor}`} />
-                       </div>
-                       <div>
-                         <h4 className="font-medium text-slate-900">
-                           {item.probleme}
-                         </h4>
-                         <div className="flex items-center gap-3 mt-1 flex-wrap">
-                           <span className="flex items-center gap-1 text-xs text-slate-500">
-                             <Clock className="w-3 h-3" />
-                             {format(new Date(item.created_date), "MMM d, h:mm a")}
-                           </span>
-                           <Badge variant="outline" className="text-xs py-0">
-                             {isJira ? '#Jira' : isTeams ? '#Microsoft Teams' : '#Slack'}
-                           </Badge>
-                         </div>
-                       </div>
-                     </div>
-                     <Badge className={`shrink-0 text-xs border ${criticityColor[item.criticite] || criticityColor.basse}`}>
-                       {item.criticite}
-                     </Badge>
-                   </div>
-                 </motion.div>
-               );
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 * index }}
+                    className={`p-4 rounded-xl border transition-all cursor-pointer hover:shadow-md ${bgColor}`}
+                    onClick={() => {
+                      setSelectedSignal(item);
+                      setPatternDetails(item.patternDetails);
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className={`p-2 rounded-lg ${iconBg}`}>
+                          <Shield className={`w-4 h-4 ${iconColor}`} />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-slate-900">
+                            {item.probleme}
+                          </h4>
+                          <div className="flex items-center gap-3 mt-1 flex-wrap">
+                            <span className="flex items-center gap-1 text-xs text-slate-500">
+                              <Clock className="w-3 h-3" />
+                              {format(new Date(item.created_date), "MMM d, h:mm a")}
+                            </span>
+                            <Badge variant="outline" className="text-xs py-0">
+                              {isJira ? '#Jira' : isTeams ? '#Microsoft Teams' : '#Slack'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2 shrink-0">
+                        <Badge className={`text-xs border ${criticityColor[item.criticite] || criticityColor.basse}`}>
+                          {item.criticite}
+                        </Badge>
+                        <ChevronRight className="w-4 h-4 text-slate-400" />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
               }
             })}
           </div>
@@ -343,8 +364,88 @@ export default function RecentAnalyses({ analyses = [] }) {
               </Link>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
+          </CardContent>
+          </Card>
+
+          {/* Signal Details Modal */}
+          <Dialog open={!!selectedSignal} onOpenChange={() => setSelectedSignal(null)}>
+          <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              {selectedSignal?.probleme}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'fr' ? 'Détails et actions recommandées' : 'Details and recommended actions'}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedSignal && (
+            <div className="space-y-6">
+              {/* Pattern Information */}
+              {patternDetails && (
+                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                  <h3 className="font-semibold text-slate-900 mb-2">
+                    {language === 'fr' ? 'Pattern détecté' : 'Detected Pattern'}
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Nom:' : 'Name:'}</span>{' '}
+                      <span className="text-slate-600">{patternDetails.name}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Catégorie:' : 'Category:'}</span>{' '}
+                      <Badge variant="outline">{patternDetails.pattern_id}</Badge>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-700 block mb-1">{language === 'fr' ? 'Description:' : 'Description:'}</span>
+                      <p className="text-slate-600">{patternDetails.description}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Recommended Actions */}
+              {(selectedSignal?.recos?.length > 0 || patternDetails?.recommended_actions?.length > 0) && (
+                <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+                  <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4" />
+                    {language === 'fr' ? 'Actions recommandées' : 'Recommended Actions'}
+                  </h3>
+                  <ul className="space-y-2">
+                    {(selectedSignal?.recos || patternDetails?.recommended_actions || []).map((action, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-green-900">
+                        <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                        <span>{action}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Quick Win */}
+              {patternDetails?.quick_win && (
+                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                  <h3 className="font-semibold text-blue-900 mb-2">
+                    {language === 'fr' ? '⚡ Quick Win (≤48h)' : '⚡ Quick Win (≤48h)'}
+                  </h3>
+                  <p className="text-sm text-blue-900">{patternDetails.quick_win}</p>
+                </div>
+              )}
+
+              {/* Severity */}
+              <div className="flex items-center justify-between p-4 rounded-lg bg-slate-100">
+                <span className="font-medium text-slate-700">
+                  {language === 'fr' ? 'Sévérité:' : 'Severity:'}
+                </span>
+                <Badge className={criticityColor[selectedSignal?.criticite] || criticityColor.basse}>
+                  {selectedSignal?.criticite}
+                </Badge>
+              </div>
+            </div>
+          )}
+          </DialogContent>
+          </Dialog>
+          </motion.div>
+          );
+          }

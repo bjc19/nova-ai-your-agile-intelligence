@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect } from "react";
 
 const LanguageContext = createContext();
@@ -160,6 +161,14 @@ export const translations = {
     manage: "Gérer",
     notConnected: "Non connecté",
     requiresBackend: "Nécessite Backend",
+
+    // Pattern names
+    blockers: "Blocages",
+    velocity_issues: "Problèmes de vélocité",
+    wip_overload: "Surcharge du travail en cours",
+    communication_issues: "Problèmes de communication",
+    scope_creep: "Glissement de périmètre",
+    context_switching: "Changements de contexte",
     },
   en: {
     // Navigation
@@ -318,8 +327,15 @@ export const translations = {
     manage: "Manage",
     notConnected: "Not Connected",
     requiresBackend: "Requires Backend",
-    }
 
+    // Pattern names
+    blockers: "Blockers",
+    velocity_issues: "Velocity Issues",
+    wip_overload: "WIP Overload",
+    communication_issues: "Communication Issues",
+    scope_creep: "Scope Creep",
+    context_switching: "Context Switching",
+    }
     };
 
 export function LanguageProvider({ children }) {
