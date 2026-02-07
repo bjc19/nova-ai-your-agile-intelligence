@@ -167,7 +167,14 @@ URGENCY EVALUATION (Scrum mode - Sprint timeboxé):
 - MEDIUM: Ralentit la vélocité, risque de déborder du sprint, dépendance non résolue
 - LOW: Impact mineur, peut attendre le prochain sprint, pas critique pour le goal actuel`;
 
-    const basePrompt = `You are Nova, an AI Scrum Master analyzing a meeting transcript. 
+    // Load anti-patterns for canonical detection
+    const antiPatterns = await base44.entities.AntiPattern.filter({ is_active: true });
+    const patternContext = antiPatterns
+      .filter(p => p.ceremony_type?.includes(workshopType) || !p.ceremony_type)
+      .map(p => `${p.pattern_id} - ${p.name}: Marqueurs [${p.markers?.join(', ')}]`)
+      .join('\n');
+
+    const basePrompt = `You are Nova, an AI Scrum Master analyzing a meeting transcript using canonical anti-patterns.
 
 Workshop type: ${workshopType.replace('_', ' ').toUpperCase()}
 Analysis focus: ${analysisFocus}
@@ -175,12 +182,15 @@ Delivery mode: ${deliveryMode.toUpperCase()}
 
 ${urgencyCriteria}
 
+ANTI-PATTERNS CANONIQUES (du Gist):
+${patternContext}
+
 Analyze the following transcript and identify:
 
-1. Blockers - issues preventing team members from making progress (with urgency level based on ${deliveryMode} context, include anti-patterns detected like: blockers, velocity_issues, wip_overload, communication_issues, scope_creep)
-2. Risks - potential problems that could impact delivery (with urgency level based on ${deliveryMode} context, include anti-patterns detected)
+1. Blockers - issues preventing team members from making progress (with urgency level, first names, and detected pattern_ids)
+2. Risks - potential problems that could impact delivery (with urgency level, first names, and detected pattern_ids)
 3. Dependencies - tasks that depend on other team members or external factors
-4. Recommended actions for each issue
+4. Recommended actions for each issue WITH FIRST NAMES
 
 Detected ceremony: ${context.current_ceremony !== "none" ? context.current_ceremony.replace("_", " ") : "Daily Scrum"}
 Communication tone: ${context.communication_tone}
@@ -201,14 +211,15 @@ Provide a detailed analysis in the following JSON format:`;
           items: {
             type: "object",
             properties: {
-              member: { type: "string" },
+              member: { type: "string", description: "First name" },
               issue: { type: "string" },
               urgency: { type: "string", enum: ["high", "medium", "low"] },
-              action: { type: "string" },
-              patterns: {
+              action: { type: "string", description: "With first names" },
+              blocked_by: { type: "string", description: "First name if applicable" },
+              pattern_ids: {
                 type: "array",
                 items: { type: "string" },
-                description: "Anti-patterns detected (e.g., blockers, velocity_issues, wip_overload)"
+                description: "Detected pattern IDs (e.g., A1, B2)"
               }
             }
           }
@@ -218,21 +229,26 @@ Provide a detailed analysis in the following JSON format:`;
           items: {
             type: "object",
             properties: {
-              description: { type: "string" },
+              description: { type: "string", description: "With first names" },
               impact: { type: "string" },
               urgency: { type: "string", enum: ["high", "medium", "low"] },
-              mitigation: { type: "string" },
-              patterns: {
+              mitigation: { type: "string", description: "With first names" },
+              affected_members: {
                 type: "array",
                 items: { type: "string" },
-                description: "Anti-patterns detected (e.g., communication_issues, scope_creep)"
+                description: "First names"
+              },
+              pattern_ids: {
+                type: "array",
+                items: { type: "string" },
+                description: "Detected pattern IDs (e.g., C3, D1)"
               }
             }
           }
         },
         recommendations: {
           type: "array",
-          items: { type: "string" }
+          items: { type: "string", description: "With first names" }
         },
         summary: { type: "string" }
       }
@@ -273,7 +289,37 @@ Provide a detailed analysis in the following JSON format:`;
       transcript_preview: transcript.substring(0, 200),
     };
     
-    await base44.entities.AnalysisHistory.create(analysisRecord);
+    const createdAnalysis = await base44.entities.AnalysisHistory.create(analysisRecord);
+
+    // Create PatternDetection records for detected patterns
+    const allDetectedPatterns = new Set();
+    blockersArray.forEach(b => b.pattern_ids?.forEach(p => allDetectedPatterns.add(p)));
+    risksArray.forEach(r => r.pattern_ids?.forEach(p => allDetectedPatterns.add(p)));
+
+    for (const patternId of allDetectedPatterns) {
+      const pattern = antiPatterns.find(p => p.pattern_id === patternId);
+      if (pattern) {
+        const relatedBlockers = blockersArray.filter(b => b.pattern_ids?.includes(patternId));
+        const relatedRisks = risksArray.filter(r => r.pattern_ids?.includes(patternId));
+        const contextText = [
+          ...relatedBlockers.map(b => `${b.member}: ${b.issue}`),
+          ...relatedRisks.map(r => r.description)
+        ].join(' | ');
+
+        await base44.entities.PatternDetection.create({
+          analysis_id: createdAnalysis.id,
+          pattern_id: patternId,
+          pattern_name: pattern.name,
+          category: pattern.category,
+          confidence_score: 75,
+          detected_markers: pattern.markers || [],
+          context: contextText.substring(0, 500),
+          severity: pattern.severity || 'medium',
+          recommended_actions: [...relatedBlockers.map(b => b.action), ...relatedRisks.map(r => r.mitigation)],
+          status: 'detected'
+        });
+      }
+    }
 
     // Store result in sessionStorage and navigate
     sessionStorage.setItem("novaAnalysis", JSON.stringify({ ...result, posture: posture.id, context }));
