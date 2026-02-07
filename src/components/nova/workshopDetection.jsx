@@ -334,7 +334,7 @@ export function detectWorkshopType(text) {
     const keywordDensity = (keywordMatches / Math.max(keywords.length, 1)) * 100;
     score += Math.min(keywordDensity * 0.3, 15); // Max 15 points
 
-    // Intelligence boost: Planning-specific multi-variable analysis
+    // Intelligence boost: Planning-specific multi-variable analysis (8 variables)
     if (ceremonyType === 'SPRINT_PLANNING') {
       let intelligenceBonus = 0;
       
@@ -346,6 +346,16 @@ export function detectWorkshopType(text) {
       // Temporal horizon is a strong differentiator
       if (/sprint.*dur|2 semaines|itération|planning horizon|upcoming sprint|le prochain sprint/gi.test(text)) {
         intelligenceBonus += 10;
+      }
+      
+      // CRUCIAL: Temporal focus on FUTURE (key differentiator from Retrospective)
+      // Planning focuses on what WILL happen, with unknowns, uncertainties, estimations
+      const futureReferences = (text.match(/sera|will be|va|going to|planning|prévoir|le prochain|next|upcoming|va faire|will do/gi) || []).length;
+      const estimationLanguage = (text.match(/planning poker|t-shirt sizing|sizing|estimation|points?|story point|buffer|unknowns|incertitude|incertitudes|on ne sait|risks?|dépendances|dependencies/gi) || []).length;
+      const pastReferences = (text.match(/s'est|a été|a fonctionné|lors du|pendant|au cours|l'impact|the impact/gi) || []).length;
+      
+      if (futureReferences >= 4 && estimationLanguage >= 2 && futureReferences > pastReferences) {
+        intelligenceBonus += 10; // Strong future-focus + estimation language = strong planning signal
       }
       
       score = Math.min(score + intelligenceBonus, 100);
