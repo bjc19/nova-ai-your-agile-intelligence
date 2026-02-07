@@ -426,7 +426,7 @@ export default function Home() {
                          </div>
                          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                            <motion.div 
-                             className="h-full bg-green-500"
+                             className="h-full bg-gradient-to-r from-emerald-400 to-green-500"
                              initial={{ width: 0 }}
                              whileInView={{ width: kpi.value }}
                              transition={{ duration: 0.8, delay: 0.35 + i * 0.1 }}
