@@ -287,7 +287,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                 className="resize-none"
               />
               <p className="text-xs text-slate-500 mt-2">
-                💡 L'expertise en un clic ! Collez votre transcript d'atelier et laissez la magie s'operer!.
+                💡 L'expertise en un clic ! Collez votre transcript d'atelier et laissez la magie s'operer.
               </p>
 
               {/* Detection preview */}
