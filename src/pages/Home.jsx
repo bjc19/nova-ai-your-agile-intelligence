@@ -378,9 +378,8 @@ export default function Home() {
              {t("launchDemo")}
            </Button>
            <Button 
-             variant="outline" 
              size="lg"
-             className="border-blue-200 text-white hover:bg-blue-600 px-8"
+             className="bg-white text-[#197aed] hover:bg-blue-50 px-8 font-semibold"
            >
              <a href="#pricing">{t("seePlans")}</a>
            </Button>
