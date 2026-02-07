@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       try {
         // Get Jira issues via API (in memory only)
         const issuesResponse = await fetch(
-          `https://api.atlassian.com/ex/jira/${connection.cloud_id}/rest/api/3/search?jql=type%20in%20(Story%2CEpic%2CTask)%20ORDER%20BY%20updated%20DESC&maxResults=100&fields=key%2Cissuetype%2Cstatus%2Cpriority%2Csummary%2Cdescription`,
+          `https://api.atlassian.com/ex/jira/${connection.cloud_id}/rest/api/3/search?jql=type%20in%20(Story%2CEpic%2CTask)%20ORDER%20BY%20updated%20DESC&maxResults=100&fields=key%2Cissuetype%2Cstatus%2Cpriority%2Csummary%2Cdescription%2Cassignee`,
           {
             headers: {
               'Authorization': `Bearer ${connection.access_token}`,
@@ -57,42 +57,33 @@ Deno.serve(async (req) => {
         const issuesData = await issuesResponse.json();
         const issues = issuesData.issues || [];
 
-        // ========== ANALYZE IN MEMORY ONLY ==========
+        // ========== ANALYZE IN MEMORY WITH ACTIONABLE CONTEXT ==========
         for (const issue of issues) {
           try {
-            // Prepare data for analysis WITHOUT storing raw content
-            const issueData = {
-              type: issue.fields.issuetype.name,
-              status: issue.fields.status.name,
-              priority: issue.fields.priority?.name || 'None',
-              has_description: Boolean(issue.fields.description),
-              description_length: issue.fields.description?.length || 0
-            };
+            const assigneeFirstName = issue.fields.assignee?.displayName?.split(' ')[0] || null;
+            const issueKey = issue.key;
+            const summary = issue.fields.summary || '';
+            const status = issue.fields.status.name;
+            const isBlocked = status.toLowerCase().includes('blocked') || status.toLowerCase().includes('impediment');
 
-            // ========== CLEAR RAW CONTENT FROM MEMORY ==========
-            // Never keep summary, description, or any text
-            const analysisPrompt = `Analyze this Jira issue metadata for backlog quality anti-patterns.
+            // Only analyze issues with potential problems
+            if (!isBlocked && status !== 'In Progress' && status !== 'To Do') continue;
 
-Issue Type: ${issueData.type}
-Status: ${issueData.status}
-Priority: ${issueData.priority}
-Has Description: ${issueData.has_description}
-Description Length: ${issueData.description_length}
+            const analysisPrompt = `Analyze this Jira issue for actionable blockers/risks.
 
-🔒 GDPR: Never mention or extract: issue keys, summaries, descriptions, assignees, comments.
+Issue: ${issueKey}
+Summary: ${summary}
+Status: ${status}
+Assignee: ${assigneeFirstName || 'Unassigned'}
+Priority: ${issue.fields.priority?.name || 'None'}
 
-Detect:
-1. Epic too large (no description or description < 50 chars)
-2. Missing acceptance criteria
-3. Blocked/impediment (blocked in status)
-4. Unclear priority
-5. Unestimated story
+Detect problems and provide actionable recommendations WITH first names.
 
-Return ONLY a JSON object:
+Return JSON:
 {
-  "detected_issues": ["issue1", "issue2"],
-  "problem_description": "Generic description without any details",
-  "recommendations": ["Rec1", "Rec2"],
+  "has_issue": true|false,
+  "problem_description": "Specific description with first name (e.g. '${assigneeFirstName} bloqué sur ${issueKey} depuis 3 jours')",
+  "recommendations": ["Actionable reco with name"],
   "criticality": "basse|moyenne|haute|critique",
   "confidence": 0.0-1.0
 }`;
@@ -102,7 +93,7 @@ Return ONLY a JSON object:
               response_json_schema: {
                 type: 'object',
                 properties: {
-                  detected_issues: { type: 'array', items: { type: 'string' } },
+                  has_issue: { type: 'boolean' },
                   problem_description: { type: 'string' },
                   recommendations: { type: 'array', items: { type: 'string' } },
                   criticality: { type: 'string' },
@@ -111,10 +102,11 @@ Return ONLY a JSON object:
               }
             });
 
-            // ========== GENERATE ANONYMIZED MARKERS ==========
-            if (analysisResult && analysisResult.detected_issues.length > 0) {
+            // ========== GENERATE ACTIONABLE MARKERS ==========
+            if (analysisResult?.has_issue) {
               const issueId = generateUUID();
               const teamId = sha256(connection.cloud_id);
+              const jiraUrl = `https://jira.atlassian.com/browse/${issueKey}`;
 
               await base44.asServiceRole.entities.GDPRMarkers.create({
                 issue_id: issueId,
@@ -122,18 +114,20 @@ Return ONLY a JSON object:
                 team_id: teamId,
                 session_id: generateUUID(),
                 date: new Date().toISOString().split('T')[0],
-                type: 'backlog_quality',
+                type: 'other',
                 probleme: analysisResult.problem_description,
+                assignee_first_name: assigneeFirstName,
+                jira_ticket_key: issueKey,
                 recos: analysisResult.recommendations,
                 statut: 'ouvert',
                 recurrence: 1,
                 criticite: analysisResult.criticality,
-                slack_workspace_id: null,
                 confidence_score: analysisResult.confidence,
-                detection_source: 'jira_backlog'
+                detection_source: 'jira_backlog',
+                consent_given: true
               });
 
-              console.log(`Created GDPR marker for Jira issue: ${issueId} (zero retention confirmed)`);
+              console.log(`Created actionable marker for ${issueKey}: ${analysisResult.problem_description}`);
               totalRecordsProcessed++;
             }
           } catch (error) {

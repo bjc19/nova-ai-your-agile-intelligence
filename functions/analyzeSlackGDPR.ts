@@ -102,6 +102,22 @@ Deno.serve(async (req) => {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const olderTimestamp = Math.floor(oneDayAgo.getTime() / 1000);
 
+    // Get user list with first names
+    const usersResponse = await fetch('https://slack.com/api/users.list', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    const usersData = await usersResponse.json();
+    const userMap = {};
+    if (usersData.ok) {
+      usersData.members.forEach(u => {
+        const firstName = u.profile?.first_name || u.real_name?.split(' ')[0] || u.name;
+        userMap[u.id] = firstName;
+      });
+    }
+
     // Get list of channels to analyze
     const channelsResponse = await fetch('https://slack.com/api/conversations.list?types=public_channel,private_channel&limit=100', {
       method: 'GET',
@@ -125,7 +141,6 @@ Deno.serve(async (req) => {
     const sessionId = uuidv4();
     const tenantId = await generateHash(user.email);
     const slackWorkspaceHash = await generateHash(slackTeamId);
-    const issueMap = {};
 
     // Analyze each channel (in memory only)
     for (const channel of channelsData.channels) {
@@ -152,24 +167,51 @@ Deno.serve(async (req) => {
 
       if (messages.length === 0) continue;
 
-      // Analyze messages IN MEMORY ONLY (never store raw messages)
-      const detectedPatterns = detectAntiPatterns(messages);
+      // Analyze messages IN MEMORY ONLY with LLM for actionable insights
+      const conversationText = messages.map(m => 
+        `${userMap[m.user] || 'Someone'}: ${m.text || ''}`
+      ).join('\n');
 
-      if (Object.keys(detectedPatterns).length > 0) {
-        const recos = generateRecommendations(detectedPatterns);
-        const criticite = mapPatternsToSeverity(detectedPatterns);
+      const analysisResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analyze this Slack standup conversation for actionable blockers and risks.
 
-        // Create anonymized marker
-        const issueId = uuidv4();
-        const channelHash = await generateHash(channel.id);
-        const clusterKey = `${Object.keys(detectedPatterns).sort().join('_')}_${criticite}`;
+Conversation:
+${conversationText}
 
-        if (!issueMap[clusterKey]) {
-          issueMap[clusterKey] = {
-            issue_id: issueId,
-            probleme_cluster_id: uuidv4(),
-          };
+Extract:
+1. Who is blocked and by what/whom
+2. Specific issues with first names
+3. Actionable recommendations with names
+
+Return JSON:
+{
+  "has_issues": true|false,
+  "probleme": "Specific description with first names (e.g. 'Marie bloquée sur API payment, attend Jean')",
+  "assignee_first_name": "First name of blocked person",
+  "blocked_by_first_name": "First name of blocker if applicable",
+  "team_members_involved": ["Name1", "Name2"],
+  "recommendations": ["Actionable reco with names"],
+  "criticality": "basse|moyenne|haute|critique",
+  "confidence": 0.0-1.0
+}`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            has_issues: { type: 'boolean' },
+            probleme: { type: 'string' },
+            assignee_first_name: { type: 'string' },
+            blocked_by_first_name: { type: 'string' },
+            team_members_involved: { type: 'array', items: { type: 'string' } },
+            recommendations: { type: 'array', items: { type: 'string' } },
+            criticality: { type: 'string' },
+            confidence: { type: 'number' }
+          }
         }
+      });
+
+      if (analysisResult?.has_issues) {
+        const issueId = uuidv4();
+        const channelLink = `https://slack.com/app_redirect?channel=${channel.id}`;
 
         const marker = {
           issue_id: issueId,
@@ -177,22 +219,26 @@ Deno.serve(async (req) => {
           team_id: slackWorkspaceHash,
           session_id: sessionId,
           date: now.toISOString().split('T')[0],
-          type: 'slack_analysis',
-          probleme: `Pattern détecté: ${Object.keys(detectedPatterns).join(', ')}`,
-          recos: recos,
+          type: 'daily_scrum',
+          probleme: analysisResult.probleme,
+          assignee_first_name: analysisResult.assignee_first_name || null,
+          blocked_by_first_name: analysisResult.blocked_by_first_name || null,
+          team_members_involved: analysisResult.team_members_involved || [],
+          slack_thread_url: channelLink,
+          recos: analysisResult.recommendations,
           statut: 'ouvert',
           recurrence: 1,
-          criticite: criticite,
+          criticite: analysisResult.criticality,
           slack_workspace_id: slackWorkspaceHash,
-          confidence_score: Math.min(1, Object.keys(detectedPatterns).length / 6),
+          confidence_score: analysisResult.confidence,
           detection_source: 'slack_hourly',
-          probleme_cluster_id: issueMap[clusterKey].probleme_cluster_id
+          consent_given: true
         };
 
         markersToCreate.push(marker);
       }
 
-      // CRITICAL: Explicitly clear message data from memory
+      // CRITICAL: Clear message data from memory
       messages.length = 0;
     }
 

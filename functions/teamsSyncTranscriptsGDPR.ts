@@ -76,28 +76,23 @@ Deno.serve(async (req) => {
 
             const transcriptContent = await contentResponse.text();
 
-              // ========== ANALYZE IN MEMORY ONLY ==========
-              // Use LLM to detect patterns WITHOUT storing raw content
-              // IMPORTANT: Account for Hawthorne Effect - team may alter behavior when observed
+              // ========== ANALYZE WITH ACTIONABLE INSIGHTS ==========
               const analysisResult = await base44.integrations.Core.InvokeLLM({
-                prompt: `Analyze this Teams meeting transcript for Agile/Scrum anti-patterns.
+                prompt: `Analyze this Teams meeting transcript for actionable Agile/Scrum blockers and risks.
 
-⚠️ CRITICAL: Account for the Hawthorne Effect - teams often alter their behavior when they know they're being observed/analyzed. Consider:
-- Is the team being unusually formal or structured (vs natural flow)?
-- Are discussions artificially shortened or filtered?
-- Is communication clearer than typical (suppressed complaints)?
+Extract first names and specific issues for actionable recommendations.
 
-Return ONLY a JSON object with:
+Return JSON:
 {
-  "detected_patterns": ["pattern1", "pattern2"],
+  "has_issues": true|false,
+  "problem_description": "Specific description with first names (e.g. 'Marie bloquée sur API, Jean en retard sur PR')",
+  "assignee_first_name": "First name of blocked person",
+  "blocked_by_first_name": "First name of blocker if applicable",
+  "team_members_involved": ["Name1", "Name2"],
   "ceremony_type": "daily_scrum|retrospective|planning|review|refinement|other",
-  "problem_description": "Generic description without any names or quotes",
-  "recommendations": ["Rec1", "Rec2"],
+  "recommendations": ["Actionable reco with names"],
   "criticality": "basse|moyenne|haute|critique",
-  "confidence": 0.0-1.0,
-  "hawthorne_effect_detected": true|false,
-  "hawthorne_confidence": 0.0-1.0,
-  "hawthorne_note": "Explanation of observed Hawthorne indicators"
+  "confidence": 0.0-1.0
 }
 
 Transcript:
@@ -105,28 +100,27 @@ ${transcriptContent.substring(0, 4000)}`,
                 response_json_schema: {
                   type: 'object',
                   properties: {
-                    detected_patterns: { type: 'array', items: { type: 'string' } },
-                    ceremony_type: { type: 'string' },
+                    has_issues: { type: 'boolean' },
                     problem_description: { type: 'string' },
+                    assignee_first_name: { type: 'string' },
+                    blocked_by_first_name: { type: 'string' },
+                    team_members_involved: { type: 'array', items: { type: 'string' } },
+                    ceremony_type: { type: 'string' },
                     recommendations: { type: 'array', items: { type: 'string' } },
                     criticality: { type: 'string' },
-                    confidence: { type: 'number' },
-                    hawthorne_effect_detected: { type: 'boolean' },
-                    hawthorne_confidence: { type: 'number' },
-                    hawthorne_note: { type: 'string' }
+                    confidence: { type: 'number' }
                   }
                 }
               });
 
               // ========== CLEAR RAW CONTENT FROM MEMORY ==========
-              const rawTranscript = transcriptContent;
-              transcriptContent = null; // Force garbage collection hint
+              transcriptContent = null; // Force garbage collection
 
-              // ========== GENERATE ANONYMIZED MARKERS ==========
-              if (analysisResult && analysisResult.detected_patterns.length > 0) {
+              // ========== GENERATE ACTIONABLE MARKERS ==========
+              if (analysisResult?.has_issues) {
                 const issueId = generateUUID();
                 const tenantId = sha256(user.email || 'unknown');
-                const teamId = sha256(connection.team_id || 'unknown');
+                const teamId = sha256(connection.tenant_id || 'unknown');
                 const sessionId = generateUUID();
 
                 await base44.asServiceRole.entities.GDPRMarkers.create({
@@ -135,21 +129,21 @@ ${transcriptContent.substring(0, 4000)}`,
                    team_id: teamId,
                    session_id: sessionId,
                    date: new Date().toISOString().split('T')[0],
-                   type: analysisResult.ceremony_type || 'other',
+                   type: analysisResult.ceremony_type || 'daily_scrum',
                    probleme: analysisResult.problem_description,
+                   assignee_first_name: analysisResult.assignee_first_name || null,
+                   blocked_by_first_name: analysisResult.blocked_by_first_name || null,
+                   team_members_involved: analysisResult.team_members_involved || [],
                    recos: analysisResult.recommendations,
                    statut: 'ouvert',
                    recurrence: 1,
                    criticite: analysisResult.criticality,
-                   slack_workspace_id: null,
                    confidence_score: analysisResult.confidence,
                    detection_source: 'teams_daily',
-                   hawthorne_effect_detected: analysisResult.hawthorne_effect_detected || false,
-                   hawthorne_confidence: analysisResult.hawthorne_confidence || 0,
-                   hawthorne_note: analysisResult.hawthorne_note || ''
+                   consent_given: true
                  });
 
-                console.log(`Created GDPR marker: ${issueId}`);
+                console.log(`Created actionable marker: ${analysisResult.problem_description}`);
                 totalRecordsProcessed++;
               }
             }
