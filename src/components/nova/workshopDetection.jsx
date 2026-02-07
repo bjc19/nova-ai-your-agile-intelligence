@@ -620,8 +620,25 @@ export function detectWorkshopType(text) {
     };
   }
 
-  // ============ CONFLICT RESOLUTION: Planning vs Retrospective ============
-  // CRITICAL: If Retrospective is close to Planning, apply differential penalty to Planning
+  // ============ CONFLICT RESOLUTION: Multi-ceremony disambiguation ============
+  // CRITICAL 1: Daily vs Retrospective - Daily has stronger temporal/operational markers
+  if ((bestType === 'RETROSPECTIVE' || bestType === 'DAILY_SCRUM') && scores.DAILY_SCRUM && scores.RETROSPECTIVE) {
+    const dailyScore = scores.DAILY_SCRUM.score;
+    const retroScore = scores.RETROSPECTIVE.score;
+    
+    // If Daily has temporal urgency + blockers, it wins
+    if (intention.isDailyIntention && dailyScore >= 50) {
+      bestType = 'DAILY_SCRUM';
+      bestScore = scores.DAILY_SCRUM;
+    }
+    // If Daily clearly lacks improvement intent, retro loses
+    else if (!intention.isRetrospectiveIntention && dailyScore > retroScore - 10) {
+      bestType = 'DAILY_SCRUM';
+      bestScore = scores.DAILY_SCRUM;
+    }
+  }
+
+  // CRITICAL 2: Planning vs Retrospective - Check for clear intent differentiation
   if (bestType === 'SPRINT_PLANNING' && scores.RETROSPECTIVE) {
     const planningScore = bestScore.score;
     const retroScore = scores.RETROSPECTIVE.score;
