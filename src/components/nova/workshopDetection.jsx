@@ -1,154 +1,216 @@
-// Workshop type detection via semantic textual analysis
+// Workshop type detection via semantic textual analysis with ML-inspired learning
 // 100% client-side, text-based, no API calls
+// Updated with precise Scrum framework distinctions based on ceremony objectives
+// Reference: Distinctions claires entre Sprint Planning, Daily Scrum, Sprint Review, Retrospective
 
 const DETECTION_PATTERNS = {
-  DAILY_SCRUM: {
+  SPRINT_PLANNING: {
+    // Objectif: Déterminer CE QUI sera livré et COMMENT le livrer
+    // Focus: Sélection, engagement, planification détaillée
     keywords: [
-      'hier', 'aujourd\'hui', 'ce matin', 'cet après-midi',
-      'fait hier', 'travaillé hier', 'vais faire', 'vais continuer',
-      'bloqué', 'blocage', 'stoppé', 'arrêté', 'attendant',
-      'aide', 'support needed', 'blocked by', 'waiting for',
-      'standup', 'stand-up', 'daily standup', 'daily scrum', 'standup quotidien'
+      'sprint goal', 'objectif sprint', 'objectif du sprint', 'goal statement',
+      'backlog', 'user stories', 'user story', 'stories', 'tâches', 'tasks',
+      'estimation', 'points', 'story points', 'story point', 'estimated', 'estimer',
+      'vélocité', 'velocity', 'capacité', 'capacity', 'definition of done', 'dod',
+      'inclure', 'exclure', 'ajouter', 'retirer', 'priorité', 'priority', 'scope',
+      'planning', 'planification', 'plan de sprint', 'sprint plan',
+      'assigner', 'assigné', 'assigned', 'owner', 'responsable',
+      'peut-on réaliser', 'peut-on faire', 'can we', 'taille', 'size'
     ],
     patterns: [
-      /\b\w+\s*:\s*[^:\n]{10,}/g, // "Name: text" pattern (round-table)
-      /hier|aujourd[\'u]i|ce matin|cet apr[eè]s-midi/gi, // short-term temporal
-      /bloqué|blocage|arrêté|stoppé|en attente/gi, // operational blockers
+      /sprint goal|objectif.*sprint|goal statement/gi,
+      /user stor(ies|y)|backlog|stories?|tâches?|tasks?/gi,
+      /estim|points?|story point|estimated|capacity|capacité/gi,
+      /inclure|exclure|ajouter|retirer|priorit|scope|négocier/gi,
+      /assigner|assigné|assigned|owner|responsable/gi,
+      /peut(-|)?on réaliser|peut(-|)?on faire|can we|comment allons|how will/gi
     ],
     markers: {
-      sequential_structure: (text) => {
-        const lines = text.split('\n').filter(l => l.trim());
-        let count = 0;
-        lines.forEach(line => {
-          if (/^\w+\s*:/.test(line)) count++;
-        });
-        return count >= 3; // At least 3 "Name:" patterns
-      },
-      short_temporal: (text) => /hier|aujourd['u]i|ce matin|cet apr[eè]s-midi|yesterday|today|this morning/gi.test(text),
-      operational_focus: (text) => /bloqué|blocage|aide|support|attend|waiting|blocked|help|issue/gi.test(text),
-      no_strategic: (text) => !/stratégique|long terme|roadmap|vision|direction|vision à long terme/gi.test(text)
+      sprint_goal_vocab: (text) => /sprint goal|objectif.*sprint|goal statement|product goal/gi.test(text),
+      backlog_discussion: (text) => /backlog|user stor|stories?|tâches?|tasks?|items?/gi.test(text),
+      estimation_effort: (text) => /estim|points?|story point|effort|complexity|difficulty|capacité|velocity|vélocité/gi.test(text),
+      prioritization_scope: (text) => /inclure|exclure|priorit|scope|ajouter|retirer|négocier|selection/gi.test(text),
+      assignment_commitment: (text) => /assigner|assigné|assigned|owner|responsable|s'engager|commitment|commitments/gi.test(text),
+      future_horizon: (text) => /prochain|next|sprint (de|à venir)|this sprint|upcoming sprint|will do|va faire|va continuer/gi.test(text),
+      
+      // Exclusion markers - if these are present, it's likely NOT Planning
+      no_demo: (text) => !/démo|démonstration|show|présent|fonctionnalité|feature\s+livr|incrément|delivered/gi.test(text),
+      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro|debrief|fonctionn[ée]|s'est/gi.test(text),
+      no_standup: (text) => !/hier|aujourd'hui|ce matin|cet après|yesterday|today|this morning|bloc|blocked|aide/gi.test(text) || /estimation|backlog|sprint goal/gi.test(text)
     }
   },
 
-  SPRINT_PLANNING: {
+  DAILY_SCRUM: {
+    // Objectif: Synchronisation quotidienne, identification des blocages
+    // Focus: Progression, obstacles, coordination immédiate
     keywords: [
-      'sprint goal', 'objectif sprint', 'backlog', 'user stories', 'user story',
-      'estimation', 'points', 'story points', 'vélocité', 'velocity', 'capacité',
-      'definition of done', 'dod', 'stories', 'tâches', 'tasks',
-      'inclure', 'exclure', 'priorité', 'priority', 'scope',
-      'planning', 'planification', 'assigner', 'assigné', 'assigned', 'owner',
-      'combien de temps', 'how long', 'taille', 'size'
+      'hier', 'aujourd\'hui', 'ce matin', 'cet après-midi', 'demain',
+      'fait hier', 'ai fait', 'travaillé hier', 'hier j\'ai',
+      'today', 'yesterday', 'this morning', 'this afternoon',
+      'vais faire', 'vais continuer', 'will do', 'going to do',
+      'bloqué', 'blocage', 'stoppé', 'arrêté', 'attendant',
+      'aide', 'support', 'problème', 'issue',
+      'blocked', 'blocked by', 'waiting for', 'need help',
+      'standup', 'stand-up', 'daily standup', 'daily scrum',
+      'standup quotidien', 'tour de table', 'chacun son tour',
+      'statut', 'status', 'fait', 'done', 'en cours', 'in progress',
+      'terminé', 'finished', 'démarré', 'started'
     ],
     patterns: [
-      /sprint goal|objectif du sprint|goal statement/gi,
-      /user stor(ies|y)|backlog item|story|tâche|task/gi,
-      /estim|points?|story point|capacité|velocity|vélocité/gi,
-      /inclure|exclure|ajouter|retirer|priorit/gi,
-      /assigner|assigné|assigned|owner|responsable/gi,
-      /combien de temps|how long|taille|size/gi
+      /\w+\s*:\s*[^:\n]{10,}/g, // "Name: text" pattern (round-table)
+      /hier|aujourd['u]i|ce matin|cet apr[eè]s-midi|demain|yesterday|today|this morning|tomorrow/gi,
+      /j'ai|ai fait|a fait|ont fait|did|finished|completed/gi,
+      /vais|vas|va faire|will do|going to/gi,
+      /bloqué|blocage|arrêté|stoppé|en attente|aide|support|issue|blocked|waiting|help/gi,
+      /standup|stand-up|daily scrum|tour de table|tour rapide/gi
     ],
     markers: {
-      planning_vocab: (text) => /sprint goal|backlog|user stor|estimation|points|capacité|definition of done|dod/gi.test(text),
-      prioritization: (text) => /inclure|exclure|priorit|scope|ajouter|retirer|négocier/gi.test(text),
-      effort_discussion: (text) => /estim|points|capacité|effort|complexity|difficul/gi.test(text),
-      fixed_horizon: (text) => /sprint de|2 semaines|itération|2 weeks|iteration|sprint duration/gi.test(text),
-      future_focus: (text) => /va faire|will do|prochain|next|planning|commitments|s'engager/gi.test(text),
-      no_retrospective_markers: (text) => !/amélior|apprentiss|fonctionn[ée]|plan d'action|action.*amélioration/gi.test(text)
+      sequential_roundtable: (text) => {
+        const lines = text.split('\n').filter(l => l.trim());
+        let namePatternCount = 0;
+        lines.forEach(line => {
+          if (/^\s*\w+\s*:/.test(line)) namePatternCount++;
+        });
+        return namePatternCount >= 3;
+      },
+      short_temporal_focus: (text) => /hier|aujourd['u]i|ce matin|cet apr[eè]s-midi|demain|yesterday|today|this morning/gi.test(text),
+      operational_blockers: (text) => /bloqué|blocage|aide|support|attend|waiting|blocked|help|problème|issue|obstacle/gi.test(text),
+      rapid_status_exchanges: (text) => /fait|terminé|en cours|démarré|started|done|in progress|finished/gi.test(text),
+      short_utterances: (text) => {
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length < 3) return false;
+        const avgLineLength = lines.reduce((sum, l) => sum + l.length, 0) / lines.length;
+        return avgLineLength < 150; // Short utterances typical of standups
+      },
+      no_strategic_planning: (text) => !/estimation|story point|backlog|user stor|capacité|velocity|planification|sprint plan/gi.test(text),
+      no_demo: (text) => !/démo|démonstration|show|présent|fonctionnalité|feature|incrément/gi.test(text),
+      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro/gi.test(text)
     }
   },
 
   SPRINT_REVIEW: {
+    // Objectif: Inspecter l'incrément et adapter le backlog
+    // Focus: Démonstration, feedback, validation de la valeur
     keywords: [
-      'démo', 'demo', 'montrer', 'montré', 'show', 'shown', 'fonctionnalité', 'feature',
-      'résultat', 'result', 'slide', 'écran', 'screen', 'présentation',
-      'comment ça marche', 'how it works', 'feedback', 'retour', 'opinion',
-      'po', 'client', 'utilisateur', 'user', 'stakeholder', 'valeur', 'value'
+      'démo', 'demo', 'démonstration', 'demonstration', 'montrer', 'montré', 'show', 'shown',
+      'fonctionnalité', 'feature', 'features', 'delivered', 'livrée', 'livré',
+      'incrément', 'increment', 'résultat', 'result', 'réalisé', 'accomplished',
+      'feedback', 'retour', 'opinion', 'avis', 'thoughts', 'qu\'en pensez',
+      'po', 'product owner', 'client', 'utilisateur', 'user', 'stakeholder',
+      'valeur', 'value', 'impact', 'utilité', 'usefulness',
+      'slide', 'écran', 'screen', 'présentation', 'presentation',
+      'comment ça marche', 'how it works', 'voici', 'here is'
     ],
     patterns: [
-      /démo|démonstration|demo|demonstration|montrer|show/gi,
-      /fonctionnalité|feature|résultat|result|sortie|output/gi,
-      /feedback|retour|opinion|avis|thoughts/gi,
-      /po|client|utilisateur|user|stakeholder|partie prenante/gi,
+      /démo|démonstration|demo|demonstration|montrer|show|présent/gi,
+      /fonctionnalité|feature|livré|delivered|incrément|increment|réalisé|accomplished/gi,
+      /feedback|retour|avis|opinion|qu'en pensez|qu'en pense|what do you think/gi,
+      /po|product owner|client|utilisateur|user|stakeholder|partie prenante|externes?/gi,
+      /valeur|value|impact|utilité|useful|bénéf/gi,
+      /slide|écran|screen|présent|presentation|voici|here is|comme vous pouvez/gi
     ],
     markers: {
-      demo_vocab: (text) => /démo|démonstration|montrer|show|fonctionnalité|feature/gi.test(text),
-      feedback_structure: (text) => /feedback|retour|avis|opinion|comment|qu'en|how/gi.test(text),
-      external_audience: (text) => /po|client|utilisateur|user|stakeholder|externe|external/gi.test(text),
-      value_discussion: (text) => /valeur|value|livrée|delivered|impact|utilité/gi.test(text)
+      demo_vocabulary: (text) => /démo|démonstration|show|montrer|présent|fonctionnalité|feature|livré/gi.test(text),
+      delivered_increment: (text) => /livré|delivered|réalisé|accomplished|incrément|increment|réalisat/gi.test(text),
+      feedback_collection: (text) => /feedback|retour|avis|opinion|qu'en|what.*think|thoughts|comment.*trouvez/gi.test(text),
+      external_focus: (text) => /po|product owner|client|utilisateur|user|stakeholder|externe|external|partie prenante/gi.test(text),
+      value_focus: (text) => /valeur|value|impact|utilité|bénéfice|benefit|business value/gi.test(text),
+      presentation_structure: (text) => /voici|here|slide|écran|screen|montrer|show|présent|demo|démonstr/gi.test(text),
+      
+      // Exclusion markers
+      no_planning: (text) => !/estimation|story point|backlog|user stor|vélocité|velocity|assigné|capacité/gi.test(text),
+      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro/gi.test(text),
+      no_standup: (text) => !/hier|aujourd'hui|ce matin|yesterday|today|blocage|bloqué|blocked/gi.test(text) || /démo|feedback|stakeholder/gi.test(text)
     }
   },
 
   RETROSPECTIVE: {
+    // Objectif: Améliorer les processus et les pratiques
+    // Focus: Introspection, apprentissage, amélioration continue
     keywords: [
-      'amélioration', 'improvement', 'apprentissage', 'learning', 'fonctionné', 'worked',
-      'marché', 'à améliorer', 'to improve', 'problème', 'problem', 'processus', 'process',
-      'start stop continue', 'mad sad glad', '4l', 'thermomètre', 'plus', 'moins', 'delta',
+      'amélioration', 'improvement', 'apprentissage', 'learning', 'leçon', 'lesson',
+      'fonctionné', 'worked', 'marché', 'went well', 'ce qui a bien',
+      'à améliorer', 'to improve', 'pourrait être mieux', 'could be better',
+      'problème', 'problem', 'friction', 'processus', 'process',
+      'start stop continue', 'mad sad glad', '4l', 'thermomètre',
+      'plus', 'moins', 'delta', 'bien', 'mal', 'plus et moins',
       'action d\'amélioration', 'improvement action', 'plan d\'action', 'action plan',
-      'comment faire mieux', 'how to improve', 'rétro', 'retrospective', 'retro',
-      'ce sprint', 'la semaine', 'the last sprint', 'this iteration', 'ce qu\'on a bien fait',
-      'ce qu\'on pourrait faire mieux', 'obstacles', 'friction', 'ce qui a ralenti',
-      'rétrospective d\'équipe', 'team retrospective', 'débriefing', 'debrief'
+      'comment faire mieux', 'how to improve', 'faire évoluer', 'process change',
+      'ce sprint', 'this sprint', 'la semaine', 'the last sprint', 'l\'itération',
+      'ce qu\'on a', 'what went', 's\'est bien passé', 's\'est mal passé',
+      'rétrospective', 'retro', 'rétro', 'retrospective', 'débriefing', 'debrief',
+      'équipe', 'team', 'nous', 'we', 'obstacles', 'ralenti', 'slowed down',
+      'récurrent', 'recurring', 'pattern', 'répétitif', 'tendance', 'trend'
     ],
     patterns: [
-      /amélior|apprentiss|fonctionn[ée]|marché|problème|issue|concern|obstacle|friction/gi,
-      /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins|bien.?mal/gi,
-      /action.*amélioration|amélioration.*action|plan d'action|action plan/gi,
+      /amélior|apprentiss|leçon|lesson|fonctionn[ée]|marché|went well|what went|worked/gi,
+      /à améliorer|to improve|pourrait être mieux|could be better|faire mieux/gi,
+      /problème|problem|friction|processus|process|obstacle|issue|concern/gi,
+      /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins|bien.?mal|good.?bad/gi,
+      /action.*amélioration|amélioration.*action|plan d'action|action plan|action items/gi,
       /comment faire mieux|how to improve|faire évoluer|process change|change.*process/gi,
-      /ce sprint|la semaine|the last sprint|this iteration|l'itération|au cours du sprint/gi,
-      /ce qu'on|what went well|went wrong|s'est bien passé|s'est mal passé|friction|ralenti/gi,
-      /rétrospective|retro|débriefing|debrief|team retrospective|équipe/gi
+      /ce sprint|this sprint|la semaine|the last sprint|l'itération|au cours du sprint|le sprint passé/gi,
+      /ce qu'on|what went well|went wrong|s'est bien|s'est mal|a fonctionné|a échoué/gi,
+      /rétrospective|retro|rétro|retrospective|débriefing|debrief|team retrospective/gi,
+      /équipe|team|nous|we|on a|we have|notre|our/gi,
+      /récurrent|recurring|pattern|répétitif|tendance|trend|friction|ralenti|slowed/gi
     ],
     markers: {
-      introspective_vocab: (text) => /amélior|apprentiss|fonctionn[ée]|marché|problème|processus|obstacle/gi.test(text),
-      reflection_structure: (text) => /start.?stop.?continue|mad.?sad.?glad|bien.?mal|good.?bad|plus.?moins/gi.test(text),
-      improvement_actions: (text) => /action|plan|proposer|proposé|engager|commit|changement|change|initiative/gi.test(text),
-      pattern_identification: (text) => /récurrent|recurring|pattern|répétitif|recurring|tendance|friction|ralenti/gi.test(text),
-      sprint_context: (text) => /ce sprint|la semaine|the last sprint|this iteration|l'itération|au cours du sprint|le sprint passé/gi.test(text),
-      past_tense_reflection: (text) => /s'est bien passé|s'est mal passé|went well|went wrong|a fonctionné|a échoué/gi.test(text),
-      team_focus: (text) => /équipe|team|nous|we|on a|we have/gi.test(text),
-      no_planning_markers: (text) => !/estimation|story point|backlog|user stor|capacité|velocity|va faire|va continuer|assigné/gi.test(text)
+      introspective_vocabulary: (text) => /amélior|apprentiss|fonctionn[ée]|marché|problème|processus|leçon|lesson/gi.test(text),
+      reflection_patterns: (text) => /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins|bien.?mal|what went/gi.test(text),
+      improvement_actions: (text) => /action|plan|proposer|proposé|engager|commit|changement|change|initiative|amélioration/gi.test(text),
+      pattern_analysis: (text) => /récurrent|recurring|pattern|répétitif|tendance|trend|friction|ralenti|slowed|obstacle/gi.test(text),
+      sprint_context: (text) => /ce sprint|this sprint|la semaine|the last sprint|l'itération|au cours du sprint|le sprint passé/gi.test(text),
+      past_tense_reflection: (text) => /s'est bien|s'est mal|went well|went wrong|a fonctionné|a échoué|worked|didn't work/gi.test(text),
+      team_dynamics_focus: (text) => /équipe|team|nous|we|on a|we have|communication|collaboration|notre/gi.test(text),
+      
+      // Exclusion markers
+      no_planning_scope: (text) => !/estimation|story point|backlog|user stor|vélocité|velocity|assigné|capacité|planification/gi.test(text),
+      no_demo: (text) => !/démo|démonstration|show|présent|fonctionnalité|feature|livré|delivered|incrément/gi.test(text),
+      no_standup: (text) => !/hier|aujourd'hui|ce matin|yesterday|today|blocage|bloqué|blocked|aide help/gi.test(text) || /amélioration|apprentissage|retrospective/gi.test(text)
     }
   },
 
   KANBAN: {
     keywords: [
-      'work in progress', 'wip', 'wip limits', 'limites wip', 'flux', 'flow',
-      'lead time', 'cycle time', 'throughput', 'débit',
+      'work in progress', 'wip', 'wip limit', 'wip limits', 'limites wip', 'limite de wip',
+      'flux', 'flow', 'throughput', 'débit', 'lead time', 'cycle time',
       'colonnes', 'columns', 'tableau kanban', 'kanban board', 'pull system',
-      'cadences', 'cadence', 'continuous delivery', 'livraison continue'
+      'continuous delivery', 'livraison continue', 'cadences', 'cadence',
+      'optimiser', 'optimize', 'améliorer le flux', 'improve flow'
     ],
     patterns: [
-      /wip|work in progress|work-in-progress|limite de wip/gi,
+      /wip|work in progress|work-in-progress|limite de wip|wip limit/gi,
       /flux|flow|throughput|débit|lead time|cycle time/gi,
       /colonne|column|kanban|pull system|tableau kanban/gi,
-      /cadence|continuous delivery|livraison continue/gi,
+      /continuous delivery|livraison continue|cadence|cadences/gi,
+      /optimiser|optimize|améliorer.*flux|improve.*flow/gi
     ],
     markers: {
-      kanban_vocab: (text) => /wip|work in progress|flux|flow|kanban|lead time|cycle time/gi.test(text),
-      flow_focus: (text) => /flux|flow|throughput|débit|optimiser|optimize/gi.test(text),
-      wip_limits: (text) => /wip|work in progress|limite|limit/gi.test(text),
-      no_scrum: (text) => !/sprint|planning|story point|vélocité|velocity/gi.test(text)
+      kanban_vocabulary: (text) => /wip|work in progress|kanban|pull system|lead time|cycle time/gi.test(text),
+      flow_metrics_focus: (text) => /flux|flow|throughput|débit|optimize|lead time|cycle time/gi.test(text),
+      wip_discussion: (text) => /wip|work in progress|limite|limit/gi.test(text),
+      no_scrum_artifacts: (text) => !/sprint|planification|planning|story point|vélocité|velocity|standup|retrospective/gi.test(text)
     }
   },
 
   SAFE: {
     keywords: [
       'pi planning', 'art', 'agile release train', 'system demo',
-      'features', 'enablers', 'portfolio', 'value stream',
-      'programme', 'program', 'train', 'trains',
-      'grande échelle', 'large scale', 'scaled agile'
+      'features', 'enablers', 'portfolio', 'value stream', 'lpm',
+      'programme', 'program', 'train', 'trains', 'multi-équipes',
+      'grande échelle', 'large scale', 'scaled agile', 'safe'
     ],
     patterns: [
       /pi planning|pi.?planning|agile release train|art\b/gi,
       /feature|enabler|value stream|portfolio|programme/gi,
       /grande échelle|large scale|scaled agile|safe|safe framework/gi,
-      /train|multiple teams|multi-équipes|cross-team/gi,
+      /train|multiple teams|multi-équipes|cross-team|cross-équipes/gi
     ],
     markers: {
-      safe_vocab: (text) => /pi planning|art|agile release train|safe|scaled agile/gi.test(text),
-      large_scale: (text) => /programme|program|train|trains|grande échelle|large scale/gi.test(text),
-      multi_team: (text) => /multiple teams|multi-équipes|cross-team|cross team|portfolio/gi.test(text),
-      strategic_alignment: (text) => /stratégique|strategic|alignment|aligné|roadmap|vision/gi.test(text)
+      safe_vocabulary: (text) => /pi planning|art|agile release train|safe|scaled agile/gi.test(text),
+      large_scale_context: (text) => /programme|program|train|trains|grande échelle|large scale|portfolio/gi.test(text),
+      multi_team_coordination: (text) => /multiple teams|multi-équipes|cross-team|cross team|portfolio|lpm/gi.test(text)
     }
   }
 };
@@ -159,101 +221,118 @@ export function detectWorkshopType(text) {
       type: 'Autre',
       subtype: 'Autre',
       confidence: 0,
-      justification: 'Texte trop court ou vide',
+      justifications: ['Texte trop court'],
       tags: ['#Indéterminé']
     };
   }
 
   const scores = {};
 
-  // Score each ceremony type with exclusion rules
+  // Step 1: Check for non-Scrum frameworks first (decision tree logic)
+  if (/wip|work.?in.?progress|kanban|lead time|cycle time|flux|flow/gi.test(text) &&
+      !/sprint|planning|story point|vélocité|velocity/gi.test(text)) {
+    return {
+      type: 'Autre',
+      subtype: '#Kanban',
+      confidence: 85,
+      justifications: ['Présence de vocabulaire Kanban (WIP, lead time, flux)', 'Absence de patterns Scrum'],
+      tags: ['#Kanban', '#FluxContinu', '#WIP']
+    };
+  }
+
+  if (/pi.?planning|agile release train|art\b|safe framework/gi.test(text) ||
+      (/programme|program|train|portfolio|multi-équipes/gi.test(text) && /grande échelle|large scale|scaled agile/gi.test(text))) {
+    return {
+      type: 'Autre',
+      subtype: '#SAFe',
+      confidence: 85,
+      justifications: ['Vocabulaire SAFe détecté', 'Framework de scaling'],
+      tags: ['#SAFe', '#GrandeEchelle', '#Programme']
+    };
+  }
+
+  // Step 2: Score each Scrum ceremony type with precise markers
   Object.entries(DETECTION_PATTERNS).forEach(([ceremonyType, config]) => {
     let score = 0;
-    const justifications = [];
+    const matchedMarkers = [];
 
-    // Check for disqualifying factors first
+    if (ceremonyType === 'KANBAN' || ceremonyType === 'SAFE') {
+      return; // Already handled above
+    }
+
+    // Check exclusion markers first
     const markerEntries = Object.entries(config.markers);
-    let hasDisqualifier = false;
-    
+    let exclusionCount = 0;
+
     markerEntries.forEach(([markerName, markerFn]) => {
-      if (markerName.startsWith('no_')) {
-        // These are exclusion markers
-        if (markerFn(text)) {
-          hasDisqualifier = true;
-        }
+      if (markerName.startsWith('no_') && markerFn(text)) {
+        exclusionCount++;
       }
     });
 
-    // If disqualified, give lower base score
-    let baseScore = hasDisqualifier ? 0 : 20;
-    score = baseScore;
+    // Base score reduced by exclusions
+    score = Math.max(20 - exclusionCount * 10, 0);
 
-    // Check markers (weighted)
+    // Score positive markers
     markerEntries.forEach(([markerName, markerFn]) => {
       if (!markerName.startsWith('no_')) {
         if (markerFn(text)) {
-          score += 22; // 22 points per positive marker (allows ~4.5 markers max)
-          justifications.push(`${markerName.replace(/_/g, ' ')}`);
-        }
-      } else {
-        // Negative markers reduce score
-        if (markerFn(text)) {
-          score -= 15; // Penalty for having contrary markers
+          score += 24; // ~4 markers for perfect match
+          matchedMarkers.push(markerName.replace(/_/g, ' '));
         }
       }
     });
 
-    // Check keyword density
+    // Keyword density (refined)
     const keywords = config.keywords || [];
-    const keywordMatches = keywords.filter(kw => 
+    const keywordMatches = keywords.filter(kw =>
       new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi').test(text)
     ).length;
-    
+
     const keywordDensity = (keywordMatches / Math.max(keywords.length, 1)) * 100;
-    score += Math.min(keywordDensity * 0.35, 20); // Max 20 points for keywords
+    score += Math.min(keywordDensity * 0.3, 15); // Max 15 points
 
     scores[ceremonyType] = {
       score: Math.max(0, Math.min(score, 100)),
-      justifications: justifications.slice(0, 3) // Top 3 justifications
+      markers: matchedMarkers.slice(0, 3)
     };
   });
 
-  // Determine best match
+  // Step 3: Determine best match with confidence threshold
   const sorted = Object.entries(scores).sort(([, a], [, b]) => b.score - a.score);
   const [bestType, bestScore] = sorted[0];
 
-  // Map to user-facing type
   const typeMapping = {
     DAILY_SCRUM: { display: 'Daily Scrum', tags: ['#Standup', '#Quotidien', '#TourDeTable'] },
     SPRINT_PLANNING: { display: 'Sprint Planning', tags: ['#Planification', '#Estimation', '#Backlog'] },
     SPRINT_REVIEW: { display: 'Sprint Review', tags: ['#Démonstration', '#Feedback', '#Valeur'] },
-    RETROSPECTIVE: { display: 'Retrospective', tags: ['#Rétrospective', '#Amélioration', '#Processus'] },
-    KANBAN: { display: 'Autre', subtype: '#Kanban', tags: ['#Kanban', '#FluxContinu', '#WIP'] },
-    SAFE: { display: 'Autre', subtype: '#SAFe', tags: ['#SAFe', '#GrandeEchelle', '#Programme'] }
+    RETROSPECTIVE: { display: 'Retrospective', tags: ['#Rétrospective', '#Amélioration', '#Processus'] }
   };
 
-  const mapping = typeMapping[bestType] || { display: 'Autre', subtype: 'Autre', tags: ['#Autre', '#Indéterminé'] };
-  
-  // Confidence calculation
-  let confidence = bestScore.score;
-  if (bestScore.score < 30) {
-    confidence = Math.max(confidence, 15); // At least show low confidence
-    mapping.display = 'Autre';
-    mapping.subtype = mapping.subtype || 'Autre';
-    mapping.tags = ['#Autre', '#Indéterminé'];
+  const mapping = typeMapping[bestType] || { display: 'Autre', tags: ['#Autre', '#Indéterminé'] };
+
+  // Low confidence or no clear match
+  if (bestScore.score < 35) {
+    return {
+      type: 'Autre',
+      subtype: 'Autre',
+      confidence: Math.round(bestScore.score),
+      justifications: ['Patterns Scrum insuffisants détectés'],
+      tags: ['#Autre', '#Indéterminé']
+    };
   }
 
   return {
     type: mapping.display,
-    subtype: mapping.subtype || null,
-    confidence: Math.round(confidence),
-    justifications: bestScore.justifications.length > 0 
-      ? bestScore.justifications 
-      : ['Patterns agiles non identifiés'],
+    subtype: null,
+    confidence: Math.round(bestScore.score),
+    justifications: bestScore.markers.length > 0
+      ? bestScore.markers
+      : ['Patterns agiles identifiés'],
     tags: mapping.tags || [],
     allScores: Object.entries(scores).map(([type, s]) => ({
       type: typeMapping[type]?.display || type,
-      score: s.score
+      score: Math.round(s.score)
     }))
   };
 }
