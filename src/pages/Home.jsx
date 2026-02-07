@@ -290,14 +290,14 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-3 text-center">Ces données sont simulées</p>
+                <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
               </CardContent>
             </Card>
 
             {/* KPIs */}
             <Card className="border-slate-200">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">KPIs Clés</h3>
+                <h3 className="font-semibold text-slate-900 mb-4">{t("keyKPIs")}</h3>
                 <div className="space-y-4">
                   {[
                     { label: "Stabilité Sprint Goal", value: "85%", emoji: "🎮" },
