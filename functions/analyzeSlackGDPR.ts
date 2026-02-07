@@ -167,25 +167,39 @@ Deno.serve(async (req) => {
 
       if (messages.length === 0) continue;
 
+      // Load active anti-patterns from Gist
+      const antiPatterns = await base44.asServiceRole.entities.AntiPattern.filter({
+        is_active: true
+      });
+
+      const patternContext = antiPatterns
+        .filter(p => p.source_type?.includes('transcript') || p.source_type?.includes('teams') || p.source_type?.includes('zoom'))
+        .map(p => `${p.pattern_id} - ${p.name}: Marqueurs [${p.markers?.join(', ')}]`)
+        .join('\n');
+
       // Analyze messages IN MEMORY ONLY with LLM for actionable insights
       const conversationText = messages.map(m => 
         `${userMap[m.user] || 'Someone'}: ${m.text || ''}`
       ).join('\n');
 
       const analysisResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analyze this Slack standup conversation for actionable blockers and risks.
+        prompt: `Analyze this Slack standup conversation for actionable blockers and risks using these Scrum anti-patterns:
+
+${patternContext}
 
 Conversation:
 ${conversationText}
 
 Extract:
-1. Who is blocked and by what/whom
-2. Specific issues with first names
-3. Actionable recommendations with names
+1. Which anti-patterns are detected (use pattern_id)
+2. Who is blocked and by what/whom
+3. Specific issues with first names
+4. Actionable recommendations with names
 
 Return JSON:
 {
   "has_issues": true|false,
+  "detected_pattern_ids": ["A1", "B2"],
   "probleme": "Specific description with first names (e.g. 'Marie bloquée sur API payment, attend Jean')",
   "assignee_first_name": "First name of blocked person",
   "blocked_by_first_name": "First name of blocker if applicable",
@@ -198,6 +212,7 @@ Return JSON:
           type: 'object',
           properties: {
             has_issues: { type: 'boolean' },
+            detected_pattern_ids: { type: 'array', items: { type: 'string' } },
             probleme: { type: 'string' },
             assignee_first_name: { type: 'string' },
             blocked_by_first_name: { type: 'string' },
@@ -236,6 +251,27 @@ Return JSON:
         };
 
         markersToCreate.push(marker);
+
+        // Create PatternDetection records for each detected pattern
+        if (analysisResult.detected_pattern_ids?.length > 0) {
+          for (const patternId of analysisResult.detected_pattern_ids) {
+            const pattern = antiPatterns.find(p => p.pattern_id === patternId);
+            if (pattern) {
+              await base44.asServiceRole.entities.PatternDetection.create({
+                analysis_id: issueId,
+                pattern_id: patternId,
+                pattern_name: pattern.name,
+                category: pattern.category,
+                confidence_score: analysisResult.confidence * 100,
+                detected_markers: pattern.markers || [],
+                context: analysisResult.probleme.substring(0, 500),
+                severity: analysisResult.criticality,
+                recommended_actions: analysisResult.recommendations,
+                status: 'detected'
+              });
+            }
+          }
+        }
       }
 
       // CRITICAL: Clear message data from memory

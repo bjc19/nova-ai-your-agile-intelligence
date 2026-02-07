@@ -76,15 +76,28 @@ Deno.serve(async (req) => {
 
             const transcriptContent = await contentResponse.text();
 
+              // Load active anti-patterns
+              const antiPatterns = await base44.asServiceRole.entities.AntiPattern.filter({
+                is_active: true
+              });
+
+              const patternContext = antiPatterns
+                .filter(p => p.source_type?.includes('transcript') || p.source_type?.includes('teams'))
+                .map(p => `${p.pattern_id} - ${p.name}: Marqueurs [${p.markers?.join(', ')}]`)
+                .join('\n');
+
               // ========== ANALYZE WITH ACTIONABLE INSIGHTS ==========
               const analysisResult = await base44.integrations.Core.InvokeLLM({
-                prompt: `Analyze this Teams meeting transcript for actionable Agile/Scrum blockers and risks.
+                prompt: `Analyze this Teams meeting transcript using these Scrum anti-patterns:
 
-Extract first names and specific issues for actionable recommendations.
+${patternContext}
+
+Extract first names, detected patterns, and specific issues for actionable recommendations.
 
 Return JSON:
 {
   "has_issues": true|false,
+  "detected_pattern_ids": ["A1", "B2"],
   "problem_description": "Specific description with first names (e.g. 'Marie bloquée sur API, Jean en retard sur PR')",
   "assignee_first_name": "First name of blocked person",
   "blocked_by_first_name": "First name of blocker if applicable",
@@ -101,6 +114,7 @@ ${transcriptContent.substring(0, 4000)}`,
                   type: 'object',
                   properties: {
                     has_issues: { type: 'boolean' },
+                    detected_pattern_ids: { type: 'array', items: { type: 'string' } },
                     problem_description: { type: 'string' },
                     assignee_first_name: { type: 'string' },
                     blocked_by_first_name: { type: 'string' },
@@ -142,6 +156,27 @@ ${transcriptContent.substring(0, 4000)}`,
                    detection_source: 'teams_daily',
                    consent_given: true
                  });
+
+                // Create PatternDetection records
+                if (analysisResult.detected_pattern_ids?.length > 0) {
+                  for (const patternId of analysisResult.detected_pattern_ids) {
+                    const pattern = antiPatterns.find(p => p.pattern_id === patternId);
+                    if (pattern) {
+                      await base44.asServiceRole.entities.PatternDetection.create({
+                        analysis_id: issueId,
+                        pattern_id: patternId,
+                        pattern_name: pattern.name,
+                        category: pattern.category,
+                        confidence_score: analysisResult.confidence * 100,
+                        detected_markers: pattern.markers || [],
+                        context: analysisResult.problem_description.substring(0, 500),
+                        severity: analysisResult.criticality,
+                        recommended_actions: analysisResult.recommendations,
+                        status: 'detected'
+                      });
+                    }
+                  }
+                }
 
                 console.log(`Created actionable marker: ${analysisResult.problem_description}`);
                 totalRecordsProcessed++;
