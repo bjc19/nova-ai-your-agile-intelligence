@@ -84,19 +84,29 @@ const DETECTION_PATTERNS = {
       'marché', 'à améliorer', 'to improve', 'problème', 'problem', 'processus', 'process',
       'start stop continue', 'mad sad glad', '4l', 'thermomètre', 'plus', 'moins', 'delta',
       'action d\'amélioration', 'improvement action', 'plan d\'action', 'action plan',
-      'comment faire mieux', 'how to improve', 'rétro', 'retrospective', 'retro'
+      'comment faire mieux', 'how to improve', 'rétro', 'retrospective', 'retro',
+      'ce sprint', 'la semaine', 'the last sprint', 'this iteration', 'ce qu\'on a bien fait',
+      'ce qu\'on pourrait faire mieux', 'obstacles', 'friction', 'ce qui a ralenti',
+      'rétrospective d\'équipe', 'team retrospective', 'débriefing', 'debrief'
     ],
     patterns: [
-      /amélior|apprentiss|fonctiomn[né]|marché|problème|issue|concern/gi,
-      /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins/gi,
+      /amélior|apprentiss|fonctionn[ée]|marché|problème|issue|concern|obstacle|friction/gi,
+      /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins|bien.?mal/gi,
       /action.*amélioration|amélioration.*action|plan d'action|action plan/gi,
-      /comment faire mieux|how to improve|faire évoluer|process change/gi,
+      /comment faire mieux|how to improve|faire évoluer|process change|change.*process/gi,
+      /ce sprint|la semaine|the last sprint|this iteration|l'itération|au cours du sprint/gi,
+      /ce qu'on|what went well|went wrong|s'est bien passé|s'est mal passé|friction|ralenti/gi,
+      /rétrospective|retro|débriefing|debrief|team retrospective|équipe/gi
     ],
     markers: {
-      introspective_vocab: (text) => /amélior|apprentiss|fonctionn[ée]|marché|problème|processus/gi.test(text),
+      introspective_vocab: (text) => /amélior|apprentiss|fonctionn[ée]|marché|problème|processus|obstacle/gi.test(text),
       reflection_structure: (text) => /start.?stop.?continue|mad.?sad.?glad|bien.?mal|good.?bad|plus.?moins/gi.test(text),
-      improvement_actions: (text) => /action|plan|proposer|proposé|engager|commit|changement|change/gi.test(text),
-      pattern_identification: (text) => /récurrent|recurring|pattern|répétitif|recurring|tendance/gi.test(text)
+      improvement_actions: (text) => /action|plan|proposer|proposé|engager|commit|changement|change|initiative/gi.test(text),
+      pattern_identification: (text) => /récurrent|recurring|pattern|répétitif|recurring|tendance|friction|ralenti/gi.test(text),
+      sprint_context: (text) => /ce sprint|la semaine|the last sprint|this iteration|l'itération|au cours du sprint|le sprint passé/gi.test(text),
+      past_tense_reflection: (text) => /s'est bien passé|s'est mal passé|went well|went wrong|a fonctionné|a échoué/gi.test(text),
+      team_focus: (text) => /équipe|team|nous|we|on a|we have/gi.test(text),
+      no_planning_markers: (text) => !/estimation|story point|backlog|user stor|capacité|velocity|va faire|va continuer|assigné/gi.test(text)
     }
   },
 
