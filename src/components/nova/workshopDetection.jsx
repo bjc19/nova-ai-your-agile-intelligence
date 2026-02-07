@@ -366,8 +366,12 @@ export function detectWorkshopType(text) {
       }
     });
 
-    // Base score reduced by exclusions
-    score = Math.max(15 - exclusionCount * 12, 0);
+    // Base score reduced by exclusions (but not as harsh for Retrospective)
+    if (ceremonyType === 'RETROSPECTIVE') {
+      score = Math.max(20 - exclusionCount * 8, 0); // Lighter penalty for retro
+    } else {
+      score = Math.max(15 - exclusionCount * 12, 0);
+    }
 
     // Score positive markers with higher precision for Planning
     let positiveMarkerCount = 0;
