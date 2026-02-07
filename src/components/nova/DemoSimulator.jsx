@@ -5,8 +5,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { detectWorkshopType } from "@/components/nova/workshopDetection";
 
 // Données simulées de démo
 const DEMO_PATTERNS = [
