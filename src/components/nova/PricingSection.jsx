@@ -55,7 +55,7 @@ const plans = [
     price: "99",
     yearlyPrice: "84",
     users: "10 utilisateurs inclus",
-    addOn: "+15 CAD/utilisateur/mois (max 15)",
+    addOn: "+15 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
       "Analyses manuelles illimitées",
