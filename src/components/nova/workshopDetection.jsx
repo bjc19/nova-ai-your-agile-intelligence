@@ -86,6 +86,53 @@ const CEREMONY_SPECIFIC_VERBS = {
 };
 
 const DETECTION_PATTERNS = {
+  SAFE: {
+    // Objectif: Identifier les ateliers Scaled Agile Framework (SAFe) vs Scrum
+    // Intelligence: Termes exclusifs SAFe, échelle programme, rôles spécifiques
+    keywords: [
+      'pi planning', 'pi.?planning', 'program increment', 'art', 'agile release train',
+      'rte', 'release train engineer', 'product management', 'business owner',
+      'wsjf', 'weighted shortest job first', 'roam', 'roam board',
+      'features', 'programme', 'program', 'portée programme', 'portfolio',
+      'synchronisation', 'synchronization', 'grande échelle', 'large scale',
+      'scaled agile', 'safe framework', 'safe', 'multi-équipes', 'multi-teams',
+      'capacité programme', 'program capacity', 'dépendances inter-équipes',
+      'cross-team dependencies', 'alignement programme', 'program alignment',
+      'objectifs de pi', 'pi goals', 'time-box', 'synchronized',
+      'release train', 'enabler', 'enablers'
+    ],
+    patterns: [
+      /pi.?planning|program.?increment|agile.?release.?train|art\b/gi,
+      /rte|release.?train.?engineer|product.?management|business.?owner/gi,
+      /wsjf|weighted.?shortest.?job|roam.?board|roam\b/gi,
+      /programme|program|portée.?programme|portfolio|large.?scale/gi,
+      /synchron|multi-équipes|multi-teams|cross-team|cross-équipes/gi,
+      /capacité.?programme|dépendances|inter-équipes|enabler|release.?train/gi
+    ],
+    markers: {
+      safe_exclusive_terms: (text) => /pi\b|pi.?planning|wsjf|roam.?board|rte\b/gi.test(text),
+      safe_acronyms_count: (text) => {
+        const piMatch = (text.match(/\bpi\b/gi) || []).length;
+        const rteMatch = (text.match(/\brte\b/gi) || []).length;
+        const wsjfMatch = (text.match(/\bwsjf\b/gi) || []).length;
+        const roamMatch = (text.match(/\broam\b/gi) || []).length;
+        return piMatch + rteMatch + wsjfMatch + roamMatch >= 2;
+      },
+      safe_roles: (text) => /product.?management|business.?owner|release.?train.?engineer|rte/gi.test(text),
+      multi_team_coordination: (text) => {
+        const teamMatches = (text.match(/team\s+[a-z]|team\s+\d/gi) || []).length;
+        return teamMatches >= 2 || /multi-équipes|multi-teams|cross-team|several teams|multiple teams/gi.test(text);
+      },
+      program_scale: (text) => /programme|program.?increment|release.?train|large.?scale|scaled.?agile|portée.?programme|portfolio/gi.test(text),
+      programme_vocabulary: (text) => /capacité.?programme|dépendances|synchronized|enabler|synchronization|alignment/gi.test(text),
+
+      // Exclusion markers - if strong, it's NOT SAFe
+      no_team_introspection: (text) => !/comment.?on|comment.?on.?travaille|team.?process|collaboration|interne|internal|émotions|bien-être|feelings/gi.test(text),
+      no_improvement_actions: (text) => !/action.*amélioration|amélioration.*action|plan d'amélioration|improvement.*plan|expérimenter|experiment/gi.test(text),
+      no_retrospective_language: (text) => !/ce qu'on|what went|went well|went wrong|retrospective|retro|apprentiss|leçon|réflex/gi.test(text)
+    }
+  },
+
   SPRINT_PLANNING: {
     // Objectif: Déterminer CE QUI sera livré et COMMENT le livrer
     // Focus: Sélection, engagement, planification détaillée
