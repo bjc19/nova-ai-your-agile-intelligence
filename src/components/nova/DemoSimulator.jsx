@@ -159,7 +159,19 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-semibold text-slate-900">Analyse Complète ✅</p>
-                  <p className="text-sm text-slate-600 mt-1">Type détecté: <strong>{results.meetingType}</strong></p>
+                  <p className="text-sm text-slate-600 mt-1">Atelier détecté: <strong>{results.meetingType}</strong></p>
+                  {results.detectionConfidence && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-xs text-slate-600">Confiance de détection:</span>
+                      <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden max-w-xs">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-600" 
+                          style={{ width: `${results.detectionConfidence}%` }} 
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-slate-600">{results.detectionConfidence}%</span>
+                    </div>
+                  )}
                 </div>
                 <Badge className="bg-yellow-100 text-yellow-800">🎮 SIMULÉ</Badge>
               </div>
