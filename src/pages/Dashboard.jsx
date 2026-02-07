@@ -28,8 +28,7 @@ import {
   Calendar,
   Clock,
   Loader2,
-  TrendingUp,
-  Download } from
+  TrendingUp } from
 "lucide-react";
 
 export default function Dashboard() {
@@ -44,7 +43,6 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [latestReports, setLatestReports] = useState({ weekly: null, monthly: null });
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -62,23 +60,6 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, []);
-
-  // Fetch latest reports
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const weeklyReports = await base44.entities.WeeklyReport.list('-created_date', 1);
-        const monthlyReports = await base44.entities.MonthlyReport.list('-created_date', 1);
-        setLatestReports({
-          weekly: weeklyReports[0] || null,
-          monthly: monthlyReports[0] || null
-        });
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-      }
-    };
-    fetchReports();
   }, []);
 
   // Check authentication (temporarily disabled for demo)
@@ -285,26 +266,16 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  <div className="flex gap-2">
-                    {latestReports.weekly && (
-                      <a href={latestReports.weekly.pdf_url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" className="rounded-xl border-slate-200">
-                          <Download className="w-4 h-4 mr-2" />
-                          Weekly Report
-                        </Button>
-                      </a>
-                    )}
-                    <Link to={createPageUrl("Analysis")}>
-                      <Button
-                        size="lg"
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
 
-                        <Mic className="w-4 h-4 mr-2" />
-                        {t('newAnalysis')}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
+                      <Mic className="w-4 h-4 mr-2" />
+                      {t('newAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
               
@@ -481,7 +452,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyToBoostYourImpact?')}
+                  {t('readyForDailyScrum')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
