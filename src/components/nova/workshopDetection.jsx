@@ -363,7 +363,7 @@ export function detectWorkshopType(text) {
   const mapping = typeMapping[bestType] || { display: 'Autre', tags: ['#Autre', '#Indéterminé'] };
 
   // Low confidence or no clear match
-  if (bestScore.score < 35) {
+  if (bestScore.score < 40) {
     return {
       type: 'Autre',
       subtype: 'Autre',
@@ -371,6 +371,22 @@ export function detectWorkshopType(text) {
       justifications: ['Patterns Scrum insuffisants détectés'],
       tags: ['#Autre', '#Indéterminé']
     };
+  }
+
+  // Special handling: Planning vs others with close scores
+  if (bestType === 'SPRINT_PLANNING' && bestScore.score >= 40) {
+    // Verify strong Planning signals
+    const planningSignals = [
+      /sprint goal|objectif.*sprint/gi.test(text),
+      /estimation|points?|story point/gi.test(text),
+      /horizon|sprint|itération|2 semaines/gi.test(text),
+      /engagement|commitment|assigner|responsable/gi.test(text)
+    ];
+    const planningSignalCount = planningSignals.filter(s => s).length;
+    
+    if (planningSignalCount >= 2) {
+      bestScore.score = Math.min(bestScore.score + 15, 100);
+    }
   }
 
   return {
