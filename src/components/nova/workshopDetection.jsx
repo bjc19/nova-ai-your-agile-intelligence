@@ -687,7 +687,24 @@ export function detectWorkshopType(text) {
     }
   }
 
-  // CRITICAL 2: Planning vs Retrospective - Check for clear intent differentiation
+  // CRITICAL 2: Review vs Retrospective - External participation is key differentiator
+  if ((bestType === 'RETROSPECTIVE' || bestType === 'SPRINT_REVIEW') && scores.SPRINT_REVIEW && scores.RETROSPECTIVE) {
+    const reviewScore = scores.SPRINT_REVIEW.score;
+    const retroScore = scores.RETROSPECTIVE.score;
+    
+    // If Review has external participation + product focus, it wins decisively
+    if (intention.isReviewIntention && reviewScore >= 45) {
+      bestType = 'SPRINT_REVIEW';
+      bestScore = scores.SPRINT_REVIEW;
+    }
+    // If Retrospective lacks process discussion markers, Review likely wins
+    else if (intention.hasProductFocus && intention.hasExternalParticipation && reviewScore > retroScore - 5) {
+      bestType = 'SPRINT_REVIEW';
+      bestScore = scores.SPRINT_REVIEW;
+    }
+  }
+
+  // CRITICAL 3: Planning vs Retrospective - Check for clear intent differentiation
   if (bestType === 'SPRINT_PLANNING' && scores.RETROSPECTIVE) {
     const planningScore = bestScore.score;
     const retroScore = scores.RETROSPECTIVE.score;
