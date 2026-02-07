@@ -374,10 +374,17 @@ function analyzeIntention(text) {
   const commitmentIntent = /s'engager|commitment|responsable|owner|assigné|assigned/gi.test(text);
   const estimationIntent = /estim|points|effort|complexité|sizing/gi.test(text);
   
+  // Intentions de Daily Scrum
+  const coordinationIntent = /bloqu|débloqu|problème|issue|aide|help|passer sur|switch|avancer|progress/gi.test(text);
+  const dailyUrgency = /aujourd'hui|today|ce matin|this morning|immédiat|immediate|urgent|urgent/gi.test(text);
+  const immediateAction = /je vais|will do|vais essayer|going to|pour midi|by noon/gi.test(text);
+  
   return {
     isRetrospectiveIntention: learningIntent && improvementIntent && reflectionIntent,
     isPlanningIntention: (selectionIntent || estimationIntent) && commitmentIntent,
-    reflectionDominant: reflectionIntent && !selectionIntent
+    reflectionDominant: reflectionIntent && !selectionIntent,
+    isDailyIntention: coordinationIntent && (dailyUrgency || immediateAction),
+    hasCoordinationIntent: coordinationIntent
   };
 }
 
