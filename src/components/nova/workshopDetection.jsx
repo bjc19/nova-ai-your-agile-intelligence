@@ -139,49 +139,57 @@ const DETECTION_PATTERNS = {
   },
 
   RETROSPECTIVE: {
-    // Objectif: Améliorer les processus et les pratiques
-    // Focus: Introspection, apprentissage, amélioration continue
+    // Objectif: Inspecter et adapter le processus - Évaluation fin de cycle
+    // Intelligence: End-of-cycle reflection, root cause analysis (5 whys), continuous improvement, action ownership
     keywords: [
-      'amélioration', 'improvement', 'apprentissage', 'learning', 'leçon', 'lesson',
-      'fonctionné', 'worked', 'marché', 'went well', 'ce qui a bien',
-      'à améliorer', 'to improve', 'pourrait être mieux', 'could be better',
-      'problème', 'problem', 'friction', 'processus', 'process',
-      'start stop continue', 'mad sad glad', '4l', 'thermomètre',
-      'plus', 'moins', 'delta', 'bien', 'mal', 'plus et moins',
+      'amélioration', 'improvement', 'améliorer', 'apprentissage', 'learning', 'leçon', 'lesson',
+      'fonctionné', 'worked', 'marché', 'went well', 'ce qui a bien', 'a fonctionné',
+      'à améliorer', 'to improve', 'pourrait être mieux', 'could be better', 'faire mieux',
+      'problème', 'problem', 'friction', 'processus', 'process', 'méthode', 'method',
+      'start stop continue', 'mad sad glad', '4l', 'thermomètre', 'rétro format',
+      'plus', 'moins', 'delta', 'bien', 'mal', 'plus et moins', 'positif', 'négatif',
       'action d\'amélioration', 'improvement action', 'plan d\'action', 'action plan',
-      'comment faire mieux', 'how to improve', 'faire évoluer', 'process change',
-      'ce sprint', 'this sprint', 'la semaine', 'the last sprint', 'l\'itération',
-      'ce qu\'on a', 'what went', 's\'est bien passé', 's\'est mal passé',
-      'rétrospective', 'retro', 'rétro', 'retrospective', 'débriefing', 'debrief',
-      'équipe', 'team', 'nous', 'we', 'obstacles', 'ralenti', 'slowed down',
-      'récurrent', 'recurring', 'pattern', 'répétitif', 'tendance', 'trend'
+      'comment faire mieux', 'how to improve', 'faire évoluer', 'process change', 'évolution',
+      'ce sprint', 'this sprint', 'la semaine', 'the last sprint', 'l\'itération', 'cycle',
+      'ce qu\'on a', 'what went', 's\'est bien passé', 's\'est mal passé', 'ce qui',
+      'rétrospective', 'retro', 'rétro', 'retrospective', 'débriefing', 'debrief', 'bilan',
+      'équipe', 'team', 'nous', 'we', 'obstacles', 'ralenti', 'slowed down', 'bloqué',
+      'récurrent', 'recurring', 'pattern', 'répétitif', 'tendance', 'trend', 'systématique',
+      'pourquoi', 'why', 'root cause', 'cause racine', 'analyse', '5 whys', 'causale',
+      'résolution', 'resolution', 'responsable', 'owner', 'porteur', 'engagement',
+      'décision', 'decision', 'engager', 'commit', 'prochaine fois', 'next time'
     ],
     patterns: [
       /amélior|apprentiss|leçon|lesson|fonctionn[ée]|marché|went well|what went|worked/gi,
-      /à améliorer|to improve|pourrait être mieux|could be better|faire mieux/gi,
-      /problème|problem|friction|processus|process|obstacle|issue|concern/gi,
+      /à améliorer|to improve|pourrait être mieux|could be better|faire mieux|faire évoluer/gi,
+      /problème|problem|friction|processus|process|obstacle|issue|concern|méthode/gi,
       /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins|bien.?mal|good.?bad/gi,
       /action.*amélioration|amélioration.*action|plan d'action|action plan|action items/gi,
       /comment faire mieux|how to improve|faire évoluer|process change|change.*process/gi,
-      /ce sprint|this sprint|la semaine|the last sprint|l'itération|au cours du sprint|le sprint passé/gi,
-      /ce qu'on|what went well|went wrong|s'est bien|s'est mal|a fonctionné|a échoué/gi,
-      /rétrospective|retro|rétro|retrospective|débriefing|debrief|team retrospective/gi,
-      /équipe|team|nous|we|on a|we have|notre|our/gi,
-      /récurrent|recurring|pattern|répétitif|tendance|trend|friction|ralenti|slowed/gi
+      /ce sprint|this sprint|la semaine|the last sprint|l'itération|au cours du sprint|cycle complété/gi,
+      /ce qu'on|what went well|went wrong|s'est bien|s'est mal|a fonctionné|a échoué|ce qui/gi,
+      /rétrospective|retro|rétro|retrospective|débriefing|debrief|team retrospective|bilan/gi,
+      /équipe|team|nous|we|on a|we have|notre|our|ensemble|collectively/gi,
+      /récurrent|recurring|pattern|répétitif|tendance|trend|friction|ralenti|slowed|systématique/gi,
+      /pourquoi|why|root cause|cause racine|analyse|analysis|5 whys|trop|pas assez|why didn't/gi,
+      /résolution|resolution|responsable|owner|porteur|engagement|s'engager|décision/gi,
+      /prochaine fois|next time|on va|we will|à l'avenir|in the future|améliorer|improve/gi
     ],
     markers: {
-      introspective_vocabulary: (text) => /amélior|apprentiss|fonctionn[ée]|marché|problème|processus|leçon|lesson/gi.test(text),
-      reflection_patterns: (text) => /start.?stop.?continue|mad.?sad.?glad|4l|thermomètre|plus.?moins|bien.?mal|what went/gi.test(text),
-      improvement_actions: (text) => /action|plan|proposer|proposé|engager|commit|changement|change|initiative|amélioration/gi.test(text),
-      pattern_analysis: (text) => /récurrent|recurring|pattern|répétitif|tendance|trend|friction|ralenti|slowed|obstacle/gi.test(text),
-      sprint_context: (text) => /ce sprint|this sprint|la semaine|the last sprint|l'itération|au cours du sprint|le sprint passé/gi.test(text),
-      past_tense_reflection: (text) => /s'est bien|s'est mal|went well|went wrong|a fonctionné|a échoué|worked|didn't work/gi.test(text),
-      team_dynamics_focus: (text) => /équipe|team|nous|we|on a|we have|communication|collaboration|notre/gi.test(text),
+      retrospective_ceremony: (text) => /retrospective|retro|rétrospective|debrief|débriefing|post-mortem|bilan/gi.test(text),
+      end_of_cycle_language: (text) => /fin de sprint|end of sprint|ce sprint|this sprint|cycle complété|dernier sprint|last sprint/gi.test(text),
+      process_evaluation: (text) => /processus|process|méthode|method|workflow|façon de travailler|équipe|team|collaboration/gi.test(text),
+      positive_negative_reflection: (text) => /qu'est-ce qui|what went|bien|positif|mal|négatif|positive|negative|went well|went wrong|succès|difficulty/gi.test(text),
+      root_cause_analysis: (text) => /pourquoi|why|cause|root cause|analyse|analysis|5 whys|trop|pas assez|why didn't|how come|causale/gi.test(text),
+      continuous_improvement_focus: (text) => /amélioration|improvement|améliorer|optimize|optimiser|enhance|adapter|adapt|éviter|avoid|faire autrement/gi.test(text),
+      action_and_ownership: (text) => /résolution|resolution|action|décision|engagement|s'engager|responsable|owner|porteur|assigné|next step|plan/gi.test(text),
+      learning_and_reflection: (text) => /apprentissage|learning|leçon|lesson|insight|découvert|réalisation|compris|understood|appris|réalisé/gi.test(text),
+      team_reflection_and_dynamics: (text) => /équipe|team|nous|we|on|notre|our|ensemble|together|collectif|collaborative|communication/gi.test(text),
       
       // Exclusion markers
-      no_planning_scope: (text) => !/estimation|story point|backlog|user stor|vélocité|velocity|assigné|capacité|planification/gi.test(text),
-      no_demo: (text) => !/démo|démonstration|show|présent|fonctionnalité|feature|livré|delivered|incrément/gi.test(text),
-      no_standup: (text) => !/hier|aujourd'hui|ce matin|yesterday|today|blocage|bloqué|blocked|aide help/gi.test(text) || /amélioration|apprentissage|retrospective/gi.test(text)
+      no_planning_scope: (text) => !/estimation|story point|backlog|user stor|vélocité|velocity|assigné|capacité|planification|sprint goal/gi.test(text),
+      no_demo: (text) => !/démo|démonstration|show|livr|présent|fonctionnalité|feature|livré|delivered|incrément|stakeholder/gi.test(text),
+      no_standup: (text) => !/hier|aujourd'hui|ce matin|cet après|yesterday|today|blocage|bloqué|blocked|aide|working on|vais faire/gi.test(text) || /amélioration|apprentissage|retrospective|processus/gi.test(text)
     }
   },
 
