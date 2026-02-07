@@ -205,10 +205,10 @@ export default function Home() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl font-bold text-slate-900 mb-4">
-            Everything Your Scrum Master Needs
+            {t("everythingNeeds")}
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Nova understands the nuances of agile ceremonies and provides intelligent insights.
+            {t("novaUnderstandsNuances")}
           </p>
         </motion.div>
 
