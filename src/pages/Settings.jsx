@@ -699,7 +699,7 @@ export default function Settings() {
                           )}
                           {integration.comingSoon && (
                             <Badge variant="outline" className="text-xs bg-slate-100">
-                              {t('comingSoon')}
+                              Prochainement
                             </Badge>
                           )}
                         </div>
