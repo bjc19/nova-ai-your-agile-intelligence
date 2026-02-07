@@ -301,6 +301,107 @@ const DETECTION_PATTERNS = {
   }
 };
 
+// ============ COUCHE 1: ANALYSE LEXICALE AVANCÉE (Champs sémantiques) ============
+const SEMANTIC_FIELDS = {
+  RETROSPECTIVE_EVALUATION: {
+    past_tense: ['s\'est', 'a été', 'a fonctionné', 'a aidé', 'on a', 'nous avons', 'ont'],
+    achievement: ['atteint', 'terminé', 'accompli', 'réalisé', 'livré'],
+    performance: ['bien', 'mal', 'positive', 'négative', 'succès', 'difficulté', 'problème'],
+    analysis: ['causes', 'raisons', 'impact', 'pourquoi', 'how', 'comment'],
+    improvement_actions: ['améliorer', 'challenger', 'clarifier', 'renforcer', 'revoir', 'corriger']
+  },
+  PLANNING_SELECTION: {
+    backlog_items: ['backlog', 'user stor', 'stories', 'tâches', 'items', 'éléments'],
+    commitment: ['s\'engager', 'engagement', 'commit', 'assigner', 'responsable'],
+    estimation: ['estim', 'points', 'story point', 'effort', 'complexité'],
+    scope: ['inclure', 'exclure', 'scope', 'coverage', 'dépendance'],
+    future: ['sera', 'will be', 'va faire', 'prochain', 'next', 'planning']
+  },
+  FACILITATION_STRUCTURE: {
+    open_questions: ['qu\'est-ce', 'what', 'comment', 'how', 'pourquoi', 'why', 'et côté'],
+    synthesis: ['parfait', 'great', 'on note', 'we capture', 'recap', 'résumé'],
+    collective_pronouns: ['on', 'we', 'notre', 'our', 'ensemble', 'together']
+  }
+};
+
+function analyzeSemanticDensity(text) {
+  const retroEval = Object.values(SEMANTIC_FIELDS.RETROSPECTIVE_EVALUATION)
+    .flat()
+    .filter(word => new RegExp(`\\b${word}`, 'gi').test(text)).length;
+  
+  const planningSelect = Object.values(SEMANTIC_FIELDS.PLANNING_SELECTION)
+    .flat()
+    .filter(word => new RegExp(`\\b${word}`, 'gi').test(text)).length;
+  
+  const facilitation = Object.values(SEMANTIC_FIELDS.FACILITATION_STRUCTURE)
+    .flat()
+    .filter(word => new RegExp(`\\b${word}`, 'gi').test(text)).length;
+  
+  return { retroEval, planningSelect, facilitation };
+}
+
+// ============ COUCHE 2: ANALYSE STRUCTURELLE CONVERSATIONNELLE ============
+function analyzeConversationalStructure(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  
+  // Détecte pattern "Name: utterance" (tour de table)
+  const roundTablePattern = /^\s*[A-Za-zÀ-ÿ]+\s*:/;
+  const namePatternsFound = lines.filter(l => roundTablePattern.test(l)).length;
+  
+  // Détecte questions ouvertes
+  const openQuestions = (text.match(/qu'est-ce|what|comment|how|pourquoi|why|et côté|and.*side/gi) || []).length;
+  
+  // Détecte synthèse/conclusion
+  const synthesisPatterns = (text.match(/parfait|great|on note|we capture|recap|résumé|conclusion|ok so/gi) || []).length;
+  
+  return {
+    hasRoundTableStructure: namePatternsFound >= 3,
+    openQuestionsCount: openQuestions,
+    synthesisCount: synthesisPatterns,
+    likesFacilitatedRetro: openQuestions >= 3 && synthesisPatterns >= 1
+  };
+}
+
+// ============ COUCHE 3: ANALYSE INTENTIONNELLE ET PSYCHOLOGIQUE ============
+function analyzeIntention(text) {
+  // Intentions de rétrospective
+  const learningIntent = /apprentiss|leçon|lesson|découvert|réalisé|understood/gi.test(text);
+  const improvementIntent = /amélioration|improvement|améliorer|process change|faire mieux/gi.test(text);
+  const reflectionIntent = /réflex|reflection|qu'est-ce qui|bien|mal|positive|negative|went well|went wrong/gi.test(text);
+  
+  // Intentions de planification
+  const selectionIntent = /sélectionn|select|inclure|exclure|prendre|taking|stories/gi.test(text);
+  const commitmentIntent = /s'engager|commitment|responsable|owner|assigné|assigned/gi.test(text);
+  const estimationIntent = /estim|points|effort|complexité|sizing/gi.test(text);
+  
+  return {
+    isRetrospectiveIntention: learningIntent && improvementIntent && reflectionIntent,
+    isPlanningIntention: (selectionIntent || estimationIntent) && commitmentIntent,
+    reflectionDominant: reflectionIntent && !selectionIntent
+  };
+}
+
+// ============ COUCHE 4: ANALYSE COMPARATIVE AVEC BASE DE CONNAISSANCES ============
+function analyzeComparative(text, semanticDensity) {
+  const { retroEval, planningSelect, facilitation } = semanticDensity;
+  
+  // Matching avec patterns Retrospective
+  const retroSimilarity = (retroEval * 0.4) + (facilitation * 0.3) - (planningSelect * 0.3);
+  
+  // Matching avec patterns Planning
+  const planningSimilarity = (planningSelect * 0.5) - (retroEval * 0.3) - (facilitation * 0.2);
+  
+  // Validation par absence de patterns antagonistes
+  const hasNoPlanningCritical = !/backlog|user stor|estim|points|story point|capacité|velocity/gi.test(text);
+  
+  return {
+    retroSimilarity: Math.max(0, retroSimilarity),
+    planningSimilarity: Math.max(0, planningSimilarity),
+    differentialScore: retroSimilarity - planningSimilarity,
+    noPlanningMarkers: hasNoPlanningCritical
+  };
+}
+
 export { CEREMONY_SPECIFIC_VERBS, DETECTION_PATTERNS };
 
 export function detectWorkshopType(text) {
@@ -338,6 +439,12 @@ export function detectWorkshopType(text) {
       tags: ['#SAFe', '#GrandeEchelle', '#Programme']
     };
   }
+
+  // ============ ANALYSE MULTI-COUCHES ============
+  const semanticDensity = analyzeSemanticDensity(text);
+  const conversationalStructure = analyzeConversationalStructure(text);
+  const intention = analyzeIntention(text);
+  const comparative = analyzeComparative(text, semanticDensity);
 
   // Step 2: Score each Scrum ceremony type with precise multi-variable detection
   Object.entries(DETECTION_PATTERNS).forEach(([ceremonyType, config]) => {
