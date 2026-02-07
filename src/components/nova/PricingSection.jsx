@@ -227,6 +227,9 @@ export function PricingSection() {
               {/* Included Features */}
               <div>
                 <p className="font-semibold text-sm mb-3">Ce qui est inclus:</p>
+                {plan.enterpriseIntro && (
+                  <p className="text-sm text-slate-700 mb-3 font-medium italic">{plan.enterpriseIntro}</p>
+                )}
                 <ul className="space-y-2">
                   {plan.included.map((feature, idx) => (
                     <li key={idx} className="flex gap-2 text-sm text-slate-700">
