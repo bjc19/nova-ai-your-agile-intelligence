@@ -198,10 +198,13 @@ const DETECTION_PATTERNS = {
       external_focus: (text) => /po|product owner|client|utilisateur|user|stakeholder|externe|external|partie prenante/gi.test(text),
       value_focus: (text) => /valeur|value|impact|utilité|bénéfice|benefit|business value/gi.test(text),
       presentation_structure: (text) => /voici|here|slide|écran|screen|montrer|show|présent|demo|démonstr/gi.test(text),
+      product_backlog_impact: (text) => /intégr.*backlog|backlog.*priorit|ajuster.*priorit|product backlog|futures stories/gi.test(text),
+      product_focus: (text) => /module|parcours|interface|critères|seuils|paramétr|fonctionnalité|scoring|décision|performance produit/gi.test(text),
       
-      // Exclusion markers
-      no_planning: (text) => !/estimation|story point|backlog|user stor|vélocité|velocity|assigné|capacité/gi.test(text),
-      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro/gi.test(text),
+      // Exclusion markers - if these are strong, it's likely NOT Review
+      no_process_discussion: (text) => !/amélioration|apprentissage|comment on|processus équipe|collaboration|méthode de travail/gi.test(text),
+      no_internal_reflection: (text) => !/émotions|ressenti|on a eu du mal|difficile|facile|bien|mal.*processus/gi.test(text),
+      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro|processus/gi.test(text),
       no_standup: (text) => !/hier|aujourd'hui|ce matin|yesterday|today|blocage|bloqué|blocked/gi.test(text) || /démo|feedback|stakeholder/gi.test(text)
     }
   },
