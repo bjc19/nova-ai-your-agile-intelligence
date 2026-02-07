@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
+import { isProduction } from "@/lib/isProduction";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,7 +66,15 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [jiraClicked, setJiraClicked] = useState(false);
   const { language } = useLanguage();
 
-  // Default/demo data if none provided
+  const prodMode = isProduction();
+
+  // En production: afficher seulement si données réelles existent
+  // En développement: utiliser données de demo si absent
+  if (prodMode && !sprintHealth) {
+    return null;
+  }
+
+  // Default/demo data if none provided (only in dev/preview)
   const data = sprintHealth || {
     sprint_name: "Sprint 14",
     wip_count: 8,
