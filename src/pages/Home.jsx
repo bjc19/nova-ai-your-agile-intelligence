@@ -1,52 +1,32 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Sparkles,
   ArrowRight,
-  Mic,
-  Shield,
-  Zap,
-  TrendingUp,
-  Users,
-  CheckCircle2,
   Play,
-  MessageSquare,
+  AlertTriangle,
+  TrendingUp,
+  Zap,
   BarChart3,
-  AlertTriangle
+  LineChart as LineChartIcon
 } from "lucide-react";
+import { PricingSection } from "@/components/nova/PricingSection";
+import { DemoSimulator } from "@/components/nova/DemoSimulator";
 
 export default function Home() {
-  const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [showDemoSimulator, setShowDemoSimulator] = useState(false);
+  const [demoTriesLeft, setDemoTriesLeft] = useState(2);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const authenticated = await base44.auth.isAuthenticated();
-      setIsAuthenticated(authenticated);
-      setIsLoading(false);
-      
-      // Redirect authenticated users to Dashboard
-      if (authenticated) {
-        navigate(createPageUrl("Dashboard"));
-      }
-    };
-    checkAuth();
-  }, [navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+    // Vérifier tries de démo (localStorage + IP-based)
+    const tries = localStorage.getItem("nova_demo_tries") || "2";
+    setDemoTriesLeft(parseInt(tries));
+  }, []);
 
   const features = [
     {
@@ -57,7 +37,7 @@ export default function Home() {
       bgColor: "bg-blue-100",
     },
     {
-      icon: Shield,
+      icon: Zap,
       title: "Risk Analysis",
       description: "Proactively surface risks before they impact your sprint delivery",
       color: "text-amber-600",
@@ -71,8 +51,8 @@ export default function Home() {
       bgColor: "bg-emerald-100",
     },
     {
-      icon: Zap,
-      title: "Actionable Recommendations",
+      icon: BarChart3,
+      title: "Recommendations",
       description: "Get AI-powered suggestions to unblock your team and accelerate delivery",
       color: "text-purple-600",
       bgColor: "bg-purple-100",
@@ -111,32 +91,38 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to={createPageUrl("Demo")}>
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
-                >
-                  <Play className="w-5 h-5 mr-2" />
-                  Try Now — Free Demo
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => setShowDemoSimulator(true)}
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Try Demo ({demoTriesLeft}/2)
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
               <Button 
                 variant="outline" 
                 size="lg"
-                onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
                 className="px-8 py-6 text-lg rounded-xl"
               >
-                Sign In
+                <a href="#pricing" className="flex items-center">Sign In</a>
               </Button>
             </div>
 
             <p className="text-sm text-slate-500 mt-4">
-              No registration required to try • 2 free demo analyses
+              🎮 No registration required • 2 free demo analyses per 24h per IP
             </p>
           </motion.div>
         </div>
       </div>
+
+      {/* Demo Simulator Modal */}
+      {showDemoSimulator && (
+        <DemoSimulator 
+          onClose={() => setShowDemoSimulator(false)}
+          onTriesUpdate={setDemoTriesLeft}
+        />
+      )}
 
       {/* Features Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
@@ -176,7 +162,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* How It Works */}
+      {/* Demo Visualizations Section */}
       <div className="bg-slate-50 py-16">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div
@@ -186,48 +172,87 @@ export default function Home() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              How Nova Works
+              Ce que Nova analyse
             </h2>
+            <p className="text-slate-600">Exemples de visualisations de démo</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "1",
-                icon: MessageSquare,
-                title: "Import Your Standup",
-                description: "Connect Slack, upload transcripts, or paste your standup notes directly.",
-              },
-              {
-                step: "2",
-                icon: Sparkles,
-                title: "AI Analysis",
-                description: "Nova processes the conversation to identify blockers, risks, and dependencies.",
-              },
-              {
-                step: "3",
-                icon: BarChart3,
-                title: "Get Insights",
-                description: "Receive actionable recommendations and track trends across sprints.",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 * index }}
-                className="relative text-center"
-              >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                  <item.icon className="w-8 h-8 text-white" />
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Sprint Performance Chart */}
+            <Card className="border-slate-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-slate-900">Performance Sprint</h3>
+                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 Simulé</Badge>
                 </div>
-                <div className="absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-transparent via-slate-200 to-transparent -z-10 hidden md:block" />
-                <h3 className="font-semibold text-slate-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-600">{item.description}</p>
-              </motion.div>
-            ))}
+                <div className="h-32 flex items-end justify-between gap-1">
+                  {[30, 35, 45, 50, 65, 72, 85, 90, 88].map((h, i) => (
+                    <div key={i} className="flex-1 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t" style={{ height: `${h}%` }} />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-3 text-center">Données simulées pour démonstration</p>
+              </CardContent>
+            </Card>
+
+            {/* Anti-patterns Trends */}
+            <Card className="border-slate-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-slate-900">Anti-patterns</h3>
+                  <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">🎮 Simulé</Badge>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { name: "WIP Overload", count: 12, color: "bg-red-500" },
+                    { name: "Context Switch", count: 8, color: "bg-amber-500" },
+                    { name: "Blocked Items", count: 5, color: "bg-yellow-500" }
+                  ].map(item => (
+                    <div key={item.name} className="text-sm">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-slate-600">{item.name}</span>
+                        <span className="font-semibold">{item.count}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div className={`h-full ${item.color}`} style={{ width: `${(item.count/12)*100}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-3 text-center">Ces données sont simulées</p>
+              </CardContent>
+            </Card>
+
+            {/* KPIs */}
+            <Card className="border-slate-200">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-slate-900 mb-4">KPIs Clés</h3>
+                <div className="space-y-4">
+                  {[
+                    { label: "Stabilité Sprint Goal", value: "85%", emoji: "🎮" },
+                    { label: "Adoption Recommandations", value: "65%", emoji: "🎮" },
+                    { label: "Dérives Anticipées", value: "80%", emoji: "🎮" }
+                  ].map(kpi => (
+                    <div key={kpi.label}>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-slate-600">{kpi.label} {kpi.emoji}</span>
+                        <span className="text-sm font-bold text-blue-600">{kpi.value}</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500" style={{ width: kpi.value }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-500 mt-4 text-center">Données de démo uniquement</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
+      </div>
+
+      {/* Pricing Section */}
+      <div id="pricing" className="max-w-7xl mx-auto px-6 py-16">
+        <PricingSection />
       </div>
 
       {/* CTA Section */}
@@ -239,24 +264,26 @@ export default function Home() {
           className="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 md:p-12 text-center"
         >
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+            Prêt à transformer vos standups?
           </h2>
           <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            Try Nova for free — no registration required. See how AI can help your team deliver faster.
+            Essayez Nova gratuitement avec 2 analyses de démo. Puis choisissez le plan qui convient à votre équipe.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to={createPageUrl("Demo")}>
-              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 px-8">
-                <Play className="w-4 h-4 mr-2" />
-                Start Free Demo
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => setShowDemoSimulator(true)}
+              size="lg" 
+              className="bg-white text-slate-900 hover:bg-slate-100 px-8"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Lancer la Démo
+            </Button>
             <Button 
               variant="outline" 
               size="lg"
-              onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
               className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-8"
             >
-              Sign In to Dashboard
+              <a href="#pricing">Voir les Plans</a>
             </Button>
           </div>
         </motion.div>
