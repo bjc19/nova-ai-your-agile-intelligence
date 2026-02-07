@@ -326,9 +326,26 @@ export function detectWorkshopType(text) {
     const keywordDensity = (keywordMatches / Math.max(keywords.length, 1)) * 100;
     score += Math.min(keywordDensity * 0.3, 15); // Max 15 points
 
+    // Intelligence boost: Planning-specific multi-variable analysis
+    if (ceremonyType === 'SPRINT_PLANNING') {
+      let intelligenceBonus = 0;
+      
+      // Multi-variable detection for Planning (projection future + engagement + négociation)
+      if (hasFutureHorizon) intelligenceBonus += 8;
+      if (hasCommitmentLanguage) intelligenceBonus += 8;
+      if (hasNegotiationLanguage) intelligenceBonus += 8;
+      
+      // Temporal horizon is a strong differentiator
+      if (/sprint.*dur|2 semaines|itération|planning horizon|upcoming sprint|le prochain sprint/gi.test(text)) {
+        intelligenceBonus += 10;
+      }
+      
+      score = Math.min(score + intelligenceBonus, 100);
+    }
+
     scores[ceremonyType] = {
       score: Math.max(0, Math.min(score, 100)),
-      markers: matchedMarkers.slice(0, 3)
+      markers: matchedMarkers.slice(0, 4)
     };
   });
 
