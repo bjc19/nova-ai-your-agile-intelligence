@@ -375,6 +375,7 @@ function analyzeIntention(text) {
   const learningIntent = /apprentiss|leçon|lesson|découvert|réalisé|understood/gi.test(text);
   const improvementIntent = /amélioration|improvement|améliorer|process change|faire mieux/gi.test(text);
   const reflectionIntent = /réflex|reflection|qu'est-ce qui|bien|mal|positive|negative|went well|went wrong/gi.test(text);
+  const processReflection = /comment on|collabor|processus|méthode de travail|façon de travailler/gi.test(text);
   
   // Intentions de planification
   const selectionIntent = /sélectionn|select|inclure|exclure|prendre|taking|stories/gi.test(text);
@@ -386,12 +387,22 @@ function analyzeIntention(text) {
   const dailyUrgency = /aujourd'hui|today|ce matin|this morning|immédiat|immediate|urgent|urgent/gi.test(text);
   const immediateAction = /je vais|will do|vais essayer|going to|pour midi|by noon/gi.test(text);
   
+  // Intentions de Sprint Review
+  const demonstrationIntent = /démo|montrer|présent|show|fonctionnalité|feature/gi.test(text);
+  const feedbackProductIntent = /feedback.*produit|opinion.*produit|avis.*produit|comment.*trouvez|qu'en.*pensez/gi.test(text);
+  const externalValidationIntent = /client|po|utilisateur|stakeholder|externe/gi.test(text);
+  const backlogImpactIntent = /backlog|priorit|intégr|ajuster scope/gi.test(text);
+  
   return {
-    isRetrospectiveIntention: learningIntent && improvementIntent && reflectionIntent,
+    isRetrospectiveIntention: learningIntent && improvementIntent && (reflectionIntent || processReflection),
     isPlanningIntention: (selectionIntent || estimationIntent) && commitmentIntent,
     reflectionDominant: reflectionIntent && !selectionIntent,
     isDailyIntention: coordinationIntent && (dailyUrgency || immediateAction),
-    hasCoordinationIntent: coordinationIntent
+    hasCoordinationIntent: coordinationIntent,
+    isReviewIntention: demonstrationIntent && feedbackProductIntent && externalValidationIntent,
+    hasProductFocus: demonstrationIntent && feedbackProductIntent,
+    hasExternalParticipation: externalValidationIntent,
+    hasBacklogImpact: backlogImpactIntent
   };
 }
 
