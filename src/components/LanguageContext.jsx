@@ -13,7 +13,7 @@ export const translations = {
     tryDemo: "Essayer la démo",
     
     // Home Page
-    homeTitle: "Nova – Votre Expert Agile IA",
+    homeTitle: "Nova – Votre Scrum Master IA",
     homeSubtitle: "Détectez les blocages et risques en temps réel, sans jugement. Nova analyse vos Daily Scrums et propose des recommandations actionnables.",
     demoButton: "Voir la démo",
     
@@ -27,7 +27,7 @@ export const translations = {
     daysLeftInSprint: "jours restants dans le sprint",
     newAnalysis: "Nouvelle analyse",
     readyForDailyScrum: "Prêts à booster votre impact ?",
-
+    readyToBoostYourImpact: "Prêt à booster votre impact ?",
     importDataDescription: "Importez des données depuis Slack, téléchargez des transcripts de réunion, ou collez vos notes directement. Nova analysera et fournira des insights actionnables.",
     connectSlack: "Connecter Slack",
     startAnalysis: "Démarrer l'analyse",
@@ -180,6 +180,7 @@ export const translations = {
     daysLeftInSprint: "days left in sprint",
     newAnalysis: "New Analysis",
     readyForDailyScrum: "Ready to boost your impact?",
+    readyToBoostYourImpact: "Ready to boost your impact?",
     importDataDescription: "Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.",
     connectSlack: "Connect Slack",
     startAnalysis: "Start Analysis",

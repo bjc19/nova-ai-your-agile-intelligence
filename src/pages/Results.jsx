@@ -545,7 +545,7 @@ export default function Results() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('Prêts à booster votre impact ?')}
+                  {t('readyToBoostYourImpact')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
