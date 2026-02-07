@@ -438,20 +438,11 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
