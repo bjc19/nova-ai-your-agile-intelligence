@@ -339,7 +339,17 @@ export default function Dashboard() {
 
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
+            {/* Recent Analyses - Full Width */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Key Recommendations - Full Width */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
+
+            <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
@@ -452,7 +462,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyToBoostYourImpact')}
+                  {t('readyToBoostYourImpact?')}
                 </h3>
                 <p className="text-slate-400 max-w-lg">
                   {t('importDataDescription')}
