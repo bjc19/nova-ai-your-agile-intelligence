@@ -223,6 +223,17 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               </ul>
             </div>
 
+            {/* Detection Tags */}
+            {results.detectionTags && results.detectionTags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {results.detectionTags.map(tag => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
             {/* Analysis Note */}
             <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
               <p className="text-xs text-yellow-800">
