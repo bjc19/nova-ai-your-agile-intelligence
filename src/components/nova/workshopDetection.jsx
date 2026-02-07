@@ -576,6 +576,17 @@ export function detectWorkshopType(text) {
       }
     }
 
+    if (ceremonyType === 'SPRINT_REVIEW') {
+      const reviewVerbMatches = CEREMONY_SPECIFIC_VERBS.SPRINT_REVIEW.patterns.reduce((count, pattern) => {
+        return count + (text.match(pattern) || []).length;
+      }, 0);
+      
+      if (reviewVerbMatches >= 3) {
+        score += 15;
+        matchedMarkers.push('verbes de démonstration et validation détectés');
+      }
+    }
+
     // ============ TRADITIONAL MARKERS (Legacy scoring, kept for fallback) ============
     const markerEntries = Object.entries(config.markers);
     let exclusionCount = 0;
