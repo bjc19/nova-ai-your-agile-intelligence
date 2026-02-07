@@ -558,8 +558,13 @@ export function detectWorkshopType(text) {
     ];
     const retroSignalCount = retroSignals.filter(s => s).length;
     
-    if (retroSignalCount >= 3) {
-      bestScore.score = Math.min(bestScore.score + 12, 100);
+    // Verb-based confirmation
+    const retroVerbCount = CEREMONY_SPECIFIC_VERBS.RETROSPECTIVE.patterns.reduce((count, pattern) => {
+      return count + (text.match(pattern) || []).length;
+    }, 0);
+    
+    if (retroSignalCount >= 3 || retroVerbCount >= 3) {
+      bestScore.score = Math.min(bestScore.score + 15, 100);
     }
   }
 
