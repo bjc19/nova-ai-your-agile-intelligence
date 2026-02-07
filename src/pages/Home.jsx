@@ -300,7 +300,14 @@ export default function Home() {
                        { name: "WIP Overload", count: 12, color: "bg-red-500" },
                        { name: "Context Switch", count: 8, color: "bg-amber-500" },
                        { name: "Blocked Items", count: 5, color: "bg-yellow-500" }
-                     ].map((item, i) => (
+                     ].map((item, i) => {
+                       const gradientClass = item.color === 'bg-red-500' 
+                         ? 'bg-gradient-to-r from-red-400 to-red-500'
+                         : item.color === 'bg-amber-500'
+                         ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                         : 'bg-gradient-to-r from-yellow-400 to-yellow-500';
+
+                       return (
                        <motion.div 
                          key={item.name} 
                          className="text-sm"
@@ -315,7 +322,7 @@ export default function Home() {
                          </div>
                          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                            <motion.div 
-                             className={`h-full ${item.color}`}
+                             className={`h-full ${gradientClass}`}
                              initial={{ width: 0 }}
                              whileInView={{ width: `${(item.count/12)*100}%` }}
                              transition={{ duration: 0.8, delay: 0.15 + i * 0.1 }}
@@ -323,7 +330,8 @@ export default function Home() {
                            />
                          </div>
                        </motion.div>
-                     ))}
+                     );
+                     })}
                    </div>
                    <p className="text-xs text-slate-500 mt-3 text-center">{t("demoData")}</p>
                  </CardContent>
