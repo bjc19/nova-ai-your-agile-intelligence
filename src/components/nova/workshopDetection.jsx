@@ -7,36 +7,50 @@ const DETECTION_PATTERNS = {
   SPRINT_PLANNING: {
     // Objectif: Déterminer CE QUI sera livré et COMMENT le livrer
     // Focus: Sélection, engagement, planification détaillée
+    // Intelligence: Projection sur un horizon futur structuré (sprint, 2 semaines, itération)
     keywords: [
       'sprint goal', 'objectif sprint', 'objectif du sprint', 'goal statement',
-      'backlog', 'user stories', 'user story', 'stories', 'tâches', 'tasks',
-      'estimation', 'points', 'story points', 'story point', 'estimated', 'estimer',
-      'vélocité', 'velocity', 'capacité', 'capacity', 'definition of done', 'dod',
-      'inclure', 'exclure', 'ajouter', 'retirer', 'priorité', 'priority', 'scope',
-      'planning', 'planification', 'plan de sprint', 'sprint plan',
-      'assigner', 'assigné', 'assigned', 'owner', 'responsable',
-      'peut-on réaliser', 'peut-on faire', 'can we', 'taille', 'size'
+      'backlog', 'user stories', 'user story', 'stories', 'tâches', 'tasks', 'items',
+      'estimation', 'points', 'story points', 'story point', 'estimated', 'estimer', 'estim',
+      'vélocité', 'velocity', 'capacité', 'capacity', 'throughput', 'definition of done', 'dod',
+      'inclure', 'exclure', 'ajouter', 'retirer', 'priorité', 'priority', 'scope', 'coverage',
+      'planning', 'planification', 'plan de sprint', 'sprint plan', 'itération', 'iteration',
+      'assigner', 'assigné', 'assigned', 'owner', 'responsable', 'propriétaire',
+      'peut-on réaliser', 'peut-on faire', 'can we', 'what can we', 'réalisable', 'feasible',
+      'taille', 'size', 'complexity', 'complexité', 'effort', 'charge',
+      'horizon', 'sprints', 'itérations', 'semaines', 'weeks',
+      'risque', 'risk', 'dépendance', 'dependency', 'contrainte', 'constraint',
+      'critique', 'critical', 'must have', 'should have', 'nice to have',
+      'sera livré', 'will deliver', 'livrer', 'deliver', 'accomplished', 'complété'
     ],
     patterns: [
-      /sprint goal|objectif.*sprint|goal statement/gi,
-      /user stor(ies|y)|backlog|stories?|tâches?|tasks?/gi,
-      /estim|points?|story point|estimated|capacity|capacité/gi,
-      /inclure|exclure|ajouter|retirer|priorit|scope|négocier/gi,
-      /assigner|assigné|assigned|owner|responsable/gi,
-      /peut(-|)?on réaliser|peut(-|)?on faire|can we|comment allons|how will/gi
+      /sprint goal|objectif.*sprint|goal statement|product goal/gi,
+      /user stor(ies|y)|backlog|stories?|tâches?|tasks?|items?/gi,
+      /estim|points?|story point|estimated|complexity|complexité|capacity|capacité|effort|charge/gi,
+      /inclure|exclure|ajouter|retirer|priorit|scope|négocier|coverage|selection/gi,
+      /assigner|assigné|assigned|owner|responsable|propriétaire/gi,
+      /peut(-|)?on réaliser|peut(-|)?on faire|can we|what can we|réalisable|feasible|accomplir/gi,
+      /sera livré|will deliver|livrer|deliver|accomplished|complété|finished|réalisé/gi,
+      /horizon|2 semaines|itération|sprint.*dur|iteration|weeks|cycle de/gi,
+      /risque|risk|dépendance|dependency|contrainte|constraint|bloquant|blocking/gi,
+      /critique|critical|must have|should have|nice to have|priorisation/gi
     ],
     markers: {
-      sprint_goal_vocab: (text) => /sprint goal|objectif.*sprint|goal statement|product goal/gi.test(text),
-      backlog_discussion: (text) => /backlog|user stor|stories?|tâches?|tasks?|items?/gi.test(text),
-      estimation_effort: (text) => /estim|points?|story point|effort|complexity|difficulty|capacité|velocity|vélocité/gi.test(text),
-      prioritization_scope: (text) => /inclure|exclure|priorit|scope|ajouter|retirer|négocier|selection/gi.test(text),
-      assignment_commitment: (text) => /assigner|assigné|assigned|owner|responsable|s'engager|commitment|commitments/gi.test(text),
-      future_horizon: (text) => /prochain|next|sprint (de|à venir)|this sprint|upcoming sprint|will do|va faire|va continuer/gi.test(text),
+      sprint_goal_definition: (text) => /sprint goal|objectif.*sprint|goal statement|product goal|objectif de l'itération/gi.test(text),
+      backlog_items_discussion: (text) => /backlog|user stor|stories?|tâches?|tasks?|items?|work items/gi.test(text),
+      estimation_and_sizing: (text) => /estim|points?|story point|effort|complexity|complexité|capacity|capacité|charge|size/gi.test(text),
+      prioritization_and_scope: (text) => /inclure|exclure|priorit|scope|négocier|must have|should have|nice to have|coverage/gi.test(text),
+      assignment_and_commitment: (text) => /assigner|assigné|assigned|owner|responsable|propriétaire|s'engager|commitment/gi.test(text),
+      future_temporal_horizon: (text) => /horizon|ce sprint|this sprint|prochain|next|2 semaines|itération|week|sprints?|semaines|duration/gi.test(text),
+      future_projection_language: (text) => /sera|will be|allons|we will|va faire|going to|planning to|plan|prévoir|anticipate|projet/gi.test(text),
+      feasibility_discussion: (text) => /peut(-|)?on|can we|réalisable|feasible|possible|accomplissable|what can we/gi.test(text),
+      delivery_focus: (text) => /sera livré|will deliver|livrer|deliver|accomplir|accomplish|complété|completed|finished/gi.test(text),
+      risk_and_dependency_analysis: (text) => /risque|risk|dépendance|dependency|contrainte|constraint|bloquant|blocking|impact/gi.test(text),
       
       // Exclusion markers - if these are present, it's likely NOT Planning
-      no_demo: (text) => !/démo|démonstration|show|présent|fonctionnalité|feature\s+livr|incrément|delivered/gi.test(text),
-      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro|debrief|fonctionn[ée]|s'est/gi.test(text),
-      no_standup: (text) => !/hier|aujourd'hui|ce matin|cet après|yesterday|today|this morning|bloc|blocked|aide/gi.test(text) || /estimation|backlog|sprint goal/gi.test(text)
+      no_demo: (text) => !/démo|démonstration|show|présent|fonctionnalité|feature\s+livr|incrément|delivered|écran|screen/gi.test(text),
+      no_retrospective: (text) => !/amélioration|apprentissage|ce qu'on|what went|went well|went wrong|retrospective|retro|debrief|fonctionn[ée]|s'est bien|s'est mal/gi.test(text),
+      no_standup: (text) => !/hier|aujourd'hui|ce matin|cet après|yesterday|today|this morning|bloc|blocked|aide/gi.test(text) || /estimation|backlog|sprint goal|planning/gi.test(text)
     }
   },
 
