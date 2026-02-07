@@ -81,15 +81,15 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
     setAnalyzing(true);
     try {
+      // Détection sémantique du type d'atelier (côté client)
+      const detected = detectWorkshopType(input);
+      setDetection(detected);
+
       // Simuler délai d'analyse (1-2 secondes)
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
 
-      // Déterminer le type de réunion (simulé)
-      const lowerInput = input.toLowerCase();
-      let meetingType = "Daily Scrum";
-      if (lowerInput.includes("retro")) meetingType = "Retrospective";
-      if (lowerInput.includes("planning")) meetingType = "Sprint Planning";
-      if (lowerInput.includes("review")) meetingType = "Sprint Review";
+      // Déterminer le type de réunion (simulé ou forcé)
+      const meetingType = forceType || detected.type;
 
       // Résultats simulés
       setResults({
@@ -97,7 +97,10 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
         patterns: DEMO_PATTERNS.slice(0, 2 + Math.floor(Math.random() * 2)),
         recommendations: DEMO_RECOMMENDATIONS.slice(0, 3 + Math.floor(Math.random() * 2)),
         confidence: 75 + Math.floor(Math.random() * 20),
-        analysisNote: "Ces résultats sont simulés pour la démonstration"
+        analysisNote: "Ces résultats sont simulés pour la démonstration",
+        detectionConfidence: detected.confidence,
+        detectionJustifications: detected.justifications,
+        detectionTags: detected.tags
       });
 
       // Décrémenter tries
