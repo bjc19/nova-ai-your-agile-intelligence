@@ -453,12 +453,17 @@ export default function RecentAnalyses({ analyses = [] }) {
                             const result = await base44.integrations.Core.InvokeLLM({
                               prompt,
                               response_json_schema: {
-                                type: 'array',
-                                items: { type: 'string' }
+                                type: 'object',
+                                properties: {
+                                  actions: {
+                                    type: 'array',
+                                    items: { type: 'string' }
+                                  }
+                                }
                               }
                             });
 
-                            setContextualActions(result);
+                            setContextualActions(result?.actions || []);
                           } catch (error) {
                             console.error('Error generating actions:', error);
                           } finally {
