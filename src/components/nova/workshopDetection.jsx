@@ -171,15 +171,17 @@ const DETECTION_PATTERNS = {
   SPRINT_REVIEW: {
     // Objectif: Inspecter l'incrément et adapter le backlog
     // Focus: Démonstration, feedback, validation de la valeur
+    // Participant clé: Client/PO/Utilisateur EXTERNE
     keywords: [
       'démo', 'demo', 'démonstration', 'demonstration', 'montrer', 'montré', 'show', 'shown',
       'fonctionnalité', 'feature', 'features', 'delivered', 'livrée', 'livré',
       'incrément', 'increment', 'résultat', 'result', 'réalisé', 'accomplished',
       'feedback', 'retour', 'opinion', 'avis', 'thoughts', 'qu\'en pensez',
-      'po', 'product owner', 'client', 'utilisateur', 'user', 'stakeholder',
-      'valeur', 'value', 'impact', 'utilité', 'usefulness',
-      'slide', 'écran', 'screen', 'présentation', 'presentation',
-      'comment ça marche', 'how it works', 'voici', 'here is'
+      'po', 'product owner', 'client', 'utilisateur', 'user', 'stakeholder', 'externe',
+      'valeur', 'value', 'impact', 'utilité', 'usefulness', 'bénéfice', 'business',
+      'slide', 'écran', 'screen', 'présentation', 'presentation', 'module', 'parcours',
+      'comment ça marche', 'how it works', 'voici', 'here is', 'interface', 'critères',
+      'backlog', 'priorité', 'intégrer', 'amélioration produit'
     ],
     patterns: [
       /démo|démonstration|demo|demonstration|montrer|show|présent/gi,
