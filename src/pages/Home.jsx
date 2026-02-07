@@ -16,7 +16,7 @@ import {
   LineChart as LineChartIcon
 } from "lucide-react";
 import { PricingSection } from "@/components/nova/PricingSection";
-import { DemoSimulator } from "@/components/nova/DemoSimulator";
+import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
 export default function Home() {
   const [showDemoSimulator, setShowDemoSimulator] = useState(false);
