@@ -155,6 +155,11 @@ export const translations = {
     risks: "risques",
     lastSyncCheck: "Dernière vérification",
     refresh: "Actualiser",
+    integrationStatus: "État des intégrations",
+    connectedOf: "de",
+    manage: "Gérer",
+    notConnected: "Non connecté",
+    requiresBackend: "Nécessite Backend",
     },
   en: {
     // Navigation
@@ -308,6 +313,11 @@ export const translations = {
     risks: "risks",
     lastSyncCheck: "Last sync check",
     refresh: "Refresh",
+    integrationStatus: "Integration Status",
+    connectedOf: "of",
+    manage: "Manage",
+    notConnected: "Not Connected",
+    requiresBackend: "Requires Backend",
     }
 
     };

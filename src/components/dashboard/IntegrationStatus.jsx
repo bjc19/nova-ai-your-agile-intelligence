@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 export default function IntegrationStatus({ integrations = {} }) {
+  const { t } = useLanguage();
   const [slackConnected, setSlackConnected] = useState(false);
   const [teamsConnected, setTeamsConnected] = useState(false);
   const [jiraConnected, setJiraConnected] = useState(false);
@@ -92,28 +94,28 @@ export default function IntegrationStatus({ integrations = {} }) {
       icon: CheckCircle2,
       color: "text-emerald-500",
       bgColor: "bg-emerald-100",
-      label: "Connected",
+      label: t('connected'),
       badgeClass: "bg-emerald-100 text-emerald-700 border-emerald-200",
     },
     disconnected: {
       icon: XCircle,
       color: "text-slate-400",
       bgColor: "bg-slate-100",
-      label: "Not Connected",
+      label: t('notConnected'),
       badgeClass: "bg-slate-100 text-slate-600 border-slate-200",
     },
     unavailable: {
       icon: AlertCircle,
       color: "text-amber-500",
       bgColor: "bg-amber-100",
-      label: "Requires Backend",
+      label: t('requiresBackend'),
       badgeClass: "bg-amber-100 text-amber-700 border-amber-200",
     },
     coming_soon: {
       icon: Zap,
       color: "text-slate-500",
       bgColor: "bg-slate-100",
-      label: "Coming Soon",
+      label: t('comingSoon'),
       badgeClass: "bg-slate-100 text-slate-600 border-slate-200",
     },
   };
@@ -131,16 +133,16 @@ export default function IntegrationStatus({ integrations = {} }) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg font-semibold text-slate-900">
-                Integration Status
+                {t('integrationStatus')}
               </CardTitle>
               <p className="text-sm text-slate-500 mt-1">
-                {connectedCount} of {Object.keys(displayIntegrations).length} connected
+                {connectedCount} {t('connectedOf')} {Object.keys(displayIntegrations).length} {t('connected').toLowerCase()}
               </p>
             </div>
             <Link to={createPageUrl("Settings")}>
               <Button variant="outline" size="sm" className="gap-2">
                 <Settings className="w-4 h-4" />
-                Manage
+                {t('manage')}
               </Button>
             </Link>
           </div>
@@ -179,10 +181,10 @@ export default function IntegrationStatus({ integrations = {} }) {
 
           <div className="mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Last sync check</span>
+              <span className="text-slate-500">{t('lastSyncCheck')}</span>
               <button className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors">
                 <RefreshCw className="w-3.5 h-3.5" />
-                Refresh
+                {t('refresh')}
               </button>
             </div>
           </div>
