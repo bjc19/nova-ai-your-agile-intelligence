@@ -150,7 +150,7 @@ export default function Home() {
             Everything Your Scrum Master Needs
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Nova understands the nuances of your team's routine and provides intelligent insights.
+            Nova understands the nuances of your team routine and provides intelligent insights.
           </p>
         </motion.div>
 
