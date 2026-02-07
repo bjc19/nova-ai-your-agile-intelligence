@@ -8,37 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, AlertCircle, CheckCircle2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { detectWorkshopType } from "@/components/nova/workshopDetection";
-
-// Données simulées de démo
-const DEMO_PATTERNS = [
-  {
-    name: "WIP Overload",
-    severity: "high",
-    description: "Trop de tickets en cours simultanément"
-  },
-  {
-    name: "Context Switching",
-    severity: "medium",
-    description: "L'équipe change trop souvent de contexte"
-  },
-  {
-    name: "Blocked Items",
-    severity: "high",
-    description: "Articles bloqués depuis plus de 48h"
-  },
-  {
-    name: "Communication Gap",
-    severity: "medium",
-    description: "Désalignement dans les objectifs du sprint"
-  }
-];
-
-const DEMO_RECOMMENDATIONS = [
-  "Limiter le WIP à 5 max par développeur",
-  "Organiser un synchronisme rapide pour débloquer les dépendances",
-  "Clarifier les priorités du Sprint Goal",
-  "Réduire les interruptions non planifiées"
-];
+import { getAntiPatternsByCeremonyType, getPatternSuggestions } from "@/components/nova/antiPatternsByType";
 
 export function DemoSimulator({ onClose, onTriesUpdate }) {
   const [input, setInput] = useState("");
