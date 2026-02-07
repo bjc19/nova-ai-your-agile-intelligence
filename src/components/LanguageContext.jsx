@@ -32,7 +32,7 @@ export const translations = {
     connectSlack: "Connecter Slack",
     startAnalysis: "Démarrer l'analyse",
     keyRecommendations: "Recommandations clés",
-    basedOnLatestAnalysis: "Basé sur les dernières analyses",
+    basedOnLatestAnalysis: "Basées sur les dernières analyses",
     high: "élevée",
     medium: "moyenne",
     low: "basse",
