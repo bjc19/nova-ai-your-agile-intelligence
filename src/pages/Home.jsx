@@ -390,7 +390,7 @@ export default function Home() {
                          viewport={{ once: true }}
                        >
                          <motion.div 
-                           className="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t opacity-80"
+                           className="w-full bg-gradient-to-t from-green-500 via-emerald-400 to-emerald-300 rounded-t opacity-80"
                            initial={{ height: 0 }}
                            whileInView={{ height: `${(item.value/32)*100}%` }}
                            transition={{ duration: 0.8, delay: 0.25 + i * 0.08 }}
