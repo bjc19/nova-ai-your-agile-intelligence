@@ -252,7 +252,14 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               </label>
               <Textarea
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  if (e.target.value.trim().length > 20) {
+                    setDetection(detectWorkshopType(e.target.value));
+                  } else {
+                    setDetection(null);
+                  }
+                }}
                 placeholder="Ex: Alice: Hier j'ai travaillé sur le formulaire de login. Aujourd'hui je vais continuer. Je suis bloquée par la validation email qui n'est pas prête. ..."
                 rows={6}
                 className="resize-none"
@@ -260,6 +267,68 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               <p className="text-xs text-slate-500 mt-2">
                 💡 Astuce: Incluez des noms de tickets, des détails de blocages pour de meilleurs résultats simulés.
               </p>
+
+              {/* Detection preview */}
+              {detection && !analyzing && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Atelier détecté: <span className="text-blue-600">{detection.type}</span>
+                        {detection.subtype && <span className="text-blue-500"> {detection.subtype}</span>}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 h-2 bg-blue-200 rounded-full overflow-hidden max-w-xs">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600" 
+                            style={{ width: `${detection.confidence}%` }} 
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-slate-600">{detection.confidence}%</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-xs text-slate-600 font-medium mb-1">Raisons de la détection:</p>
+                    <ul className="text-xs text-slate-600 space-y-0.5">
+                      {detection.justifications.map((just, idx) => (
+                        <li key={idx}>• {just}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1">
+                    {detection.tags.map(tag => (
+                      <Badge key={tag} variant="outline" className="text-xs bg-white">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {detection.confidence < 70 && (
+                    <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded">
+                      ⚠️ Confiance faible - Vous pouvez forcer le type d'atelier ci-dessous
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-slate-600 font-medium">Ou choisissez:</label>
+                    <select 
+                      value={forceType || ''}
+                      onChange={(e) => setForceType(e.target.value || null)}
+                      className="text-xs px-2 py-1 border border-slate-300 rounded bg-white"
+                    >
+                      <option value="">Auto-détecté</option>
+                      <option value="Daily Scrum">Daily Scrum</option>
+                      <option value="Sprint Planning">Sprint Planning</option>
+                      <option value="Sprint Review">Sprint Review</option>
+                      <option value="Retrospective">Retrospective</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
 
             {tries === 1 && (
