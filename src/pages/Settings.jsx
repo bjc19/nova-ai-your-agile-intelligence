@@ -231,6 +231,26 @@ export default function Settings() {
       iconColor: "text-blue-600",
       available: false,
       comingSoon: true
+    },
+    {
+      id: "trello",
+      name: "Trello",
+      icon: Layers,
+      color: "from-sky-500 to-sky-600",
+      bgColor: "bg-sky-100",
+      iconColor: "text-sky-600",
+      available: false,
+      comingSoon: true
+    },
+    {
+      id: "confluence",
+      name: "Confluence",
+      icon: FileSpreadsheet,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-100",
+      iconColor: "text-blue-600",
+      available: false,
+      comingSoon: true
     }
   ];
 
