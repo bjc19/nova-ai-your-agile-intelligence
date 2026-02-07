@@ -244,9 +244,9 @@ export default function Home() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              Ce que Nova analyse
+              {t("whatNovaAnalyzes")}
             </h2>
-            <p className="text-slate-600">Exemples de visualisations de démo</p>
+            <p className="text-slate-600">{t("demoVisualizations")}</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
