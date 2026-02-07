@@ -337,9 +337,18 @@ export default function Dashboard() {
           </div>
         }
 
+        {/* Recent Analyses */}
+        <RecentAnalyses analyses={analysisHistory} />
+        
+        {/* Key Recommendations */}
+        <KeyRecommendations
+          latestAnalysis={latestAnalysis}
+          sourceUrl={latestAnalysis?.sourceUrl}
+          sourceName={latestAnalysis?.sourceName} />
+
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6 mt-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
@@ -421,20 +430,11 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
