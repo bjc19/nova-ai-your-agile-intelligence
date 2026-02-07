@@ -24,7 +24,7 @@ const plans = [
     badgeColor: "bg-green-100 text-green-800",
     subtitle: "Découvrez la puissance de Nova",
     price: "50",
-    users: "Jusqu'à 5 utilisateurs inclus",
+    users: "5 utilisateurs inclus",
     addOn: "+10 CAD/utilisateur/mois (max 10)",
     included: [
       "Analyses manuelles uniquement",
@@ -54,8 +54,8 @@ const plans = [
     subtitle: "Idéal pour plus de volume d'analyses",
     price: "99",
     yearlyPrice: "84",
-    users: "Jusqu'à 5 utilisateurs inclus",
-    addOn: "+15 CAD/utilisateur/mois (max 10)",
+    users: "10 utilisateurs inclus",
+    addOn: "+15 CAD/utilisateur/mois (max 15)",
     discount: "15% annuel",
     included: [
       "Analyses manuelles illimitées",
@@ -84,7 +84,7 @@ const plans = [
     subtitle: "ROI clair et mesurable",
     price: "199",
     yearlyPrice: "169",
-    users: "Jusqu'à 10 utilisateurs inclus",
+    users: "25 utilisateurs inclus",
     addOn: "+20 CAD/utilisateur/mois (max 50)",
     discount: "15% annuel",
     addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
