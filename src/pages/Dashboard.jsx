@@ -104,9 +104,7 @@ export default function Dashboard() {
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000 // 30 minutes
+    enabled: !isLoading
   });
 
   // Filter analysis history based on selected period
@@ -344,6 +342,15 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Recent Analyses */}
+              <RecentAnalyses analyses={analysisHistory} />
+
+              {/* Key Recommendations */}
+              <KeyRecommendations
+                latestAnalysis={latestAnalysis}
+                sourceUrl={latestAnalysis?.sourceUrl}
+                sourceName={latestAnalysis?.sourceName} />
+
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -420,23 +427,13 @@ export default function Dashboard() {
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
             }
-            
+
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
-
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
@@ -454,22 +451,22 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
-                  {t('readyToBoostYourImpact?')}
+                  Ready to Boost Your Impact?
                 </h3>
                 <p className="text-slate-400 max-w-lg">
-                  {t('importDataDescription')}
+                  Import data from Slack, upload meeting transcripts, or paste your notes directly. Nova will analyze and provide actionable insights.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
                   <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
                     <Zap className="w-4 h-4 mr-2" />
-                    {t('connectSlack')}
+                    Connect Slack
                   </Button>
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
+                    Start Analysis
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
