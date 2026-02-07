@@ -425,7 +425,7 @@ export function detectWorkshopType(text) {
       score = Math.min(score + intelligenceBonus, 100);
     }
 
-    // Intelligence boost: Retrospective-specific multi-variable analysis (8 variables)
+    // Intelligence boost: Retrospective-specific multi-variable analysis (8+ variables)
     if (ceremonyType === 'RETROSPECTIVE') {
       let retroBonus = 0;
       
@@ -471,6 +471,18 @@ export function detectWorkshopType(text) {
       
       if (pastReferences > futureReferences && pastReferences >= 4) {
         retroBonus += 10; // Strong past-focus = strong retro signal
+      }
+      
+      // 9. LAYER: Ceremony-specific verbs (strongest semantic signal)
+      const retroVerbMatches = CEREMONY_SPECIFIC_VERBS.RETROSPECTIVE.patterns.reduce((count, pattern) => {
+        const matches = text.match(pattern) || [];
+        return count + matches.length;
+      }, 0);
+      
+      if (retroVerbMatches >= 3) {
+        retroBonus += 15; // Very strong signal - multiple retro-specific verbs
+      } else if (retroVerbMatches >= 1) {
+        retroBonus += 8;
       }
       
       score = Math.min(score + retroBonus, 100);
