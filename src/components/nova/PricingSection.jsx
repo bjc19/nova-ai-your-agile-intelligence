@@ -114,8 +114,8 @@ const plans = [
     subtitle: "Gouvernance, sécurité, insights systémiques",
     price: "Custom",
     priceNote: "À partir de 500 CAD/mois",
-    structure: "Base + 25 CAD/utilisateur (min 50 utilisateurs)",
-    degressiveNote: "≈15-20 CAD/utilisateur à 100+ utilisateurs",
+    structure: "Base + 15 CAD/utilisateur (min 50 utilisateurs)",
+    degressiveNote: "≈10-5 CAD/utilisateur à 100+ utilisateurs",
     enterpriseIntro: "Tous les éléments de Pro, +",
     included: [
       "Analyses organisationnelles & systémiques",
