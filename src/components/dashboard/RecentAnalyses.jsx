@@ -254,15 +254,8 @@ export default function RecentAnalyses({ analyses = [] }) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: 0.1 * index }}
                     className="group p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 transition-all cursor-pointer"
-                    onClick={() => {
-                      const analysisData = {
-                        ...item,
-                        blockers: item.blockers || [],
-                        risks: item.risks || [],
-                        recommendations: item.recommendations || [],
-                        summary: item.summary || item.title || ""
-                      };
-                      sessionStorage.setItem("novaAnalysis", JSON.stringify(analysisData));
+                    onClick={async () => {
+                      sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data || item));
                       window.location.href = createPageUrl("Results");
                     }}
                     role="button"
