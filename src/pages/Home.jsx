@@ -971,31 +971,6 @@ export default function Home() {
               </Card>
             </motion.div>
 
-            {/* Zoom */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-              viewport={{ once: true }}
-            >
-              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <svg className="w-14 h-14" viewBox="0 0 210 210">
-                      <path d="M105 0C47.103 0 0 47.103 0 105s47.103 105 105 105 105-47.103 105-105S162.897 0 105 0z" fill="#2D8CFF"/>
-                      <path d="M61.667 151.667V90l41.25 30.833V90h45.833v61.667l-41.25-30.834v30.834H61.667z" fill="#FFF"/>
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">Zoom</h3>
-                  <p className="text-sm text-slate-600">
-                    {lang === 'fr' 
-                      ? 'Enregistrements vidéo' 
-                      : 'Video recordings'}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
             {/* Trello */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
