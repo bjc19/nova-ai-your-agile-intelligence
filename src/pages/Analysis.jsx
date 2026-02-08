@@ -661,7 +661,7 @@ Provide a detailed analysis in the following JSON format:`;
           >
             <Button
               onClick={handleAnalyze}
-              disabled={isAnalyzing || !transcript.trim() || isOutOfContext || wordCount < 500}
+              disabled={isAnalyzing || !transcript.trim() || isOutOfContext}
               size="lg"
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
