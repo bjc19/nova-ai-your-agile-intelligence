@@ -20,17 +20,31 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
-// Animation CSS pour le curseur de terminal clignotant
+// Animation CSS pour le curseur de terminal qui progresse
 const commandAnimationStyles = `
-  @keyframes cursor-blink {
+  @keyframes type-and-stop {
+    0% { width: 0; }
+    80% { width: 100%; }
+    100% { width: 100%; }
+  }
+
+  @keyframes blink {
     0%, 49% { opacity: 1; }
     50%, 100% { opacity: 0; }
   }
 
+  .terminal-cursor {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    animation: type-and-stop 3s steps(20, end) 1;
+  }
+
   .terminal-cursor::after {
     content: '|';
-    animation: cursor-blink 1s step-end infinite;
-    margin-left: 2px;
+    position: absolute;
+    right: -8px;
+    animation: blink 0.8s step-end infinite;
   }
 `;
 
