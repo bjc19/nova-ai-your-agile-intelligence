@@ -180,49 +180,64 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     }
     
     // ========== COUCHE 2: ANALYSE DU CHAMP SÉMANTIQUE PROFESSIONNEL ==========
-    
-    // Champ L1: PROJET & GESTION
+
+    // Champ L1: PROJET & GESTION (Management de Projet/Programme)
     const L1_terms = [
-      'projet', 'mission', 'initiative', 'programme', 'phase',
-      'livrable', 'delai', 'echeance', 'budget', 'ressource',
-      'perimetre', 'cahier des charges', 'specification', 'jalon',
+      'projet', 'programme', 'portefeuille', 'mission', 'initiative',
+      'livrable', 'jalon', 'delai', 'echeance', 'budget', 'ressource',
+      'perimetre', 'scope', 'cahier des charges', 'specification',
       'objectif', 'kpi', 'indicateur', 'suivi', 'reporting', 'roadmap',
-      'milestone', 'iteration', 'release', 'increment', 'deliverable'
+      'milestone', 'iteration', 'release', 'increment', 'deliverable',
+      'gouvernance', 'pilotage', 'coordination', 'arbitrage', 'priorisation',
+      'partie prenante', 'stakeholder', 'sponsor', 'comite de pilotage',
+      'risque projet', 'dependance projet', 'contrainte projet',
+      'change request', 'scope creep', 'hypothese projet', 'business case'
     ].map(normalizeText);
-    
-    // Champ L2: ORGANISATION & ÉQUIPE
+
+    // Champ L2: ORGANISATION & ÉQUIPE (Rôles Pro)
     const L2_terms = [
-      'equipe', 'service', 'departement', 'comite', 'client',
-      'utilisateur', 'partie prenante', 'stakeholder', 'collegue',
-      'manager', 'role', 'responsabilite', 'decision', 'compte-rendu',
-      'product owner', 'scrum master', 'developpeur', 'testeur', 'po', 'sm'
+      'equipe projet', 'equipe scrum', 'equipe agile', 'equipe dev',
+      'product owner', 'scrum master', 'developpeur', 'testeur',
+      'po', 'sm', 'dev', 'qa', 'tech lead', 'architect',
+      'client projet', 'utilisateur final', 'user', 'product manager',
+      'project manager', 'chef de projet', 'responsable produit',
+      'manager projet', 'facilitateur', 'coach agile'
     ].map(normalizeText);
-    
-    // Champ L3: ACTIVITÉS & PROCESSUS AGILE/SCRUM
+
+    // Champ L3: ACTIVITÉS & PROCESSUS AGILE/SCRUM (Cérémonies & Artéfacts)
     const L3_terms = [
-      'reunion', 'atelier', 'point', 'briefing', 'debriefing',
-      'revue', 'retrospective', 'planning', 'conception',
-      'developpement', 'test', 'validation', 'deploiement', 'support',
-      'daily', 'scrum', 'kanban', 'sprint', 'standup', 'stand-up',
-      'backlog refinement', 'grooming', 'demo', 'increment', 'ceremony',
-      'story', 'user story', 'epic', 'feature', 'task', 'subtask'
+      'daily scrum', 'daily standup', 'stand-up', 'standup',
+      'sprint planning', 'planning', 'sprint review', 'revue de sprint',
+      'retrospective', 'retro', 'refinement', 'grooming',
+      'demo', 'sprint', 'iteration', 'increment', 'ceremony',
+      'backlog', 'product backlog', 'sprint backlog',
+      'user story', 'story', 'epic', 'feature', 'task', 'subtask',
+      'ticket jira', 'ticket', 'issue jira', 'pr', 'pull request',
+      'merge', 'commit', 'code review', 'definition of done',
+      'acceptance criteria', 'story point', 'velocite', 'burndown',
+      'kanban', 'wip', 'limite wip', 'flux', 'lead time', 'cycle time'
     ].map(normalizeText);
-    
+
     const L3_verbs = [
-      'planifier', 'estimer', 'prioriser', 'developper', 'tester',
-      'corriger', 'deployer', 'livrer', 'documenter', 'reporter',
-      'escalader', 'resoudre', 'analyser', 'concevoir', 'valider',
-      'piloter', 'faciliter', 'animer', 'implementer', 'refactoriser',
-      'merger', 'commiter', 'reviewer', 'deboguer'
+      'planifier', 'estimer', 'prioriser', 'developper', 'coder',
+      'tester', 'debugger', 'corriger', 'deployer', 'livrer',
+      'valider', 'accepter', 'implementer', 'concevoir', 'designer',
+      'reviewer', 'merger', 'commiter', 'refactoriser',
+      'documenter', 'reporter', 'escalader', 'resoudre blocage',
+      'analyser besoin', 'specifier', 'faciliter ceremonie',
+      'animer atelier', 'coordonner equipe', 'piloter projet'
     ].map(normalizeText);
-    
-    // Champ L4: PROBLÉMATIQUES & SOLUTIONS
+
+    // Champ L4: PROBLÉMATIQUES PROJET (Issues Techniques)
     const L4_terms = [
-      'probleme', 'blocage', 'bloque', 'risque', 'issue', 'bug',
-      'anomalie', 'incident', 'changement', 'dependance', 'contrainte',
-      'resolution', 'correctif', 'solution', 'workaround', 'mitigation',
-      'ticket', 'backlog', 'impediment', 'blocker', 'done', 'wip',
-      'pull request', 'pr', 'merge conflict', 'technical debt', 'dette technique'
+      'blocage', 'bloque', 'impediment', 'blocker',
+      'risque projet', 'issue technique', 'bug', 'anomalie',
+      'incident production', 'dette technique', 'technical debt',
+      'dependance technique', 'dependance equipe',
+      'retard livraison', 'retard sprint', 'scope change',
+      'changement perimetre', 'besoin client', 'feedback client',
+      'resolution', 'correctif', 'solution technique', 'workaround',
+      'mitigation risque', 'plan d\'action', 'action corrective'
     ].map(normalizeText);
     
     // Compter les occurrences
