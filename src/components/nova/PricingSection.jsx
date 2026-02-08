@@ -12,7 +12,7 @@ const translations = {
   },
   fr: {
     contactSales: "Contact Sales",
-    contactTeam: "Contactez notre équipe commerciale"
+    contactTeam: "Contactez Sales"
   }
 };
 
