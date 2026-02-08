@@ -358,28 +358,89 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 mb-12"
+            className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-10 mb-12 border border-blue-100 shadow-xl"
           >
-            <h3 className="text-xl font-semibold text-slate-900 mb-6 text-center">
-              🔄 {lang === 'fr' ? 'Notre Processus Unique d\'Analyse Sécurisée' : 'Our Unique Secure Analysis Process'}
-            </h3>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-4 shadow-lg">
+                <span className="text-3xl">🔄</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                {lang === 'fr' ? 'Notre Processus Unique d\'Analyse Sécurisée' : 'Our Unique Secure Analysis Process'}
+              </h3>
+              <p className="text-slate-600">
+                {lang === 'fr' ? 'En 6 étapes, de la connexion aux insights' : 'In 6 steps, from connection to insights'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
-                { step: '1️⃣', text: lang === 'fr' ? 'Connexion sécurisée (Read-Only)' : 'Secure connection (Read-Only)' },
-                { step: '2️⃣', text: lang === 'fr' ? 'Données → Mémoire vive' : 'Data → RAM' },
-                { step: '3️⃣', text: lang === 'fr' ? 'Analyse + Anonymisation' : 'Analysis + Anonymization' },
-                { step: '4️⃣', text: lang === 'fr' ? 'Suppression données brutes' : 'Delete raw data' },
-                { step: '5️⃣', text: lang === 'fr' ? 'Stockage marqueurs' : 'Store markers' },
-                { step: '6️⃣', text: lang === 'fr' ? 'Insights actionnables' : 'Actionable insights' }
+                { 
+                  step: '1', 
+                  icon: '🔐',
+                  title: lang === 'fr' ? 'Connexion Sécurisée' : 'Secure Connection',
+                  text: lang === 'fr' ? 'Read-Only uniquement' : 'Read-Only access only',
+                  color: 'from-blue-500 to-blue-600'
+                },
+                { 
+                  step: '2', 
+                  icon: '💾',
+                  title: lang === 'fr' ? 'Chargement RAM' : 'Load to RAM',
+                  text: lang === 'fr' ? 'Données en mémoire' : 'Data in memory',
+                  color: 'from-indigo-500 to-indigo-600'
+                },
+                { 
+                  step: '3', 
+                  icon: '🧠',
+                  title: lang === 'fr' ? 'Analyse IA' : 'AI Analysis',
+                  text: lang === 'fr' ? '+ Anonymisation' : '+ Anonymization',
+                  color: 'from-purple-500 to-purple-600'
+                },
+                { 
+                  step: '4', 
+                  icon: '🗑️',
+                  title: lang === 'fr' ? 'Suppression' : 'Delete',
+                  text: lang === 'fr' ? 'Données brutes effacées' : 'Raw data deleted',
+                  color: 'from-pink-500 to-pink-600'
+                },
+                { 
+                  step: '5', 
+                  icon: '🔖',
+                  title: lang === 'fr' ? 'Marqueurs' : 'Markers',
+                  text: lang === 'fr' ? 'Stockage anonymisé' : 'Anonymized storage',
+                  color: 'from-orange-500 to-orange-600'
+                },
+                { 
+                  step: '6', 
+                  icon: '✨',
+                  title: lang === 'fr' ? 'Insights' : 'Insights',
+                  text: lang === 'fr' ? 'Recommandations actionnables' : 'Actionable recommendations',
+                  color: 'from-green-500 to-green-600'
+                }
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="text-center">
-                    <div className="text-2xl mb-1">{item.step}</div>
-                    <div className="text-xs text-slate-600 max-w-[100px]">{item.text}</div>
-                  </div>
-                  {i < 5 && <ArrowRight className="w-4 h-4 text-slate-400 hidden md:block" />}
-                </div>
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.45 + i * 0.05 }}
+                  viewport={{ once: true }}
+                  className="relative"
+                >
+                  <Card className="h-full p-6 hover:shadow-lg transition-all bg-white border-slate-200">
+                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} text-white font-bold text-lg mb-3 shadow-md`}>
+                      {item.step}
+                    </div>
+                    <div className="text-3xl mb-2">{item.icon}</div>
+                    <h4 className="font-bold text-slate-900 mb-1">{item.title}</h4>
+                    <p className="text-sm text-slate-600">{item.text}</p>
+                  </Card>
+                </motion.div>
               ))}
+            </div>
+
+            <div className="mt-8 text-center">
+              <Badge className="bg-green-600 text-white text-sm px-4 py-2">
+                ⚡ {lang === 'fr' ? 'Traitement en moins de 5 secondes' : 'Processing in under 5 seconds'}
+              </Badge>
             </div>
           </motion.div>
 
