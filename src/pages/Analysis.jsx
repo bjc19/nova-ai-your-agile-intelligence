@@ -26,7 +26,8 @@ import {
   MessageSquare,
   Upload,
   FileText,
-  Settings
+  Settings,
+  AlertTriangle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -43,6 +44,8 @@ export default function Analysis() {
   const [currentPosture, setCurrentPosture] = useState(POSTURES.agile_coach);
   const [alignmentReport, setAlignmentReport] = useState(null);
   const [workshopType, setWorkshopType] = useState("");
+  const [workshopDetection, setWorkshopDetection] = useState(null);
+  const [isOutOfContext, setIsOutOfContext] = useState(false);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -80,8 +83,24 @@ export default function Analysis() {
       
       // Auto-detect workshop type
       const detected = detectWorkshopType(transcript);
-      if (detected.type && detected.type !== "unknown") {
-        setWorkshopType(detected.type);
+      setWorkshopDetection(detected);
+      
+      // Check if out of context
+      const isOutOfContext = detected.tags && detected.tags.includes('#HorsContexte');
+      setIsOutOfContext(isOutOfContext);
+      
+      // Map detected type to form value
+      const typeMapping = {
+        'Daily Scrum': 'daily_scrum',
+        'Sprint Planning': 'sprint_planning',
+        'Sprint Review': 'sprint_review',
+        'Retrospective': 'retrospective'
+      };
+      
+      if (typeMapping[detected.type]) {
+        setWorkshopType(typeMapping[detected.type]);
+      } else {
+        setWorkshopType('other');
       }
     }
   }, [transcript]);
@@ -411,44 +430,70 @@ Provide a detailed analysis in the following JSON format:`;
           </div>
         </motion.div>
 
-        {/* Workshop Type Auto-Detection */}
-        {transcript && transcript.length > 50 && (
+        {/* Workshop Type Auto-Detection with Full Details */}
+        {workshopDetection && transcript && transcript.length > 50 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-6"
           >
-            <Card className={`${workshopType ? 'border-green-200 bg-green-50/50' : 'border-slate-200 bg-slate-50/50'}`}>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-blue-600" />
-                  Type d'atelier détecté
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {workshopType ? (
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-green-200">
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">
-                        {workshopType === 'daily_scrum' ? 'Daily Scrum' :
-                         workshopType === 'retrospective' ? 'Rétrospective' :
-                         workshopType === 'sprint_planning' ? 'Sprint Planning' :
-                         workshopType === 'sprint_review' ? 'Sprint Review' : 'Autre'}
-                      </p>
-                      <p className="text-xs text-slate-500">Détecté automatiquement</p>
-                    </div>
+            {isOutOfContext ? (
+              <div className="p-6 rounded-2xl bg-red-50/50 border border-red-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-red-900 mb-1">
+                      {language === 'fr' ? 'Contenu Hors Contexte' : 'Out of Context Content'}
+                    </h3>
+                    <p className="text-sm text-red-700">
+                      {language === 'fr'
+                        ? 'Le contenu analysé n\'apparaît pas être une réunion d\'équipe Agile. Les résultats peuvent être inexacts.'
+                        : 'The analyzed content does not appear to be an Agile team meeting. Results may be inaccurate.'}
+                    </p>
                   </div>
-                ) : (
-                  <p className="text-sm text-slate-600">Analyse en cours...</p>
-                )}
-                <p className="text-xs text-slate-500 flex items-start gap-2">
-                  <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                  Les analyses manuelles sont considérées comme des données réelles.
-                </p>
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 rounded-2xl bg-blue-50/50 border border-blue-200">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">
+                      {language === 'fr' ? 'Type de Réunion Détecté' : 'Detected Meeting Type'}
+                    </p>
+                    <h3 className="text-2xl font-bold text-blue-900 mb-3">
+                      {workshopDetection.type}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {workshopDetection.tags && workshopDetection.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    {workshopDetection.justifications && workshopDetection.justifications.length > 0 && (
+                      <div className="text-sm text-blue-700 space-y-1">
+                        {workshopDetection.justifications.slice(0, 3).map((justification, idx) => (
+                          <p key={idx} className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">✓</span>
+                            <span>{justification}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs text-blue-600 mb-1 uppercase font-semibold">{language === 'fr' ? 'Confiance' : 'Confidence'}</p>
+                    <p className="text-4xl font-bold text-blue-900">
+                      {workshopDetection.confidence}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 
