@@ -11,6 +11,7 @@ import TranscriptInput, { SAMPLE_TRANSCRIPT } from "@/components/nova/Transcript
 import FileUpload from "@/components/nova/FileUpload";
 import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
 import PostureIndicator from "@/components/nova/PostureIndicator";
+import OutOfContextResult from "@/components/nova/OutOfContextResult";
 import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTURES } from "@/components/nova/PostureEngine";
 import ProductGoalCard from "@/components/nova/ProductGoalCard";
 import { generateAlignmentReport } from "@/components/nova/ProductGoalAlignmentEngine";
@@ -48,6 +49,7 @@ export default function Analysis() {
   const [workshopDetection, setWorkshopDetection] = useState(null);
   const [isOutOfContext, setIsOutOfContext] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+  const [showOutOfContextResult, setShowOutOfContextResult] = useState(false);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -154,7 +156,7 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
     }
 
     if (isOutOfContext) {
-      setError("Le contenu est hors contexte. Veuillez coller une conversation professionnelle en gestion de projet Agile.");
+      setShowOutOfContextResult(true);
       return;
     }
 
@@ -386,6 +388,36 @@ Provide a detailed analysis in the following JSON format:`;
     navigate(createPageUrl("Results"));
     setIsAnalyzing(false);
   };
+
+  if (showOutOfContextResult) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="max-w-4xl mx-auto px-6 py-12">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <button 
+              onClick={() => setShowOutOfContextResult(false)}
+              className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1.5" />
+              Retour à l'analyse
+            </button>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              {t('analyzeTitle')}
+            </h1>
+          </motion.div>
+
+          {/* Out of Context Result */}
+          <OutOfContextResult onClose={() => setShowOutOfContextResult(false)} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
