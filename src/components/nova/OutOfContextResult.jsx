@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
-export default function OutOfContextResult({ onClose }) {
+export default function OutOfContextResult({ data, onClose }) {
+  if (!data) return null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -26,10 +28,10 @@ export default function OutOfContextResult({ onClose }) {
               <div className="flex-1 h-2.5 bg-red-200 rounded-full overflow-hidden max-w-xs">
                 <div 
                   className="h-full bg-gradient-to-r from-red-500 to-red-600" 
-                  style={{ width: '98%' }} 
+                  style={{ width: `${data.confidence}%` }} 
                 />
               </div>
-              <span className="text-sm font-bold text-red-600">98%</span>
+              <span className="text-sm font-bold text-red-600">{data.confidence}%</span>
             </div>
           </div>
         </div>
@@ -46,7 +48,7 @@ export default function OutOfContextResult({ onClose }) {
             {/* Raison Principale */}
             <div className="pb-4 border-b border-slate-200">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Raison Principale</p>
-              <p className="text-sm font-medium text-slate-900">COUCHE 2: Lexique Management de Projet/Agile insuffisant</p>
+              <p className="text-sm font-medium text-slate-900">{data.reason || data.vetoType}</p>
             </div>
 
             {/* Analyse Lexicale */}
@@ -55,35 +57,61 @@ export default function OutOfContextResult({ onClose }) {
               <div className="space-y-3 text-sm">
                 <div className="flex gap-2">
                   <span className="text-slate-600 font-medium min-w-[140px]">Thème identifié :</span>
-                  <span className="text-red-700 font-semibold">Conversation Générale / Hors Périmètre PM</span>
+                  <span className="text-red-700 font-semibold">{data.theme}</span>
                 </div>
+                
+                {data.detectedKeywords && data.detectedKeywords.length > 0 && (
+                  <div className="flex gap-2">
+                    <span className="text-slate-600 font-medium min-w-[140px]">Termes-clés :</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {data.detectedKeywords.map((kw, idx) => (
+                        <Badge key={idx} variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs">
+                          {kw}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex gap-2">
                   <span className="text-slate-600 font-medium min-w-[140px]">Champ sémantique pro :</span>
-                  <span className="text-slate-900">Trop faible - absence des marqueurs attendus (ex: projet, équipe, tâche, réunion, livrable, décision...)</span>
+                  <span className="text-slate-900">
+                    {data.professionalFieldScore === 0 ? 'Absent' : `Trop faible (score: ${data.professionalFieldScore})`}
+                  </span>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-100">
-                  <p className="text-xs text-slate-500 mb-2">Détection par champ lexical :</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-600">L1 (Projet & Gestion):</span>
-                      <span className="font-medium text-red-600">0</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600">L2 (Organisation):</span>
-                      <span className="font-medium text-red-600">0</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600">L3 (Activités):</span>
-                      <span className="font-medium text-red-600">0</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-600">L4 (Problématiques):</span>
-                      <span className="font-medium text-red-600">0</span>
+                {data.professionalFieldScore === 0 && (
+                  <div className="mt-2 pl-[148px]">
+                    <p className="text-xs text-slate-600 italic">
+                      • Absence des marqueurs attendus (ex: projet, équipe, tâche, réunion, livrable, décision...).
+                    </p>
+                  </div>
+                )}
+
+                {/* Détails des champs lexicaux si disponibles */}
+                {(data.L1_count !== undefined) && (
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    <p className="text-xs text-slate-500 mb-2">Détection par champ lexical :</p>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">L1 (Projet & Gestion):</span>
+                        <span className="font-medium">{data.L1_count}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">L2 (Organisation):</span>
+                        <span className="font-medium">{data.L2_count}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">L3 (Activités):</span>
+                        <span className="font-medium">{data.L3_count + (data.L3_verbs_count || 0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">L4 (Problématiques):</span>
+                        <span className="font-medium">{data.L4_count}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </CardContent>
