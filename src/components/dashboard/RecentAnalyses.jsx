@@ -248,19 +248,14 @@ export default function RecentAnalyses({ analyses = [] }) {
               if (item.type === 'analysis') {
                 const SourceIcon = sourceIcons[item.source] || FileText;
                 return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 * index }}
-                    className="group p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 transition-all cursor-pointer"
-                    onClick={() => {
-                      if (item.analysis_data) {
-                        sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data));
-                        window.location.href = createPageUrl("Results");
-                      }
-                    }}
-                  >
+                  <Link to={createPageUrl(`Details?id=${item.id}`)}>
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1 * index }}
+                      className="group p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 transition-all cursor-pointer"
+                    >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
                         <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-white transition-colors">
@@ -292,10 +287,11 @@ export default function RecentAnalyses({ analyses = [] }) {
                         </div>
                         <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                       </div>
-                    </div>
-                  </motion.div>
-                );
-              } else if (item.type === 'signal') {
+                      </div>
+                      </motion.div>
+                      </Link>
+                      );
+                      } else if (item.type === 'signal') {
                const isTeams = item.signalSource === 'teams';
                const isJira = item.signalSource === 'jira';
                const bgColor = isJira 
