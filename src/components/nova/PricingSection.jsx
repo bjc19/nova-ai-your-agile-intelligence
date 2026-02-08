@@ -25,16 +25,14 @@ const plans = [
     subtitle: "Découvrez la puissance de Nova",
     price: "49",
     users: "5 utilisateurs inclus",
-    addOn: "+10 CAD/utilisateur/mois (max 10)",
+    addOn: "+15 CAD/utilisateur/mois (max 10)",
     included: [
-      "Analyses manuelles uniquement",
-      "10 analyses par mois",
+      "30 analyses manuelles uniquement",
       "Insights contextualisés",
       "1 source au choix (Slack, Jira ou Teams)",
       "Configuration guidée",
       "Vue basique avec tendances",
-      "Visualisations simples",
-      "Export PDF basique"
+      "Visualisations simples"
     ],
     limitations: [
       "Pas de rapports mensuels automatiques",
@@ -58,9 +56,10 @@ const plans = [
     addOn: "+15 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
-      "Analyses manuelles illimitées",
-      "8 analyses post-réunion automatiques/mois",
+      "70 analyses manuelles illimitées",
+      "30 analyses post-réunion automatiques/mois",
       "Insights contextualisés avancés",
+      "Intégrations Slack, Jira, Teams",
       "Croisement limité avec 2 sources externes",
       "Dashboard tendances complet",
       "Rapports sommaires mensuels automatiques",
@@ -78,14 +77,14 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    badge: "MEILLEUR RAPPORT QUALITÉ/PRIX",
+    badge: "RAPPORT QUALITÉ/PRIX",
     badgeColor: "bg-purple-100 text-purple-800",
     badge2: "⭐",
     subtitle: "ROI clair et mesurable",
     price: "199",
     yearlyPrice: "169",
     users: "25 utilisateurs inclus",
-    addOn: "+20 CAD/utilisateur/mois (max 50)",
+    addOn: "+10 CAD/utilisateur/mois (max 50)",
     discount: "15% annuel",
     addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
@@ -114,8 +113,8 @@ const plans = [
     subtitle: "Gouvernance, sécurité, insights systémiques",
     price: "Custom",
     priceNote: "À partir de 500 CAD/mois",
-    structure: "Base + 25 CAD/utilisateur (min 50 utilisateurs)",
-    degressiveNote: "≈15-20 CAD/utilisateur à 100+ utilisateurs",
+    structure: "+ 15 CAD/utilisateur",
+    degressiveNote: "≈10-15 CAD/utilisateur à 100+ utilisateurs",
     enterpriseIntro: "Tous les éléments de Pro, +",
     included: [
       "Analyses organisationnelles & systémiques",
@@ -125,7 +124,8 @@ const plans = [
       "Dashboards et reporting custom direction/PMO",
       "Support dédié + SLA",
       "KPIs personnalisés et exports exécutifs",
-      "Add-ons usage-based (API calls, analyses)"
+      "Add-ons usage-based (API calls, analyses)",
+      "Consultations et coaching d'experts à la demande"
     ],
     target: "Entreprises, banques, grandes techs, organisations multi-produits",
     ctaKey: "contactTeam"
