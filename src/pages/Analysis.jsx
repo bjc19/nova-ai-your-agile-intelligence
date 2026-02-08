@@ -15,6 +15,7 @@ import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTUR
 import ProductGoalCard from "@/components/nova/ProductGoalCard";
 import { generateAlignmentReport } from "@/components/nova/ProductGoalAlignmentEngine";
 import { detectWorkshopType } from "@/components/nova/workshopDetection";
+import { detectOutOfContext } from "@/components/nova/outOfContextDetection";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import { 
@@ -46,6 +47,7 @@ export default function Analysis() {
   const [workshopType, setWorkshopType] = useState("");
   const [workshopDetection, setWorkshopDetection] = useState(null);
   const [isOutOfContext, setIsOutOfContext] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -76,31 +78,40 @@ export default function Analysis() {
   // Analyze transcript to detect context, workshop type, and determine posture
   useEffect(() => {
     if (transcript && transcript.length > 50) {
+      // Count words
+      const words = transcript.trim().split(/\s+/).length;
+      setWordCount(words);
+      
       const context = analyzeTranscriptForContext(transcript);
       setDetectedContext(context);
       const posture = determinePosture(context);
       setCurrentPosture(posture);
       
-      // Auto-detect workshop type
-      const detected = detectWorkshopType(transcript);
-      setWorkshopDetection(detected);
+      // Check out of context FIRST
+      const outOfContextCheck = detectOutOfContext(transcript);
+      setIsOutOfContext(outOfContextCheck.isOutOfContext);
       
-      // Check if out of context
-      const isOutOfContext = detected.tags && detected.tags.includes('#HorsContexte');
-      setIsOutOfContext(isOutOfContext);
-      
-      // Map detected type to form value
-      const typeMapping = {
-        'Daily Scrum': 'daily_scrum',
-        'Sprint Planning': 'sprint_planning',
-        'Sprint Review': 'sprint_review',
-        'Retrospective': 'retrospective'
-      };
-      
-      if (typeMapping[detected.type]) {
-        setWorkshopType(typeMapping[detected.type]);
+      // Only proceed with workshop detection if not out of context
+      if (!outOfContextCheck.isOutOfContext) {
+        const detected = detectWorkshopType(transcript);
+        setWorkshopDetection(detected);
+        
+        // Map detected type to form value
+        const typeMapping = {
+          'Daily Scrum': 'daily_scrum',
+          'Sprint Planning': 'sprint_planning',
+          'Sprint Review': 'sprint_review',
+          'Retrospective': 'retrospective'
+        };
+        
+        if (typeMapping[detected.type]) {
+          setWorkshopType(typeMapping[detected.type]);
+        } else {
+          setWorkshopType('other');
+        }
       } else {
-        setWorkshopType('other');
+        setWorkshopDetection(null);
+        setWorkshopType('');
       }
     }
   }, [transcript]);
@@ -139,6 +150,16 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
       setError("Aucun texte détecté. Collez le contenu de votre atelier Scrum pour analyse.");
+      return;
+    }
+
+    if (isOutOfContext) {
+      setError("Le contenu est hors contexte. Veuillez coller une conversation professionnelle en gestion de projet Agile.");
+      return;
+    }
+
+    if (wordCount < 500) {
+      setError(`Texte insuffisant (${wordCount} mots). Minimum 500 mots requis pour une analyse fiable.`);
       return;
     }
 
@@ -566,21 +587,24 @@ Provide a detailed analysis in the following JSON format:`;
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="p-4 rounded-xl bg-slate-50 border border-slate-200"
+              className={`p-4 rounded-xl border ${isOutOfContext ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-slate-700">{t('dataReady')}</span>
                 <div className="flex items-center gap-2">
-                  {detectedContext && detectedContext.current_ceremony !== "none" && (
-                    <Badge variant="outline" className="text-xs bg-indigo-50 border-indigo-200 text-indigo-700">
-                      {detectedContext.current_ceremony.replace("_", " ")}
-                    </Badge>
-                  )}
+                  <Badge variant="outline" className={`text-xs ${wordCount >= 500 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
+                    {wordCount} mots
+                  </Badge>
                   <Badge variant="outline" className="text-xs">
                     {transcript.length.toLocaleString()} {t('characters')}
                   </Badge>
                 </div>
               </div>
+              {wordCount < 500 && (
+                <div className="text-xs text-amber-700 mb-2">
+                  ⚠️ Minimum 500 mots requis ({500 - wordCount} mots manquants)
+                </div>
+              )}
               <p className="text-xs text-slate-500 line-clamp-2">
                 {transcript.substring(0, 150)}...
               </p>
@@ -605,7 +629,7 @@ Provide a detailed analysis in the following JSON format:`;
           >
             <Button
               onClick={handleAnalyze}
-              disabled={isAnalyzing || !transcript.trim()}
+              disabled={isAnalyzing || !transcript.trim() || isOutOfContext || wordCount < 500}
               size="lg"
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
