@@ -84,7 +84,7 @@ const plans = [
     price: "199",
     yearlyPrice: "169",
     users: "25 utilisateurs inclus",
-    addOn: "+20 CAD/utilisateur/mois (max 50)",
+    addOn: "+10 CAD/utilisateur/mois (max 50)",
     discount: "15% annuel",
     addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
