@@ -54,10 +54,10 @@ const commandAnimationStyles = `
   }
 
   .terminal-block-0 .text-white::after { animation-delay: 0s; }
-  .terminal-block-1 .text-white::after { animation-delay: 2s; }
-  .terminal-block-2 .text-white::after { animation-delay: 5s; }
-  .terminal-block-3 .text-white::after { animation-delay: 8s; }
-  .terminal-block-4 .text-white::after { animation-delay: 12s; }
+  .terminal-block-1 .text-white::after { animation-delay: 1s; }
+  .terminal-block-2 .text-white::after { animation-delay: 1s; }
+  .terminal-block-3 .text-white::after { animation-delay: 1s; }
+  .terminal-block-4 .text-white::after { animation-delay: 1s; }
 
   .terminal-block-5 {
     animation: validate-frame 1s ease-out 10s forwards;
