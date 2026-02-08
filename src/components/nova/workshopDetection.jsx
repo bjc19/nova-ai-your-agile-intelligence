@@ -803,15 +803,28 @@ export function detectWorkshopType(text) {
     const dailyScore = scores.DAILY_SCRUM.score;
     const retroScore = scores.RETROSPECTIVE.score;
     
+    // HIGHEST PRIORITY: Explicit "quotidien/quotidienne" keyword → DAILY wins decisively
+    const hasQuotidienKeyword = /quotidien|quotidienne|coordination quotidienne|synchronisation quotidienne/gi.test(text);
+    if (hasQuotidienKeyword) {
+      bestType = 'DAILY_SCRUM';
+      bestScore = scores.DAILY_SCRUM;
+    }
     // If Daily has temporal urgency + blockers, it wins
-    if (intention.isDailyIntention && dailyScore >= 50) {
+    else if (intention.isDailyIntention && dailyScore >= 45) {
       bestType = 'DAILY_SCRUM';
       bestScore = scores.DAILY_SCRUM;
     }
     // If Daily clearly lacks improvement intent, retro loses
-    else if (!intention.isRetrospectiveIntention && dailyScore > retroScore - 10) {
+    else if (!intention.isRetrospectiveIntention && dailyScore > retroScore - 15) {
       bestType = 'DAILY_SCRUM';
       bestScore = scores.DAILY_SCRUM;
+    }
+    // If Retrospective lacks clear improvement/process markers AND Daily has round-table + blockers, Daily wins
+    else if (conversationalStructure.hasRoundTableStructure && /bloqué|blocage|aide|problème/gi.test(text)) {
+      if (!/amélioration|apprentissage|leçon|ce qu'on|processus.*équipe/gi.test(text)) {
+        bestType = 'DAILY_SCRUM';
+        bestScore = scores.DAILY_SCRUM;
+      }
     }
   }
 
