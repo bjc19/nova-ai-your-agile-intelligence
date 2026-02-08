@@ -597,7 +597,18 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
                 {/* CTA */}
                 {tries === 0 ? (
-                  <Button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    onClick={() => {
+                      onClose();
+                      setTimeout(() => {
+                        const pricingSection = document.getElementById('pricing-section');
+                        if (pricingSection) {
+                          pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    }}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
                     Voir les Plans Tarifaires
                   </Button>
                 ) : (
@@ -750,10 +761,18 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                   Nouvelle Analyse
                 </Button>
                 <Button 
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    setTimeout(() => {
+                      const pricingSection = document.getElementById('pricing-section');
+                      if (pricingSection) {
+                        pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }, 100);
+                  }}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
-                  Essayer le vrai produit
+                  Voir les Plans Tarifaires
                 </Button>
               </div>
             )}
