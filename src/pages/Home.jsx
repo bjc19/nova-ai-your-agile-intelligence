@@ -148,8 +148,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium bg-white/80 backdrop-blur-sm border-blue-200 text-blue-700 mb-6">
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+            <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium bg-white/80 backdrop-blur-sm border-slate-300 text-slate-700 mb-6">
               {t("aiPoweredScrum")}
             </Badge>
             
@@ -184,7 +183,7 @@ export default function Home() {
             </div>
 
             <p className="text-sm text-slate-500 mt-4">
-              🎮 {t("noReg")}
+              {t("noReg")}
             </p>
           </motion.div>
         </div>
@@ -246,8 +245,8 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <Badge className="mb-4 bg-green-100 text-green-800 border-green-200">
-              🛡️ {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
+            <Badge className="mb-4 bg-slate-100 text-slate-700 border-slate-300">
+              {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
             </Badge>
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
               {lang === 'fr' ? 'Comment Nova protège vos données' : 'How Nova protects your data'}
@@ -267,9 +266,11 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="border-blue-200 bg-blue-50/50 h-full">
+              <Card className="border-slate-200 bg-white h-full">
                 <CardContent className="p-6">
-                  <div className="text-4xl mb-3">📖</div>
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
+                    <span className="text-lg font-bold text-slate-700">R</span>
+                  </div>
                   <h3 className="font-semibold text-slate-900 mb-3">
                     {lang === 'fr' ? 'Lecture Seule, Jamais Écriture' : 'Read-Only, Never Write'}
                   </h3>
@@ -297,9 +298,11 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <Card className="border-purple-200 bg-purple-50/50 h-full">
+              <Card className="border-slate-200 bg-white h-full">
                 <CardContent className="p-6">
-                  <div className="text-4xl mb-3">💾</div>
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
+                    <span className="text-lg font-bold text-slate-700">Ø</span>
+                  </div>
                   <h3 className="font-semibold text-slate-900 mb-3">
                     {lang === 'fr' ? 'Aucun Stockage de Données Sensibles' : 'No Sensitive Data Storage'}
                   </h3>
@@ -327,9 +330,11 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <Card className="border-amber-200 bg-amber-50/50 h-full">
+              <Card className="border-slate-200 bg-white h-full">
                 <CardContent className="p-6">
-                  <div className="text-4xl mb-3">🔑</div>
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
+                    <span className="text-lg font-bold text-slate-700">A</span>
+                  </div>
                   <h3 className="font-semibold text-slate-900 mb-3">
                     {lang === 'fr' ? 'Données Anonymisées, Insights Préservés' : 'Anonymized Data, Preserved Insights'}
                   </h3>
@@ -406,7 +411,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-              📊 {lang === 'fr' ? 'Nova vs Concurrents Typiques' : 'Nova vs Typical Competitors'}
+              {lang === 'fr' ? 'Nova vs Concurrents Typiques' : 'Nova vs Typical Competitors'}
             </h3>
             <Card className="border-slate-200">
               <CardContent className="p-0 overflow-x-auto">
@@ -483,10 +488,10 @@ export default function Home() {
                 </table>
               </CardContent>
             </Card>
-            <p className="text-center text-sm text-slate-500 mt-4">
+            <p className="text-center text-sm text-slate-600 mt-4 font-medium">
               {lang === 'fr' 
-                ? '🎯 Résultat : Toute la valeur analytique, aucun risque de fuite de données' 
-                : '🎯 Result: All the analytical value, zero data breach risk'}
+                ? 'Résultat : Toute la valeur analytique, aucun risque de fuite de données' 
+                : 'Result: All the analytical value, zero data breach risk'}
             </p>
           </motion.div>
 
@@ -499,14 +504,9 @@ export default function Home() {
             className="mt-16"
           >
             <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-                  <span className="text-2xl">🏆</span>
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900">
-                  {lang === 'fr' ? 'Certifications & Conformité' : 'Certifications & Compliance'}
-                </h3>
-              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                {lang === 'fr' ? 'Certifications & Conformité' : 'Certifications & Compliance'}
+              </h3>
               <p className="text-slate-600">
                 {lang === 'fr' 
                   ? 'Votre confiance est notre priorité absolue' 
@@ -521,8 +521,10 @@ export default function Home() {
                 transition={{ duration: 0.4, delay: 0.7 }}
                 viewport={{ once: true }}
               >
-                <Card className="text-center p-6 hover:shadow-xl transition-all border-slate-200 hover:border-slate-300 bg-gradient-to-br from-white to-slate-50">
-                  <div className="text-4xl mb-3">🔒</div>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <span className="text-xl font-bold text-slate-700">S2</span>
+                  </div>
                   <h4 className="font-bold text-slate-900 mb-1">SOC 2</h4>
                   <p className="text-xs text-slate-600">Type II</p>
                 </Card>
@@ -534,8 +536,10 @@ export default function Home() {
                 transition={{ duration: 0.4, delay: 0.75 }}
                 viewport={{ once: true }}
               >
-                <Card className="text-center p-6 hover:shadow-xl transition-all border-slate-200 hover:border-slate-300 bg-gradient-to-br from-white to-slate-50">
-                  <div className="text-4xl mb-3">🛡️</div>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <span className="text-xl font-bold text-slate-700">ISO</span>
+                  </div>
                   <h4 className="font-bold text-slate-900 mb-1">ISO 27001</h4>
                   <p className="text-xs text-slate-600">Certified</p>
                 </Card>
@@ -547,10 +551,12 @@ export default function Home() {
                 transition={{ duration: 0.4, delay: 0.8 }}
                 viewport={{ once: true }}
               >
-                <Card className="text-center p-6 hover:shadow-xl transition-all border-blue-200 hover:border-blue-300 bg-gradient-to-br from-blue-50 to-white">
-                  <div className="text-4xl mb-3">🇪🇺</div>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <span className="text-base font-bold text-slate-700">GDPR</span>
+                  </div>
                   <h4 className="font-bold text-slate-900 mb-1">GDPR</h4>
-                  <p className="text-xs text-blue-700">Compliant</p>
+                  <p className="text-xs text-slate-600">Compliant</p>
                 </Card>
               </motion.div>
 
@@ -560,10 +566,12 @@ export default function Home() {
                 transition={{ duration: 0.4, delay: 0.85 }}
                 viewport={{ once: true }}
               >
-                <Card className="text-center p-6 hover:shadow-xl transition-all border-green-200 hover:border-green-300 bg-gradient-to-br from-green-50 to-white">
-                  <div className="text-4xl mb-3">✅</div>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <span className="text-base font-bold text-slate-700">CCPA</span>
+                  </div>
                   <h4 className="font-bold text-slate-900 mb-1">CCPA</h4>
-                  <p className="text-xs text-green-700">Compliant</p>
+                  <p className="text-xs text-slate-600">Compliant</p>
                 </Card>
               </motion.div>
             </div>
