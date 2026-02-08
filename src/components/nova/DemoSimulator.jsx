@@ -167,77 +167,113 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     // Champ L1: PROJET & GESTION
     const L1_terms = [
       'projet', 'mission', 'initiative', 'programme', 'phase',
-      'livrable', 'délai', 'échéance', 'budget', 'ressource',
-      'périmètre', 'cahier des charges', 'spécification', 'jalon',
-      'objectif', 'kpi', 'indicateur', 'suivi', 'reporting'
-    ];
+      'livrable', 'delai', 'echeance', 'budget', 'ressource',
+      'perimetre', 'cahier des charges', 'specification', 'jalon',
+      'objectif', 'kpi', 'indicateur', 'suivi', 'reporting', 'roadmap',
+      'milestone', 'iteration', 'release', 'increment', 'deliverable'
+    ].map(normalizeText);
     
     // Champ L2: ORGANISATION & ÉQUIPE
     const L2_terms = [
-      'équipe', 'service', 'département', 'comité', 'client',
-      'utilisateur', 'partie prenante', 'stakeholder', 'collègue',
-      'manager', 'rôle', 'responsabilité', 'décision', 'compte-rendu'
-    ];
+      'equipe', 'service', 'departement', 'comite', 'client',
+      'utilisateur', 'partie prenante', 'stakeholder', 'collegue',
+      'manager', 'role', 'responsabilite', 'decision', 'compte-rendu',
+      'product owner', 'scrum master', 'developpeur', 'testeur', 'po', 'sm'
+    ].map(normalizeText);
     
-    // Champ L3: ACTIVITÉS & PROCESSUS
+    // Champ L3: ACTIVITÉS & PROCESSUS AGILE/SCRUM
     const L3_terms = [
-      'réunion', 'atelier', 'point', 'briefing', 'debriefing',
-      'revue', 'rétrospective', 'retrospective', 'planning', 'conception',
-      'développement', 'test', 'validation', 'déploiement', 'support',
-      'daily', 'scrum', 'kanban', 'sprint', 'standup', 'stand-up'
-    ];
+      'reunion', 'atelier', 'point', 'briefing', 'debriefing',
+      'revue', 'retrospective', 'planning', 'conception',
+      'developpement', 'test', 'validation', 'deploiement', 'support',
+      'daily', 'scrum', 'kanban', 'sprint', 'standup', 'stand-up',
+      'backlog refinement', 'grooming', 'demo', 'increment', 'ceremony',
+      'story', 'user story', 'epic', 'feature', 'task', 'subtask'
+    ].map(normalizeText);
+    
     const L3_verbs = [
-      'planifier', 'estimer', 'prioriser', 'développer', 'tester',
-      'corriger', 'déployer', 'livrer', 'documenter', 'reporter',
-      'escalader', 'résoudre', 'analyser', 'concevoir', 'valider',
-      'piloter', 'faciliter', 'animer'
-    ];
+      'planifier', 'estimer', 'prioriser', 'developper', 'tester',
+      'corriger', 'deployer', 'livrer', 'documenter', 'reporter',
+      'escalader', 'resoudre', 'analyser', 'concevoir', 'valider',
+      'piloter', 'faciliter', 'animer', 'implementer', 'refactoriser',
+      'merger', 'commiter', 'reviewer', 'deboguer'
+    ].map(normalizeText);
     
     // Champ L4: PROBLÉMATIQUES & SOLUTIONS
     const L4_terms = [
-      'problème', 'blocage', 'bloqué', 'risque', 'issue', 'bug',
-      'anomalie', 'incident', 'changement', 'dépendance', 'contrainte',
-      'résolution', 'correctif', 'solution', 'workaround', 'mitigation',
-      'ticket', 'backlog'
-    ];
+      'probleme', 'blocage', 'bloque', 'risque', 'issue', 'bug',
+      'anomalie', 'incident', 'changement', 'dependance', 'contrainte',
+      'resolution', 'correctif', 'solution', 'workaround', 'mitigation',
+      'ticket', 'backlog', 'impediment', 'blocker', 'done', 'wip',
+      'pull request', 'pr', 'merge conflict', 'technical debt', 'dette technique'
+    ].map(normalizeText);
     
     // Compter les occurrences
     let L1_count = 0, L2_count = 0, L3_count = 0, L3_verbs_count = 0, L4_count = 0;
+    const detectedL1 = [], detectedL2 = [], detectedL3 = [], detectedL3V = [], detectedL4 = [];
     
-    L1_terms.forEach(term => { if (lowerText.includes(term)) L1_count++; });
-    L2_terms.forEach(term => { if (lowerText.includes(term)) L2_count++; });
-    L3_terms.forEach(term => { if (lowerText.includes(term)) L3_count++; });
-    L3_verbs.forEach(term => { if (lowerText.includes(term)) L3_verbs_count++; });
-    L4_terms.forEach(term => { if (lowerText.includes(term)) L4_count++; });
+    L1_terms.forEach(term => { if (lowerText.includes(term)) { L1_count++; detectedL1.push(term); } });
+    L2_terms.forEach(term => { if (lowerText.includes(term)) { L2_count++; detectedL2.push(term); } });
+    L3_terms.forEach(term => { if (lowerText.includes(term)) { L3_count++; detectedL3.push(term); } });
+    L3_verbs.forEach(term => { if (lowerText.includes(term)) { L3_verbs_count++; detectedL3V.push(term); } });
+    L4_terms.forEach(term => { if (lowerText.includes(term)) { L4_count++; detectedL4.push(term); } });
     
     const L1L2_density = L1_count + L2_count;
     const L3L4_density = L3_count + L3_verbs_count + L4_count;
+    const totalProScore = L1_count + L2_count + L3_count + L3_verbs_count + L4_count;
     
-    // RÈGLE DE DÉCISION SÉMANTIQUE (RDS-1)
+    console.log('🔍 COUCHE 2 Semantic Analysis:', {
+      L1_count, L2_count, L3_count, L3_verbs_count, L4_count,
+      totalProScore,
+      L1L2_density, L3L4_density,
+      detectedL1: detectedL1.slice(0, 3),
+      detectedL2: detectedL2.slice(0, 3),
+      detectedL3: detectedL3.slice(0, 3),
+      detectedL3V: detectedL3V.slice(0, 3),
+      detectedL4: detectedL4.slice(0, 3)
+    });
+    
+    // RÈGLE DE DÉCISION SÉMANTIQUE RENFORCÉE (RDS-2)
+    // Exigence CUMULATIVE: doit avoir des termes dans AU MOINS 2 champs différents
+    const fieldsWithTerms = [
+      L1_count > 0,
+      L2_count > 0,
+      L3_count > 0,
+      L3_verbs_count > 0,
+      L4_count > 0
+    ].filter(Boolean).length;
+    
     const hasProfessionalContext = (
-      (L1L2_density >= 2 && (L3_verbs_count >= 1 || L4_count >= 1)) ||
-      (L3L4_density >= 3)
+      fieldsWithTerms >= 2 &&  // Au moins 2 champs lexicaux différents
+      totalProScore >= 3 &&     // Au moins 3 termes pro au total
+      (L1L2_density >= 1 || L3L4_density >= 2)  // Structure OU action
     );
     
+    console.log('📊 Professional Context Check:', {
+      fieldsWithTerms,
+      hasProfessionalContext,
+      totalProScore
+    });
+    
     if (!hasProfessionalContext) {
+      console.log('❌ COUCHE 2 TRIGGERED - Insufficient professional context');
       // PRINCIPE DE PRÉCAUTION: En l'absence de preuve forte -> #HorsContexte
-      const totalProScore = L1_count + L2_count + L3_count + L3_verbs_count + L4_count;
-      
       return {
         isOutOfContext: true,
-        confidence: totalProScore === 0 ? 95 : 85 + Math.min(10, 15 - totalProScore * 3),
-        vetoType: 'COUCHE 2: Score sémantique professionnel insuffisant',
+        confidence: totalProScore === 0 ? 95 : Math.max(80, 92 - totalProScore * 2),
+        vetoType: 'COUCHE 2: Lexique professionnel Scrum/Agile/PM insuffisant',
         theme: 'Conversation Générale / Ambiguë',
-        detectedKeywords: [],
+        detectedKeywords: [...detectedL1.slice(0, 2), ...detectedL2.slice(0, 2), ...detectedL3.slice(0, 2)],
         professionalFieldScore: totalProScore,
         L1_count, L2_count, L3_count, L3_verbs_count, L4_count
       };
     }
     
+    console.log('✅ COUCHE 2 PASSED - Professional context validated');
     // PASSER: Le texte a un contexte professionnel suffisant
     return { 
       isOutOfContext: false,
-      professionalFieldScore: L1_count + L2_count + L3_count + L3_verbs_count + L4_count
+      professionalFieldScore: totalProScore
     };
   };
 
