@@ -358,89 +358,43 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-10 mb-12 border border-blue-100 shadow-xl"
+            className="bg-slate-900 rounded-2xl p-8 mb-12 border border-slate-800"
           >
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 mb-4 shadow-lg">
-                <span className="text-3xl">🔄</span>
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                {lang === 'fr' ? 'Notre Processus Unique d\'Analyse Sécurisée' : 'Our Unique Secure Analysis Process'}
-              </h3>
-              <p className="text-slate-600">
-                {lang === 'fr' ? 'En 6 étapes, de la connexion aux insights' : 'In 6 steps, from connection to insights'}
-              </p>
-            </div>
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+              <span className="text-green-400">●</span>
+              {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
+            </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 max-w-5xl mx-auto font-mono text-xs">
               {[
-                { 
-                  step: '1', 
-                  icon: '🔐',
-                  title: lang === 'fr' ? 'Connexion Sécurisée' : 'Secure Connection',
-                  text: lang === 'fr' ? 'Read-Only uniquement' : 'Read-Only access only',
-                  color: 'from-blue-500 to-blue-600'
-                },
-                { 
-                  step: '2', 
-                  icon: '💾',
-                  title: lang === 'fr' ? 'Chargement RAM' : 'Load to RAM',
-                  text: lang === 'fr' ? 'Données en mémoire' : 'Data in memory',
-                  color: 'from-indigo-500 to-indigo-600'
-                },
-                { 
-                  step: '3', 
-                  icon: '🧠',
-                  title: lang === 'fr' ? 'Analyse IA' : 'AI Analysis',
-                  text: lang === 'fr' ? '+ Anonymisation' : '+ Anonymization',
-                  color: 'from-purple-500 to-purple-600'
-                },
-                { 
-                  step: '4', 
-                  icon: '🗑️',
-                  title: lang === 'fr' ? 'Suppression' : 'Delete',
-                  text: lang === 'fr' ? 'Données brutes effacées' : 'Raw data deleted',
-                  color: 'from-pink-500 to-pink-600'
-                },
-                { 
-                  step: '5', 
-                  icon: '🔖',
-                  title: lang === 'fr' ? 'Marqueurs' : 'Markers',
-                  text: lang === 'fr' ? 'Stockage anonymisé' : 'Anonymized storage',
-                  color: 'from-orange-500 to-orange-600'
-                },
-                { 
-                  step: '6', 
-                  icon: '✨',
-                  title: lang === 'fr' ? 'Insights' : 'Insights',
-                  text: lang === 'fr' ? 'Recommandations actionnables' : 'Actionable recommendations',
-                  color: 'from-green-500 to-green-600'
-                }
+                { label: 'OAuth\nRead-Only', time: '< 1s' },
+                { label: 'RAM\nLoad', time: '< 2s' },
+                { label: 'AI\nAnalysis', time: '2-3s' },
+                { label: 'Anonymize', time: '< 1s' },
+                { label: 'Delete\nRaw', time: '< 1s' },
+                { label: 'Store\nMarkers', time: '< 1s' }
               ].map((item, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.45 + i * 0.05 }}
-                  viewport={{ once: true }}
-                  className="relative"
-                >
-                  <Card className="h-full p-6 hover:shadow-lg transition-all bg-white border-slate-200">
-                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} text-white font-bold text-lg mb-3 shadow-md`}>
-                      {item.step}
+                <React.Fragment key={i}>
+                  <div className="flex flex-col items-center">
+                    <div className="w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
+                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight">
+                        {item.label}
+                      </div>
                     </div>
-                    <div className="text-3xl mb-2">{item.icon}</div>
-                    <h4 className="font-bold text-slate-900 mb-1">{item.title}</h4>
-                    <p className="text-sm text-slate-600">{item.text}</p>
-                  </Card>
-                </motion.div>
+                    <div className="text-slate-500 mt-1">{item.time}</div>
+                  </div>
+                  {i < 5 && (
+                    <div className="hidden md:flex items-center">
+                      <ArrowRight className="w-6 h-6 text-blue-400" />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
 
-            <div className="mt-8 text-center">
-              <Badge className="bg-green-600 text-white text-sm px-4 py-2">
-                ⚡ {lang === 'fr' ? 'Traitement en moins de 5 secondes' : 'Processing in under 5 seconds'}
-              </Badge>
+            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
+              <span className="text-green-400">✓</span>
+              <span>{lang === 'fr' ? 'Temps total : ~5s | Données brutes : 0 bytes stockés' : 'Total time: ~5s | Raw data: 0 bytes stored'}</span>
             </div>
           </motion.div>
 
