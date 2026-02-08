@@ -467,36 +467,6 @@ export default function Settings() {
           </Card>
         </motion.div>
 
-        {/* Backend Functions Notice */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="mb-8"
-        >
-          <Card className="border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/50">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-2 rounded-lg bg-amber-100">
-                  <Lock className="w-5 h-5 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900 mb-1">
-                    {t('backendRequired')}
-                  </h3>
-                  <p className="text-sm text-slate-600 mb-3">
-                    {t('backendRequiredDescription')}
-                  </p>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <ExternalLink className="w-4 h-4" />
-                    {t('goToAppSettings')}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
         {/* Available Integrations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
