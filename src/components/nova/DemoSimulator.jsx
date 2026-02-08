@@ -292,20 +292,34 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       (L1L2_density >= 2 || L3L4_density >= 3)  // Densité minimale (DURCI)
     );
     
-    console.log('📊 Professional Context Check:', {
+    console.log('📊 Professional Context Check (RDS-3):', {
       fieldsWithTerms,
-      hasProfessionalContext,
-      totalProScore
+      totalProScore,
+      hasProjectManagementCore,
+      L1L2_density,
+      L3L4_density,
+      hasProfessionalContext
     });
-    
+
     if (!hasProfessionalContext) {
-      console.log('❌ COUCHE 2 TRIGGERED - Insufficient professional context');
-      // PRINCIPE DE PRÉCAUTION: En l'absence de preuve forte -> #HorsContexte
+      console.log('❌ COUCHE 2 TRIGGERED - Insufficient professional PM/Agile context');
+
+      // Diagnostic précis de la raison du rejet
+      let rejectionReason = 'COUCHE 2: Lexique Management de Projet/Agile insuffisant';
+      if (!hasProjectManagementCore) {
+        rejectionReason = 'COUCHE 2: Absence de noyau Projet/Agile (pas de sprint/daily/backlog/livrable/objectif projet)';
+      } else if (fieldsWithTerms < 3) {
+        rejectionReason = 'COUCHE 2: Trop peu de champs lexicaux couverts (< 3)';
+      } else if (totalProScore < 5) {
+        rejectionReason = 'COUCHE 2: Densité terminologique trop faible (< 5 termes)';
+      }
+
+      // PRINCIPE DE PRÉCAUTION RENFORCÉ: En l'absence de preuve forte -> #HorsContexte
       return {
         isOutOfContext: true,
-        confidence: totalProScore === 0 ? 95 : Math.max(80, 92 - totalProScore * 2),
-        vetoType: 'COUCHE 2: Lexique professionnel Scrum/Agile/PM insuffisant',
-        theme: 'Conversation Générale / Ambiguë',
+        confidence: totalProScore === 0 ? 98 : Math.max(85, 95 - totalProScore * 2),
+        vetoType: rejectionReason,
+        theme: 'Conversation Générale / Hors Périmètre PM',
         detectedKeywords: [...detectedL1.slice(0, 2), ...detectedL2.slice(0, 2), ...detectedL3.slice(0, 2)],
         professionalFieldScore: totalProScore,
         L1_count, L2_count, L3_count, L3_verbs_count, L4_count
