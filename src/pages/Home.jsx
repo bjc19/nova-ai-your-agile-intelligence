@@ -1063,7 +1063,7 @@ export default function Home() {
             </Button>
           </div>
           </motion.div>
-          </div>
+        </div>
         </div>
       </div>
     );
