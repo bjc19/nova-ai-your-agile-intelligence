@@ -379,18 +379,12 @@ export default function Home() {
                     </li>
                   </ul>
                 </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+                </Card>
+                </div>
+                </div>
 
-          {/* Process Flow */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="bg-slate-900 rounded-2xl p-8 mb-12 border border-slate-800"
-          >
+                {/* Process Flow */}
+                <div className="bg-slate-900 rounded-2xl p-8 mb-12 border border-slate-800">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
               <span className="text-green-400">●</span>
               {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
