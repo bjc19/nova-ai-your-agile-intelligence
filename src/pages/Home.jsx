@@ -359,51 +359,7 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Process Flow */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="bg-slate-900 rounded-2xl p-8 mb-12 border border-slate-800"
-          >
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-              <span className="text-green-400">●</span>
-              {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
-            </h3>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3 max-w-5xl mx-auto font-mono text-xs">
-              {[
-                { label: 'OAuth\nRead-Only', time: '< 1s' },
-                { label: 'RAM\nLoad', time: '< 2s' },
-                { label: 'AI\nAnalysis', time: '2-3s' },
-                { label: 'Anonymize', time: '< 1s' },
-                { label: 'Delete\nRaw', time: '< 1s' },
-                { label: 'Store\nMarkers', time: '< 1s' }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
-                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight">
-                        {item.label}
-                      </div>
-                    </div>
-                    <div className="text-slate-500 mt-1">{item.time}</div>
-                  </div>
-                  {i < 5 && (
-                    <div className="hidden md:flex items-center">
-                      <ArrowRight className="w-6 h-6 text-blue-400" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-400">
-              <span className="text-green-400">✓</span>
-              <span>{lang === 'fr' ? 'Temps total : ~5s | Données brutes : 0 bytes stockés' : 'Total time: ~5s | Raw data: 0 bytes stored'}</span>
-            </div>
-          </motion.div>
 
           {/* Comparison Table */}
           <motion.div
