@@ -439,6 +439,8 @@ export default function RecentAnalyses({ analyses = [] }) {
                         variant="outline"
                         onClick={async () => {
                           setLoadingActions(true);
+                          // Add delay to avoid rate limiting
+                          await new Promise(resolve => setTimeout(resolve, 1500));
                           try {
                             const prompt = `Tu es un Scrum Master expert. Voici un problème détecté dans l'équipe:
 
