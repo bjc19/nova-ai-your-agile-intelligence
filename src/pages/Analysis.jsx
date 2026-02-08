@@ -555,14 +555,7 @@ Provide a detailed analysis in the following JSON format:`;
 
         {/* Input Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full bg-slate-100 p-1 rounded-xl">
-            <TabsTrigger 
-              value="slack" 
-              className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
-            >
-              <MessageSquare className="w-4 h-4" />
-              {t('slackTab')}
-            </TabsTrigger>
+          <TabsList className="grid grid-cols-2 w-full bg-slate-100 p-1 rounded-xl">
             <TabsTrigger 
               value="upload" 
               className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2"
@@ -578,22 +571,6 @@ Provide a detailed analysis in the following JSON format:`;
               {t('pasteTab')}
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="slack" className="mt-6">
-            <SlackChannelSelector 
-              onChannelSelect={handleSlackChannelSelect}
-              isConnected={slackConnected}
-            />
-            {!slackConnected && (
-              <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
-                <p className="text-sm text-blue-900">
-                  <strong>{t('demoMode')}:</strong> {t('demoModeDescription')}{" "}
-                  <Link to={createPageUrl("Settings")} className="underline">{t('settings')}</Link>
-                  {" "}{t('toImportReal')}
-                </p>
-              </div>
-            )}
-          </TabsContent>
 
           <TabsContent value="upload" className="mt-6">
             <FileUpload onDataExtracted={handleFileDataExtracted} />
