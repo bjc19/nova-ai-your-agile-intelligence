@@ -236,6 +236,247 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Zero-Retention Architecture Section */}
+      <div className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-4 bg-green-100 text-green-800 border-green-200">
+              🛡️ {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
+            </Badge>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              {lang === 'fr' ? 'Comment Nova protège vos données' : 'How Nova protects your data'}
+            </h2>
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+              {lang === 'fr' 
+                ? 'Toute la valeur analytique, aucun risque de fuite de données'
+                : 'All the analytical value, zero data breach risk'}
+            </p>
+          </motion.div>
+
+          {/* Security Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-blue-200 bg-blue-50/50 h-full">
+                <CardContent className="p-6">
+                  <div className="text-4xl mb-3">📖</div>
+                  <h3 className="font-semibold text-slate-900 mb-3">
+                    {lang === 'fr' ? 'Lecture Seule, Jamais Écriture' : 'Read-Only, Never Write'}
+                  </h3>
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Connexions en lecture seule à Slack, Teams, Jira' : 'Read-only connections to Slack, Teams, Jira'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-600 mt-0.5">✗</span>
+                      <span>{lang === 'fr' ? 'Jamais d\'écriture, modification ou suppression' : 'Never write, modify or delete your data'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Accès temporaire uniquement pendant l\'analyse' : 'Temporary access only during analysis'}</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-purple-200 bg-purple-50/50 h-full">
+                <CardContent className="p-6">
+                  <div className="text-4xl mb-3">💾</div>
+                  <h3 className="font-semibold text-slate-900 mb-3">
+                    {lang === 'fr' ? 'Aucun Stockage de Données Sensibles' : 'No Sensitive Data Storage'}
+                  </h3>
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Analyse en mémoire vive uniquement' : 'Analysis in RAM only'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Suppression immédiate post-traitement' : 'Immediate deletion post-processing'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Zéro stockage de conversations brutes' : 'Zero raw conversation storage'}</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-amber-200 bg-amber-50/50 h-full">
+                <CardContent className="p-6">
+                  <div className="text-4xl mb-3">🔑</div>
+                  <h3 className="font-semibold text-slate-900 mb-3">
+                    {lang === 'fr' ? 'Données Anonymisées, Insights Préservés' : 'Anonymized Data, Preserved Insights'}
+                  </h3>
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Marqueurs anonymisés au lieu de verbatims' : 'Anonymized markers instead of verbatims'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Pas de PII (Informations Personnelles)' : 'No PII (Personal Identifiable Information)'}</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 mt-0.5">✓</span>
+                      <span>{lang === 'fr' ? 'Identifiants hashés (SHA256)' : 'Hashed identifiers (SHA256)'}</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Process Flow */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 mb-12"
+          >
+            <h3 className="text-xl font-semibold text-slate-900 mb-6 text-center">
+              🔄 {lang === 'fr' ? 'Notre Processus Unique d\'Analyse Sécurisée' : 'Our Unique Secure Analysis Process'}
+            </h3>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 max-w-4xl mx-auto">
+              {[
+                { step: '1️⃣', text: lang === 'fr' ? 'Connexion sécurisée (Read-Only)' : 'Secure connection (Read-Only)' },
+                { step: '2️⃣', text: lang === 'fr' ? 'Données → Mémoire vive' : 'Data → RAM' },
+                { step: '3️⃣', text: lang === 'fr' ? 'Analyse + Anonymisation' : 'Analysis + Anonymization' },
+                { step: '4️⃣', text: lang === 'fr' ? 'Suppression données brutes' : 'Delete raw data' },
+                { step: '5️⃣', text: lang === 'fr' ? 'Stockage marqueurs' : 'Store markers' },
+                { step: '6️⃣', text: lang === 'fr' ? 'Insights actionnables' : 'Actionable insights' }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="text-center">
+                    <div className="text-2xl mb-1">{item.step}</div>
+                    <div className="text-xs text-slate-600 max-w-[100px]">{item.text}</div>
+                  </div>
+                  {i < 5 && <ArrowRight className="w-4 h-4 text-slate-400 hidden md:block" />}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Comparison Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+              📊 {lang === 'fr' ? 'Nova vs Concurrents Typiques' : 'Nova vs Typical Competitors'}
+            </h3>
+            <Card className="border-slate-200">
+              <CardContent className="p-0 overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="text-left p-4 font-semibold text-slate-900">
+                        {lang === 'fr' ? 'Critère' : 'Criteria'}
+                      </th>
+                      <th className="text-center p-4 font-semibold text-green-700 bg-green-50">
+                        {lang === 'fr' ? '✅ Nova' : '✅ Nova'}
+                      </th>
+                      <th className="text-center p-4 font-semibold text-slate-600">
+                        {lang === 'fr' ? '❌ Autres' : '❌ Others'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    <tr>
+                      <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Stockage conversations brutes' : 'Raw conversation storage'}</td>
+                      <td className="p-4 text-center bg-green-50">
+                        <Badge className="bg-green-600 text-white">NON</Badge>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Badge variant="outline" className="border-red-300 text-red-700">OUI</Badge>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Accès en écriture' : 'Write access'}</td>
+                      <td className="p-4 text-center bg-green-50">
+                        <Badge className="bg-green-600 text-white">NON</Badge>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Badge variant="outline" className="border-red-300 text-red-700">OUI</Badge>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Anonymisation automatique' : 'Automatic anonymization'}</td>
+                      <td className="p-4 text-center bg-green-50">
+                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Badge variant="outline" className="border-red-300 text-red-700">NON</Badge>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Traitement en mémoire vive' : 'RAM-only processing'}</td>
+                      <td className="p-4 text-center bg-green-50">
+                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Badge variant="outline" className="border-red-300 text-red-700">NON</Badge>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Conservation PII' : 'PII retention'}</td>
+                      <td className="p-4 text-center bg-green-50">
+                        <Badge className="bg-green-600 text-white">NON</Badge>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Badge variant="outline" className="border-red-300 text-red-700">OUI</Badge>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Insights actionnables' : 'Actionable insights'}</td>
+                      <td className="p-4 text-center bg-green-50">
+                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      </td>
+                      <td className="p-4 text-center">
+                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+            <p className="text-center text-sm text-slate-500 mt-4">
+              {lang === 'fr' 
+                ? '🎯 Résultat : Toute la valeur analytique, aucun risque de fuite de données' 
+                : '🎯 Result: All the analytical value, zero data breach risk'}
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
       {/* Demo Visualizations Section */}
       <div className="bg-slate-50 py-16">
         <div className="max-w-6xl mx-auto px-6">
