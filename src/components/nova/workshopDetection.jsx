@@ -197,7 +197,8 @@ const DETECTION_PATTERNS = {
       'standup', 'stand-up', 'daily standup', 'daily scrum',
       'standup quotidien', 'tour de table', 'chacun son tour',
       'statut', 'status', 'fait', 'done', 'en cours', 'in progress',
-      'terminé', 'finished', 'démarré', 'started'
+      'terminé', 'finished', 'démarré', 'started',
+      'quotidien', 'quotidienne', 'daily', 'coordination quotidienne', 'synchronisation quotidienne'
     ],
     patterns: [
       /\w+\s*:\s*[^:\n]{10,}/g, // "Name: text" pattern (round-table)
@@ -205,7 +206,7 @@ const DETECTION_PATTERNS = {
       /j'ai|ai fait|a fait|ont fait|did|finished|completed/gi,
       /vais|vas|va faire|will do|going to/gi,
       /bloqué|blocage|arrêté|stoppé|en attente|aide|support|issue|blocked|waiting|help/gi,
-      /standup|stand-up|daily scrum|tour de table|tour rapide/gi
+      /standup|stand-up|daily scrum|tour de table|tour rapide|quotidien|quotidienne|coordination quotidienne/gi
     ],
     markers: {
       sequential_roundtable: (text) => {
@@ -219,6 +220,7 @@ const DETECTION_PATTERNS = {
       short_temporal_focus: (text) => /hier|aujourd['u]i|ce matin|cet apr[eè]s-midi|demain|yesterday|today|this morning/gi.test(text),
       operational_blockers: (text) => /bloqué|blocage|aide|support|attend|waiting|blocked|help|problème|issue|obstacle/gi.test(text),
       rapid_status_exchanges: (text) => /fait|terminé|en cours|démarré|started|done|in progress|finished/gi.test(text),
+      daily_coordination_intent: (text) => /quotidien|quotidienne|daily|coordination quotidienne|synchronisation quotidienne|on se bloque|débloquer/gi.test(text),
       short_utterances: (text) => {
         const lines = text.split('\n').filter(l => l.trim());
         if (lines.length < 3) return false;
@@ -446,9 +448,9 @@ function analyzeIntention(text) {
   const estimationIntent = /estim|points|effort|complexité|sizing/gi.test(text);
   
   // Intentions de Daily Scrum
-  const coordinationIntent = /bloqu|débloqu|problème|issue|aide|help|passer sur|switch|avancer|progress/gi.test(text);
-  const dailyUrgency = /aujourd'hui|today|ce matin|this morning|immédiat|immediate|urgent|urgent/gi.test(text);
-  const immediateAction = /je vais|will do|vais essayer|going to|pour midi|by noon/gi.test(text);
+  const coordinationIntent = /bloqu|débloqu|problème|issue|aide|help|passer sur|switch|avancer|progress|synchronisation|coordination/gi.test(text);
+  const dailyUrgency = /aujourd'hui|today|ce matin|this morning|immédiat|immediate|urgent|urgent|quotidien|quotidienne/gi.test(text);
+  const immediateAction = /je vais|will do|vais essayer|going to|pour midi|by noon|on se bloque|débloquer/gi.test(text);
   
   // Intentions de Sprint Review
   const demonstrationIntent = /démo|montrer|présent|show|fonctionnalité|feature/gi.test(text);
