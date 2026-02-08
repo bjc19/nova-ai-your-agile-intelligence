@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import TranscriptInput, { SAMPLE_TRANSCRIPT } from "@/components/nova/TranscriptInput";
+import TranscriptInput from "@/components/nova/TranscriptInput";
 import FileUpload from "@/components/nova/FileUpload";
 import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
 import PostureIndicator from "@/components/nova/PostureIndicator";
@@ -36,7 +36,7 @@ import { Link } from "react-router-dom";
 export default function Analysis() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const [transcript, setTranscript] = useState(SAMPLE_TRANSCRIPT);
+  const [transcript, setTranscript] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("transcript");
