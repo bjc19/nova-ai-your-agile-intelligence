@@ -75,7 +75,7 @@ const translations = {
     launchDemo: "Lancer la Démo",
     seePlans: "Voir les Plans",
     blockersDetection: "Détection des Blocages",
-    blockersDesc: "Identifiez automatiquement les blocages et les obstacles à partir des conversations de standup",
+    blockersDesc: "Identifiez automatiquement les blocages et les obstacles à partir des conversations d'ateliers et réunions",
     riskAnalysis: "Analyse des Risques",
     riskDesc: "Surfacez proactivement les risques avant qu'ils n'impactent la livraison de votre sprint",
     sprintInsights: "Insights du Sprint / Cycle",
@@ -680,36 +680,6 @@ export default function Home() {
                     {lang === 'fr' 
                       ? 'Tableaux et cartes' 
                       : 'Boards & cards'}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Azure DevOps */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.45 }}
-              viewport={{ once: true }}
-            >
-              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <svg className="w-14 h-14" viewBox="0 0 256 256">
-                      <defs>
-                        <linearGradient x1="49.998%" y1="-0.001%" x2="49.998%" y2="99.998%" id="d">
-                          <stop stopColor="#0078D4" offset="0%"/>
-                          <stop stopColor="#0078D4" offset="100%"/>
-                        </linearGradient>
-                      </defs>
-                      <path d="M192.2 0L90.3 22.7v37.4L29.5 79.3 3.7 99.6v95l25.8 20.3 60.8 19.2v37.6l101.9 22.7L256 226V30L192.2 0zm37.5 195.1l-47.3 8.8V55.8l47.3-8.8v148.1zM44.7 172.2V83.8l45.6-19.1V191l-45.6-18.8z" fill="url(#d)"/>
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">Azure DevOps</h3>
-                  <p className="text-sm text-slate-600">
-                    {lang === 'fr' 
-                      ? 'Pipelines & work items' 
-                      : 'Pipelines & work items'}
                   </p>
                 </CardContent>
               </Card>
