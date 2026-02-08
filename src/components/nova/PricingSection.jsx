@@ -27,10 +27,10 @@ const plans = [
     users: "5 utilisateurs inclus",
     addOn: "+10 CAD/utilisateur/mois (max 10)",
     included: [
-      "Analyses manuelles uniquement",
-      "10 analyses par mois",
-      "Insights contextualisés",
+      "30 analyses manuelles uniquement",
+      "10 analyses automatiques par mois",
       "1 source au choix (Slack, Jira ou Teams)",
+      "Insights contextualisés",
       "Configuration guidée",
       "Vue basique avec tendances",
       "Visualisations simples",
