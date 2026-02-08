@@ -20,11 +20,11 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
-// Animation CSS pour le curseur de terminal qui progresse
+// Animation CSS pour la progression des blocs et validation finale
 const commandAnimationStyles = `
-  @keyframes type-and-stop {
+  @keyframes type-text {
     0% { width: 0; }
-    80% { width: 100%; }
+    90% { width: 100%; }
     100% { width: 100%; }
   }
 
@@ -33,18 +33,45 @@ const commandAnimationStyles = `
     50%, 100% { opacity: 0; }
   }
 
-  .terminal-cursor {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    animation: type-and-stop 3s steps(20, end) 1;
+  @keyframes validate-frame {
+    0% { 
+      box-shadow: inset 0 0 0 0 #10b981, inset 0 0 0 0 #10b981;
+    }
+    50% {
+      box-shadow: inset 24px 0 0 0 #10b981, inset -24px 0 0 0 #10b981;
+    }
+    100% {
+      box-shadow: inset 24px 0 0 0 #10b981, inset -24px 0 0 0 #10b981;
+    }
   }
 
-  .terminal-cursor::after {
+  .terminal-block {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .terminal-block .text-white {
+    position: relative;
+    display: inline-block;
+    animation: type-text 0.6s steps(15, end) forwards;
+    animation-fill-mode: both;
+  }
+
+  .terminal-block .text-white::after {
     content: '|';
-    position: absolute;
-    right: -8px;
-    animation: blink 0.8s step-end infinite;
+    animation: blink 0.7s step-end infinite;
+    margin-left: 2px;
+  }
+
+  .terminal-block-0 .text-white { animation-delay: 0s; }
+  .terminal-block-1 .text-white { animation-delay: 0.8s; }
+  .terminal-block-2 .text-white { animation-delay: 1.6s; }
+  .terminal-block-3 .text-white { animation-delay: 2.4s; }
+  .terminal-block-4 .text-white { animation-delay: 3.2s; }
+  .terminal-block-5 .text-white { animation-delay: 4s; }
+
+  .terminal-block-5 {
+    animation: validate-frame 1s ease-out 4.6s forwards;
   }
 `;
 
@@ -412,8 +439,8 @@ export default function Home() {
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="flex flex-col items-center">
-                    <div className="w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
-                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight terminal-cursor">
+                    <div className={`w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors terminal-block terminal-block-${i}`}>
+                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight">
                         {item.label}
                       </div>
                     </div>
