@@ -20,7 +20,7 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
-// Animation CSS pour la progression séquentielle des blocs
+// Animation CSS pour la progression séquentielle des blocs (4s par bloc)
 const commandAnimationStyles = `
   @keyframes cursor-type {
     0% { opacity: 1; }
@@ -49,18 +49,18 @@ const commandAnimationStyles = `
     content: '|';
     display: inline;
     margin-left: 2px;
-    animation: cursor-type 0.8s step-end forwards;
+    animation: cursor-type 4s step-end forwards;
     opacity: 0;
   }
 
   .terminal-block-0 .text-white::after { animation-delay: 0s; }
-  .terminal-block-1 .text-white::after { animation-delay: 0.8s; }
-  .terminal-block-2 .text-white::after { animation-delay: 1.6s; }
-  .terminal-block-3 .text-white::after { animation-delay: 2.4s; }
-  .terminal-block-4 .text-white::after { animation-delay: 3.2s; }
+  .terminal-block-1 .text-white::after { animation-delay: 4s; }
+  .terminal-block-2 .text-white::after { animation-delay: 8s; }
+  .terminal-block-3 .text-white::after { animation-delay: 12s; }
+  .terminal-block-4 .text-white::after { animation-delay: 16s; }
 
   .terminal-block-5 {
-    animation: validate-frame 1s ease-out 4.2s forwards;
+    animation: validate-frame 1s ease-out 20s forwards;
   }
 `;
 
