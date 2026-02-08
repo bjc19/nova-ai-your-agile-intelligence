@@ -14,6 +14,7 @@ import PostureIndicator from "@/components/nova/PostureIndicator";
 import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTURES } from "@/components/nova/PostureEngine";
 import ProductGoalCard from "@/components/nova/ProductGoalCard";
 import { generateAlignmentReport } from "@/components/nova/ProductGoalAlignmentEngine";
+import { detectWorkshopType } from "@/components/nova/workshopDetection";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import { 
@@ -69,13 +70,19 @@ export default function Analysis() {
     setAlignmentReport(report);
   }, []);
 
-  // Analyze transcript to detect context and determine posture
+  // Analyze transcript to detect context, workshop type, and determine posture
   useEffect(() => {
     if (transcript && transcript.length > 50) {
       const context = analyzeTranscriptForContext(transcript);
       setDetectedContext(context);
       const posture = determinePosture(context);
       setCurrentPosture(posture);
+      
+      // Auto-detect workshop type
+      const detected = detectWorkshopType(transcript);
+      if (detected.type && detected.type !== "unknown") {
+        setWorkshopType(detected.type);
+      }
     }
   }, [transcript]);
 
@@ -403,50 +410,46 @@ Provide a detailed analysis in the following JSON format:`;
           </div>
         </motion.div>
 
-        {/* Workshop Type Selector */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-6"
-        >
-          <Card className="border-amber-200 bg-amber-50/50">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
-                Type d'atelier Scrum
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-amber-100/50 border border-amber-200 rounded-lg p-3">
-                <p className="text-sm text-amber-800 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span>
-                    ⚠️ Les analyses manuelles sont considérées comme des données réelles.
-                    Assurez-vous de ne coller que du contenu provenant de réunions ou ateliers effectifs.
-                  </span>
+        {/* Workshop Type Auto-Detection */}
+        {transcript && transcript.length > 50 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-6"
+          >
+            <Card className={`${workshopType ? 'border-green-200 bg-green-50/50' : 'border-slate-200 bg-slate-50/50'}`}>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-blue-600" />
+                  Type d'atelier détecté
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {workshopType ? (
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-green-200">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {workshopType === 'daily_scrum' ? 'Daily Scrum' :
+                         workshopType === 'retrospective' ? 'Rétrospective' :
+                         workshopType === 'sprint_planning' ? 'Sprint Planning' :
+                         workshopType === 'sprint_review' ? 'Sprint Review' : 'Autre'}
+                      </p>
+                      <p className="text-xs text-slate-500">Détecté automatiquement</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-600">Analyse en cours...</p>
+                )}
+                <p className="text-xs text-slate-500 flex items-start gap-2">
+                  <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                  Les analyses manuelles sont considérées comme des données réelles.
                 </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Sélectionnez le type d'atelier à analyser
-                </label>
-                <Select value={workshopType} onValueChange={setWorkshopType}>
-                  <SelectTrigger className="w-full bg-white">
-                    <SelectValue placeholder="Choisir un type d'atelier..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily_scrum">Daily Scrum</SelectItem>
-                    <SelectItem value="retrospective">Rétrospective</SelectItem>
-                    <SelectItem value="sprint_planning">Sprint Planning</SelectItem>
-                    <SelectItem value="sprint_review">Sprint Review</SelectItem>
-                    <SelectItem value="other">Autre</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Input Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
