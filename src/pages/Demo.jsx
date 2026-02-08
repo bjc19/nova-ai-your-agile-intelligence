@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import TranscriptInput, { SAMPLE_TRANSCRIPT } from "@/components/nova/TranscriptInput";
+import TranscriptInput from "@/components/nova/TranscriptInput";
 import FileUpload from "@/components/nova/FileUpload";
 import SlackChannelSelector from "@/components/nova/SlackChannelSelector";
 import { base44 } from "@/api/base44Client";
@@ -35,7 +35,7 @@ const DEMO_STORAGE_KEY = "nova_demo_count";
 
 export default function Demo() {
   const navigate = useNavigate();
-  const [transcript, setTranscript] = useState(SAMPLE_TRANSCRIPT);
+  const [transcript, setTranscript] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("transcript");
