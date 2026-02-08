@@ -89,7 +89,7 @@ const plans = [
     included: [
       "Analyses post-réunion illimitées",
       "Croisement complet multi-sources",
-      "Détection et adaptation multi-projets",
+      "Détection et adaptation multi-projets & multi-équipes",
       "Recommandations courageuses contextualisées",
       "Stabilité Sprint Goal / Product Goal",
       "Risques capacité / focus",
@@ -183,10 +183,10 @@ export function PricingSection() {
                     💰 {plan.yearlyPrice} CAD/mois avec {plan.discount}
                   </p>
                 )}
-                
-                <p className="text-sm text-slate-600 pt-2">{plan.users}</p>
                 {plan.structure && <p className="text-xs text-slate-600">{plan.structure}</p>}
                 {plan.degressiveNote && <p className="text-xs text-slate-600">{plan.degressiveNote}</p>}
+
+                <p className="text-sm text-slate-600 pt-2">{plan.users}</p>
                 <p className="text-xs text-slate-500">{plan.addOn}</p>
                 {plan.addonOption && <p className="text-xs text-slate-500 italic">{plan.addonOption}</p>}
               </div>
