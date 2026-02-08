@@ -421,15 +421,9 @@ export default function Home() {
               <span className="text-green-400">✓</span>
               <span>{lang === 'fr' ? 'Temps total : ~5s | Données brutes : 0 bytes stockés' : 'Total time: ~5s | Raw data: 0 bytes stored'}</span>
             </div>
-          </motion.div>
 
           {/* Comparison Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            viewport={{ once: true }}
-          >
+          <div>
             <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
               Tableau Comparatif : Nova vs Concurrents Typiques
             </h3>
