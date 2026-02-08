@@ -53,7 +53,16 @@ export function detectOutOfContext(text) {
   sportsLexicon.forEach(term => { if (lowerText.includes(term)) sportsLexiconCount++; });
   teamBuildingTerms.forEach(term => { if (lowerText.includes(term)) teamBuildingContext = true; });
   
-  if (sportsNounsCount >= 1 && sportsLexiconCount >= 2 && !teamBuildingContext) {
+  // Contra-indicateur: si forte présence de vocabulaire PM/Agile, le VETO Sport est ignoré
+  let agileContraIndicator = 0;
+  const agileContraTerms = [
+    'sprint', 'planning', 'backlog', 'item', 'capacite', 'engagement',
+    'deplacement', 'coordination', 'charge', 'dependance', 'risque',
+    'objectif sprint', 'user story', 'definition of done', 'velocity'
+  ].map(normalizeText);
+  agileContraTerms.forEach(term => { if (lowerText.includes(term)) agileContraIndicator++; });
+
+  if (sportsNounsCount >= 1 && sportsLexiconCount >= 2 && !teamBuildingContext && agileContraIndicator < 3) {
     return {
       isOutOfContext: true,
       confidence: 99,
