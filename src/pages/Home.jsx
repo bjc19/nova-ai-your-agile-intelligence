@@ -20,12 +20,11 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
-// Animation CSS pour la progression séquentielle des blocs (4s par bloc)
+// Animation CSS pour la progression séquentielle des blocs
 const commandAnimationStyles = `
-  @keyframes cursor-type {
-    0% { opacity: 1; }
-    95% { opacity: 1; }
-    100% { opacity: 0; }
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 
   @keyframes validate-frame {
@@ -49,8 +48,8 @@ const commandAnimationStyles = `
     content: '|';
     display: inline;
     margin-left: 2px;
-    animation: cursor-type 3s step-end 1s forwards;
-    opacity: 0;
+    animation: cursor-blink 0.7s step-end infinite;
+    opacity: 1;
   }
 
   .terminal-block-0 .text-white::after { animation-delay: 0s; }
@@ -61,19 +60,6 @@ const commandAnimationStyles = `
 
   .terminal-block-5 {
     animation: validate-frame 1s ease-out 10s forwards;
-    /* AJOUTER APRÈS votre code existant : */
-
-/* Nouvelle animation de clignotement rapide */
-@keyframes terminal-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* Surcharger le style du curseur */
-.terminal-block .text-white::after {
-  animation: terminal-blink 0.7s step-end infinite !important;
-  opacity: 1 !important;
-}
   }
 `;
 
