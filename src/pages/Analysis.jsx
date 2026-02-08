@@ -19,6 +19,7 @@ import { detectWorkshopType } from "@/components/nova/workshopDetection";
 import { detectOutOfContext } from "@/components/nova/outOfContextDetection";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
+import { anonymizeAnalysisData } from "@/components/nova/anonymizationEngine";
 import { 
   Sparkles, 
   ArrowLeft, 
@@ -373,8 +374,11 @@ Provide a detailed analysis in the following JSON format:`;
       }
     }
 
+    // Anonymize analysis data before storing
+    const anonymizedAnalysis = anonymizeAnalysisData({ ...result, posture: posture.id, context });
+
     // Store result in sessionStorage and navigate
-    sessionStorage.setItem("novaAnalysis", JSON.stringify({ ...result, posture: posture.id, context }));
+    sessionStorage.setItem("novaAnalysis", JSON.stringify(anonymizedAnalysis));
     sessionStorage.setItem("novaTranscript", transcript);
 
     // Store source info for external CTA redirection
