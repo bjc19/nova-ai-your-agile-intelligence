@@ -57,11 +57,11 @@ const commandAnimationStyles = `
     opacity: 1;
   }
 
-  .terminal-block-0 .text-white::after { animation-delay: 0s; }
-  .terminal-block-1 .text-white::after { animation-delay: 1s; }
-  .terminal-block-2 .text-white::after { animation-delay: 1s; }
-  .terminal-block-3 .text-white::after { animation-delay: 1s; }
-  .terminal-block-4 .text-white::after { animation-delay: 1s; }
+  .terminal-block-0 .text-white::after { animation: hide-cursor 0s 10s forwards; }
+  .terminal-block-1 .text-white::after { animation: hide-cursor 0s 10s forwards; }
+  .terminal-block-2 .text-white::after { animation: hide-cursor 0s 10s forwards; }
+  .terminal-block-3 .text-white::after { animation: hide-cursor 0s 10s forwards; }
+  .terminal-block-4 .text-white::after { animation: hide-cursor 0s 10s forwards; }
 
   .terminal-block-5 {
     animation: validate-frame 1s ease-out 10s forwards;
