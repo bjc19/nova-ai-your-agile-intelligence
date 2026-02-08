@@ -25,7 +25,7 @@ const plans = [
     subtitle: "Découvrez la puissance de Nova",
     price: "49",
     users: "5 utilisateurs inclus",
-    addOn: "+10 CAD/utilisateur/mois (max 10)",
+    addOn: "+15 CAD/utilisateur/mois (max +10)",
     included: [
       "30 analyses manuelles uniquement",
       "10 analyses automatiques par mois",
@@ -53,7 +53,7 @@ const plans = [
     price: "99",
     yearlyPrice: "84",
     users: "10 utilisateurs inclus",
-    addOn: "+15 CAD/utilisateur/mois (max 25)",
+    addOn: "+10 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
       "70 analyses manuelles par mois",
