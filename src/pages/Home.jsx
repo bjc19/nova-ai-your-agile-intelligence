@@ -384,7 +384,7 @@ export default function Home() {
                 </div>
 
                 {/* Process Flow */}
-                <div className="bg-slate-900 rounded-2xl p-8 mb-12 border border-slate-800">
+                <div className="bg-gradient-to-b from-slate-100 to-slate-50 rounded-2xl p-8 mb-12 border border-slate-200">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
               <span className="text-green-400">●</span>
               {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
