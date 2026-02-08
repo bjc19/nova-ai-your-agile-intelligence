@@ -509,64 +509,64 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               <div>
-                <Card className="text-center p-4 hover:shadow-md transition-all border-slate-300 bg-slate-50">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-900 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">SOC2</span>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="45" fill="#1e40af" />
+                      <path d="M30 50 L45 65 L70 35" stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      <text x="50" y="80" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold">SOC 2</text>
+                    </svg>
                   </div>
-                  <h4 className="font-semibold text-slate-900 mb-0.5 text-sm">SOC 2</h4>
+                  <h4 className="font-bold text-slate-900 mb-1">SOC 2</h4>
                   <p className="text-xs text-slate-600">Type II</p>
                 </Card>
               </div>
 
               <div>
-                <Card className="text-center p-4 hover:shadow-md transition-all border-slate-300 bg-slate-50">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-900 flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">ISO</span>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect x="10" y="10" width="80" height="80" rx="5" fill="#059669" />
+                      <text x="50" y="45" fontSize="18" fill="white" textAnchor="middle" fontWeight="bold">ISO</text>
+                      <text x="50" y="65" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">27001</text>
+                    </svg>
                   </div>
-                  <h4 className="font-semibold text-slate-900 mb-0.5 text-sm">ISO 27001</h4>
+                  <h4 className="font-bold text-slate-900 mb-1">ISO 27001</h4>
                   <p className="text-xs text-slate-600">Certified</p>
                 </Card>
               </div>
 
               <div>
-                <Card className="text-center p-4 hover:shadow-md transition-all border-slate-300 bg-slate-50">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-900 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">GDPR</span>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="45" fill="#0c4a6e" />
+                      <circle cx="30" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="40" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="50" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="60" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="70" cy="30" r="3" fill="#fbbf24" />
+                      <text x="50" y="70" fontSize="16" fill="white" textAnchor="middle" fontWeight="bold">GDPR</text>
+                    </svg>
                   </div>
-                  <h4 className="font-semibold text-slate-900 mb-0.5 text-sm">GDPR</h4>
+                  <h4 className="font-bold text-slate-900 mb-1">GDPR</h4>
                   <p className="text-xs text-slate-600">Compliant</p>
                 </Card>
               </div>
 
               <div>
-                <Card className="text-center p-4 hover:shadow-md transition-all border-slate-300 bg-slate-50">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-900 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">CCPA</span>
+                <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect x="5" y="5" width="90" height="90" rx="10" fill="#dc2626" />
+                      <path d="M20 30 L50 15 L80 30 L80 60 L50 85 L20 60 Z" fill="#991b1b" />
+                      <text x="50" y="55" fontSize="16" fill="white" textAnchor="middle" fontWeight="bold">CCPA</text>
+                    </svg>
                   </div>
-                  <h4 className="font-semibold text-slate-900 mb-0.5 text-sm">CCPA</h4>
+                  <h4 className="font-bold text-slate-900 mb-1">CCPA</h4>
                   <p className="text-xs text-slate-600">Compliant</p>
-                </Card>
-              </div>
-
-              <div>
-                <Card className="text-center p-4 hover:shadow-md transition-all border-slate-300 bg-slate-50">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-900 flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">HIPAA</span>
-                  </div>
-                  <h4 className="font-semibold text-slate-900 mb-0.5 text-sm">HIPAA</h4>
-                  <p className="text-xs text-slate-600">Ready</p>
-                </Card>
-              </div>
-
-              <div>
-                <Card className="text-center p-4 hover:shadow-md transition-all border-slate-300 bg-slate-50">
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-lg bg-slate-900 flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">FedRAMP</span>
-                  </div>
-                  <h4 className="font-semibold text-slate-900 mb-0.5 text-sm">FedRAMP</h4>
-                  <p className="text-xs text-slate-600">Ready</p>
                 </Card>
               </div>
             </div>
@@ -966,6 +966,31 @@ export default function Home() {
                     {lang === 'fr' 
                       ? 'Pull requests & commits' 
                       : 'Pull requests & commits'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Zoom */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 210 210">
+                      <path d="M105 0C47.103 0 0 47.103 0 105s47.103 105 105 105 105-47.103 105-105S162.897 0 105 0z" fill="#2D8CFF"/>
+                      <path d="M61.667 151.667V90l41.25 30.833V90h45.833v61.667l-41.25-30.834v30.834H61.667z" fill="#FFF"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Zoom</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Enregistrements vidéo' 
+                      : 'Video recordings'}
                   </p>
                 </CardContent>
               </Card>
