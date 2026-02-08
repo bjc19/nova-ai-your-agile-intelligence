@@ -1086,10 +1086,11 @@ export default function Home() {
               </Card>
             </motion.div>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+          </Suspense>
 
-      {/* CTA Section */}
+          {/* CTA Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
        <motion.div
          initial={{ opacity: 0, y: 20 }}
