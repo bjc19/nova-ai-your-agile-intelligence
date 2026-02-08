@@ -27,6 +27,12 @@ const commandAnimationStyles = `
     50% { opacity: 0; }
   }
 
+  @keyframes dance {
+    0%, 100% { transform: translateY(0px); }
+    25% { transform: translateY(-4px); }
+    75% { transform: translateY(4px); }
+  }
+
   @keyframes validate-frame {
     0% { 
       box-shadow: inset 0 0 0 0 #10b981, inset 0 0 0 0 #10b981;
@@ -39,9 +45,19 @@ const commandAnimationStyles = `
     }
   }
 
+  @keyframes fade-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .terminal-block {
+    animation: fade-out 0.6s ease-out 16s forwards;
+  }
+
   .terminal-block .text-white {
     position: relative;
     display: inline-block;
+    animation: dance 0.5s ease-in-out infinite;
   }
 
   .terminal-block .text-white::after {
