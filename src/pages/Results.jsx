@@ -30,6 +30,7 @@ export default function Results() {
   const { t, language } = useLanguage();
   const [analysis, setAnalysis] = useState(null);
         const [translationComplete, setTranslationComplete] = useState(language !== 'fr');
+        const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(true);
         const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
   const [riskUrgencyFilter, setRiskUrgencyFilter] = useState(null);
   const [workshopDetection, setWorkshopDetection] = useState(null);
@@ -59,8 +60,9 @@ export default function Results() {
             setIsOutOfContext(isOutOfContext);
           }
 
-          // Display results immediately, translate in background if needed
+          // Display results immediately
           setAnalysis(parsedAnalysis);
+          setIsLoadingAnalysis(false);
 
           // Translate all LLM content if language is French
           if (language === 'fr') {
@@ -134,20 +136,20 @@ export default function Results() {
         }
       }, [navigate, language, t]);
 
-  if (!analysis || !translationComplete) {
-      return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
-          <motion.div
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-center"
-          >
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-600 animate-spin" />
-            <p className="text-slate-500 font-medium">{t('novaAnalyzing')}</p>
-          </motion.div>
-        </div>
-      );
-    }
+  if (!analysis || isLoadingAnalysis || !translationComplete) {
+       return (
+         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+           <motion.div
+             animate={{ opacity: [0.5, 1, 0.5] }}
+             transition={{ duration: 2, repeat: Infinity }}
+             className="text-center"
+           >
+             <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-600 animate-spin" />
+             <p className="text-slate-500 font-medium">{t('novaAnalyzing')}</p>
+           </motion.div>
+         </div>
+       );
+     }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
