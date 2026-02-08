@@ -477,7 +477,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
             {/* Slack */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -487,16 +487,19 @@ export default function Home() {
             >
               <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 127 127" fill="none">
+                      <path d="M27.2 80c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8h8v8zm4 0c0-4.4 3.6-8 8-8s8 3.6 8 8v20c0 4.4-3.6 8-8 8s-8-3.6-8-8V80z" fill="#E01E5A"/>
+                      <path d="M39.2 27c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8v8h-8zm0 4c4.4 0 8 3.6 8 8s-3.6 8-8 8h-20c-4.4 0-8-3.6-8-8s3.6-8 8-8h20z" fill="#36C5F0"/>
+                      <path d="M99.8 47c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8h-8v-8zm-4 0c0 4.4-3.6 8-8 8s-8-3.6-8-8V27c0-4.4 3.6-8 8-8s8 3.6 8 8v20z" fill="#2EB67D"/>
+                      <path d="M87.8 99.8c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8v-8h8zm0-4c-4.4 0-8-3.6-8-8s3.6-8 8-8h20c4.4 0 8 3.6 8 8s-3.6 8-8 8h-20z" fill="#ECB22E"/>
                     </svg>
                   </div>
                   <h3 className="font-semibold text-slate-900 mb-2">Slack</h3>
                   <p className="text-sm text-slate-600">
                     {lang === 'fr' 
-                      ? 'Analysez vos conversations d\'équipe automatiquement' 
-                      : 'Analyze your team conversations automatically'}
+                      ? 'Conversations d\'équipe' 
+                      : 'Team conversations'}
                   </p>
                 </CardContent>
               </Card>
@@ -506,21 +509,33 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
               viewport={{ once: true }}
             >
               <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20.625 8.25h-7.5v7.5h7.5v-7.5zM12.375 0v7.5h-7.5v-7.5h7.5zM12.375 8.25v7.5h-7.5v-7.5h7.5zM21.375 0v7.5h-7.5v-7.5h7.5zM3.375 24h9v-7.5h-9V24zM20.625 24h-7.5v-7.5h7.5V24z"/>
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 2228.833 2073.333">
+                      <path fill="#5059C9" d="M1554.637 777.5h575.713c54.391 0 98.483 44.092 98.483 98.483v524.398c0 199.901-162.051 361.952-361.952 361.952h-1.711c-199.901.028-361.975-162-362.004-361.901V828.971c.001-28.427 23.045-51.471 51.471-51.471z"/>
+                      <circle fill="#5059C9" cx="1943.75" cy="440.583" r="233.25"/>
+                      <circle fill="#7B83EB" cx="1218.083" cy="336.917" r="336.917"/>
+                      <path fill="#7B83EB" d="M1667.323 777.5H717.01c-53.743 1.33-96.257 45.931-95.01 99.676v598.105c-7.505 322.519 247.657 590.16 570.167 598.053 322.51-7.893 577.671-275.534 570.167-598.053V877.176c1.245-53.745-41.268-98.346-95.011-99.676z"/>
+                      <path opacity=".1" d="M1244 777.5v838.145c-.258 38.435-23.549 72.964-59.09 87.598-11.316 4.787-23.478 7.254-35.765 7.257H667.613c-6.738-17.105-12.958-34.21-18.142-51.833a631.287 631.287 0 0 1-27.472-183.49V877.02c-1.246-53.659 41.198-98.19 94.855-99.52H1244z"/>
+                      <path opacity=".2" d="M1192.167 777.5v889.978a91.84 91.84 0 0 1-7.257 35.765c-14.634 35.541-49.163 58.833-87.598 59.09H691.975c-8.812-17.105-17.105-34.21-24.362-51.833-7.257-17.623-12.958-34.21-18.142-51.833a631.282 631.282 0 0 1-27.472-183.49V877.02c-1.246-53.659 41.198-98.19 94.855-99.52h475.313z"/>
+                      <path opacity=".2" d="M1192.167 777.5v786.312c-.395 52.223-42.632 94.46-94.855 94.855h-447.84A631.282 631.282 0 0 1 622 1475.177V877.02c-1.246-53.659 41.198-98.19 94.855-99.52h475.312z"/>
+                      <path opacity=".2" d="M1140.333 777.5v786.312c-.395 52.223-42.632 94.46-94.855 94.855H649.472A631.282 631.282 0 0 1 622 1475.177V877.02c-1.246-53.659 41.198-98.19 94.855-99.52h423.478z"/>
+                      <path opacity=".1" d="M1244 509.522v163.275c-8.812.518-17.105 1.037-25.917 1.037s-17.105-.518-25.917-1.037c-17.496-1.161-34.848-3.937-51.833-8.293a336.92 336.92 0 0 1-233.25-198.003 288.02 288.02 0 0 1-16.587-51.833h258.648c52.305.198 94.657 42.549 94.856 94.854z"/>
+                      <path opacity=".2" d="M1192.167 561.355v111.442a951.733 951.733 0 0 1-25.917 1.037c-8.812 0-17.105-.518-25.917-1.037-17.496-1.161-34.848-3.937-51.833-8.293a336.92 336.92 0 0 1-233.25-198.003h242.062c52.304.198 94.656 42.55 94.855 94.854z"/>
+                      <path opacity=".2" d="M1192.167 561.355v111.442a951.733 951.733 0 0 1-25.917 1.037c-8.812 0-17.105-.518-25.917-1.037-17.496-1.161-34.848-3.937-51.833-8.293a336.92 336.92 0 0 1-233.25-198.003h242.062c52.304.198 94.656 42.55 94.855 94.854z"/>
+                      <path opacity=".2" d="M1140.333 561.355v111.442c-8.812.518-17.105 1.037-25.917 1.037s-17.105-.518-25.917-1.037c-17.496-1.161-34.848-3.937-51.833-8.293a336.92 336.92 0 0 1-233.25-198.003h242.062c52.305.198 94.656 42.55 94.855 94.854z"/>
+                      <path fill="#FFF" d="M1140.333 561.355v111.442c-8.812.518-17.105 1.037-25.917 1.037s-17.105-.518-25.917-1.037c-17.496-1.161-34.848-3.937-51.833-8.293a336.92 336.92 0 0 1-233.25-198.003h242.062c52.305.198 94.656 42.55 94.855 94.854z"/>
                     </svg>
                   </div>
                   <h3 className="font-semibold text-slate-900 mb-2">Microsoft Teams</h3>
                   <p className="text-sm text-slate-600">
                     {lang === 'fr' 
-                      ? 'Synchronisez vos transcriptions de réunions' 
-                      : 'Sync your meeting transcripts'}
+                      ? 'Transcriptions de réunions' 
+                      : 'Meeting transcripts'}
                   </p>
                 </CardContent>
               </Card>
@@ -530,21 +545,141 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
             >
               <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.004-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z"/>
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 256 256">
+                      <defs>
+                        <linearGradient x1="98.031%" y1="0.161%" x2="58.888%" y2="40.766%" id="a">
+                          <stop stopColor="#0052CC" offset="18%"/>
+                          <stop stopColor="#2684FF" offset="100%"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M244.658 0H121.707c0 55.502 45.001 100.503 100.503 100.503h22.448V22.448C244.658 10.048 234.61 0 244.658 0z" fill="#2684FF"/>
+                      <path d="M121.707 0H0c0 55.502 45.001 100.503 100.503 100.503h21.204V21.204C121.707 9.503 111.204 0 121.707 0z" fill="url(#a)"/>
+                      <path d="M121.707 121.707H0c0 55.502 45.001 100.503 100.503 100.503h21.204v-79.299c0-11.701-10.503-21.204-21.204-21.204z" fill="url(#a)"/>
                     </svg>
                   </div>
                   <h3 className="font-semibold text-slate-900 mb-2">Jira</h3>
                   <p className="text-sm text-slate-600">
                     {lang === 'fr' 
-                      ? 'Croisez vos métriques avec votre backlog' 
-                      : 'Cross-reference metrics with your backlog'}
+                      ? 'Métriques de backlog' 
+                      : 'Backlog metrics'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Confluence */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 256 256">
+                      <defs>
+                        <linearGradient x1="99.14%" y1="112.696%" x2="33.746%" y2="37.947%" id="b">
+                          <stop stopColor="#0052CC" offset="18%"/>
+                          <stop stopColor="#2684FF" offset="100%"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M12.803 4.542c-6.845 10.52-6.845 22.972-6.845 22.972 0 2.369 1.901 4.27 4.27 4.27h52.44c2.368 0 3.612-2.791 2.052-4.596L19.69.915C17.48-1.476 14.1-.813 12.803 4.542z" fill="url(#b)"/>
+                      <path d="M243.197 251.458c6.845-10.52 6.845-22.972 6.845-22.972 0-2.369-1.901-4.27-4.27-4.27h-52.44c-2.368 0-3.612 2.791-2.052 4.596l45.03 26.273c2.21 2.391 5.59 1.728 6.887-3.627z" fill="#2684FF"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Confluence</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Documentation d\'équipe' 
+                      : 'Team documentation'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* GitHub */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 256 250">
+                      <path d="M128.001 0C57.317 0 0 57.307 0 128.001c0 56.554 36.676 104.535 87.535 121.46 6.397 1.185 8.746-2.777 8.746-6.158 0-3.052-.12-13.135-.174-23.83-35.61 7.742-43.124-15.103-43.124-15.103-5.823-14.795-14.213-18.73-14.213-18.73-11.613-7.944.876-7.78.876-7.78 12.853.902 19.621 13.19 19.621 13.19 11.417 19.568 29.945 13.911 37.249 10.64 1.149-8.272 4.466-13.92 8.127-17.116-28.431-3.236-58.318-14.212-58.318-63.258 0-13.975 5-25.394 13.188-34.358-1.329-3.224-5.71-16.242 1.24-33.874 0 0 10.749-3.44 35.21 13.121 10.21-2.836 21.16-4.258 32.038-4.307 10.878.049 21.837 1.47 32.066 4.307 24.431-16.56 35.165-13.12 35.165-13.12 6.967 17.63 2.584 30.65 1.255 33.873 8.207 8.964 13.173 20.383 13.173 34.358 0 49.163-29.944 59.988-58.447 63.157 4.591 3.972 8.682 11.762 8.682 23.704 0 17.126-.148 30.91-.148 35.126 0 3.407 2.304 7.398 8.792 6.14C219.37 232.5 256 184.537 256 128.002 256 57.307 198.691 0 128.001 0zm-80.06 182.34c-.282.636-1.283.827-2.194.39-.929-.417-1.45-1.284-1.15-1.922.276-.655 1.279-.838 2.205-.399.93.418 1.46 1.293 1.139 1.931zm6.296 5.618c-.61.566-1.804.303-2.614-.591-.837-.892-.994-2.086-.375-2.66.63-.566 1.787-.301 2.626.591.838.903 1 2.088.363 2.66zm4.32 7.188c-.785.545-2.067.034-2.86-1.104-.784-1.138-.784-2.503.017-3.05.795-.547 2.058-.055 2.861 1.075.782 1.157.782 2.522-.019 3.08zm7.304 8.325c-.701.774-2.196.566-3.29-.49-1.119-1.032-1.43-2.496-.726-3.27.71-.776 2.213-.558 3.315.49 1.11 1.03 1.45 2.505.701 3.27zm9.442 2.81c-.31 1.003-1.75 1.459-3.199 1.033-1.448-.439-2.395-1.613-2.103-2.626.301-1.01 1.747-1.484 3.207-1.028 1.446.436 2.396 1.602 2.095 2.622zm10.744 1.193c.036 1.055-1.193 1.93-2.715 1.95-1.53.034-2.769-.82-2.786-1.86 0-1.065 1.202-1.932 2.733-1.958 1.522-.03 2.768.818 2.768 1.868zm10.555-.405c.182 1.03-.875 2.088-2.387 2.37-1.485.271-2.861-.365-3.05-1.386-.184-1.056.893-2.114 2.376-2.387 1.514-.263 2.868.356 3.061 1.403z" fill="#181717"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">GitHub</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Pull requests & commits' 
+                      : 'Pull requests & commits'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Zoom */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 210 210">
+                      <path d="M105 0C47.103 0 0 47.103 0 105s47.103 105 105 105 105-47.103 105-105S162.897 0 105 0z" fill="#2D8CFF"/>
+                      <path d="M61.667 151.667V90l41.25 30.833V90h45.833v61.667l-41.25-30.834v30.834H61.667z" fill="#FFF"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Zoom</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Enregistrements vidéo' 
+                      : 'Video recordings'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Trello */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 256 256">
+                      <defs>
+                        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="c">
+                          <stop stopColor="#0091E6" offset="0%"/>
+                          <stop stopColor="#0079BF" offset="100%"/>
+                        </linearGradient>
+                      </defs>
+                      <rect fill="url(#c)" width="256" height="256" rx="25"/>
+                      <rect fill="#FFF" x="144.64" y="33.28" width="78.08" height="112" rx="12"/>
+                      <rect fill="#FFF" x="33.28" y="33.28" width="78.08" height="176" rx="12"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Trello</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Tableaux et cartes' 
+                      : 'Boards & cards'}
                   </p>
                 </CardContent>
               </Card>
