@@ -457,6 +457,102 @@ export default function Home() {
         <PricingSection />
       </div>
 
+      {/* Integrations Section */}
+      <div className="bg-slate-50 py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+              {lang === 'fr' ? 'Intégrations' : 'Integrations'}
+            </h2>
+            <p className="text-lg text-slate-600">
+              {lang === 'fr' 
+                ? 'Connectez Nova avec vos outils préférés' 
+                : 'Connect Nova with your favorite tools'}
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+            {/* Slack */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center">
+                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Slack</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Analysez vos conversations d\'équipe automatiquement' 
+                      : 'Analyze your team conversations automatically'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Microsoft Teams */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.625 8.25h-7.5v7.5h7.5v-7.5zM12.375 0v7.5h-7.5v-7.5h7.5zM12.375 8.25v7.5h-7.5v-7.5h7.5zM21.375 0v7.5h-7.5v-7.5h7.5zM3.375 24h9v-7.5h-9V24zM20.625 24h-7.5v-7.5h7.5V24z"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Microsoft Teams</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Synchronisez vos transcriptions de réunions' 
+                      : 'Sync your meeting transcripts'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Jira */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.004-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Jira</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Croisez vos métriques avec votre backlog' 
+                      : 'Cross-reference metrics with your backlog'}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
       {/* CTA Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
        <motion.div
