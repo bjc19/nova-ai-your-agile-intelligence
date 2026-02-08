@@ -34,7 +34,6 @@ const plans = [
       "Configuration guidée",
       "Vue basique avec tendances",
       "Visualisations simples",
-      "Export PDF basique"
     ],
     limitations: [
       "Pas de rapports mensuels automatiques",
