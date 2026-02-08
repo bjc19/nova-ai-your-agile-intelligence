@@ -818,7 +818,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                         </div>
                       </div>
                       <p className="text-xs text-red-700 italic">
-                        ⚠️ Ce contenu sera rejeté à l'analyse. Nova analyse uniquement les conversations professionnelles d'équipe.
+                        ⚠️ Veuillez coller uniquement une conversation professionnelle en contexte de gestion de projets agile ou autres ( Scrum, Kanban, SAFe, Disciplined Agile, etc.)
                       </p>
                     </div>
                   );
