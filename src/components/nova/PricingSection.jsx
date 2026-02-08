@@ -43,6 +43,7 @@ const plans = [
       "Pas d'alertes automatiques",
       "Pas de KPIs détaillés"
     ],
+    highlight: "NON renouvelable - Upgrade vers Growth requis",
     ctaKey: "contactSales"
   },
   {
