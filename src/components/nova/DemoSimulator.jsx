@@ -45,19 +45,36 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     
     // ========== COUCHE 1: VETOS THÉMATIQUES ABSOLUS ==========
     
-    // VETO 1: Domaine du Sport (Explicite)
+    // VETO 1: Domaine du Sport (Explicite - Football, Hockey, Basketball, etc.)
     const sportsProperNouns = [
+      // Football/Soccer
       'real madrid', 'real', 'barcelone', 'barca', 'psg', 'bayern', 
       'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappe', 'clasico',
-      'liverpool', 'manchester', 'arsenal', 'chelsea'
+      'liverpool', 'manchester', 'arsenal', 'chelsea', 'juventus', 'milan',
+      // Hockey (équipes NHL communes)
+      'canadiens', 'bruins', 'maple leafs', 'rangers', 'penguins', 'blackhawks',
+      // Basketball
+      'lakers', 'celtics', 'bulls', 'warriors', 'lebron', 'curry', 'jordan'
     ].map(normalizeText);
     
     const sportsLexicon = [
+      // Football/Soccer
       'match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'terrain',
       'arbitre', 'penalty', 'corner', 'coup franc', 'finition', 'defense',
       'attaque', 'transition', 'ligne defensive', 'egalisation', 
       'ballon', 'dribble', 'tacle', 'sortir le ballon', 'marquer', 'scorer',
-      'remontada', 'prolongation'
+      'remontada', 'prolongation', 'carton', 'hors-jeu',
+      // Hockey
+      'rondelle', 'patinoire', 'arena', 'mise en echec', 'penalite', 
+      'desavantage numerique', 'avantage numerique', 'filet desert', 
+      'zone offensive', 'zone defensive', 'zone neutre', 'tir au but',
+      'arret', 'lancer', 'passe', 'periode', 'mises en echec',
+      // Basketball
+      'panier', 'dunk', 'trois points', 'rebond', 'passe decisive',
+      'quart-temps', 'temps mort', 'faute personnelle',
+      // Général sport
+      'entraineur', 'coach sportif', 'championnat', 'ligue', 'classement',
+      'victoire', 'defaite', 'egalite', 'score', 'adversaire', 'supporter'
     ].map(normalizeText);
     
     const teamBuildingTerms = [
