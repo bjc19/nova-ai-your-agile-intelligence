@@ -83,7 +83,7 @@ export const translations = {
     confluenceDescription: "Importez la documentation d'équipe et détectez les écarts avec la réalité.",
     
     // Analysis
-    analyzeTitle: "Analyser votre Daily Scrum",
+    analyzeTitle: "Analyser un atelier",
     analyzeDescription: "Importez des données depuis Slack, téléchargez des fichiers ou collez votre transcript.",
     analyzeButton: "Analyser avec Nova",
     analyzing: "Nova analyse la réunion...",
