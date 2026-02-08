@@ -297,16 +297,11 @@ export default function Home() {
                 ? 'Toute la valeur analytique, aucun risque de fuite de données'
                 : 'All the analytical value, zero data breach risk'}
             </p>
-          </motion.div>
+            </div>
 
-          {/* Security Features Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-            >
+            {/* Security Features Grid */}
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div>
               <Card className="border-slate-200 bg-white h-full">
                 <CardContent className="p-6">
                   <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
