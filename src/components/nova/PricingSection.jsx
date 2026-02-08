@@ -61,7 +61,7 @@ const plans = [
       "50 analyses post-réunion automatiques/mois",
       "Integrations Slack, Jira, Teams",
       "Insights contextualisés avancés",
-      "Croisement limité avec 2 sources externes",
+      "Croisement limité avec 3 sources",
       "Dashboard tendances complet",
       "Rapports sommaires mensuels automatiques",
       "Alertes basiques sur dérives"
