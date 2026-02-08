@@ -64,7 +64,7 @@ const anonymizeNamesInText = (text) => {
 
   // Common first names that might appear in team contexts
   const commonNames = [
-    'Alice', 'André', 'Antoine', 'Arthur', 'Aurélie', 'Benjamin', 'Bernard', 'Béatrice',
+    'Alex', 'Alice', 'André', 'Antoine', 'Arthur', 'Aurélie', 'Benjamin', 'Bernard', 'Béatrice',
     'Bruno', 'Camille', 'Caroline', 'Catherine', 'Cédric', 'Céline', 'Chantal', 'Charles',
     'Christian', 'Christine', 'Christophe', 'Claire', 'Clara', 'Claude', 'Claudine', 'Clement',
     'Colette', 'Collin', 'Colombe', 'Corinne', 'Cosette', 'Cyrille', 'Cyril',
