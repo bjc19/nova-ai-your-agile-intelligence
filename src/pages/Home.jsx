@@ -27,11 +27,6 @@ const commandAnimationStyles = `
     50% { opacity: 0; }
   }
 
-  @keyframes hide-cursor {
-    0% { opacity: 0; }
-    100% { opacity: 0; }
-  }
-
   @keyframes validate-frame {
     0% { 
       box-shadow: inset 0 0 0 0 #10b981, inset 0 0 0 0 #10b981;
@@ -57,11 +52,11 @@ const commandAnimationStyles = `
     opacity: 1;
   }
 
-  .terminal-block-0 .text-white::after { animation: hide-cursor 0s 10s forwards; }
-  .terminal-block-1 .text-white::after { animation: hide-cursor 0s 10s forwards; }
-  .terminal-block-2 .text-white::after { animation: hide-cursor 0s 10s forwards; }
-  .terminal-block-3 .text-white::after { animation: hide-cursor 0s 10s forwards; }
-  .terminal-block-4 .text-white::after { animation: hide-cursor 0s 10s forwards; }
+  .terminal-block-0 .text-white::after { animation-delay: 0s; }
+  .terminal-block-1 .text-white::after { animation-delay: 1s; }
+  .terminal-block-2 .text-white::after { animation-delay: 1s; }
+  .terminal-block-3 .text-white::after { animation-delay: 1s; }
+  .terminal-block-4 .text-white::after { animation-delay: 1s; }
 
   .terminal-block-5 {
     animation: validate-frame 1s ease-out 10s forwards;
