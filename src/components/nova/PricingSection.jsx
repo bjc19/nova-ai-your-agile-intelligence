@@ -125,8 +125,8 @@ const plans = [
       "Dashboards et reporting custom direction/PMO",
       "Support dédié + SLA",
       "KPIs personnalisés et exports exécutifs",
-      "Consultations et coaching d'experts à la demande",
-      "Add-ons usage-based (API calls, analyses)"
+      "Add-ons usage-based (API calls, analyses)",
+      "Consultations et coaching d'experts à la demande"
     ],
     target: "Entreprises, banques, grandes techs, organisations multi-produits",
     ctaKey: "contactTeam"
