@@ -265,8 +265,10 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       detectedL4: detectedL4.slice(0, 3)
     });
     
-    // RÈGLE DE DÉCISION SÉMANTIQUE RENFORCÉE (RDS-2)
-    // Exigence CUMULATIVE: doit avoir des termes dans AU MOINS 2 champs différents
+    // RÈGLE DE DÉCISION SÉMANTIQUE RENFORCÉE (RDS-3)
+    // PRINCIPE DE PRÉCAUTION: Le texte doit CLAIREMENT appartenir au domaine du management de projet
+    // Pas seulement "quelques mots ambigus", mais une DENSITÉ SIGNIFICATIVE de termes spécifiques
+
     const fieldsWithTerms = [
       L1_count > 0,
       L2_count > 0,
@@ -274,11 +276,20 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       L3_verbs_count > 0,
       L4_count > 0
     ].filter(Boolean).length;
-    
+
+    // EXIGENCES DURCIES:
+    // 1. Au moins 3 champs lexicaux différents (pas juste 2)
+    // 2. Score pro total minimum de 5 (pas juste 3)
+    // 3. OBLIGATOIREMENT: L1 (Projet) OU L3 (Scrum/Agile) avec score >= 2
+    //    → Si le texte ne parle ni de "projet/programme/livrable" ni de "sprint/daily/backlog", c'est suspect
+
+    const hasProjectManagementCore = (L1_count >= 2 || L3_count >= 2);
+
     const hasProfessionalContext = (
-      fieldsWithTerms >= 2 &&  // Au moins 2 champs lexicaux différents
-      totalProScore >= 3 &&     // Au moins 3 termes pro au total
-      (L1L2_density >= 1 || L3L4_density >= 2)  // Structure OU action
+      fieldsWithTerms >= 3 &&           // Au moins 3 champs lexicaux différents (DURCI)
+      totalProScore >= 5 &&              // Au moins 5 termes pro au total (DURCI)
+      hasProjectManagementCore &&        // OBLIGATOIRE: noyau projet/agile (NOUVEAU)
+      (L1L2_density >= 2 || L3L4_density >= 3)  // Densité minimale (DURCI)
     );
     
     console.log('📊 Professional Context Check:', {
