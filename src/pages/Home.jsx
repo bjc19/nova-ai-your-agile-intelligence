@@ -23,8 +23,8 @@ import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 // Animation CSS pour la progression séquentielle des blocs
 const commandAnimationStyles = `
   @keyframes cursor-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+    0%, 99% { opacity: 1; }
+    100% { opacity: 0; }
   }
 
   @keyframes validate-frame {
@@ -48,7 +48,7 @@ const commandAnimationStyles = `
     content: '|';
     display: inline;
     margin-left: 2px;
-    animation: cursor-blink 0.7s step-end infinite;
+    animation: cursor-blink 0.7s step-end 10s forwards;
     opacity: 1;
   }
 
