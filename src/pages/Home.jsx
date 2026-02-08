@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -17,8 +17,9 @@ import {
   Check,
   X
 } from "lucide-react";
-import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
+
+const PricingSection = lazy(() => import("@/components/nova/PricingSection").then(m => ({ default: m.PricingSection })));
 
 // Animation CSS pour la progression séquentielle des blocs
 const commandAnimationStyles = `
