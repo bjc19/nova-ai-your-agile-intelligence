@@ -63,13 +63,10 @@ function LayoutContent({ children, currentPageName }) {
                 <Button 
                    variant="ghost" 
                    size="sm"
-                   onClick={async () => {
-                     try {
-                       await base44.auth.logout();
-                     } catch (e) {
-                       // Ignore errors
-                     }
-                     window.location.href = "/";
+                   onClick={() => {
+                     localStorage.clear();
+                     sessionStorage.clear();
+                     window.location.replace("/");
                    }}
                    className="text-slate-500 hover:text-slate-700"
                  >
