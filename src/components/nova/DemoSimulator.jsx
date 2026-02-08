@@ -38,6 +38,54 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     setLoading(false);
   }, []);
 
+  const detectOutOfContext = (text) => {
+    const lowerText = text.toLowerCase();
+    
+    // PATTERN 1: Vocabulaire hors domaine professionnel
+    const sportsTerms = ['match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'équipe de foot', 'terrain', 'arbitre', 'football', 'basketball', 'tennis', 'rugby'];
+    const entertainmentTerms = ['film', 'série', 'célébrité', 'acteur', 'spectacle', 'concert', 'streaming', 'netflix', 'disney', 'marvel'];
+    const personalTerms = ['vacances', 'week-end', 'restaurant', 'cuisine', 'recette', 'voyage', 'tourisme', 'shopping'];
+    
+    // PATTERN 2: Vocabulaire professionnel
+    const professionalTerms = ['sprint', 'backlog', 'user story', 'équipe', 'projet', 'tâche', 'blocage', 'réunion', 'délai', 'livrable', 'client', 'produit', 'développement', 'test', 'scrum', 'kanban', 'planning', 'review', 'retrospective', 'daily', 'stand-up', 'ticket'];
+    
+    // Compter les occurrences
+    let sportsCount = 0;
+    let entertainmentCount = 0;
+    let personalCount = 0;
+    let professionalCount = 0;
+    
+    sportsTerms.forEach(term => { if (lowerText.includes(term)) sportsCount++; });
+    entertainmentTerms.forEach(term => { if (lowerText.includes(term)) entertainmentCount++; });
+    personalTerms.forEach(term => { if (lowerText.includes(term)) personalCount++; });
+    professionalTerms.forEach(term => { if (lowerText.includes(term)) professionalCount++; });
+    
+    const nonProfessionalCount = sportsCount + entertainmentCount + personalCount;
+    
+    // Règles de détection
+    const isOutOfContext = (
+      (sportsCount >= 3 && professionalCount < 2) ||
+      (entertainmentCount >= 2 && professionalCount === 0) ||
+      (nonProfessionalCount >= 4 && professionalCount < 2)
+    );
+    
+    if (isOutOfContext) {
+      const detectedTerms = [];
+      if (sportsCount > 0) detectedTerms.push('vocabulaire sportif');
+      if (entertainmentCount > 0) detectedTerms.push('contenu divertissement');
+      if (personalCount > 0) detectedTerms.push('sujets personnels');
+      
+      return {
+        isOutOfContext: true,
+        confidence: Math.min(95, 80 + nonProfessionalCount * 3),
+        detectedTerms,
+        professionalTermsCount: professionalCount
+      };
+    }
+    
+    return { isOutOfContext: false };
+  };
+
   const handleAnalyze = async () => {
     if (!input.trim()) {
       toast.error("Remplissez le champ de texte");
@@ -52,6 +100,30 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
     setAnalyzing(true);
     try {
+      // Vérifier si le contenu est hors contexte
+      const outOfContextCheck = detectOutOfContext(input);
+      
+      if (outOfContextCheck.isOutOfContext) {
+        // Décrémenter tries même pour hors contexte
+        const newTries = tries - 1;
+        setTries(newTries);
+        localStorage.setItem("nova_demo_tries", newTries.toString());
+        onTriesUpdate(newTries);
+        
+        // Simuler délai d'analyse
+        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
+        
+        setResults({
+          isOutOfContext: true,
+          confidence: outOfContextCheck.confidence,
+          detectedTerms: outOfContextCheck.detectedTerms,
+          professionalTermsCount: outOfContextCheck.professionalTermsCount
+        });
+        
+        setAnalyzing(false);
+        return;
+      }
+      
       // Détection sémantique du type d'atelier (côté client)
       const detected = detectWorkshopType(input);
       setDetection(detected);
@@ -129,28 +201,142 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
           </div>
         ) : results ? (
           <div className="space-y-6">
-            {/* Results Header */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-semibold text-slate-900">Analyse Complète ✅</p>
-                  <p className="text-sm text-slate-600 mt-1">Atelier détecté: <strong>{results.meetingType}</strong></p>
-                  {results.detectionConfidence && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs text-slate-600">Confiance de détection:</span>
-                      <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden max-w-xs">
-                        <div 
-                          className="h-full bg-gradient-to-r from-green-500 to-emerald-600" 
-                          style={{ width: `${results.detectionConfidence}%` }} 
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-slate-600">{results.detectionConfidence}%</span>
+            {/* Out of Context Result */}
+            {results.isOutOfContext ? (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-6 h-6 text-red-600" />
                     </div>
-                  )}
+                    <div className="flex-1">
+                      <p className="text-xl font-bold text-slate-900 mb-2">Contenu Hors Contexte</p>
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-sm text-slate-600">Confiance:</span>
+                        <div className="flex-1 h-2 bg-red-200 rounded-full overflow-hidden max-w-xs">
+                          <div 
+                            className="h-full bg-gradient-to-r from-red-500 to-red-600" 
+                            style={{ width: `${results.confidence}%` }} 
+                          />
+                        </div>
+                        <span className="text-sm font-bold text-red-600">{results.confidence}%</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <Badge className="bg-yellow-100 text-yellow-800">🎮 SIMULÉ</Badge>
+
+                {/* Explanation */}
+                <Card className="border-slate-200">
+                  <CardContent className="p-6 space-y-4">
+                    <div>
+                      <p className="font-semibold text-slate-900 mb-2">💡 Explication</p>
+                      <p className="text-sm text-slate-700">
+                        Le contenu analysé ne semble pas concerner le travail d'équipe professionnel ou les méthodologies agiles.
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-semibold text-slate-900 mb-2">🔍 Indicateurs détectés</p>
+                      <ul className="space-y-1.5">
+                        {results.detectedTerms.map((term, idx) => (
+                          <li key={idx} className="flex gap-2 text-sm text-slate-700">
+                            <span className="text-red-600">•</span>
+                            <span>{term} identifié</span>
+                          </li>
+                        ))}
+                        <li className="flex gap-2 text-sm text-slate-700">
+                          <span className="text-red-600">•</span>
+                          <span>Absence de termes professionnels ({results.professionalTermsCount} terme{results.professionalTermsCount > 1 ? 's' : ''} détecté{results.professionalTermsCount > 1 ? 's' : ''})</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="font-semibold text-slate-900 mb-3">🎯 Pour utiliser Nova efficacement</p>
+                      <p className="text-sm text-slate-700 mb-3">Partagez des conversations professionnelles liées à :</p>
+                      <ul className="space-y-1.5">
+                        <li className="flex gap-2 text-sm text-slate-700">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span>Réunions d'équipe (Daily, Planning, Review, Retrospective)</span>
+                        </li>
+                        <li className="flex gap-2 text-sm text-slate-700">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span>Discussions projets, tâches, blocages</span>
+                        </li>
+                        <li className="flex gap-2 text-sm text-slate-700">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span>Méthodologies agiles (Scrum, Kanban, SAFe)</span>
+                        </li>
+                        <li className="flex gap-2 text-sm text-slate-700">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                          <span>Collaboration d'équipe, processus de travail</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                      <p className="font-semibold text-slate-900 mb-2">❓ Exemples de textes appropriés</p>
+                      <p className="text-xs text-slate-600">
+                        • Verbatims de daily scrum<br/>
+                        • Discussions de planning de sprint<br/>
+                        • Retours de revue de sprint<br/>
+                        • Conversations de rétrospective
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* CTA */}
+                {tries === 0 ? (
+                  <Button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-700">
+                    Voir les Plans Tarifaires
+                  </Button>
+                ) : (
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setInput("");
+                        setResults(null);
+                      }}
+                      className="flex-1"
+                    >
+                      Nouvelle Analyse
+                    </Button>
+                    <Button 
+                      onClick={onClose}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    >
+                      Fermer
+                    </Button>
+                  </div>
+                )}
               </div>
-            </div>
+            ) : (
+              <>
+                {/* Results Header */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">Analyse Complète ✅</p>
+                      <p className="text-sm text-slate-600 mt-1">Atelier détecté: <strong>{results.meetingType}</strong></p>
+                      {results.detectionConfidence && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span className="text-xs text-slate-600">Confiance de détection:</span>
+                          <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden max-w-xs">
+                            <div 
+                              className="h-full bg-gradient-to-r from-green-500 to-emerald-600" 
+                              style={{ width: `${results.detectionConfidence}%` }} 
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-slate-600">{results.detectionConfidence}%</span>
+                        </div>
+                      )}
+                    </div>
+                    <Badge className="bg-yellow-100 text-yellow-800">🎮 SIMULÉ</Badge>
+                  </div>
+                </div>
 
             {/* Confidence */}
             <div>
@@ -262,6 +448,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                   Essayer le vrai produit
                 </Button>
               </div>
+            )}
+              </>
             )}
           </div>
         ) : (
