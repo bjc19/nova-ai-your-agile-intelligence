@@ -85,6 +85,7 @@ const plans = [
     users: "25 utilisateurs inclus",
     addOn: "+10 CAD/utilisateur/mois (max 50)",
     discount: "15% annuel",
+     addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
       "Analyses post-réunion illimitées",
       "Croisement complet multi-sources",
@@ -99,7 +100,6 @@ const plans = [
       "Exports avancés (PDF, Excel, PowerPoint)",
       "Support prioritaire"
     ],
-    addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     roiValue: "ROI mesurable : anticipation dérives, optimisation capacité",
     ctaKey: "contactSales"
   },
