@@ -22,10 +22,11 @@ const plans = [
     name: "Starter",
     badge: "RECOMMANDÉ POUR DÉBUTER",
     badgeColor: "bg-green-100 text-green-800",
-    subtitle: "Découvrez la puissance de Nova",
+    subtitle: "Embarquez et découvrez la puissance de Nova",
     price: "49",
     users: "5 utilisateurs inclus",
     addOn: "+15 CAD/utilisateur/mois (max 10)",
+    highlight: "NON renouvelable - Upgrade vers Growth requis",
     included: [
       "30 analyses manuelles uniquement",
       "Insights contextualisés",
@@ -41,7 +42,6 @@ const plans = [
       "Pas d'alertes automatiques",
       "Pas de KPIs détaillés"
     ],
-    highlight: "NON renouvelable - Upgrade vers Growth requis",
     ctaKey: "contactSales"
   },
   {
@@ -49,7 +49,7 @@ const plans = [
     name: "Growth",
     badge: "PLUS DE VALEUR",
     badgeColor: "bg-blue-100 text-blue-800",
-    subtitle: "Idéal pour plus de volume d'analyses",
+    subtitle: "Idéal pour les equipes qui veulent plus de volume d'analyses",
     price: "99",
     yearlyPrice: "84",
     users: "10 utilisateurs inclus",
@@ -80,7 +80,7 @@ const plans = [
     badge: "RAPPORT QUALITÉ/PRIX",
     badgeColor: "bg-purple-100 text-purple-800",
     badge2: "⭐",
-    subtitle: "ROI clair et mesurable",
+    subtitle: "Insights actionnables, ROI clair et mesurable",
     price: "199",
     yearlyPrice: "169",
     users: "25 utilisateurs inclus",
