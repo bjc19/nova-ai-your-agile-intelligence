@@ -804,11 +804,12 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                   }
                 }}
                 onKeyDown={(e) => {
-                  // Bloquer toute saisie clavier sauf Ctrl+V / Cmd+V
-                  if (!(e.ctrlKey || e.metaKey) || e.key !== 'v') {
-                    if (!['Tab', 'Escape', 'Enter'].includes(e.key) && !e.ctrlKey && !e.metaKey) {
-                      e.preventDefault();
-                    }
+                  // Bloquer toute saisie clavier sauf Ctrl+V / Cmd+V et touches Effacer
+                  const allowedKeys = ['Tab', 'Escape', 'Enter', 'Backspace', 'Delete'];
+                  const isPaste = (e.ctrlKey || e.metaKey) && e.key === 'v';
+
+                  if (!isPaste && !allowedKeys.includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
                   }
                 }}
                 placeholder="Collez uniquement (Ctrl+V ou Cmd+V) - Saisie clavier désactivée"
