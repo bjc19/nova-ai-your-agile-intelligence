@@ -39,22 +39,30 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   }, []);
 
   const detectOutOfContext = (text) => {
-    const lowerText = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // Normaliser le texte: minuscules et retrait des accents
+    const normalizeText = (str) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const lowerText = normalizeText(text);
     
     // ========== COUCHE 1: VETOS THÉMATIQUES ABSOLUS ==========
     
     // VETO 1: Domaine du Sport (Explicite)
     const sportsProperNouns = [
-      'real madrid', 'real', 'barcelone', 'barca', 'barça', 'psg', 'bayern', 
-      'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappe', 'clasico', 'clásico'
-    ];
+      'real madrid', 'real', 'barcelone', 'barca', 'psg', 'bayern', 
+      'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappe', 'clasico',
+      'liverpool', 'manchester', 'arsenal', 'chelsea'
+    ].map(normalizeText);
+    
     const sportsLexicon = [
-      'match', 'but', 'joueur', 'mi-temps', 'mi temps', 'gardien', 'frappe', 'terrain',
-      'arbitre', 'penalty', 'corner', 'coup franc', 'finition', 'defense', 'défense',
-      'attaque', 'transition', 'ligne defensive', 'ligne défensive', 'egalisation', 
-      'égalisation', 'ballon', 'dribble', 'tacle', 'sortir le ballon'
-    ];
-    const teamBuildingTerms = ['team building', 'evenement d\'entreprise', 'événement d\'entreprise', 'sponsoring', 'partenariat commercial'];
+      'match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'terrain',
+      'arbitre', 'penalty', 'corner', 'coup franc', 'finition', 'defense',
+      'attaque', 'transition', 'ligne defensive', 'egalisation', 
+      'ballon', 'dribble', 'tacle', 'sortir le ballon', 'marquer', 'scorer',
+      'remontada', 'prolongation'
+    ].map(normalizeText);
+    
+    const teamBuildingTerms = [
+      'team building', 'evenement d\'entreprise', 'sponsoring', 'partenariat commercial'
+    ].map(normalizeText);
     
     let sportsNounsCount = 0;
     let sportsLexiconCount = 0;
@@ -76,23 +84,24 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     });
     teamBuildingTerms.forEach(term => { if (lowerText.includes(term)) teamBuildingContext = true; });
     
-    // Debug console log
-    console.log('VETO 1 Debug:', {
-      sportsNounsCount,
-      sportsLexiconCount,
+    console.log('🔍 VETO 1 Sport Detection:', {
+      textLength: text.length,
+      sportsNounsFound: sportsNounsCount,
+      sportsLexiconFound: sportsLexiconCount,
       teamBuildingContext,
-      detectedSportsNouns,
-      detectedSportsLexicon: detectedSportsLexicon.slice(0, 5)
+      nounsDetected: detectedSportsNouns,
+      lexiconDetected: detectedSportsLexicon.slice(0, 8),
+      willTrigger: (sportsNounsCount >= 1 && sportsLexiconCount >= 2 && !teamBuildingContext)
     });
     
     if (sportsNounsCount >= 1 && sportsLexiconCount >= 2 && !teamBuildingContext) {
+      console.log('✅ VETO 1 TRIGGERED - Returning #HorsContexte');
       return {
         isOutOfContext: true,
         confidence: 99,
         vetoType: 'VETO 1: Domaine du Sport',
         theme: 'Sport',
-        detectedKeywords: detectedSportsNouns.slice(0, 3)
-          .concat(detectedSportsLexicon.slice(0, 4)),
+        detectedKeywords: [...detectedSportsNouns.slice(0, 3), ...detectedSportsLexicon.slice(0, 4)],
         professionalFieldScore: 0
       };
     }
@@ -246,10 +255,15 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
     setAnalyzing(true);
     try {
+      console.log('🚀 Starting analysis for text:', input.substring(0, 100) + '...');
+      
       // Vérifier si le contenu est hors contexte
       const outOfContextCheck = detectOutOfContext(input);
       
+      console.log('📊 Out of context check result:', outOfContextCheck);
+      
       if (outOfContextCheck.isOutOfContext) {
+        console.log('🚫 Content detected as OUT OF CONTEXT');
         // Décrémenter tries même pour hors contexte
         const newTries = tries - 1;
         setTries(newTries);
@@ -262,13 +276,22 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
         setResults({
           isOutOfContext: true,
           confidence: outOfContextCheck.confidence,
-          detectedTerms: outOfContextCheck.detectedTerms,
-          professionalTermsCount: outOfContextCheck.professionalTermsCount
+          vetoType: outOfContextCheck.vetoType,
+          theme: outOfContextCheck.theme,
+          detectedKeywords: outOfContextCheck.detectedKeywords,
+          professionalFieldScore: outOfContextCheck.professionalFieldScore,
+          L1_count: outOfContextCheck.L1_count,
+          L2_count: outOfContextCheck.L2_count,
+          L3_count: outOfContextCheck.L3_count,
+          L3_verbs_count: outOfContextCheck.L3_verbs_count,
+          L4_count: outOfContextCheck.L4_count
         });
         
         setAnalyzing(false);
         return;
       }
+      
+      console.log('✅ Content passed out-of-context check, proceeding with workshop detection');
       
       // Détection sémantique du type d'atelier (côté client)
       const detected = detectWorkshopType(input);
