@@ -49,18 +49,18 @@ const commandAnimationStyles = `
     content: '|';
     display: inline;
     margin-left: 2px;
-    animation: cursor-type 0.2s step-end 2s forwards;
+    animation: cursor-type 1s step-end 3s forwards;
     opacity: 0;
   }
 
   .terminal-block-0 .text-white::after { animation-delay: 0s; }
-  .terminal-block-1 .text-white::after { animation-delay: 1s; }
-  .terminal-block-2 .text-white::after { animation-delay: 3s; }
-  .terminal-block-3 .text-white::after { animation-delay: 5s; }
-  .terminal-block-4 .text-white::after { animation-delay: 8s; }
+  .terminal-block-1 .text-white::after { animation-delay: 2s; }
+  .terminal-block-2 .text-white::after { animation-delay: 5s; }
+  .terminal-block-3 .text-white::after { animation-delay: 8s; }
+  .terminal-block-4 .text-white::after { animation-delay: 12s; }
 
   .terminal-block-5 {
-    animation: validate-frame 1s ease-out 17s forwards;
+    animation: validate-frame 1s ease-out 5s forwards;
   }
 `;
 
