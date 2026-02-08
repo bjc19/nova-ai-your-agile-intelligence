@@ -185,17 +185,84 @@ export default function Results() {
           </div>
         </motion.div>
 
-        {/* Posture Context */}
-        {analysis.posture && (
+        {/* Workshop Type Detection & Out-of-Context Warning */}
+        {workshopDetection && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-6"
           >
-            <PostureIndicator postureId={analysis.posture} showDetails={true} />
+            {isOutOfContext ? (
+              <div className="p-6 rounded-2xl bg-red-50/50 border border-red-200">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-red-900 mb-1">
+                      {language === 'fr' ? 'Contenu Hors Contexte' : 'Out of Context Content'}
+                    </h3>
+                    <p className="text-sm text-red-700">
+                      {language === 'fr'
+                        ? 'Le contenu analysé n\'apparaît pas être une réunion d\'équipe Agile. Les résultats peuvent être inexacts.'
+                        : 'The analyzed content does not appear to be an Agile team meeting. Results may be inaccurate.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 rounded-2xl bg-blue-50/50 border border-blue-200">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">
+                      {language === 'fr' ? 'Type de Réunion Détecté' : 'Detected Meeting Type'}
+                    </p>
+                    <h3 className="text-xl font-bold text-blue-900 mb-2">
+                      {workshopDetection.type}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {workshopDetection.tags && workshopDetection.tags.map((tag, idx) => (
+                        <span
+                          key={idx}
+                          className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    {workshopDetection.justifications && workshopDetection.justifications.length > 0 && (
+                      <div className="text-sm text-blue-700 space-y-1">
+                        {workshopDetection.justifications.slice(0, 2).map((justification, idx) => (
+                          <p key={idx} className="flex items-start gap-2">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>{justification}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs text-blue-600 mb-1">{language === 'fr' ? 'Confiance' : 'Confidence'}</p>
+                    <p className="text-3xl font-bold text-blue-900">
+                      {workshopDetection.confidence}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
+
+        {/* Posture Context */}
+         {analysis.posture && (
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.5, delay: 0.15 }}
+             className="mb-6"
+           >
+             <PostureIndicator postureId={analysis.posture} showDetails={true} />
+           </motion.div>
+         )}
 
         {/* Summary Stats - Clickable */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
