@@ -26,7 +26,6 @@ const plans = [
     price: "49",
     users: "5 utilisateurs inclus",
     addOn: "+15 CAD/utilisateur/mois (max 10)",
-    highlight: "NON renouvelable - Upgrade vers Growth requis",
     included: [
       "30 analyses manuelles uniquement",
       "Insights contextualisés",
