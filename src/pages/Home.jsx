@@ -567,9 +567,9 @@ export default function Home() {
                   <h4 className="font-bold text-slate-900 mb-1">CCPA</h4>
                   <p className="text-xs text-slate-600">Compliant</p>
                 </Card>
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
