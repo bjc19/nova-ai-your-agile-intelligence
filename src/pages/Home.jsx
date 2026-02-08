@@ -422,8 +422,8 @@ export default function Home() {
               <span>{lang === 'fr' ? 'Temps total : ~5s | Données brutes : 0 bytes stockés' : 'Total time: ~5s | Raw data: 0 bytes stored'}</span>
             </div>
 
-          {/* Comparison Table */}
-          <div>
+            {/* Comparison Table */}
+            <div>
             <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
               Tableau Comparatif : Nova vs Concurrents Typiques
             </h3>
