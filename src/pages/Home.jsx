@@ -846,13 +846,16 @@ export default function Home() {
                </Card>
              </motion.div>
            </div>
-        </div>
-      </div>
+           </div>
+           </div>
+           </Suspense>
 
-      {/* Pricing Section */}
-      <div id="pricing" className="max-w-7xl mx-auto px-6 py-16">
-        <PricingSection />
-      </div>
+           {/* Pricing Section */}
+           <Suspense fallback={<div className="max-w-7xl mx-auto px-6 py-16 h-96" />}>
+           <div id="pricing" className="max-w-7xl mx-auto px-6 py-16">
+           <PricingSection />
+           </div>
+           </Suspense>
 
       {/* Integrations Section */}
       <div className="bg-slate-50 py-16">
