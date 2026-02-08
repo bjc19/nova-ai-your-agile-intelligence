@@ -522,8 +522,12 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <span className="text-xl font-bold text-slate-700">S2</span>
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="45" fill="#1e40af" />
+                      <path d="M30 50 L45 65 L70 35" stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                      <text x="50" y="80" fontSize="12" fill="white" textAnchor="middle" fontWeight="bold">SOC 2</text>
+                    </svg>
                   </div>
                   <h4 className="font-bold text-slate-900 mb-1">SOC 2</h4>
                   <p className="text-xs text-slate-600">Type II</p>
@@ -537,8 +541,12 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <span className="text-xl font-bold text-slate-700">ISO</span>
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect x="10" y="10" width="80" height="80" rx="5" fill="#059669" />
+                      <text x="50" y="45" fontSize="18" fill="white" textAnchor="middle" fontWeight="bold">ISO</text>
+                      <text x="50" y="65" fontSize="14" fill="white" textAnchor="middle" fontWeight="bold">27001</text>
+                    </svg>
                   </div>
                   <h4 className="font-bold text-slate-900 mb-1">ISO 27001</h4>
                   <p className="text-xs text-slate-600">Certified</p>
@@ -552,8 +560,16 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <span className="text-base font-bold text-slate-700">GDPR</span>
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="45" fill="#0c4a6e" />
+                      <circle cx="30" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="40" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="50" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="60" cy="30" r="3" fill="#fbbf24" />
+                      <circle cx="70" cy="30" r="3" fill="#fbbf24" />
+                      <text x="50" y="70" fontSize="16" fill="white" textAnchor="middle" fontWeight="bold">GDPR</text>
+                    </svg>
                   </div>
                   <h4 className="font-bold text-slate-900 mb-1">GDPR</h4>
                   <p className="text-xs text-slate-600">Compliant</p>
@@ -567,8 +583,12 @@ export default function Home() {
                 viewport={{ once: true }}
               >
                 <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <span className="text-base font-bold text-slate-700">CCPA</span>
+                  <div className="w-16 h-16 mx-auto mb-3">
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <rect x="5" y="5" width="90" height="90" rx="10" fill="#dc2626" />
+                      <path d="M20 30 L50 15 L80 30 L80 60 L50 85 L20 60 Z" fill="#991b1b" />
+                      <text x="50" y="55" fontSize="16" fill="white" textAnchor="middle" fontWeight="bold">CCPA</text>
+                    </svg>
                   </div>
                   <h4 className="font-bold text-slate-900 mb-1">CCPA</h4>
                   <p className="text-xs text-slate-600">Compliant</p>
