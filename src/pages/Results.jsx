@@ -63,72 +63,84 @@ export default function Results() {
           setAnalysis(parsedAnalysis);
 
           // Translate all LLM content if language is French
-          if (language === 'fr') {
-            const translateContentIfNeeded = async () => {
-              // Add delay to avoid rate limiting
-              await new Promise(resolve => setTimeout(resolve, 8000));
-              // Batch translate all texts in one LLM call
-              const textsToTranslate = [];
+               if (language === 'fr') {
+                 // Only attempt translation if it hasn't already been cached
+                 const translationCacheKey = `nova-translation-${JSON.stringify(parsedAnalysis).substring(0, 100)}`;
+                 const cachedTranslation = sessionStorage.getItem(translationCacheKey);
 
-              // Collect all texts
-              if (parsedAnalysis.summary) textsToTranslate.push(parsedAnalysis.summary);
-              if (parsedAnalysis.blockers) {
-                parsedAnalysis.blockers.forEach(b => {
-                  textsToTranslate.push(b.issue, b.action);
-                });
-              }
-              if (parsedAnalysis.risks) {
-                parsedAnalysis.risks.forEach(r => {
-                  textsToTranslate.push(r.description, r.impact, r.mitigation);
-                });
-              }
+                 if (!cachedTranslation) {
+                   const translateContentIfNeeded = async () => {
+                     // Add longer delay to avoid rate limiting
+                     await new Promise(resolve => setTimeout(resolve, 10000));
 
-              if (textsToTranslate.length > 0) {
-                const prompt = `Traduis TOUS ces textes en français de manière concise et naturelle. Réponds EN FRANÇAIS UNIQUEMENT:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
-                const result = await invokeLLMWithAutoTranslate(
-                  prompt,
-                  {
-                    type: "object",
-                    properties: {
-                      translations: { type: "array", items: { type: "string" } }
-                    }
-                  },
-                  language
-                );
+                     try {
+                       // Batch translate all texts in one LLM call
+                       const textsToTranslate = [];
 
-                // Map translations back
-                let idx = 0;
-                if (parsedAnalysis.summary) parsedAnalysis.summary = result.translations[idx++];
-                if (parsedAnalysis.blockers) {
-                  parsedAnalysis.blockers = parsedAnalysis.blockers.map(b => ({
-                    ...b,
-                    issue: result.translations[idx++],
-                    action: result.translations[idx++]
-                  }));
-                }
-                if (parsedAnalysis.risks) {
-                  parsedAnalysis.risks = parsedAnalysis.risks.map(r => ({
-                    ...r,
-                    description: result.translations[idx++],
-                    impact: result.translations[idx++],
-                    mitigation: result.translations[idx++]
-                  }));
-                }
+                       // Collect all texts
+                       if (parsedAnalysis.summary) textsToTranslate.push(parsedAnalysis.summary);
+                       if (parsedAnalysis.blockers) {
+                         parsedAnalysis.blockers.forEach(b => {
+                           textsToTranslate.push(b.issue, b.action);
+                         });
+                       }
+                       if (parsedAnalysis.risks) {
+                         parsedAnalysis.risks.forEach(r => {
+                           textsToTranslate.push(r.description, r.impact, r.mitigation);
+                         });
+                       }
 
-                // Update with translated content
-                setAnalysis(parsedAnalysis);
-                setTranslationComplete(true);
-                }
-                };
+                       if (textsToTranslate.length > 0) {
+                         const prompt = `Traduis TOUS ces textes en français de manière concise et naturelle. Réponds EN FRANÇAIS UNIQUEMENT:\n\n${textsToTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n\n')}`;
+                         const result = await invokeLLMWithAutoTranslate(
+                           prompt,
+                           {
+                             type: "object",
+                             properties: {
+                               translations: { type: "array", items: { type: "string" } }
+                             }
+                           },
+                           language
+                         );
 
-                translateContentIfNeeded().catch(error => {
-                // Gracefully handle translation errors (e.g., rate limits)
-                console.log('Background translation skipped:', error?.message);
-                setTranslationComplete(true);
-                });
-                } else {
-                setTranslationComplete(true);
-                }
+                         // Map translations back
+                         let idx = 0;
+                         if (parsedAnalysis.summary) parsedAnalysis.summary = result.translations[idx++];
+                         if (parsedAnalysis.blockers) {
+                           parsedAnalysis.blockers = parsedAnalysis.blockers.map(b => ({
+                             ...b,
+                             issue: result.translations[idx++],
+                             action: result.translations[idx++]
+                           }));
+                         }
+                         if (parsedAnalysis.risks) {
+                           parsedAnalysis.risks = parsedAnalysis.risks.map(r => ({
+                             ...r,
+                             description: result.translations[idx++],
+                             impact: result.translations[idx++],
+                             mitigation: result.translations[idx++]
+                           }));
+                         }
+
+                         // Cache translation and update
+                         sessionStorage.setItem(translationCacheKey, 'done');
+                         setAnalysis(parsedAnalysis);
+                       }
+                     } catch (error) {
+                       // Gracefully handle translation errors (e.g., rate limits)
+                       console.log('Background translation skipped:', error?.message);
+                     } finally {
+                       setTranslationComplete(true);
+                     }
+                   };
+
+                   translateContentIfNeeded();
+                 } else {
+                   setTranslationComplete(true);
+                 }
+               } else {
+                 setTranslationComplete(true);
+               }
         } else {
           navigate(createPageUrl("Analysis"));
         }
