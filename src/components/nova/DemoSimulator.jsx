@@ -736,66 +736,103 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               </p>
 
               {/* Detection preview */}
-              {detection && !analyzing && (
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        Atelier détecté: <span className="text-blue-600">{detection.type}</span>
-                        {detection.subtype && <span className="text-blue-500"> {detection.subtype}</span>}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex-1 h-2 bg-blue-200 rounded-full overflow-hidden max-w-xs">
-                          <div 
-                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600" 
-                            style={{ width: `${detection.confidence}%` }} 
-                          />
+              {input.trim().length > 20 && !analyzing && (() => {
+                const outOfContextCheck = detectOutOfContext(input);
+
+                if (outOfContextCheck.isOutOfContext) {
+                  return (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg space-y-2">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-red-900">#HorsContexte détecté</p>
+                          <p className="text-xs text-red-700 mt-1">
+                            {outOfContextCheck.vetoType} • Thème: <strong>{outOfContextCheck.theme}</strong>
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex-1 h-2 bg-red-200 rounded-full overflow-hidden max-w-xs">
+                              <div 
+                                className="h-full bg-gradient-to-r from-red-500 to-red-600" 
+                                style={{ width: `${outOfContextCheck.confidence}%` }} 
+                              />
+                            </div>
+                            <span className="text-xs font-medium text-red-600">{outOfContextCheck.confidence}%</span>
+                          </div>
                         </div>
-                        <span className="text-xs font-medium text-slate-600">{detection.confidence}%</span>
+                      </div>
+                      <p className="text-xs text-red-700 italic">
+                        ⚠️ Ce contenu sera rejeté à l'analyse. Nova analyse uniquement les conversations professionnelles d'équipe.
+                      </p>
+                    </div>
+                  );
+                }
+
+                // Si contexte professionnel validé, montrer la détection d'atelier
+                if (detection) {
+                  return (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            Atelier détecté: <span className="text-blue-600">{detection.type}</span>
+                            {detection.subtype && <span className="text-blue-500"> {detection.subtype}</span>}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex-1 h-2 bg-blue-200 rounded-full overflow-hidden max-w-xs">
+                              <div 
+                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600" 
+                                style={{ width: `${detection.confidence}%` }} 
+                              />
+                            </div>
+                            <span className="text-xs font-medium text-slate-600">{detection.confidence}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-slate-600 font-medium mb-1">Raisons de la détection:</p>
+                        <ul className="text-xs text-slate-600 space-y-0.5">
+                          {detection.justifications.map((just, idx) => (
+                            <li key={idx}>• {just}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        {detection.tags.map(tag => (
+                          <Badge key={tag} variant="outline" className="text-xs bg-white">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      {detection.confidence < 70 && (
+                        <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded">
+                          ⚠️ Confiance faible - Vous pouvez forcer le type d'atelier ci-dessous
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs text-slate-600 font-medium">Ou choisissez:</label>
+                        <select 
+                          value={forceType || ''}
+                          onChange={(e) => setForceType(e.target.value || null)}
+                          className="text-xs px-2 py-1 border border-slate-300 rounded bg-white"
+                        >
+                          <option value="">Auto-détecté</option>
+                          <option value="Daily Scrum">Daily Scrum</option>
+                          <option value="Sprint Planning">Sprint Planning</option>
+                          <option value="Sprint Review">Sprint Review</option>
+                          <option value="Retrospective">Retrospective</option>
+                          <option value="Autre">Autre</option>
+                        </select>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <p className="text-xs text-slate-600 font-medium mb-1">Raisons de la détection:</p>
-                    <ul className="text-xs text-slate-600 space-y-0.5">
-                      {detection.justifications.map((just, idx) => (
-                        <li key={idx}>• {just}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  );
+                }
 
-                  <div className="flex flex-wrap gap-1">
-                    {detection.tags.map(tag => (
-                      <Badge key={tag} variant="outline" className="text-xs bg-white">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {detection.confidence < 70 && (
-                    <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded">
-                      ⚠️ Confiance faible - Vous pouvez forcer le type d'atelier ci-dessous
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs text-slate-600 font-medium">Ou choisissez:</label>
-                    <select 
-                      value={forceType || ''}
-                      onChange={(e) => setForceType(e.target.value || null)}
-                      className="text-xs px-2 py-1 border border-slate-300 rounded bg-white"
-                    >
-                      <option value="">Auto-détecté</option>
-                      <option value="Daily Scrum">Daily Scrum</option>
-                      <option value="Sprint Planning">Sprint Planning</option>
-                      <option value="Sprint Review">Sprint Review</option>
-                      <option value="Retrospective">Retrospective</option>
-                      <option value="Autre">Autre</option>
-                    </select>
-                  </div>
-                </div>
-              )}
+                return null;
+              })()}
             </div>
 
             {tries === 1 && (
