@@ -13,7 +13,9 @@ import {
   TrendingUp,
   Zap,
   BarChart3,
-  LineChart as LineChartIcon
+  LineChart as LineChartIcon,
+  Check,
+  X
 } from "lucide-react";
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
@@ -416,72 +418,72 @@ export default function Home() {
             <Card className="border-slate-200">
               <CardContent className="p-0 overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-slate-50">
+                  <thead className="border-b border-slate-200">
                     <tr>
-                      <th className="text-left p-4 font-semibold text-slate-900">
+                      <th className="text-left p-4 font-semibold text-slate-900 bg-white">
                         {lang === 'fr' ? 'Critère' : 'Criteria'}
                       </th>
-                      <th className="text-center p-4 font-semibold text-green-700 bg-green-50">
-                        {lang === 'fr' ? '✅ Nova' : '✅ Nova'}
+                      <th className="text-center p-4 font-semibold text-slate-900 bg-slate-50">
+                        Nova
                       </th>
-                      <th className="text-center p-4 font-semibold text-slate-600">
-                        {lang === 'fr' ? '❌ Autres' : '❌ Others'}
+                      <th className="text-center p-4 font-semibold text-slate-900 bg-white">
+                        {lang === 'fr' ? 'Autres' : 'Others'}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     <tr>
                       <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Stockage conversations brutes' : 'Raw conversation storage'}</td>
-                      <td className="p-4 text-center bg-green-50">
-                        <Badge className="bg-green-600 text-white">NON</Badge>
+                      <td className="p-4 text-center bg-slate-50">
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                       <td className="p-4 text-center">
-                        <Badge variant="outline" className="border-red-300 text-red-700">OUI</Badge>
+                        <X className="w-5 h-5 text-slate-400 mx-auto" />
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Accès en écriture' : 'Write access'}</td>
-                      <td className="p-4 text-center bg-green-50">
-                        <Badge className="bg-green-600 text-white">NON</Badge>
+                      <td className="p-4 text-center bg-slate-50">
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                       <td className="p-4 text-center">
-                        <Badge variant="outline" className="border-red-300 text-red-700">OUI</Badge>
+                        <X className="w-5 h-5 text-slate-400 mx-auto" />
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Anonymisation automatique' : 'Automatic anonymization'}</td>
-                      <td className="p-4 text-center bg-green-50">
-                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      <td className="p-4 text-center bg-slate-50">
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                       <td className="p-4 text-center">
-                        <Badge variant="outline" className="border-red-300 text-red-700">NON</Badge>
+                        <X className="w-5 h-5 text-slate-400 mx-auto" />
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Traitement en mémoire vive' : 'RAM-only processing'}</td>
-                      <td className="p-4 text-center bg-green-50">
-                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      <td className="p-4 text-center bg-slate-50">
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                       <td className="p-4 text-center">
-                        <Badge variant="outline" className="border-red-300 text-red-700">NON</Badge>
+                        <X className="w-5 h-5 text-slate-400 mx-auto" />
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Conservation PII' : 'PII retention'}</td>
-                      <td className="p-4 text-center bg-green-50">
-                        <Badge className="bg-green-600 text-white">NON</Badge>
+                      <td className="p-4 text-center bg-slate-50">
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                       <td className="p-4 text-center">
-                        <Badge variant="outline" className="border-red-300 text-red-700">OUI</Badge>
+                        <X className="w-5 h-5 text-slate-400 mx-auto" />
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 text-sm text-slate-700">{lang === 'fr' ? 'Insights actionnables' : 'Actionable insights'}</td>
-                      <td className="p-4 text-center bg-green-50">
-                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                      <td className="p-4 text-center bg-slate-50">
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                       <td className="p-4 text-center">
-                        <Badge className="bg-green-600 text-white">OUI</Badge>
+                        <Check className="w-5 h-5 text-slate-900 mx-auto" />
                       </td>
                     </tr>
                   </tbody>
