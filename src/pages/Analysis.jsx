@@ -94,6 +94,7 @@ export default function Analysis() {
       const outOfContextCheck = detectOutOfContext(transcript);
       setIsOutOfContext(outOfContextCheck.isOutOfContext);
       setOutOfContextData(outOfContextCheck);
+      setShowOutOfContextResult(outOfContextCheck.isOutOfContext);
       
       // Only proceed with workshop detection if not out of context
       if (!outOfContextCheck.isOutOfContext) {
