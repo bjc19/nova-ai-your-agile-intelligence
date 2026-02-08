@@ -77,7 +77,7 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    badge: "MEILLEUR RAPPORT QUALITÉ/PRIX",
+    badge: "RAPPORT QUALITÉ/PRIX",
     badgeColor: "bg-purple-100 text-purple-800",
     badge2: "⭐",
     subtitle: "ROI clair et mesurable",
