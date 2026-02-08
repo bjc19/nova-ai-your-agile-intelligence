@@ -493,16 +493,10 @@ export default function Home() {
                 Résultat : Toute la valeur analytique, aucun risque de fuite de données
               </p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Certifications */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            viewport={{ once: true }}
-            className="mt-16"
-          >
+          <div className="mt-16">
             <div className="text-center mb-10">
               <h3 className="text-2xl font-bold text-slate-900 mb-2">
                 {lang === 'fr' ? 'Certifications & Conformité' : 'Certifications & Compliance'}
