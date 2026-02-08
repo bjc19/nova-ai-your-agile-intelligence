@@ -419,14 +419,14 @@ export default function Home() {
               <CardContent className="p-0 overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr style={{ backgroundColor: '#1879ec' }}>
-                      <th className="text-left p-5 font-semibold text-white">
+                    <tr className="bg-gradient-to-r from-slate-50 to-blue-50/30 border-b-2 border-blue-100">
+                      <th className="text-left p-5 font-semibold text-slate-900">
                         Critère
                       </th>
-                      <th className="text-left p-5 font-semibold text-white">
+                      <th className="text-left p-5 font-semibold text-slate-900">
                         Concurrents Typiques
                       </th>
-                      <th className="text-left p-5 font-semibold text-white">
+                      <th className="text-left p-5 font-semibold text-slate-900 bg-blue-50/50">
                         Nova
                       </th>
                     </tr>
