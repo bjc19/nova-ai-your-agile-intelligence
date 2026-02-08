@@ -12,6 +12,7 @@ import PostureIndicator from "@/components/nova/PostureIndicator";
 import GDPRMarkersSection from "@/components/nova/GDPRMarkersSection";
 import { POSTURES } from "@/components/nova/PostureEngine";
 import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
+import { detectWorkshopType } from "@/components/nova/workshopDetection";
 import { 
         ArrowLeft, 
         AlertOctagon,
@@ -20,7 +21,8 @@ import {
         CheckCircle2,
         Loader2,
         Zap,
-        ArrowRight
+        ArrowRight,
+        AlertTriangle
       } from "lucide-react";
 
 export default function Results() {
@@ -30,9 +32,13 @@ export default function Results() {
         const [translationComplete, setTranslationComplete] = useState(language !== 'fr');
         const [expandedSection, setExpandedSection] = useState(null); // "blockers" | "risks" | null
   const [riskUrgencyFilter, setRiskUrgencyFilter] = useState(null);
+  const [workshopDetection, setWorkshopDetection] = useState(null);
+  const [isOutOfContext, setIsOutOfContext] = useState(false);
 
   useEffect(() => {
         const storedAnalysis = sessionStorage.getItem("novaAnalysis");
+        const storedTranscript = sessionStorage.getItem("novaTranscript");
+        
         if (storedAnalysis) {
           const parsedAnalysis = JSON.parse(storedAnalysis);
           // Add source info from sessionStorage if available
@@ -41,6 +47,16 @@ export default function Results() {
             const { url, name } = JSON.parse(sourceInfo);
             parsedAnalysis.sourceUrl = url;
             parsedAnalysis.sourceName = name;
+          }
+
+          // Detect workshop type if transcript is available
+          if (storedTranscript) {
+            const detected = detectWorkshopType(storedTranscript);
+            setWorkshopDetection(detected);
+            
+            // Check if out of context
+            const isOutOfContext = detected.tags && detected.tags.includes('#HorsContexte');
+            setIsOutOfContext(isOutOfContext);
           }
 
           // Display results immediately, translate in background if needed
