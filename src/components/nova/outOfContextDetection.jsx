@@ -125,7 +125,8 @@ export function detectOutOfContext(text) {
     'gouvernance', 'pilotage', 'coordination', 'arbitrage', 'priorisation',
     'partie prenante', 'stakeholder', 'sponsor', 'comite de pilotage',
     'risque projet', 'dependance projet', 'contrainte projet',
-    'change request', 'scope creep', 'hypothese projet', 'business case'
+    'change request', 'scope creep', 'hypothese projet', 'business case',
+    'engagement', 'capacite', 'feedback utilisateur', 'amelioration', 'item'
   ].map(normalizeText);
 
   const L2_terms = [
@@ -147,7 +148,8 @@ export function detectOutOfContext(text) {
     'ticket jira', 'ticket', 'issue jira', 'pr', 'pull request',
     'merge', 'commit', 'code review', 'definition of done',
     'acceptance criteria', 'story point', 'velocite', 'burndown',
-    'kanban', 'wip', 'limite wip', 'flux', 'lead time', 'cycle time'
+    'kanban', 'wip', 'limite wip', 'flux', 'lead time', 'cycle time',
+    'item', 'items', 'prise en compte', 'transversal', 'coordinateur'
   ].map(normalizeText);
 
   const L3_verbs = [
