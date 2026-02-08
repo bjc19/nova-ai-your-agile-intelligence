@@ -61,6 +61,19 @@ const commandAnimationStyles = `
 
   .terminal-block-5 {
     animation: validate-frame 1s ease-out 10s forwards;
+    /* AJOUTER APRÈS votre code existant : */
+
+/* Nouvelle animation de clignotement rapide */
+@keyframes terminal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Surcharger le style du curseur */
+.terminal-block .text-white::after {
+  animation: terminal-blink 0.7s step-end infinite !important;
+  opacity: 1 !important;
+}
   }
 `;
 
