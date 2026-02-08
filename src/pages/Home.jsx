@@ -553,14 +553,9 @@ export default function Home() {
                   <h4 className="font-bold text-slate-900 mb-1">GDPR</h4>
                   <p className="text-xs text-slate-600">Compliant</p>
                 </Card>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.85 }}
-                viewport={{ once: true }}
-              >
+              <div>
                 <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
                   <div className="w-16 h-16 mx-auto mb-3">
                     <svg viewBox="0 0 100 100" className="w-full h-full">
