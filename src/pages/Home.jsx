@@ -374,7 +374,7 @@ export default function Home() {
                 { label: 'Delete\nRaw', time: '< 1s' },
                 { label: 'Store\nMarkers', time: '< 1s' }
               ].map((item, i) => (
-                <React.Fragment key={i}>
+                <div key={i} className="flex items-center gap-3">
                   <div className="flex flex-col items-center">
                     <div className="w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
                       <div className="text-white font-semibold whitespace-pre-line text-center leading-tight">
@@ -388,7 +388,7 @@ export default function Home() {
                       <ArrowRight className="w-6 h-6 text-blue-400" />
                     </div>
                   )}
-                </React.Fragment>
+                </div>
               ))}
             </div>
 
