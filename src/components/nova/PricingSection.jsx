@@ -212,48 +212,50 @@ export function PricingSection() {
                 {t(plan.ctaKey)}
               </Button>
 
-              {plan.roiValue && (
-                <div className="bg-green-50 p-3 rounded border border-green-200">
-                  <p className="text-sm text-green-800">{plan.roiValue}</p>
-                </div>
-              )}
-
-              {plan.target && (
-                <div className="bg-amber-50 p-3 rounded border border-amber-200">
-                  <p className="text-xs text-amber-800"><strong>Cible:</strong> {plan.target}</p>
-                </div>
-              )}
-
-              {/* Included Features */}
-              <div>
-                <p className="font-semibold text-sm mb-3">Ce qui est inclus:</p>
-                {plan.enterpriseIntro && (
-                  <p className="text-sm text-slate-700 mb-3 font-medium italic">{plan.enterpriseIntro}</p>
+              <div className="flex-1">
+                {plan.roiValue && (
+                  <div className="bg-green-50 p-3 rounded border border-green-200 mb-4">
+                    <p className="text-sm text-green-800">{plan.roiValue}</p>
+                  </div>
                 )}
-                <ul className="space-y-2">
-                  {plan.included.map((feature, idx) => (
-                    <li key={idx} className="flex gap-2 text-sm text-slate-700">
-                      <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
-              {/* Limitations */}
-              {plan.limitations && (
+                {plan.target && (
+                  <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-4">
+                    <p className="text-xs text-amber-800"><strong>Cible:</strong> {plan.target}</p>
+                  </div>
+                )}
+
+                {/* Included Features */}
                 <div>
-                  <p className="font-semibold text-sm mb-3 text-red-700">Limitations:</p>
-                  <ul className="space-y-1">
-                    {plan.limitations.map((limit, idx) => (
-                      <li key={idx} className="flex gap-2 text-xs text-slate-600">
-                        <X className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
-                        <span>{limit}</span>
+                  <p className="font-semibold text-sm mb-3">Ce qui est inclus:</p>
+                  {plan.enterpriseIntro && (
+                    <p className="text-sm text-slate-700 mb-3 font-medium italic">{plan.enterpriseIntro}</p>
+                  )}
+                  <ul className="space-y-2">
+                    {plan.included.map((feature, idx) => (
+                      <li key={idx} className="flex gap-2 text-sm text-slate-700">
+                        <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-              )}
+
+                {/* Limitations */}
+                {plan.limitations && (
+                  <div className="mt-4">
+                    <p className="font-semibold text-sm mb-3 text-red-700">Limitations:</p>
+                    <ul className="space-y-1">
+                      {plan.limitations.map((limit, idx) => (
+                        <li key={idx} className="flex gap-2 text-xs text-slate-600">
+                          <X className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
+                          <span>{limit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
