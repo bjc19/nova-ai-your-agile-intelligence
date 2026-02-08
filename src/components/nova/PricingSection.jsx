@@ -42,7 +42,6 @@ const plans = [
       "Pas d'alertes automatiques",
       "Pas de KPIs détaillés"
     ],
-    highlight: "NON renouvelable - Upgrade vers Growth requis",
     ctaKey: "contactSales"
   },
   {
@@ -57,7 +56,7 @@ const plans = [
     addOn: "+15 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
-      "50 analyses manuelles par mois",
+      "70 analyses manuelles par mois",
       "30 analyses post-réunion automatiques/mois",
       "Integrations Slack, Jira, Teams",
       "Insights contextualisés avancés",
