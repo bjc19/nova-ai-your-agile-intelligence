@@ -57,8 +57,8 @@ const plans = [
     addOn: "+15 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
-      "Analyses manuelles illimitées",
-      "50 analyses post-réunion automatiques/mois",
+      "50 analyses manuelles par mois",
+      "30 analyses post-réunion automatiques/mois",
       "Integrations Slack, Jira, Teams",
       "Insights contextualisés avancés",
       "Croisement limité avec 3 sources",
@@ -89,7 +89,8 @@ const plans = [
     discount: "15% annuel",
     addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
-      "Analyses post-réunion illimitées",
+      "Analyses manuelles illimitées",
+      "Analyses automatiques illimitées",
       "Croisement complet multi-sources",
       "Détection et adaptation multi-projets",
       "Recommandations courageuses contextualisées",
