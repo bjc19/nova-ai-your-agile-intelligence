@@ -49,7 +49,7 @@ const commandAnimationStyles = `
     content: '|';
     display: inline;
     margin-left: 2px;
-    animation: cursor-type 4s step-end forwards;
+    animation: cursor-type 0.4s step-end 4s forwards;
     opacity: 0;
   }
 
