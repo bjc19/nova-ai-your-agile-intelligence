@@ -71,8 +71,7 @@ const plans = [
       "Pas de détection multi-projets avancée",
       "Pas de croisement complet",
       "Pas de KPIs détaillés",
-      "Pas d'analyses organisationnelles",
-      " "
+      "Pas d'analyses organisationnelles"
     ],
     ctaKey: "contactSales"
   },
@@ -193,7 +192,7 @@ export function PricingSection() {
               </div>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col space-y-6">
+            <CardContent className="flex-1 space-y-6">
               {plan.highlight && (
                 <p className="text-xs text-red-600 font-semibold text-center">
                   ⚠️ {plan.highlight}
@@ -202,7 +201,7 @@ export function PricingSection() {
 
               <Button 
                 onClick={() => setSelectedPlan(plan)}
-                className={`w-full mt-auto ${
+                className={`w-full ${
                   plan.id === 'pro' 
                     ? 'bg-purple-600 hover:bg-purple-700' 
                     : plan.id === 'starter' || plan.id === 'growth' || plan.id === 'enterprise'
@@ -213,50 +212,48 @@ export function PricingSection() {
                 {t(plan.ctaKey)}
               </Button>
 
-              <div className="flex-1">
-                {plan.roiValue && (
-                  <div className="bg-green-50 p-3 rounded border border-green-200 mb-4">
-                    <p className="text-sm text-green-800">{plan.roiValue}</p>
-                  </div>
-                )}
+              {plan.roiValue && (
+                <div className="bg-green-50 p-3 rounded border border-green-200">
+                  <p className="text-sm text-green-800">{plan.roiValue}</p>
+                </div>
+              )}
 
-                {plan.target && (
-                  <div className="bg-amber-50 p-3 rounded border border-amber-200 mb-4">
-                    <p className="text-xs text-amber-800"><strong>Cible:</strong> {plan.target}</p>
-                  </div>
-                )}
+              {plan.target && (
+                <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                  <p className="text-xs text-amber-800"><strong>Cible:</strong> {plan.target}</p>
+                </div>
+              )}
 
-                {/* Included Features */}
+              {/* Included Features */}
+              <div>
+                <p className="font-semibold text-sm mb-3">Ce qui est inclus:</p>
+                {plan.enterpriseIntro && (
+                  <p className="text-sm text-slate-700 mb-3 font-medium italic">{plan.enterpriseIntro}</p>
+                )}
+                <ul className="space-y-2">
+                  {plan.included.map((feature, idx) => (
+                    <li key={idx} className="flex gap-2 text-sm text-slate-700">
+                      <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Limitations */}
+              {plan.limitations && (
                 <div>
-                  <p className="font-semibold text-sm mb-3">Ce qui est inclus:</p>
-                  {plan.enterpriseIntro && (
-                    <p className="text-sm text-slate-700 mb-3 font-medium italic">{plan.enterpriseIntro}</p>
-                  )}
-                  <ul className="space-y-2">
-                    {plan.included.map((feature, idx) => (
-                      <li key={idx} className="flex gap-2 text-sm text-slate-700">
-                        <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span>{feature}</span>
+                  <p className="font-semibold text-sm mb-3 text-red-700">Limitations:</p>
+                  <ul className="space-y-1">
+                    {plan.limitations.map((limit, idx) => (
+                      <li key={idx} className="flex gap-2 text-xs text-slate-600">
+                        <X className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
+                        <span>{limit}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-
-                {/* Limitations */}
-                {plan.limitations && (
-                  <div className="mt-4">
-                    <p className="font-semibold text-sm mb-3 text-red-700">Limitations:</p>
-                    <ul className="space-y-1">
-                      {plan.limitations.map((limit, idx) => (
-                        <li key={idx} className="flex gap-2 text-xs text-slate-600">
-                          <X className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
-                          <span>{limit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+              )}
             </CardContent>
           </Card>
         ))}
