@@ -58,7 +58,8 @@ export function detectOutOfContext(text) {
   const agileContraTerms = [
     'sprint', 'planning', 'backlog', 'item', 'capacite', 'engagement',
     'deplacement', 'coordination', 'charge', 'dependance', 'risque',
-    'objectif sprint', 'user story', 'definition of done', 'velocity'
+    'objectif sprint', 'user story', 'definition of done', 'velocity',
+    'equipe', 'equipe projet', 'equipe dev', 'equipe agile', 'equipe scrum'
   ].map(normalizeText);
   agileContraTerms.forEach(term => { if (lowerText.includes(term)) agileContraIndicator++; });
 
