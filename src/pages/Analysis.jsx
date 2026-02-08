@@ -330,6 +330,7 @@ Provide a detailed analysis in the following JSON format:`;
 
     // Store result in sessionStorage and navigate
     sessionStorage.setItem("novaAnalysis", JSON.stringify({ ...result, posture: posture.id, context }));
+    sessionStorage.setItem("novaTranscript", transcript);
 
     // Store source info for external CTA redirection
     const sourceInfo = {
