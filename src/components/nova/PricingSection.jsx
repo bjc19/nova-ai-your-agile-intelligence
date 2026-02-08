@@ -71,7 +71,8 @@ const plans = [
       "Pas de détection multi-projets avancée",
       "Pas de croisement complet",
       "Pas de KPIs détaillés",
-      "Pas d'analyses organisationnelles"
+      "Pas d'analyses organisationnelles",
+      " "
     ],
     ctaKey: "contactSales"
   },
