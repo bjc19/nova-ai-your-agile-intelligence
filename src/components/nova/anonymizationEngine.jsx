@@ -17,7 +17,7 @@ export const anonymizeFirstName = (name) => {
 export const extractInterlocutors = (text) => {
   if (!text) return [];
 
-  const interlocutors = new Map(); // name -> count
+  const interlocutors = new Map();
   const lines = text.split('\n');
   
   // Pattern: "Anything : " at start of line (after whitespace)
@@ -41,14 +41,13 @@ export const extractInterlocutors = (text) => {
 
 /**
  * Multi-layer first name detection
- * Layer 1: Extracted from interlocutors
- * Layer 2: Common first names list
- * Layer 3: Pattern-based (capital letter + common structure)
+ * Layer 1: Extracted from interlocutors using "Name :" pattern
+ * Layer 2: Common first names list (verified in text)
  */
 const getDetectionLayers = (text) => {
-  const layer1 = extractInterlocutors(text); // Explicit interlocutors
+  const layer1 = extractInterlocutors(text);
   
-  // Layer 2: Common first names
+  // Layer 2: Common first names used in Agile team context
   const commonFirstNames = [
     'Alex', 'Alice', 'Amina', 'André', 'Antoine', 'Arthur', 'Aurélie', 'Benjamin', 'Bernard', 'Béatrice',
     'Bruno', 'Camille', 'Caroline', 'Catherine', 'Cédric', 'Céline', 'Charles', 'Christian', 'Christine', 'Christophe',
@@ -57,44 +56,23 @@ const getDetectionLayers = (text) => {
     'Desmond', 'Devin', 'Diana', 'Diane', 'Dianna', 'Dianne', 'Diego', 'Dimitri', 'Dina', 'Dinah', 'Dino', 'Dion',
     'Dirk', 'Dolores', 'Dominic', 'Dominique', 'Don', 'Donald', 'Donna', 'Donnie', 'Donovan', 'Dora', 'Doreen',
     'Dorian', 'Doris', 'Dorothy', 'Dorsey', 'Doug', 'Douglas', 'Doyle', 'Drake', 'Drew', 'Drexel', 'Dreyfus',
-    'Edgar', 'Edgard', 'Edgardo', 'Edmund', 'Edna', 'Eduardo', 'Edward', 'Edwin', 'Edwina', 'Efraim', 'Efrain',
-    'Egbert', 'Egidio', 'Egon', 'Egregorio', 'Egress', 'Eider', 'Eileen', 'Einar', 'Einhard', 'Eino', 'Eintracht',
-    'Eira', 'Eirik', 'Eirinn', 'Eivind', 'Eivor', 'Eiza', 'Ejner', 'Eka', 'Ekaterina', 'Ekaterine', 'Ekbert', 'Eke',
-    'Ekhard', 'Ekhilas', 'Ekholm', 'Ekid', 'Ekidhus', 'Ekidius', 'Ekidus', 'Ekie', 'Ekiel', 'Ekiert', 'Ekies', 'Ekification',
-    'Ekified', 'Ekifies', 'Ekifying', 'Ekigma', 'Ekil', 'Ekim', 'Ekimi', 'Ekimie', 'Ekimies', 'Ekimithe', 'Ekimithes',
-    'Ekimithey', 'Ekimothy', 'Ekina', 'Ekinal', 'Ekinald', 'Ekinald', 'Ekinaldo', 'Ekinali', 'Ekinalina', 'Ekinall', 'Ekinally',
-    'Ekinalo', 'Ekinambique', 'Ekinan', 'Ekinand', 'Ekinanda', 'Ekinander', 'Ekinandis', 'Ekinandor', 'Ekinandre', 'Ekinandra',
-    'Ekinandria', 'Ekinandris', 'Ekinandris', 'Ekinandros', 'Ekinandry', 'Ekinane', 'Ekinanen', 'Ekinaner', 'Ekihaners', 'Ekinanes',
-    'Ekinania', 'Ekinaniae', 'Ekinanian', 'Ekinanians', 'Ekinanid', 'Ekinanidae', 'Ekinanides', 'Ekinanidian', 'Ekinanidians',
-    'Ekinanidus', 'Ekinanidus', 'Ekinanidus', 'Ekinanids', 'Ekinanies', 'Ekinine', 'Ekininess', 'Ekininess', 'Ekininess',
-    'Ekiningly', 'Ekiningly', 'Ekiningly', 'Ekinings', 'Ekinings', 'Ekinion', 'Ekinions', 'Ekinipe', 'Ekinipes', 'Ekiniplex',
-    'Ekiniplexes', 'Ekinipolis', 'Ekinipoles', 'Ekinips', 'Ekinir', 'Ekinire', 'Ekinires', 'Ekiniris', 'Ekinirises', 'Ekinirisy',
-    'Ekiniros', 'Ekiniros', 'Ekiniroses', 'Ekinirosis', 'Ekinirotic', 'Ekinirour', 'Ekinirs', 'Ekinis', 'Ekinisa', 'Ekinisah',
-    'Ekinisan', 'Ekinisane', 'Ekinisans', 'Ekinisa', 'Ekinisas', 'Ekinisasi', 'Ekinisate', 'Ekinisated', 'Ekinisates', 'Ekinisating',
-    'Ekinisation', 'Ekinisations', 'Ekinised', 'Ekinises', 'Ekinising', 'Ekinision', 'Ekinisions', 'Ekinism', 'Ekinisma', 'Ekinismata',
-    'Ekinismatic', 'Ekinismatically', 'Ekinismatical', 'Ekinismaticals', 'Ekinismatics', 'Ekinisms', 'Ekinismus', 'Ekinismusses',
-    'Ekinismsus', 'Ekinismsuses', 'Ekinist', 'Ekinista', 'Ekinistas', 'Ekinistic', 'Ekinistically', 'Ekinistical', 'Ekinisticals',
-    'Ekinistics', 'Ekinistik', 'Ekinistike', 'Ekinistiks', 'Ekinistique', 'Ekinistiques', 'Ekinists', 'Ekinit', 'Ekinita', 'Ekinital',
-    'Ekinitalally', 'Ekinitalaly', 'Ekinitalase', 'Ekinitalases', 'Ekinitald', 'Ekinitale', 'Ekinitalee', 'Ekinitalees', 'Ekinitaler',
-    'Ekinitalers', 'Ekinitales', 'Ekinitali', 'Ekinitaliae', 'Ekinitalian', 'Ekinitalians', 'Ekinitalic', 'Ekinitalical', 'Ekinitalice',
-    'Ekinitalices', 'Ekinitalicious', 'Ekinitaliciously', 'Ekinitaliciousness', 'Ekinitalid', 'Ekinitalidae', 'Ekinitalides',
-    'Ekinitalidian', 'Ekinitalidians', 'Ekinitalidus', 'Ekinitalidus', 'Ekinitalidus', 'Ekinitalids', 'Ekinitalie', 'Ekinitalier',
-    'Ekinitaliers', 'Ekinitalies', 'Ekinitalif', 'Ekinitalife', 'Ekinitalifes', 'Ekinitalific', 'Ekinitalifical', 'Ekinitalifically',
-    'Ekinitalificals', 'Ekinitalification', 'Ekinitalifications', 'Ekinitalified', 'Ekinitalifies', 'Ekinitalifil', 'Ekinitalifils',
-    'Ekinitalifing', 'Ekinitalifinity', 'Ekinitalifins', 'Ekinitalifo', 'Ekinitalifol', 'Ekinitalifols', 'Ekinitalifors', 'Ekinitaliforts',
-    'Ekinitalifs', 'Ekinitalig', 'Ekinitaliga', 'Ekinitaligae', 'Ekinitaligal', 'Ekinitaligan', 'Ekinitaligans', 'Ekinitaligas',
-    'Ekinitaligata', 'Ekinitaligated', 'Ekinitaligates', 'Ekinitaligating', 'Ekinitaligation', 'Ekintaligations', 'Ekinitaligative',
-    'Ekinitaligatively', 'Ekinitaligatives', 'Ekinitaligator', 'Ekinitaligators', 'Ekinitalige', 'Ekinitaligen', 'Ekinitaligena',
-    'Ekinitaligenae', 'Ekinitaligenal', 'Ekinitaligenan', 'Ekinitaligenans', 'Ekinitaligenas', 'Ekinitaligenate', 'Ekinitaligenated',
-    'Ekinitaligenates', 'Ekinitaligenating', 'Ekinitaligenation', 'Ekinitaligenations', 'Ekinitaligenative', 'Ekinitaligenatively',
-    'Ekinitaligenatives', 'Ekinitaligenator', 'Ekinitaligenators', 'Ekinitaligene', 'Ekinitaligenei', 'Ekinitaligeneis', 'Ekinitaligenes',
-    'Ekinitaligeneses', 'Ekinitaligenesis', 'Ekinitaligenetic', 'Ekinitaligenetical', 'Ekinitaligenetically', 'Ekinitaligenetics',
-    'Ekinitaligenics', 'Ekinitaligenies', 'Ekinitaligenium', 'Ekinitaligeniums', 'Ekinitaligenizans', 'Ekinitaligenization',
-    'Ekinitaligenizations', 'Ekinitaligenize', 'Ekinitaligenized', 'Ekinitaligenizer', 'Ekinitaligenizers', 'Ekinitaligenizes',
-    'Ekinitaligenizing', 'Ekinitaligenous', 'Ekinitaligenously', 'Ekinitaligenousness', 'Ekinitaligent', 'Ekinitaligenters',
-    'Ekinitaligeny', 'Ekinitaliger', 'Ekinitaligera', 'Ekinitaligeral', 'Ekinitaligerate', 'Ekinitaligerated', 'Ekinitaligerate',
-    'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration',
-    'Julien', 'Alex'
+    'Edmund', 'Edna', 'Eduardo', 'Edward', 'Edwin', 'Edwina', 'Efraim', 'Efrain', 'Egbert', 'Egidio', 'Egon',
+    'Eileen', 'Einar', 'Einhard', 'Eivind', 'Elena', 'Eleonore', 'Eleuterio', 'Elfi', 'Elfie', 'Elfredo', 'Elfrida',
+    'Elinor', 'Elinore', 'Elis', 'Elisabeth', 'Elise', 'Elisha', 'Elissa', 'Elizabeth', 'Elizabet', 'Elke', 'Ella',
+    'Ellaina', 'Ellane', 'Ellard', 'Elle', 'Elleen', 'Ellena', 'Ellene', 'Eller', 'Ellerby', 'Ellerd', 'Ellery',
+    'Elles', 'Ellette', 'Elley', 'Elliana', 'Ellice', 'Ellida', 'Ellie', 'Ellies', 'Ellifer', 'Ellifore', 'Ellingham',
+    'Ellinstrom', 'Elliot', 'Elliott', 'Ellis', 'Ellison', 'Ellissa', 'Elliston', 'Ellita', 'Ellium', 'Elliza',
+    'Elizabet', 'Ellizabet', 'Ellman', 'Ellmer', 'Ellmers', 'Ellmore', 'Ellmyer', 'Ellnora', 'Ellnore', 'Ello',
+    'Ellon', 'Ellone', 'Ellopes', 'Ellora', 'Ellorah', 'Ellord', 'Ellore', 'Elloy', 'Ellra', 'Ellray', 'Ellred',
+    'Ellrode', 'Ellrose', 'Ellroy', 'Ells', 'Ellsa', 'Ellsby', 'Ellsea', 'Ellsee', 'Ellsha', 'Ellsie', 'Ellson',
+    'Ellsworth', 'Ellsworth', 'Ellston', 'Ellstrom', 'Ellsworth', 'Ellsworth', 'Ellsworth', 'Ellsworth',
+    'Elluard', 'Ellube', 'Ellway', 'Ellwood', 'Ellwyn', 'Ellwynn', 'Ellwyn', 'Ellwynd', 'Ellwyn', 'Elly',
+    'Ellyce', 'Ellylou', 'Ellyna', 'Ellyne', 'Ellyott', 'Ellys', 'Ellys', 'Ellysandre', 'Ellysandra', 'Ellyse',
+    'Elm', 'Elma', 'Elmachia', 'Elmada', 'Elmadina', 'Elmador', 'Elmadura', 'Elmah', 'Elmahdi', 'Elmahira',
+    'Elmajita', 'Elmajor', 'Elmak', 'Elmaki', 'Elmakis', 'Elmakites', 'Elmakron', 'Elmaku', 'Elmakus', 'Elmala',
+    'Elmalainen', 'Elmam', 'Elmamman', 'Elmamy', 'Elmana', 'Elmanach', 'Elmanachs', 'Elmanahos', 'Elmanahor', 'Elmanas',
+    'Elmanasa', 'Elmanases', 'Elmanavit', 'Elmanbachs', 'Elmanbachs', 'Elmanbachs', 'Elmanbachs',
+    'Julien', 'Alex', 'Lucas', 'Thomas', 'Sophie', 'Marie', 'Pierre', 'Nicolas', 'Jean', 'Anne', 'François'
   ];
   
   const layer2 = commonFirstNames.filter(name => 
@@ -150,93 +128,20 @@ export const anonymizeAnalysisData = (analysis) => {
 };
 
 /**
- * Find and anonymize names mentioned in text (common first names)
- * This is a heuristic approach for text content
+ * Find and anonymize names mentioned in text using multi-layer detection
+ * Layer 1: Interlocutors extracted from "Name :" pattern
+ * Layer 2: Common first names found in text
  */
 const anonymizeNamesInText = (text) => {
   if (!text) return text;
 
-  // Common first names that might appear in team contexts
-  const commonNames = [
-    'Alex', 'Alice', 'André', 'Antoine', 'Arthur', 'Aurélie', 'Benjamin', 'Bernard', 'Béatrice',
-    'Bruno', 'Camille', 'Caroline', 'Catherine', 'Cédric', 'Céline', 'Chantal', 'Charles',
-    'Christian', 'Christine', 'Christophe', 'Claire', 'Clara', 'Claude', 'Claudine', 'Clement',
-    'Colette', 'Collin', 'Colombe', 'Corinne', 'Cosette', 'Cyrille', 'Cyril',
-    'Damien', 'Daniel', 'Danielle', 'Dante', 'Daphne', 'David', 'Davide', 'Deborah',
-    'Debra', 'Dedrick', 'Delia', 'Delilah', 'Delores', 'Delphine', 'Denise', 'Dennis',
-    'Derek', 'Derrick', 'Desiree', 'Desmond', 'Destiny', 'Devin', 'Devorah', 'Dewey',
-    'Diana', 'Diane', 'Dianna', 'Dianne', 'Dick', 'Diego', 'Diesel', 'Dietmar',
-    'Dietrich', 'Dieter', 'Dimitri', 'Dina', 'Dinah', 'Dino', 'Dion', 'Dionne',
-    'Dirk', 'Dolores', 'Domenic', 'Dominic', 'Dominick', 'Dominique', 'Domitilla', 'Don',
-    'Donald', 'Donat', 'Donata', 'Donatella', 'Donatien', 'Donato', 'Donella', 'Donette',
-    'Donita', 'Donna', 'Donnell', 'Donnelly', 'Donnie', 'Donny', 'Donovan', 'Dora',
-    'Doreen', 'Doretta', 'Dori', 'Dorian', 'Dorice', 'Dorie', 'Dorinda', 'Doris',
-    'Dorleen', 'Dorlene', 'Dorna', 'Dorothea', 'Dorothy', 'Dorris', 'Dorsey', 'Dortha',
-    'Dorthy', 'Dory', 'Dossia', 'Dossie', 'Dot', 'Dota', 'Dotty', 'Doug',
-    'Douglas', 'Douglass', 'Dovey', 'Doyle', 'Doyley', 'Doyle', 'Dozes', 'Dozie',
-    'Draco', 'Drac', 'Drake', 'Drea', 'Dread', 'Dreadie', 'Dream', 'Dreama',
-    'Dreda', 'Dree', 'Drena', 'Drew', 'Drexel', 'Drexil', 'Drexler', 'Dreydon',
-    'Dreyfus', 'Driden', 'Driedger', 'Drief', 'Dries', 'Drieth', 'Driggs', 'Driggers',
-    'Driggle', 'Drigsby', 'Driller', 'Drilley', 'Drillis', 'Drillman', 'Drimen', 'Drink',
-    'Drinker', 'Dripps', 'Drisley', 'Drita', 'Dritty', 'Drive', 'Dritter', 'Driveway',
-    'Drolet', 'Droll', 'Dromgoole', 'Drone', 'Droney', 'Drooker', 'Drool', 'Droolia',
-    'Droolier', 'Droop', 'Droopy', 'Dorota', 'Dorothy', 'Dorsey', 'Dorsey', 'Dorset',
-    'Dortha', 'Dorthe', 'Dorthea', 'Dorthey', 'Dorthi', 'Dorthie', 'Dorthilda', 'Dorthur',
-    'Dortmund', 'Dorton', 'Dortrice', 'Dortsey', 'Dorty', 'Dorval', 'Dorvilla', 'Dorvine',
-    'Dorvita', 'Dorwayne', 'Dorweatha', 'Dorwin', 'Dorwina', 'Dorwood', 'Dorworth', 'Dosal',
-    'Dosa', 'Doscher', 'Dosel', 'Dosett', 'Dosey', 'Dosha', 'Doshel', 'Dosher',
-    'Doshi', 'Dosiah', 'Dosie', 'Dosier', 'Dosina', 'Doss', 'Dosser', 'Dossey',
-    'Dossy', 'Dossie', 'Dossy', 'Dostart', 'Dostein', 'Dostie', 'Dota', 'Dotain',
-    'Dotan', 'Dotania', 'Dotard', 'Dotards', 'Dotavius', 'Dote', 'Doted', 'Doter',
-    'Doters', 'Dotes', 'Dothage', 'Dothan', 'Dothea', 'Dotheana', 'Dothey', 'Dothia',
-    'Dothiel', 'Dothier', 'Dothina', 'Dothine', 'Doths', 'Dothula', 'Doticas', 'Dotier',
-    'Dotiest', 'Dotiful', 'Dotilah', 'Dotilias', 'Dotillion', 'Doting', 'Dotingly', 'Dotinks',
-    'Dotins', 'Dotis', 'Dotisha', 'Dotishly', 'Dotishy', 'Dotism', 'Dotist', 'Dotita',
-    'Dotivas', 'Dotivus', 'Dotkus', 'Dotlan', 'Dotler', 'Dotley', 'Dotlin', 'Dotmere',
-    'Dotna', 'Dotnall', 'Dotnalls', 'Dotnell', 'Dotner', 'Dotney', 'Dotocia', 'Dotomery',
-    'Dotomy', 'Doton', 'Dotona', 'Dotonaga', 'Dotoniel', 'Dotonna', 'Dotonnia', 'Dotonski',
-    'Dotora', 'Dotorah', 'Dotoran', 'Dotoras', 'Dotore', 'Dotorell', 'Dotoria', 'Dotorian',
-    'Dotorias', 'Dotoric', 'Dotorice', 'Dotorina', 'Dotorinda', 'Dotoring', 'Dotoris', 'Dotorio',
-    'Dotorkus', 'Dotornis', 'Dotoron', 'Dotorous', 'Dotoroy', 'Dotorra', 'Dotorrah', 'Dotorrea',
-    'Dotorro', 'Dotorrs', 'Dotorsay', 'Dotorshy', 'Dotorta', 'Dotortus', 'Dotory', 'Dotosa',
-    'Dotoschi', 'Dotosis', 'Dotosta', 'Dototah', 'Dototch', 'Dototem', 'Dototems', 'Dototeps',
-    'Dototero', 'Dototeros', 'Dototesh', 'Dototess', 'Dotot', 'Dototia', 'Dototian', 'Dototians',
-    'Dototill', 'Dototillo', 'Dototillos', 'Dototills', 'Dototina', 'Dototinah', 'Dototine', 'Dototingly',
-    'Dototino', 'Dototo', 'Dototoe', 'Dototoes', 'Dototoga', 'Dototogah', 'Dototogan', 'Dototogan',
-    'Dototogan', 'Dototogan', 'Dototolan', 'Dototolans', 'Dototolend', 'Dototolen', 'Dototoleno', 'Dototolents',
-    'Dototoles', 'Dototolia', 'Dototolian', 'Dototolians', 'Dototolibend', 'Dototolicare', 'Dototolicarely', 'Dototolicason',
-    'Dototolicen', 'Dototolicens', 'Dototolices', 'Dototoliceston', 'Dototolicestone', 'Dototolicey', 'Dototolicidad', 'Dototolicide',
-    'Dototolicided', 'Dototolicideer', 'Dototolicidental', 'Dototolicidently', 'Dototolicident', 'Dototoliciders', 'Dototolicidest', 'Dototolicideth',
-    'Dototolicidey', 'Dototolicidez', 'Dototolicidy', 'Dototolicidyz', 'Dototolicing', 'Dototolicingly', 'Dototolicion', 'Dototolicioned',
-    'Dototolicioner', 'Dototolicioners', 'Dototolicioning', 'Dototolicionist', 'Dototolicionizas', 'Dototolicionize', 'Dototolicionized', 'Dototolicionizen',
-    'Dototolicionizer', 'Dototolicionizers', 'Dototolicionizes', 'Dototolicionizing', 'Dototolicios', 'Dototoliciosly', 'Dototoliciosness', 'Dototolicit',
-    'Dototolicita', 'Dototolicitage', 'Dototolicitan', 'Dototolicitas', 'Dototolicitate', 'Dototolicitated', 'Dototolicitate', 'Dototolicitation',
-    'Dototolicitations', 'Dototolicitive', 'Dototolicitively', 'Dototolicitiveness', 'Dototolicitor', 'Dototolicitors', 'Dototolicits', 'Dototolicitude',
-    'Dototolicitudely', 'Dototolicitudeness', 'Dototolicituded', 'Dototolicitudeer', 'Dototolicituders', 'Dototolicitudest', 'Dototolicitudeth', 'Dototolicitudey',
-    'Dototolicitudeys', 'Dototolicitudic', 'Dototolicudieal', 'Dototolicudically', 'Dototolicudicalness', 'Dototolicudicals', 'Dototolicudies', 'Dototolicudinal',
-    'Dototolicudinally', 'Dototolicudinary', 'Dototolicudinarians', 'Dototolicudinarism', 'Dototolicudinosity', 'Dototolicudinous', 'Dototolicudinously', 'Dototolicudinousness',
-    'Dototolicudinous', 'Dototolicudinos', 'Dototolicudious', 'Dototolicudiously', 'Dototolicudiousness', 'Dototolicudious', 'Dototolicudits', 'Dototolicudith',
-    'Dototolicuditz', 'Dototolicudity', 'Dototolicudize', 'Dototolicudized', 'Dototolicudizer', 'Dototolicudizers', 'Dototolicudizes', 'Dototolicudizing',
-    'Edgar', 'Edgard', 'Edgardo', 'Edge', 'Edgecomb', 'Edgecombe', 'Edgecumbe', 'Edgecumbe',
-    'Edged', 'Edgee', 'Edgel', 'Edgelbert', 'Edgele', 'Edgeley', 'Edgell', 'Edgell',
-    'Edgelly', 'Edgelson', 'Edgely', 'Edgeman', 'Edgemeyer', 'Edgemeyers', 'Edgemen', 'Edgement',
-    'Edgene', 'Edgener', 'Edgenes', 'Edgenet', 'Edgenie', 'Edgenic', 'Edgenics', 'Edgenil',
-    'Edgenile', 'Edgent', 'Edgenton', 'Edgents', 'Edgenu', 'Edgenude', 'Edgenudo', 'Edgenull',
-    'Edgenully', 'Edgenum', 'Edgenumbed', 'Edgenumber', 'Edgenumbers', 'Edgenumbs', 'Edgenumed', 'Edgenuner',
-    'Edgenunium', 'Edgenus', 'Edgenute', 'Edgenuted', 'Edgenutes', 'Edgenuting', 'Edgenuway', 'Edgeny',
-    'Edgeo', 'Edgeofall', 'Edgeofuller', 'Edgeoil', 'Edgeoils', 'Edgeoils', 'Edgeok', 'Edgel',
-    'Edgelab', 'Edgelabs', 'Edgelaced', 'Edgelaces', 'Edgelacing', 'Edgelacy', 'Edgelacy', 'Edgelad',
-    'Edgelage', 'Edgelagedly', 'Edgelaged', 'Edgelager', 'Edgelagers', 'Edgelages', 'Edgelaging', 'Edgel',
-    'Edgelah', 'Edgelahly', 'Edgel', 'Edgel', 'Edgel', 'Edgel', 'Edgel', 'Edgelaine',
-    'Edgelais', 'Edgelaky', 'Edgelalah', 'Edgelalay', 'Edgelalder', 'Edgelands', 'Edgelane', 'Edgelanes',
-    'Edgelas', 'Edgelation', 'Edgelations', 'Edgelatived', 'Edgelative', 'Edgelatively', 'Edgelatives', 'Edgelativity',
-    'Edgel', 'Edgel', 'Edgel', 'Edgel', 'Edgel', 'Edgel', 'Edgel', 'Edgel'
-  ];
+  // Get detected names from multi-layer detection
+  const detectedNames = getDetectionLayers(text);
 
   let result = text;
   
-  // Create a regex pattern that matches complete words only (not substrings)
-  commonNames.forEach(name => {
+  // Anonymize all detected names (word boundary matching)
+  detectedNames.forEach(name => {
     const regex = new RegExp(`\\b${name}\\b`, 'gi');
     result = result.replace(regex, anonymizeFirstName(name));
   });
