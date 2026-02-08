@@ -803,7 +803,15 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                     setDetection(null);
                   }
                 }}
-                placeholder="Ex: Alice: Hier j'ai travaillé sur le formulaire de login. Aujourd'hui je vais continuer. Je suis bloquée par la validation email qui n'est pas prête. ..."
+                onKeyDown={(e) => {
+                  // Bloquer toute saisie clavier sauf Ctrl+V / Cmd+V
+                  if (!(e.ctrlKey || e.metaKey) || e.key !== 'v') {
+                    if (!['Tab', 'Escape', 'Enter'].includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                      e.preventDefault();
+                    }
+                  }
+                }}
+                placeholder="Collez uniquement (Ctrl+V ou Cmd+V) - Saisie clavier désactivée"
                 rows={6}
                 className="resize-none"
               />
