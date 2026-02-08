@@ -248,14 +248,17 @@ export default function RecentAnalyses({ analyses = [] }) {
               if (item.type === 'analysis') {
                 const SourceIcon = sourceIcons[item.source] || FileText;
                 return (
-                  <Link to={createPageUrl(`Details?id=${item.id}`)}>
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1 * index }}
-                      className="group p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 transition-all cursor-pointer"
-                    >
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 * index }}
+                    className="group p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 transition-all cursor-pointer"
+                    onClick={() => {
+                      sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data || item));
+                      window.location.href = createPageUrl("Results");
+                    }}
+                  >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
                         <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-white transition-colors">
@@ -289,7 +292,6 @@ export default function RecentAnalyses({ analyses = [] }) {
                       </div>
                       </div>
                       </motion.div>
-                      </Link>
                       );
                       } else if (item.type === 'signal') {
                const isTeams = item.signalSource === 'teams';
