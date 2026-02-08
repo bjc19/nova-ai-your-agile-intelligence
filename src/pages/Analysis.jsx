@@ -441,10 +441,6 @@ Provide a detailed analysis in the following JSON format:`;
           </Link>
           
           <div className="flex items-center gap-3 mb-3">
-            <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-blue-50 border-blue-200 text-blue-700">
-              <Sparkles className="w-3 h-3 mr-1" />
-              {slackConnected ? t('liveMode') : t('simulationMode')}
-            </Badge>
             <PostureIndicator postureId={currentPosture.id} size="compact" />
           </div>
           
