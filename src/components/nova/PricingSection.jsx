@@ -58,7 +58,8 @@ const plans = [
     discount: "15% annuel",
     included: [
       "Analyses manuelles illimitées",
-      "8 analyses post-réunion automatiques/mois",
+      "50 analyses post-réunion automatiques/mois",
+      "Integrations Slack, Jira, Teams",
       "Insights contextualisés avancés",
       "Croisement limité avec 2 sources externes",
       "Dashboard tendances complet",
