@@ -114,7 +114,6 @@ const plans = [
     subtitle: "Gouvernance, sécurité, insights systémiques",
     price: "Custom",
     priceNote: "À partir de 500 CAD/mois",
-    users: "50 utilisateurs inclus",
     structure: "+ 10 CAD/utilisateur",
     degressiveNote: "≈10-5 CAD/utilisateur à 100+ utilisateurs",
     enterpriseIntro: "Tous les éléments de Pro, +",
