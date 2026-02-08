@@ -911,7 +911,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               </Button>
               <Button 
                 onClick={handleAnalyze}
-                disabled={analyzing || !input.trim()}
+                disabled={analyzing || !input.trim() || (input.trim().length > 20 && detectOutOfContext(input).isOutOfContext)}
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 {analyzing ? (
