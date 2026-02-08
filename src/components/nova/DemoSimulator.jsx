@@ -41,45 +41,65 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   const detectOutOfContext = (text) => {
     const lowerText = text.toLowerCase();
     
-    // PATTERN 1: Vocabulaire hors domaine professionnel
-    const sportsTerms = ['match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'équipe de foot', 'terrain', 'arbitre', 'football', 'basketball', 'tennis', 'rugby'];
+    // PATTERN 1: Vocabulaire hors domaine professionnel (plus exhaustif)
+    const sportsTerms = [
+      'match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'terrain', 'arbitre', 
+      'football', 'basketball', 'tennis', 'rugby', 'barça', 'barcelone', 'real madrid',
+      'real', 'cristiano', 'messi', 'clásico', 'défense', 'attaque', 'transition',
+      'coup franc', 'finition', 'circulation', 'ligne défensive', 'égalisation'
+    ];
+    const sportsNames = ['barça', 'barcelone', 'real', 'madrid', 'cristiano', 'messi'];
     const entertainmentTerms = ['film', 'série', 'célébrité', 'acteur', 'spectacle', 'concert', 'streaming', 'netflix', 'disney', 'marvel'];
     const personalTerms = ['vacances', 'week-end', 'restaurant', 'cuisine', 'recette', 'voyage', 'tourisme', 'shopping'];
     
-    // PATTERN 2: Vocabulaire professionnel
-    const professionalTerms = ['sprint', 'backlog', 'user story', 'équipe', 'projet', 'tâche', 'blocage', 'réunion', 'délai', 'livrable', 'client', 'produit', 'développement', 'test', 'scrum', 'kanban', 'planning', 'review', 'retrospective', 'daily', 'stand-up', 'ticket'];
+    // PATTERN 2: Vocabulaire STRICTEMENT professionnel (exclusion termes ambigus)
+    const strictProfessionalTerms = [
+      'sprint', 'backlog', 'user story', 'projet', 'tâche', 'blocage', 'bloqué',
+      'réunion d\'équipe', 'délai', 'livrable', 'client', 'produit', 'développement', 
+      'test', 'scrum', 'kanban', 'planning', 'review', 'retrospective', 'rétrospective',
+      'daily', 'stand-up', 'standup', 'ticket', 'jira', 'pull request', 'merge',
+      'déploiement', 'feature', 'bug', 'story point', 'velocity', 'impediment'
+    ];
     
     // Compter les occurrences
     let sportsCount = 0;
+    let sportsNamesCount = 0;
     let entertainmentCount = 0;
     let personalCount = 0;
-    let professionalCount = 0;
+    let strictProfessionalCount = 0;
     
     sportsTerms.forEach(term => { if (lowerText.includes(term)) sportsCount++; });
+    sportsNames.forEach(term => { if (lowerText.includes(term)) sportsNamesCount++; });
     entertainmentTerms.forEach(term => { if (lowerText.includes(term)) entertainmentCount++; });
     personalTerms.forEach(term => { if (lowerText.includes(term)) personalCount++; });
-    professionalTerms.forEach(term => { if (lowerText.includes(term)) professionalCount++; });
+    strictProfessionalTerms.forEach(term => { if (lowerText.includes(term)) strictProfessionalCount++; });
     
     const nonProfessionalCount = sportsCount + entertainmentCount + personalCount;
     
-    // Règles de détection
+    // Règles de détection RENFORCÉES
     const isOutOfContext = (
-      (sportsCount >= 3 && professionalCount < 2) ||
-      (entertainmentCount >= 2 && professionalCount === 0) ||
-      (nonProfessionalCount >= 4 && professionalCount < 2)
+      // Règle HORS_CONTEXTE_1: Sports avec noms propres
+      (sportsNamesCount >= 2 && strictProfessionalCount === 0) ||
+      // Règle HORS_CONTEXTE_2: Beaucoup de termes sportifs
+      (sportsCount >= 5 && strictProfessionalCount < 2) ||
+      // Règle HORS_CONTEXTE_3: Divertissement sans contexte pro
+      (entertainmentCount >= 2 && strictProfessionalCount === 0) ||
+      // Règle HORS_CONTEXTE_4: Ratio non-pro vs pro
+      (nonProfessionalCount >= 6 && strictProfessionalCount < 3)
     );
     
     if (isOutOfContext) {
       const detectedTerms = [];
-      if (sportsCount > 0) detectedTerms.push('vocabulaire sportif');
+      if (sportsCount > 0 || sportsNamesCount > 0) detectedTerms.push('vocabulaire sportif');
+      if (sportsNamesCount > 0) detectedTerms.push('noms propres sportifs');
       if (entertainmentCount > 0) detectedTerms.push('contenu divertissement');
       if (personalCount > 0) detectedTerms.push('sujets personnels');
       
       return {
         isOutOfContext: true,
-        confidence: Math.min(95, 80 + nonProfessionalCount * 3),
+        confidence: Math.min(98, 85 + sportsNamesCount * 5 + Math.floor(nonProfessionalCount / 2)),
         detectedTerms,
-        professionalTermsCount: professionalCount
+        professionalTermsCount: strictProfessionalCount
       };
     }
     
