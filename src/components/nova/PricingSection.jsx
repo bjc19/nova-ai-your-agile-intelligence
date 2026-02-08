@@ -22,19 +22,19 @@ const plans = [
     name: "Starter",
     badge: "RECOMMANDÉ POUR DÉBUTER",
     badgeColor: "bg-green-100 text-green-800",
-    subtitle: "Embarquez vous et découvrez la puissance de Nova",
+    subtitle: "Découvrez la puissance de Nova",
     price: "49",
     users: "5 utilisateurs inclus",
-    addOn: "+15 CAD/utilisateur/mois (max +10)",
-    addOn: "",
+    addOn: "+10 CAD/utilisateur/mois (max 10)",
     included: [
-      "30 analyses manuelles uniquement",
-      "10 analyses automatiques par mois",
-      "1 source au choix (Slack, Jira ou Teams)",
+      "Analyses manuelles uniquement",
+      "10 analyses par mois",
       "Insights contextualisés",
+      "1 source au choix (Slack, Jira ou Teams)",
       "Configuration guidée",
       "Vue basique avec tendances",
       "Visualisations simples",
+      "Export PDF basique"
     ],
     limitations: [
       "Pas de rapports mensuels automatiques",
@@ -43,6 +43,7 @@ const plans = [
       "Pas d'alertes automatiques",
       "Pas de KPIs détaillés"
     ],
+    highlight: "NON renouvelable - Upgrade vers Growth requis",
     ctaKey: "contactSales"
   },
   {
@@ -54,14 +55,13 @@ const plans = [
     price: "99",
     yearlyPrice: "84",
     users: "10 utilisateurs inclus",
-    addOn: "+10 CAD/utilisateur/mois (max 25)",
+    addOn: "+15 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
-      "70 analyses manuelles par mois",
-      "30 analyses post-réunion automatiques/mois",
-      "Integrations Slack, Jira, Teams",
+      "Analyses manuelles illimitées",
+      "8 analyses post-réunion automatiques/mois",
       "Insights contextualisés avancés",
-      "Croisement limité avec 3 sources",
+      "Croisement limité avec 2 sources externes",
       "Dashboard tendances complet",
       "Rapports sommaires mensuels automatiques",
       "Alertes basiques sur dérives"
@@ -78,19 +78,18 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    badge: "RAPPORT QUALITÉ/PRIX",
+    badge: "MEILLEUR RAPPORT QUALITÉ/PRIX",
     badgeColor: "bg-purple-100 text-purple-800",
     badge2: "⭐",
-    subtitle: "Recommandations actionnables, ROI clair et mesurable",
+    subtitle: "ROI clair et mesurable",
     price: "199",
     yearlyPrice: "169",
     users: "25 utilisateurs inclus",
-    addOn: "+10 CAD/utilisateur/mois (max 50)",
+    addOn: "+20 CAD/utilisateur/mois (max 50)",
     discount: "15% annuel",
     addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
-      "Analyses manuelles illimitées",
-      "Analyses automatiques illimitées",
+      "Analyses post-réunion illimitées",
       "Croisement complet multi-sources",
       "Détection et adaptation multi-projets",
       "Recommandations courageuses contextualisées",
@@ -115,8 +114,8 @@ const plans = [
     subtitle: "Gouvernance, sécurité, insights systémiques",
     price: "Custom",
     priceNote: "À partir de 500 CAD/mois",
-    structure: "+ 10 CAD/utilisateur",
-    degressiveNote: "≈10-5 CAD/utilisateur à 100+ utilisateurs",
+    structure: "Base + 25 CAD/utilisateur (min 50 utilisateurs)",
+    degressiveNote: "≈15-20 CAD/utilisateur à 100+ utilisateurs",
     enterpriseIntro: "Tous les éléments de Pro, +",
     included: [
       "Analyses organisationnelles & systémiques",
@@ -126,8 +125,7 @@ const plans = [
       "Dashboards et reporting custom direction/PMO",
       "Support dédié + SLA",
       "KPIs personnalisés et exports exécutifs",
-      "Add-ons usage-based (API calls, analyses)",
-      "Consultations et coaching d'experts à la demande"
+      "Add-ons usage-based (API calls, analyses)"
     ],
     target: "Entreprises, banques, grandes techs, organisations multi-produits",
     ctaKey: "contactTeam"
