@@ -137,12 +137,17 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
           const translated = await base44.integrations.Core.InvokeLLM({
             prompt: translationPrompt,
             response_json_schema: {
-              type: "array",
-              items: { type: "string" }
+              type: "object",
+              properties: {
+                translations: {
+                  type: "array",
+                  items: { type: "string" }
+                }
+              }
             }
           });
 
-          const translatedList = translated.map((desc, i) => ({
+          const translatedList = (translated.translations || translated).map((desc, i) => ({
             type: "default",
             description: desc,
             title: desc.substring(0, 50) + (desc.length > 50 ? "..." : ""),
