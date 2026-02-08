@@ -192,7 +192,7 @@ export function PricingSection() {
               </div>
             </CardHeader>
 
-            <CardContent className="flex-1 space-y-6">
+            <CardContent className="flex-1 flex flex-col space-y-6">
               {plan.highlight && (
                 <p className="text-xs text-red-600 font-semibold text-center">
                   ⚠️ {plan.highlight}
@@ -201,7 +201,7 @@ export function PricingSection() {
 
               <Button 
                 onClick={() => setSelectedPlan(plan)}
-                className={`w-full ${
+                className={`w-full mt-auto ${
                   plan.id === 'pro' 
                     ? 'bg-purple-600 hover:bg-purple-700' 
                     : plan.id === 'starter' || plan.id === 'growth' || plan.id === 'enterprise'
