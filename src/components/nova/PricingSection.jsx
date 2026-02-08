@@ -144,7 +144,7 @@ export function PricingSection() {
   const t = (key) => translations[lang][key] || translations["en"][key];
 
   return (
-    <div className="space-y-8">
+    <div id="pricing-section" className="space-y-8">
       <div className="text-center space-y-3">
         <h2 className="text-4xl font-bold text-slate-900">Plans et tarifs</h2>
         <p className="text-xl text-slate-600">Choisissez le plan adapté à votre équipe</p>
