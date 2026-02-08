@@ -415,70 +415,72 @@ export default function Home() {
             <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
               Tableau Comparatif : Nova vs Concurrents Typiques
             </h3>
-            <Card className="border-slate-200">
+            <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-0 overflow-x-auto">
                 <table className="w-full">
-                  <thead className="border-b-2 border-slate-300">
-                    <tr className="bg-slate-50">
-                      <th className="text-left p-4 font-semibold text-slate-900">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-slate-50 to-blue-50/30 border-b-2 border-blue-100">
+                      <th className="text-left p-5 font-semibold text-slate-900">
                         Critère
                       </th>
-                      <th className="text-left p-4 font-semibold text-slate-900">
+                      <th className="text-left p-5 font-semibold text-slate-900">
                         Concurrents Typiques
                       </th>
-                      <th className="text-left p-4 font-semibold text-slate-900 bg-slate-100">
+                      <th className="text-left p-5 font-semibold text-slate-900 bg-blue-50/50">
                         Nova
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">Certifié SOC 2 Type II</td>
-                      <td className="p-4 text-sm text-slate-600">Type I seulement (audit ponctuel)</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Infrastructure et plateforme certifiées</td>
+                  <tbody className="divide-y divide-slate-100">
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">Certifié SOC 2 Type II</td>
+                      <td className="p-5 text-sm text-slate-600">Type I seulement (audit ponctuel)</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Infrastructure et plateforme certifiées</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">ISO 27001</td>
-                      <td className="p-4 text-sm text-slate-600">Pas certifié</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Infrastructure et plateforme certifiées</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">ISO 27001</td>
+                      <td className="p-5 text-sm text-slate-600">Pas certifié</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Infrastructure et plateforme certifiées</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">GDPR by Design</td>
-                      <td className="p-4 text-sm text-slate-600">Adaptation postérieure (correctif)</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Native depuis conception (Privacy by Design)</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">GDPR by Design</td>
+                      <td className="p-5 text-sm text-slate-600">Adaptation postérieure (correctif)</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Native depuis conception (Privacy by Design)</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">Architecture Zero-Retention</td>
-                      <td className="p-4 text-sm text-slate-600">Stockage données (risque persistant)</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Certifiée SOC 2 (mémoire vive uniquement)</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">Architecture Zero-Retention</td>
+                      <td className="p-5 text-sm text-slate-600">Stockage données (risque persistant)</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Certifiée SOC 2 (mémoire vive uniquement)</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">Accès aux Données</td>
-                      <td className="p-4 text-sm text-slate-600">Read/Write (risque modification)</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Read-Only uniquement (votre contrôle)</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">Accès aux Données</td>
+                      <td className="p-5 text-sm text-slate-600">Read/Write (risque modification)</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Read-Only uniquement (votre contrôle)</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">Stockage Conversations</td>
-                      <td className="p-4 text-sm text-slate-600">Archivées (exposition continue)</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Supprimées post-traitement (protection maximale)</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">Stockage Conversations</td>
+                      <td className="p-5 text-sm text-slate-600">Archivées (exposition continue)</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Supprimées post-traitement (protection maximale)</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">Analyse Données</td>
-                      <td className="p-4 text-sm text-slate-600">Sur disque (persistance)</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Mémoire vive uniquement (volatilité)</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">Analyse Données</td>
+                      <td className="p-5 text-sm text-slate-600">Sur disque (persistance)</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Mémoire vive uniquement (volatilité)</td>
                     </tr>
-                    <tr>
-                      <td className="p-4 text-sm font-medium text-slate-900">Marqueurs Anonymisés</td>
-                      <td className="p-4 text-sm text-slate-600">Option payante</td>
-                      <td className="p-4 text-sm text-slate-900 bg-slate-50 font-medium">Par défaut (protection intégrée)</td>
+                    <tr className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-5 text-sm font-medium text-slate-900">Marqueurs Anonymisés</td>
+                      <td className="p-5 text-sm text-slate-600">Option payante</td>
+                      <td className="p-5 text-sm text-slate-900 bg-blue-50/30 font-medium">Par défaut (protection intégrée)</td>
                     </tr>
                   </tbody>
                 </table>
               </CardContent>
             </Card>
-            <p className="text-center text-sm text-slate-600 mt-4 font-medium">
-              Résultat : Toute la valeur analytique, aucun risque de fuite de données
-            </p>
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+              <p className="text-center text-sm text-slate-900 font-medium">
+                Résultat : Toute la valeur analytique, aucun risque de fuite de données
+              </p>
+            </div>
           </motion.div>
 
           {/* Certifications */}
