@@ -857,10 +857,10 @@ export default function Home() {
            </div>
            </Suspense>
 
-      {/* Integrations Section */}
-      <Suspense fallback={<div className="bg-slate-50 py-16 h-96" />}>
-      <div className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-6">
+           {/* Integrations Section */}
+           <Suspense fallback={<div className="bg-slate-50 py-16 h-96" />}>
+           <div className="bg-slate-50 py-16">
+           <div className="max-w-6xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
