@@ -820,7 +820,7 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-3">
             {/* Slack */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -829,9 +829,9 @@ export default function Home() {
               viewport={{ once: true }}
             >
               <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <svg className="w-14 h-14" viewBox="0 0 127 127" fill="none">
+                <CardContent className="p-3 text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                    <svg className="w-10 h-10" viewBox="0 0 127 127" fill="none">
                       <path d="M27.2 80c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8h8v8zm4 0c0-4.4 3.6-8 8-8s8 3.6 8 8v20c0 4.4-3.6 8-8 8s-8-3.6-8-8V80z" fill="#E01E5A"/>
                       <path d="M39.2 27c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8v8h-8zm0 4c4.4 0 8 3.6 8 8s-3.6 8-8 8h-20c-4.4 0-8-3.6-8-8s3.6-8 8-8h20z" fill="#36C5F0"/>
                       <path d="M99.8 47c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8h-8v-8zm-4 0c0 4.4-3.6 8-8 8s-8-3.6-8-8V27c0-4.4 3.6-8 8-8s8 3.6 8 8v20z" fill="#2EB67D"/>
