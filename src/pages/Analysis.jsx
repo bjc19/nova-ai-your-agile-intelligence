@@ -50,6 +50,7 @@ export default function Analysis() {
   const [isOutOfContext, setIsOutOfContext] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [showOutOfContextResult, setShowOutOfContextResult] = useState(false);
+  const [outOfContextData, setOutOfContextData] = useState(null);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -92,6 +93,7 @@ export default function Analysis() {
       // Check out of context FIRST
       const outOfContextCheck = detectOutOfContext(transcript);
       setIsOutOfContext(outOfContextCheck.isOutOfContext);
+      setOutOfContextData(outOfContextCheck);
       
       // Only proceed with workshop detection if not out of context
       if (!outOfContextCheck.isOutOfContext) {
@@ -413,7 +415,7 @@ Provide a detailed analysis in the following JSON format:`;
           </motion.div>
 
           {/* Out of Context Result */}
-          <OutOfContextResult onClose={() => setShowOutOfContextResult(false)} />
+          <OutOfContextResult data={outOfContextData} onClose={() => setShowOutOfContextResult(false)} />
         </div>
       </div>
     );
