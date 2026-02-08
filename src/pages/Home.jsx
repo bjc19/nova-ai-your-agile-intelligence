@@ -285,13 +285,7 @@ export default function Home() {
       {/* Zero-Retention Architecture Section */}
       <div className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12">
             <Badge className="mb-4 bg-slate-100 text-slate-700 border-slate-300">
               {lang === 'fr' ? 'Architecture Zero-Retention' : 'Zero-Retention Architecture'}
             </Badge>
