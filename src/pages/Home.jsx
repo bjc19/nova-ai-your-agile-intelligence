@@ -20,17 +20,12 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
-// Animation CSS pour la progression des blocs et validation finale
+// Animation CSS pour la progression séquentielle des blocs
 const commandAnimationStyles = `
-  @keyframes type-text {
-    0% { width: 0; }
-    90% { width: 100%; }
-    100% { width: 100%; }
-  }
-
-  @keyframes blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+  @keyframes cursor-type {
+    0% { opacity: 1; }
+    95% { opacity: 1; }
+    100% { opacity: 0; }
   }
 
   @keyframes validate-frame {
@@ -45,33 +40,27 @@ const commandAnimationStyles = `
     }
   }
 
-  .terminal-block {
-    position: relative;
-    overflow: hidden;
-  }
-
   .terminal-block .text-white {
     position: relative;
     display: inline-block;
-    animation: type-text 0.6s steps(15, end) forwards;
-    animation-fill-mode: both;
   }
 
   .terminal-block .text-white::after {
     content: '|';
-    animation: blink 0.7s step-end infinite;
+    display: inline;
     margin-left: 2px;
+    animation: cursor-type 0.8s step-end forwards;
+    opacity: 0;
   }
 
-  .terminal-block-0 .text-white { animation-delay: 0s; }
-  .terminal-block-1 .text-white { animation-delay: 0.8s; }
-  .terminal-block-2 .text-white { animation-delay: 1.6s; }
-  .terminal-block-3 .text-white { animation-delay: 2.4s; }
-  .terminal-block-4 .text-white { animation-delay: 3.2s; }
-  .terminal-block-5 .text-white { animation-delay: 4s; }
+  .terminal-block-0 .text-white::after { animation-delay: 0s; }
+  .terminal-block-1 .text-white::after { animation-delay: 0.8s; }
+  .terminal-block-2 .text-white::after { animation-delay: 1.6s; }
+  .terminal-block-3 .text-white::after { animation-delay: 2.4s; }
+  .terminal-block-4 .text-white::after { animation-delay: 3.2s; }
 
   .terminal-block-5 {
-    animation: validate-frame 1s ease-out 4.6s forwards;
+    animation: validate-frame 1s ease-out 4.2s forwards;
   }
 `;
 
