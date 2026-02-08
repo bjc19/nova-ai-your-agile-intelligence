@@ -474,6 +474,36 @@ export default function Home() {
                 : '🎯 Result: All the analytical value, zero data breach risk'}
             </p>
           </motion.div>
+
+          {/* Certifications */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            viewport={{ once: true }}
+            className="mt-12 text-center"
+          >
+            <h3 className="text-xl font-semibold text-slate-900 mb-6">
+              {lang === 'fr' ? '🏆 Certifications & Conformité' : '🏆 Certifications & Compliance'}
+            </h3>
+            <div className="flex flex-wrap justify-center items-center gap-8">
+              <Badge className="text-base px-4 py-2 bg-slate-900 text-white">
+                🔒 SOC 2 Type II
+              </Badge>
+              <Badge className="text-base px-4 py-2 bg-slate-900 text-white">
+                🛡️ ISO 27001
+              </Badge>
+              <Badge className="text-base px-4 py-2 bg-blue-600 text-white">
+                🇪🇺 GDPR Compliant
+              </Badge>
+              <Badge className="text-base px-4 py-2 bg-slate-900 text-white">
+                🔐 HIPAA Ready
+              </Badge>
+              <Badge className="text-base px-4 py-2 bg-green-700 text-white">
+                ✅ CCPA Compliant
+              </Badge>
+            </div>
+          </motion.div>
         </div>
       </div>
 
