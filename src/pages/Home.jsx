@@ -325,15 +325,10 @@ export default function Home() {
                     </li>
                   </ul>
                 </CardContent>
-              </Card>
-            </motion.div>
+                </Card>
+                </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
+                <div>
               <Card className="border-slate-200 bg-white h-full">
                 <CardContent className="p-6">
                   <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
