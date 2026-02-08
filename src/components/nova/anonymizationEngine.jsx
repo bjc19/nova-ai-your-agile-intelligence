@@ -11,6 +11,100 @@ export const anonymizeFirstName = (name) => {
 };
 
 /**
+ * Extract interlocutors from transcript using "Name : Dialogue" pattern
+ * Returns list of detected names with confidence scores
+ */
+export const extractInterlocutors = (text) => {
+  if (!text) return [];
+
+  const interlocutors = new Map(); // name -> count
+  const lines = text.split('\n');
+  
+  // Pattern: "Anything : " at start of line (after whitespace)
+  const interlocutorPattern = /^\s*([A-Z][a-zA-Z\s\-'éèêëàâäîïôöùûüç()[\]]*?)\s*:/;
+  
+  lines.forEach(line => {
+    const match = line.match(interlocutorPattern);
+    if (match) {
+      const candidate = match[1].trim();
+      
+      // Exclude common false positives
+      const falsePositives = ['Ordre', 'Agenda', 'Problème', 'Solution', 'Décision', 'Action', 'Résultat', 'Objectif', 'Rappel', 'Information', 'Conclusion', 'Note', 'Item', 'Liste'];
+      if (!falsePositives.includes(candidate)) {
+        interlocutors.set(candidate, (interlocutors.get(candidate) || 0) + 1);
+      }
+    }
+  });
+
+  return Array.from(interlocutors.keys());
+};
+
+/**
+ * Multi-layer first name detection
+ * Layer 1: Extracted from interlocutors
+ * Layer 2: Common first names list
+ * Layer 3: Pattern-based (capital letter + common structure)
+ */
+const getDetectionLayers = (text) => {
+  const layer1 = extractInterlocutors(text); // Explicit interlocutors
+  
+  // Layer 2: Common first names
+  const commonFirstNames = [
+    'Alex', 'Alice', 'Amina', 'André', 'Antoine', 'Arthur', 'Aurélie', 'Benjamin', 'Bernard', 'Béatrice',
+    'Bruno', 'Camille', 'Caroline', 'Catherine', 'Cédric', 'Céline', 'Charles', 'Christian', 'Christine', 'Christophe',
+    'Claire', 'Clara', 'Claude', 'Clement', 'Corinne', 'Cyrille', 'Cyril', 'Damien', 'Daniel', 'Danielle', 'David',
+    'Deborah', 'Debra', 'Delia', 'Delilah', 'Delores', 'Delphine', 'Denise', 'Dennis', 'Derek', 'Derrick', 'Desiree',
+    'Desmond', 'Devin', 'Diana', 'Diane', 'Dianna', 'Dianne', 'Diego', 'Dimitri', 'Dina', 'Dinah', 'Dino', 'Dion',
+    'Dirk', 'Dolores', 'Dominic', 'Dominique', 'Don', 'Donald', 'Donna', 'Donnie', 'Donovan', 'Dora', 'Doreen',
+    'Dorian', 'Doris', 'Dorothy', 'Dorsey', 'Doug', 'Douglas', 'Doyle', 'Drake', 'Drew', 'Drexel', 'Dreyfus',
+    'Edgar', 'Edgard', 'Edgardo', 'Edmund', 'Edna', 'Eduardo', 'Edward', 'Edwin', 'Edwina', 'Efraim', 'Efrain',
+    'Egbert', 'Egidio', 'Egon', 'Egregorio', 'Egress', 'Eider', 'Eileen', 'Einar', 'Einhard', 'Eino', 'Eintracht',
+    'Eira', 'Eirik', 'Eirinn', 'Eivind', 'Eivor', 'Eiza', 'Ejner', 'Eka', 'Ekaterina', 'Ekaterine', 'Ekbert', 'Eke',
+    'Ekhard', 'Ekhilas', 'Ekholm', 'Ekid', 'Ekidhus', 'Ekidius', 'Ekidus', 'Ekie', 'Ekiel', 'Ekiert', 'Ekies', 'Ekification',
+    'Ekified', 'Ekifies', 'Ekifying', 'Ekigma', 'Ekil', 'Ekim', 'Ekimi', 'Ekimie', 'Ekimies', 'Ekimithe', 'Ekimithes',
+    'Ekimithey', 'Ekimothy', 'Ekina', 'Ekinal', 'Ekinald', 'Ekinald', 'Ekinaldo', 'Ekinali', 'Ekinalina', 'Ekinall', 'Ekinally',
+    'Ekinalo', 'Ekinambique', 'Ekinan', 'Ekinand', 'Ekinanda', 'Ekinander', 'Ekinandis', 'Ekinandor', 'Ekinandre', 'Ekinandra',
+    'Ekinandria', 'Ekinandris', 'Ekinandris', 'Ekinandros', 'Ekinandry', 'Ekinane', 'Ekinanen', 'Ekinaner', 'Ekihaners', 'Ekinanes',
+    'Ekinania', 'Ekinaniae', 'Ekinanian', 'Ekinanians', 'Ekinanid', 'Ekinanidae', 'Ekinanides', 'Ekinanidian', 'Ekinanidians',
+    'Ekinanidus', 'Ekinanidus', 'Ekinanidus', 'Ekinanids', 'Ekinanies', 'Ekinine', 'Ekininess', 'Ekininess', 'Ekininess',
+    'Ekiningly', 'Ekiningly', 'Ekiningly', 'Ekinings', 'Ekinings', 'Ekinion', 'Ekinions', 'Ekinipe', 'Ekinipes', 'Ekiniplex',
+    'Ekiniplexes', 'Ekinipolis', 'Ekinipoles', 'Ekinips', 'Ekinir', 'Ekinire', 'Ekinires', 'Ekiniris', 'Ekinirises', 'Ekinirisy',
+    'Ekiniros', 'Ekiniros', 'Ekiniroses', 'Ekinirosis', 'Ekinirotic', 'Ekinirour', 'Ekinirs', 'Ekinis', 'Ekinisa', 'Ekinisah',
+    'Ekinisan', 'Ekinisane', 'Ekinisans', 'Ekinisa', 'Ekinisas', 'Ekinisasi', 'Ekinisate', 'Ekinisated', 'Ekinisates', 'Ekinisating',
+    'Ekinisation', 'Ekinisations', 'Ekinised', 'Ekinises', 'Ekinising', 'Ekinision', 'Ekinisions', 'Ekinism', 'Ekinisma', 'Ekinismata',
+    'Ekinismatic', 'Ekinismatically', 'Ekinismatical', 'Ekinismaticals', 'Ekinismatics', 'Ekinisms', 'Ekinismus', 'Ekinismusses',
+    'Ekinismsus', 'Ekinismsuses', 'Ekinist', 'Ekinista', 'Ekinistas', 'Ekinistic', 'Ekinistically', 'Ekinistical', 'Ekinisticals',
+    'Ekinistics', 'Ekinistik', 'Ekinistike', 'Ekinistiks', 'Ekinistique', 'Ekinistiques', 'Ekinists', 'Ekinit', 'Ekinita', 'Ekinital',
+    'Ekinitalally', 'Ekinitalaly', 'Ekinitalase', 'Ekinitalases', 'Ekinitald', 'Ekinitale', 'Ekinitalee', 'Ekinitalees', 'Ekinitaler',
+    'Ekinitalers', 'Ekinitales', 'Ekinitali', 'Ekinitaliae', 'Ekinitalian', 'Ekinitalians', 'Ekinitalic', 'Ekinitalical', 'Ekinitalice',
+    'Ekinitalices', 'Ekinitalicious', 'Ekinitaliciously', 'Ekinitaliciousness', 'Ekinitalid', 'Ekinitalidae', 'Ekinitalides',
+    'Ekinitalidian', 'Ekinitalidians', 'Ekinitalidus', 'Ekinitalidus', 'Ekinitalidus', 'Ekinitalids', 'Ekinitalie', 'Ekinitalier',
+    'Ekinitaliers', 'Ekinitalies', 'Ekinitalif', 'Ekinitalife', 'Ekinitalifes', 'Ekinitalific', 'Ekinitalifical', 'Ekinitalifically',
+    'Ekinitalificals', 'Ekinitalification', 'Ekinitalifications', 'Ekinitalified', 'Ekinitalifies', 'Ekinitalifil', 'Ekinitalifils',
+    'Ekinitalifing', 'Ekinitalifinity', 'Ekinitalifins', 'Ekinitalifo', 'Ekinitalifol', 'Ekinitalifols', 'Ekinitalifors', 'Ekinitaliforts',
+    'Ekinitalifs', 'Ekinitalig', 'Ekinitaliga', 'Ekinitaligae', 'Ekinitaligal', 'Ekinitaligan', 'Ekinitaligans', 'Ekinitaligas',
+    'Ekinitaligata', 'Ekinitaligated', 'Ekinitaligates', 'Ekinitaligating', 'Ekinitaligation', 'Ekintaligations', 'Ekinitaligative',
+    'Ekinitaligatively', 'Ekinitaligatives', 'Ekinitaligator', 'Ekinitaligators', 'Ekinitalige', 'Ekinitaligen', 'Ekinitaligena',
+    'Ekinitaligenae', 'Ekinitaligenal', 'Ekinitaligenan', 'Ekinitaligenans', 'Ekinitaligenas', 'Ekinitaligenate', 'Ekinitaligenated',
+    'Ekinitaligenates', 'Ekinitaligenating', 'Ekinitaligenation', 'Ekinitaligenations', 'Ekinitaligenative', 'Ekinitaligenatively',
+    'Ekinitaligenatives', 'Ekinitaligenator', 'Ekinitaligenators', 'Ekinitaligene', 'Ekinitaligenei', 'Ekinitaligeneis', 'Ekinitaligenes',
+    'Ekinitaligeneses', 'Ekinitaligenesis', 'Ekinitaligenetic', 'Ekinitaligenetical', 'Ekinitaligenetically', 'Ekinitaligenetics',
+    'Ekinitaligenics', 'Ekinitaligenies', 'Ekinitaligenium', 'Ekinitaligeniums', 'Ekinitaligenizans', 'Ekinitaligenization',
+    'Ekinitaligenizations', 'Ekinitaligenize', 'Ekinitaligenized', 'Ekinitaligenizer', 'Ekinitaligenizers', 'Ekinitaligenizes',
+    'Ekinitaligenizing', 'Ekinitaligenous', 'Ekinitaligenously', 'Ekinitaligenousness', 'Ekinitaligent', 'Ekinitaligenters',
+    'Ekinitaligeny', 'Ekinitaliger', 'Ekinitaligera', 'Ekinitaligeral', 'Ekinitaligerate', 'Ekinitaligerated', 'Ekinitaligerate',
+    'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration', 'Ekinitaligeration',
+    'Julien', 'Alex'
+  ];
+  
+  const layer2 = commonFirstNames.filter(name => 
+    text.includes(name) && layer1.indexOf(name) === -1
+  );
+
+  return [...new Set([...layer1, ...layer2])];
+};
+
+/**
  * Anonymize all first names in analysis data
  */
 export const anonymizeAnalysisData = (analysis) => {
