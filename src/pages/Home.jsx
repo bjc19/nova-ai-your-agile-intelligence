@@ -421,6 +421,7 @@ export default function Home() {
               <span className="text-green-400">✓</span>
               <span>{lang === 'fr' ? 'Temps total : ~5s | Données brutes : 0 bytes stockés' : 'Total time: ~5s | Raw data: 0 bytes stored'}</span>
             </div>
+            </div>
 
             {/* Comparison Table */}
             <div>
