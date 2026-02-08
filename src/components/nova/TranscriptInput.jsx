@@ -29,16 +29,10 @@ export default function TranscriptInput({ value, onChange }) {
       transition={{ duration: 0.5 }}
       className="space-y-3"
     >
-      <div className="flex items-center justify-between">
+      <div>
         <label className="text-sm font-medium text-slate-700">
           Meeting Transcript
         </label>
-        <button
-          onClick={() => onChange(SAMPLE_TRANSCRIPT)}
-          className="text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
-        >
-          Load sample transcript
-        </button>
       </div>
       <Textarea
         value={value}
