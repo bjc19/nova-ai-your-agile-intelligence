@@ -481,24 +481,76 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
             viewport={{ once: true }}
-            className="mt-12 text-center"
+            className="mt-16"
           >
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">
-              {lang === 'fr' ? '🏆 Certifications & Conformité' : '🏆 Certifications & Compliance'}
-            </h3>
-            <div className="flex flex-wrap justify-center items-center gap-8">
-              <Badge className="text-base px-4 py-2 bg-slate-900 text-white">
-                🔒 SOC 2 Type II
-              </Badge>
-              <Badge className="text-base px-4 py-2 bg-slate-900 text-white">
-                🛡️ ISO 27001
-              </Badge>
-              <Badge className="text-base px-4 py-2 bg-blue-600 text-white">
-                🇪🇺 GDPR Compliant
-              </Badge>
-              <Badge className="text-base px-4 py-2 bg-green-700 text-white">
-                ✅ CCPA Compliant
-              </Badge>
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
+                  <span className="text-2xl">🏆</span>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900">
+                  {lang === 'fr' ? 'Certifications & Conformité' : 'Certifications & Compliance'}
+                </h3>
+              </div>
+              <p className="text-slate-600">
+                {lang === 'fr' 
+                  ? 'Votre confiance est notre priorité absolue' 
+                  : 'Your trust is our absolute priority'}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.7 }}
+                viewport={{ once: true }}
+              >
+                <Card className="text-center p-6 hover:shadow-xl transition-all border-slate-200 hover:border-slate-300 bg-gradient-to-br from-white to-slate-50">
+                  <div className="text-4xl mb-3">🔒</div>
+                  <h4 className="font-bold text-slate-900 mb-1">SOC 2</h4>
+                  <p className="text-xs text-slate-600">Type II</p>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.75 }}
+                viewport={{ once: true }}
+              >
+                <Card className="text-center p-6 hover:shadow-xl transition-all border-slate-200 hover:border-slate-300 bg-gradient-to-br from-white to-slate-50">
+                  <div className="text-4xl mb-3">🛡️</div>
+                  <h4 className="font-bold text-slate-900 mb-1">ISO 27001</h4>
+                  <p className="text-xs text-slate-600">Certified</p>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.8 }}
+                viewport={{ once: true }}
+              >
+                <Card className="text-center p-6 hover:shadow-xl transition-all border-blue-200 hover:border-blue-300 bg-gradient-to-br from-blue-50 to-white">
+                  <div className="text-4xl mb-3">🇪🇺</div>
+                  <h4 className="font-bold text-slate-900 mb-1">GDPR</h4>
+                  <p className="text-xs text-blue-700">Compliant</p>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.85 }}
+                viewport={{ once: true }}
+              >
+                <Card className="text-center p-6 hover:shadow-xl transition-all border-green-200 hover:border-green-300 bg-gradient-to-br from-green-50 to-white">
+                  <div className="text-4xl mb-3">✅</div>
+                  <h4 className="font-bold text-slate-900 mb-1">CCPA</h4>
+                  <p className="text-xs text-green-700">Compliant</p>
+                </Card>
+              </motion.div>
             </div>
           </motion.div>
         </div>
