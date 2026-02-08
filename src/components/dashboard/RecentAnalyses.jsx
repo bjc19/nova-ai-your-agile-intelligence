@@ -258,6 +258,14 @@ export default function RecentAnalyses({ analyses = [] }) {
                       sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data || item));
                       window.location.href = createPageUrl("Results");
                     }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data || item));
+                        window.location.href = createPageUrl("Results");
+                      }
+                    }}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
