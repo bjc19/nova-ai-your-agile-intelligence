@@ -20,6 +20,19 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
+// Animation CSS pour l'effet de clignotement des commandes
+const commandAnimationStyles = `
+  @keyframes blink-letter {
+    0%, 70% { opacity: 1; }
+    75%, 85% { opacity: 0.3; }
+    90%, 100% { opacity: 1; }
+  }
+
+  .typing-animation {
+    animation: blink-letter 2s ease-in-out infinite;
+  }
+`;
+
 const translations = {
   en: {
     aiPoweredScrum: "Your AI Agile Expert",
@@ -137,6 +150,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <style>{commandAnimationStyles}</style>
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-transparent" />
@@ -384,7 +398,7 @@ export default function Home() {
                 <div key={i} className="flex items-center gap-3">
                   <div className="flex flex-col items-center">
                     <div className="w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
-                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight">
+                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight typing-animation">
                         {item.label}
                       </div>
                     </div>

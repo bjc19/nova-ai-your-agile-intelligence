@@ -53,9 +53,9 @@ import AntiPatterns from './pages/AntiPatterns';
 import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
+import Home from './pages/Home';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import Home from './pages/Home';
 import __Layout from './Layout.jsx';
 
 
@@ -66,9 +66,9 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Demo": Demo,
     "Details": Details,
+    "Home": Home,
     "Results": Results,
     "Settings": Settings,
-    "Home": Home,
 }
 
 export const pagesConfig = {
