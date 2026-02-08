@@ -41,69 +41,173 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   const detectOutOfContext = (text) => {
     const lowerText = text.toLowerCase();
     
-    // PATTERN 1: Vocabulaire hors domaine professionnel (plus exhaustif)
-    const sportsTerms = [
-      'match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'terrain', 'arbitre', 
-      'football', 'basketball', 'tennis', 'rugby', 'barça', 'barcelone', 'real madrid',
-      'real', 'cristiano', 'messi', 'clásico', 'défense', 'attaque', 'transition',
-      'coup franc', 'finition', 'circulation', 'ligne défensive', 'égalisation'
+    // ========== COUCHE 1: VETOS THÉMATIQUES ABSOLUS ==========
+    
+    // VETO 1: Domaine du Sport (Explicite)
+    const sportsProperNouns = [
+      'real madrid', 'real', 'barcelone', 'barça', 'psg', 'bayern', 
+      'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappé', 'clásico'
     ];
-    const sportsNames = ['barça', 'barcelone', 'real', 'madrid', 'cristiano', 'messi'];
-    const entertainmentTerms = ['film', 'série', 'célébrité', 'acteur', 'spectacle', 'concert', 'streaming', 'netflix', 'disney', 'marvel'];
-    const personalTerms = ['vacances', 'week-end', 'restaurant', 'cuisine', 'recette', 'voyage', 'tourisme', 'shopping'];
-    
-    // PATTERN 2: Vocabulaire STRICTEMENT professionnel (exclusion termes ambigus)
-    const strictProfessionalTerms = [
-      'sprint', 'backlog', 'user story', 'projet', 'tâche', 'blocage', 'bloqué',
-      'réunion d\'équipe', 'délai', 'livrable', 'client', 'produit', 'développement', 
-      'test', 'scrum', 'kanban', 'planning', 'review', 'retrospective', 'rétrospective',
-      'daily', 'stand-up', 'standup', 'ticket', 'jira', 'pull request', 'merge',
-      'déploiement', 'feature', 'bug', 'story point', 'velocity', 'impediment'
+    const sportsLexicon = [
+      'match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'terrain',
+      'arbitre', 'penalty', 'corner', 'coup franc', 'finition', 'défense',
+      'attaque', 'transition', 'ligne défensive', 'égalisation', 'ballon'
     ];
+    const teamBuildingTerms = ['team building', 'événement d\'entreprise', 'sponsoring', 'partenariat commercial'];
     
-    // Compter les occurrences
-    let sportsCount = 0;
-    let sportsNamesCount = 0;
-    let entertainmentCount = 0;
-    let personalCount = 0;
-    let strictProfessionalCount = 0;
+    let sportsNounsCount = 0;
+    let sportsLexiconCount = 0;
+    let teamBuildingContext = false;
     
-    sportsTerms.forEach(term => { if (lowerText.includes(term)) sportsCount++; });
-    sportsNames.forEach(term => { if (lowerText.includes(term)) sportsNamesCount++; });
-    entertainmentTerms.forEach(term => { if (lowerText.includes(term)) entertainmentCount++; });
-    personalTerms.forEach(term => { if (lowerText.includes(term)) personalCount++; });
-    strictProfessionalTerms.forEach(term => { if (lowerText.includes(term)) strictProfessionalCount++; });
+    sportsProperNouns.forEach(term => { if (lowerText.includes(term)) sportsNounsCount++; });
+    sportsLexicon.forEach(term => { if (lowerText.includes(term)) sportsLexiconCount++; });
+    teamBuildingTerms.forEach(term => { if (lowerText.includes(term)) teamBuildingContext = true; });
     
-    const nonProfessionalCount = sportsCount + entertainmentCount + personalCount;
-    
-    // Règles de détection RENFORCÉES
-    const isOutOfContext = (
-      // Règle HORS_CONTEXTE_1: Sports avec noms propres
-      (sportsNamesCount >= 2 && strictProfessionalCount === 0) ||
-      // Règle HORS_CONTEXTE_2: Beaucoup de termes sportifs
-      (sportsCount >= 5 && strictProfessionalCount < 2) ||
-      // Règle HORS_CONTEXTE_3: Divertissement sans contexte pro
-      (entertainmentCount >= 2 && strictProfessionalCount === 0) ||
-      // Règle HORS_CONTEXTE_4: Ratio non-pro vs pro
-      (nonProfessionalCount >= 6 && strictProfessionalCount < 3)
-    );
-    
-    if (isOutOfContext) {
-      const detectedTerms = [];
-      if (sportsCount > 0 || sportsNamesCount > 0) detectedTerms.push('vocabulaire sportif');
-      if (sportsNamesCount > 0) detectedTerms.push('noms propres sportifs');
-      if (entertainmentCount > 0) detectedTerms.push('contenu divertissement');
-      if (personalCount > 0) detectedTerms.push('sujets personnels');
-      
+    if (sportsNounsCount >= 1 && sportsLexiconCount >= 2 && !teamBuildingContext) {
       return {
         isOutOfContext: true,
-        confidence: Math.min(98, 85 + sportsNamesCount * 5 + Math.floor(nonProfessionalCount / 2)),
-        detectedTerms,
-        professionalTermsCount: strictProfessionalCount
+        confidence: 99,
+        vetoType: 'VETO 1: Domaine du Sport',
+        theme: 'Sport',
+        detectedKeywords: sportsProperNouns.filter(t => lowerText.includes(t))
+          .concat(sportsLexicon.filter(t => lowerText.includes(t)).slice(0, 3)),
+        professionalFieldScore: 0
       };
     }
     
-    return { isOutOfContext: false };
+    // VETO 2: Divertissement & Loisirs Purs
+    const entertainmentThemes = [
+      'film', 'série', 'cinéma', 'acteur', 'actrice', 'réalisateur',
+      'netflix', 'disney', 'marvel', 'star wars', 'game of thrones',
+      'concert', 'spectacle', 'streaming', 'jeu vidéo', 'gaming'
+    ];
+    const professionalEntertainmentContext = [
+      'projet de développement', 'campagne marketing', 'client', 'produit',
+      'développement de jeu', 'production', 'projet film'
+    ];
+    
+    let entertainmentCount = 0;
+    let proProdContext = false;
+    
+    entertainmentThemes.forEach(term => { if (lowerText.includes(term)) entertainmentCount++; });
+    professionalEntertainmentContext.forEach(term => { if (lowerText.includes(term)) proProdContext = true; });
+    
+    if (entertainmentCount >= 2 && !proProdContext) {
+      return {
+        isOutOfContext: true,
+        confidence: 98,
+        vetoType: 'VETO 2: Divertissement & Loisirs',
+        theme: 'Divertissement',
+        detectedKeywords: entertainmentThemes.filter(t => lowerText.includes(t)).slice(0, 4),
+        professionalFieldScore: 0
+      };
+    }
+    
+    // VETO 3: Vie Personnelle & Sociale
+    const personalThemes = [
+      'vacances', 'week-end', 'famille', 'enfants', 'anniversaire',
+      'restaurant', 'cuisine', 'recette', 'shopping', 'achats',
+      'médecin', 'santé personnelle', 'voyage personnel', 'tourisme'
+    ];
+    const professionalPersonalContext = [
+      'déplacement professionnel', 'politique rh', 'télétravail',
+      'congé maladie', 'absence justifiée', 'réunion client'
+    ];
+    
+    let personalCount = 0;
+    let proPersonalContext = false;
+    
+    personalThemes.forEach(term => { if (lowerText.includes(term)) personalCount++; });
+    professionalPersonalContext.forEach(term => { if (lowerText.includes(term)) proPersonalContext = true; });
+    
+    if (personalCount >= 2 && !proPersonalContext) {
+      return {
+        isOutOfContext: true,
+        confidence: 97,
+        vetoType: 'VETO 3: Vie Personnelle & Sociale',
+        theme: 'Vie Personnelle',
+        detectedKeywords: personalThemes.filter(t => lowerText.includes(t)).slice(0, 3),
+        professionalFieldScore: 0
+      };
+    }
+    
+    // ========== COUCHE 2: ANALYSE DU CHAMP SÉMANTIQUE PROFESSIONNEL ==========
+    
+    // Champ L1: PROJET & GESTION
+    const L1_terms = [
+      'projet', 'mission', 'initiative', 'programme', 'phase',
+      'livrable', 'délai', 'échéance', 'budget', 'ressource',
+      'périmètre', 'cahier des charges', 'spécification', 'jalon',
+      'objectif', 'kpi', 'indicateur', 'suivi', 'reporting'
+    ];
+    
+    // Champ L2: ORGANISATION & ÉQUIPE
+    const L2_terms = [
+      'équipe', 'service', 'département', 'comité', 'client',
+      'utilisateur', 'partie prenante', 'stakeholder', 'collègue',
+      'manager', 'rôle', 'responsabilité', 'décision', 'compte-rendu'
+    ];
+    
+    // Champ L3: ACTIVITÉS & PROCESSUS
+    const L3_terms = [
+      'réunion', 'atelier', 'point', 'briefing', 'debriefing',
+      'revue', 'rétrospective', 'retrospective', 'planning', 'conception',
+      'développement', 'test', 'validation', 'déploiement', 'support',
+      'daily', 'scrum', 'kanban', 'sprint', 'standup', 'stand-up'
+    ];
+    const L3_verbs = [
+      'planifier', 'estimer', 'prioriser', 'développer', 'tester',
+      'corriger', 'déployer', 'livrer', 'documenter', 'reporter',
+      'escalader', 'résoudre', 'analyser', 'concevoir', 'valider',
+      'piloter', 'faciliter', 'animer'
+    ];
+    
+    // Champ L4: PROBLÉMATIQUES & SOLUTIONS
+    const L4_terms = [
+      'problème', 'blocage', 'bloqué', 'risque', 'issue', 'bug',
+      'anomalie', 'incident', 'changement', 'dépendance', 'contrainte',
+      'résolution', 'correctif', 'solution', 'workaround', 'mitigation',
+      'ticket', 'backlog'
+    ];
+    
+    // Compter les occurrences
+    let L1_count = 0, L2_count = 0, L3_count = 0, L3_verbs_count = 0, L4_count = 0;
+    
+    L1_terms.forEach(term => { if (lowerText.includes(term)) L1_count++; });
+    L2_terms.forEach(term => { if (lowerText.includes(term)) L2_count++; });
+    L3_terms.forEach(term => { if (lowerText.includes(term)) L3_count++; });
+    L3_verbs.forEach(term => { if (lowerText.includes(term)) L3_verbs_count++; });
+    L4_terms.forEach(term => { if (lowerText.includes(term)) L4_count++; });
+    
+    const L1L2_density = L1_count + L2_count;
+    const L3L4_density = L3_count + L3_verbs_count + L4_count;
+    
+    // RÈGLE DE DÉCISION SÉMANTIQUE (RDS-1)
+    const hasProfessionalContext = (
+      (L1L2_density >= 2 && (L3_verbs_count >= 1 || L4_count >= 1)) ||
+      (L3L4_density >= 3)
+    );
+    
+    if (!hasProfessionalContext) {
+      // PRINCIPE DE PRÉCAUTION: En l'absence de preuve forte -> #HorsContexte
+      const totalProScore = L1_count + L2_count + L3_count + L3_verbs_count + L4_count;
+      
+      return {
+        isOutOfContext: true,
+        confidence: totalProScore === 0 ? 95 : 85 + Math.min(10, 15 - totalProScore * 3),
+        vetoType: 'COUCHE 2: Score sémantique professionnel insuffisant',
+        theme: 'Conversation Générale / Ambiguë',
+        detectedKeywords: [],
+        professionalFieldScore: totalProScore,
+        L1_count, L2_count, L3_count, L3_verbs_count, L4_count
+      };
+    }
+    
+    // PASSER: Le texte a un contexte professionnel suffisant
+    return { 
+      isOutOfContext: false,
+      professionalFieldScore: L1_count + L2_count + L3_count + L3_verbs_count + L4_count
+    };
   };
 
   const handleAnalyze = async () => {
@@ -231,10 +335,10 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                       <AlertCircle className="w-6 h-6 text-red-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xl font-bold text-slate-900 mb-2">Contenu Hors Contexte</p>
+                      <p className="text-xl font-bold text-slate-900 mb-1">#HorsContexte</p>
                       <div className="flex items-center gap-3 mb-3">
                         <span className="text-sm text-slate-600">Confiance:</span>
-                        <div className="flex-1 h-2 bg-red-200 rounded-full overflow-hidden max-w-xs">
+                        <div className="flex-1 h-2.5 bg-red-200 rounded-full overflow-hidden max-w-xs">
                           <div 
                             className="h-full bg-gradient-to-r from-red-500 to-red-600" 
                             style={{ width: `${results.confidence}%` }} 
@@ -246,64 +350,107 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                   </div>
                 </div>
 
-                {/* Explanation */}
+                {/* Analysis Details */}
                 <Card className="border-slate-200">
+                  <CardContent className="p-6 space-y-5">
+                    {/* Raison Principale */}
+                    <div className="pb-4 border-b border-slate-200">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Raison Principale</p>
+                      <p className="text-sm font-medium text-slate-900">{results.vetoType}</p>
+                    </div>
+
+                    {/* Analyse Lexicale */}
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Analyse Lexicale</p>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex gap-2">
+                          <span className="text-slate-600 font-medium min-w-[140px]">Thème identifié :</span>
+                          <span className="text-red-700 font-semibold">{results.theme}</span>
+                        </div>
+                        
+                        {results.detectedKeywords && results.detectedKeywords.length > 0 && (
+                          <div className="flex gap-2">
+                            <span className="text-slate-600 font-medium min-w-[140px]">Termes-clés :</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {results.detectedKeywords.map((kw, idx) => (
+                                <Badge key={idx} variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs">
+                                  {kw}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex gap-2">
+                          <span className="text-slate-600 font-medium min-w-[140px]">Champ sémantique pro :</span>
+                          <span className="text-slate-900">
+                            {results.professionalFieldScore === 0 ? 'Absent' : `Trop faible (score: ${results.professionalFieldScore})`}
+                          </span>
+                        </div>
+                        
+                        {results.professionalFieldScore === 0 && (
+                          <div className="mt-2 pl-[148px]">
+                            <p className="text-xs text-slate-600 italic">
+                              • Absence des marqueurs attendus (ex: projet, équipe, tâche, réunion, livrable, décision...).
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Détails des champs lexicaux si disponibles */}
+                        {(results.L1_count !== undefined) && (
+                          <div className="mt-3 pt-3 border-t border-slate-100">
+                            <p className="text-xs text-slate-500 mb-2">Détection par champ lexical :</p>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-slate-600">L1 (Projet & Gestion):</span>
+                                <span className="font-medium">{results.L1_count}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-600">L2 (Organisation):</span>
+                                <span className="font-medium">{results.L2_count}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-600">L3 (Activités):</span>
+                                <span className="font-medium">{results.L3_count + results.L3_verbs_count}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-600">L4 (Problématiques):</span>
+                                <span className="font-medium">{results.L4_count}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Notre Périmètre */}
+                <Card className="border-blue-200 bg-blue-50">
                   <CardContent className="p-6 space-y-4">
                     <div>
-                      <p className="font-semibold text-slate-900 mb-2">💡 Explication</p>
-                      <p className="text-sm text-slate-700">
-                        Le contenu analysé ne semble pas concerner le travail d'équipe professionnel ou les méthodologies agiles.
+                      <p className="font-semibold text-slate-900 mb-2">🎯 Notre Périmètre</p>
+                      <p className="text-sm text-slate-700 mb-4">
+                        Nova analyse spécifiquement les <strong>conversations de travail d'équipe et de gestion de projet</strong>.
                       </p>
+                      
+                      <p className="text-sm font-medium text-slate-900 mb-2">Exemples de textes adaptés :</p>
+                      <div className="space-y-2">
+                        <div className="bg-white/70 rounded-lg p-3 text-xs text-slate-700 font-mono border border-blue-200">
+                          "Daily : Hier j'ai corrigé le bug #123, aujourd'hui je travaille sur l'API de paiement."
+                        </div>
+                        <div className="bg-white/70 rounded-lg p-3 text-xs text-slate-700 font-mono border border-blue-200">
+                          "Revue de sprint : La feature 'login' est terminée, mais le 'checkout' a un retard d'un jour."
+                        </div>
+                        <div className="bg-white/70 rounded-lg p-3 text-xs text-slate-700 font-mono border border-blue-200">
+                          "Atelier risques : Risque identifié sur le fournisseur Cloud, plan d'action assigné à Marie."
+                        </div>
+                      </div>
                     </div>
-
-                    <div>
-                      <p className="font-semibold text-slate-900 mb-2">🔍 Indicateurs détectés</p>
-                      <ul className="space-y-1.5">
-                        {results.detectedTerms.map((term, idx) => (
-                          <li key={idx} className="flex gap-2 text-sm text-slate-700">
-                            <span className="text-red-600">•</span>
-                            <span>{term} identifié</span>
-                          </li>
-                        ))}
-                        <li className="flex gap-2 text-sm text-slate-700">
-                          <span className="text-red-600">•</span>
-                          <span>Absence de termes professionnels ({results.professionalTermsCount} terme{results.professionalTermsCount > 1 ? 's' : ''} détecté{results.professionalTermsCount > 1 ? 's' : ''})</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="font-semibold text-slate-900 mb-3">🎯 Pour utiliser Nova efficacement</p>
-                      <p className="text-sm text-slate-700 mb-3">Partagez des conversations professionnelles liées à :</p>
-                      <ul className="space-y-1.5">
-                        <li className="flex gap-2 text-sm text-slate-700">
-                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <span>Réunions d'équipe (Daily, Planning, Review, Retrospective)</span>
-                        </li>
-                        <li className="flex gap-2 text-sm text-slate-700">
-                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <span>Discussions projets, tâches, blocages</span>
-                        </li>
-                        <li className="flex gap-2 text-sm text-slate-700">
-                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <span>Méthodologies agiles (Scrum, Kanban, SAFe)</span>
-                        </li>
-                        <li className="flex gap-2 text-sm text-slate-700">
-                          <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <span>Collaboration d'équipe, processus de travail</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                      <p className="font-semibold text-slate-900 mb-2">❓ Exemples de textes appropriés</p>
-                      <p className="text-xs text-slate-600">
-                        • Verbatims de daily scrum<br/>
-                        • Discussions de planning de sprint<br/>
-                        • Retours de revue de sprint<br/>
-                        • Conversations de rétrospective
-                      </p>
-                    </div>
+                    
+                    <p className="text-xs text-slate-600 italic text-center pt-2">
+                      Merci de rester sérieux et professionnel 🙂
+                    </p>
                   </CardContent>
                 </Card>
 
