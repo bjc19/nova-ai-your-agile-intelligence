@@ -49,7 +49,7 @@ const commandAnimationStyles = `
     content: '|';
     display: inline;
     margin-left: 2px;
-    animation: cursor-type 1s step-end 3s forwards;
+    animation: cursor-type 3s step-end 1s forwards;
     opacity: 0;
   }
 
@@ -60,7 +60,7 @@ const commandAnimationStyles = `
   .terminal-block-4 .text-white::after { animation-delay: 12s; }
 
   .terminal-block-5 {
-    animation: validate-frame 1s ease-out 5s forwards;
+    animation: validate-frame 1s ease-out 10s forwards;
   }
 `;
 
