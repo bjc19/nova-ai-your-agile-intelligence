@@ -125,6 +125,7 @@ const plans = [
       "Dashboards et reporting custom direction/PMO",
       "Support dédié + SLA",
       "KPIs personnalisés et exports exécutifs",
+      "Consultations et coaching d'experts à la demande",
       "Add-ons usage-based (API calls, analyses)"
     ],
     target: "Entreprises, banques, grandes techs, organisations multi-produits",
