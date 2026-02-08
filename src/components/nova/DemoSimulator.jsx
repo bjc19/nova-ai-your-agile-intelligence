@@ -292,23 +292,26 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     setAnalyzing(true);
     try {
       console.log('🚀 Starting analysis for text:', input.substring(0, 100) + '...');
-      
-      // Vérifier si le contenu est hors contexte
+
+      // ÉTAPE 1: Vérifier si le contenu est hors contexte (VETO)
       const outOfContextCheck = detectOutOfContext(input);
-      
+
       console.log('📊 Out of context check result:', outOfContextCheck);
-      
+
       if (outOfContextCheck.isOutOfContext) {
-        console.log('🚫 Content detected as OUT OF CONTEXT');
+        console.log('🚫 Content detected as OUT OF CONTEXT - Skipping workshop detection');
         // Décrémenter tries même pour hors contexte
         const newTries = tries - 1;
         setTries(newTries);
         localStorage.setItem("nova_demo_tries", newTries.toString());
         onTriesUpdate(newTries);
-        
+
+        // Reset detection (important pour éviter confusion UI)
+        setDetection(null);
+
         // Simuler délai d'analyse
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
-        
+
         setResults({
           isOutOfContext: true,
           confidence: outOfContextCheck.confidence,
@@ -322,14 +325,14 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
           L3_verbs_count: outOfContextCheck.L3_verbs_count,
           L4_count: outOfContextCheck.L4_count
         });
-        
+
         setAnalyzing(false);
         return;
       }
-      
+
       console.log('✅ Content passed out-of-context check, proceeding with workshop detection');
-      
-      // Détection sémantique du type d'atelier (côté client)
+
+      // ÉTAPE 2: Détection sémantique du type d'atelier (seulement si contexte pro validé)
       const detected = detectWorkshopType(input);
       setDetection(detected);
 
@@ -711,9 +714,15 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                 onChange={(e) => {
                   const newValue = e.target.value;
                   setInput(newValue);
+                  // Seulement détecter le type d'atelier si le contenu est professionnel
                   if (newValue.trim().length > 20) {
-                    const result = detectWorkshopType(newValue);
-                    setDetection(result);
+                    const outOfContextCheck = detectOutOfContext(newValue);
+                    if (!outOfContextCheck.isOutOfContext) {
+                      const result = detectWorkshopType(newValue);
+                      setDetection(result);
+                    } else {
+                      setDetection(null);
+                    }
                   } else {
                     setDetection(null);
                   }
