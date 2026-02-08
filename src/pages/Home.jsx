@@ -496,9 +496,6 @@ export default function Home() {
               <Badge className="text-base px-4 py-2 bg-blue-600 text-white">
                 🇪🇺 GDPR Compliant
               </Badge>
-              <Badge className="text-base px-4 py-2 bg-slate-900 text-white">
-                🔐 HIPAA Ready
-              </Badge>
               <Badge className="text-base px-4 py-2 bg-green-700 text-white">
                 ✅ CCPA Compliant
               </Badge>
