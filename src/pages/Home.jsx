@@ -27,6 +27,11 @@ const commandAnimationStyles = `
     50% { opacity: 0; }
   }
 
+  @keyframes hide-cursor {
+    0% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+
   @keyframes validate-frame {
     0% { 
       box-shadow: inset 0 0 0 0 #10b981, inset 0 0 0 0 #10b981;
