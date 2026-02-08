@@ -440,7 +440,7 @@ export default function RecentAnalyses({ analyses = [] }) {
                         onClick={async () => {
                           setLoadingActions(true);
                           // Add delay to avoid rate limiting
-                          await new Promise(resolve => setTimeout(resolve, 3000));
+                          await new Promise(resolve => setTimeout(resolve, 5000));
                           try {
                             const prompt = `Tu es un Scrum Master expert. Voici un problème détecté dans l'équipe:
 
