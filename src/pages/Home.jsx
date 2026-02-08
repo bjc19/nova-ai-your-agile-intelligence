@@ -20,16 +20,17 @@ import {
 import { PricingSection } from "@/components/nova/PricingSection";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 
-// Animation CSS pour l'effet de clignotement des commandes
+// Animation CSS pour le curseur de terminal clignotant
 const commandAnimationStyles = `
-  @keyframes blink-letter {
-    0%, 70% { opacity: 1; }
-    75%, 85% { opacity: 0.3; }
-    90%, 100% { opacity: 1; }
+  @keyframes cursor-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
   }
 
-  .typing-animation {
-    animation: blink-letter 2s ease-in-out infinite;
+  .terminal-cursor::after {
+    content: '|';
+    animation: cursor-blink 1s step-end infinite;
+    margin-left: 2px;
   }
 `;
 
@@ -398,7 +399,7 @@ export default function Home() {
                 <div key={i} className="flex items-center gap-3">
                   <div className="flex flex-col items-center">
                     <div className="w-24 h-16 bg-slate-800 border-2 border-slate-700 rounded flex flex-col items-center justify-center hover:border-blue-500 transition-colors">
-                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight typing-animation">
+                      <div className="text-white font-semibold whitespace-pre-line text-center leading-tight terminal-cursor">
                         {item.label}
                       </div>
                     </div>
