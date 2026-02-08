@@ -39,29 +39,51 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   }, []);
 
   const detectOutOfContext = (text) => {
-    const lowerText = text.toLowerCase();
+    const lowerText = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     
     // ========== COUCHE 1: VETOS THÉMATIQUES ABSOLUS ==========
     
     // VETO 1: Domaine du Sport (Explicite)
     const sportsProperNouns = [
-      'real madrid', 'real', 'barcelone', 'barça', 'psg', 'bayern', 
-      'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappé', 'clásico'
+      'real madrid', 'real', 'barcelone', 'barca', 'barça', 'psg', 'bayern', 
+      'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappe', 'clasico', 'clásico'
     ];
     const sportsLexicon = [
-      'match', 'but', 'joueur', 'mi-temps', 'gardien', 'frappe', 'terrain',
-      'arbitre', 'penalty', 'corner', 'coup franc', 'finition', 'défense',
-      'attaque', 'transition', 'ligne défensive', 'égalisation', 'ballon'
+      'match', 'but', 'joueur', 'mi-temps', 'mi temps', 'gardien', 'frappe', 'terrain',
+      'arbitre', 'penalty', 'corner', 'coup franc', 'finition', 'defense', 'défense',
+      'attaque', 'transition', 'ligne defensive', 'ligne défensive', 'egalisation', 
+      'égalisation', 'ballon', 'dribble', 'tacle', 'sortir le ballon'
     ];
-    const teamBuildingTerms = ['team building', 'événement d\'entreprise', 'sponsoring', 'partenariat commercial'];
+    const teamBuildingTerms = ['team building', 'evenement d\'entreprise', 'événement d\'entreprise', 'sponsoring', 'partenariat commercial'];
     
     let sportsNounsCount = 0;
     let sportsLexiconCount = 0;
     let teamBuildingContext = false;
+    const detectedSportsNouns = [];
+    const detectedSportsLexicon = [];
     
-    sportsProperNouns.forEach(term => { if (lowerText.includes(term)) sportsNounsCount++; });
-    sportsLexicon.forEach(term => { if (lowerText.includes(term)) sportsLexiconCount++; });
+    sportsProperNouns.forEach(term => { 
+      if (lowerText.includes(term)) {
+        sportsNounsCount++; 
+        detectedSportsNouns.push(term);
+      }
+    });
+    sportsLexicon.forEach(term => { 
+      if (lowerText.includes(term)) {
+        sportsLexiconCount++; 
+        detectedSportsLexicon.push(term);
+      }
+    });
     teamBuildingTerms.forEach(term => { if (lowerText.includes(term)) teamBuildingContext = true; });
+    
+    // Debug console log
+    console.log('VETO 1 Debug:', {
+      sportsNounsCount,
+      sportsLexiconCount,
+      teamBuildingContext,
+      detectedSportsNouns,
+      detectedSportsLexicon: detectedSportsLexicon.slice(0, 5)
+    });
     
     if (sportsNounsCount >= 1 && sportsLexiconCount >= 2 && !teamBuildingContext) {
       return {
@@ -69,8 +91,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
         confidence: 99,
         vetoType: 'VETO 1: Domaine du Sport',
         theme: 'Sport',
-        detectedKeywords: sportsProperNouns.filter(t => lowerText.includes(t))
-          .concat(sportsLexicon.filter(t => lowerText.includes(t)).slice(0, 3)),
+        detectedKeywords: detectedSportsNouns.slice(0, 3)
+          .concat(detectedSportsLexicon.slice(0, 4)),
         professionalFieldScore: 0
       };
     }
