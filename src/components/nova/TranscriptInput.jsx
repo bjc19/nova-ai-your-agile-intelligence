@@ -17,7 +17,7 @@ export default function TranscriptInput({ value, onChange }) {
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Collez le contenu de votre atelier (transcription, notes ou messages Slack)..."
+        placeholder="Collez le contenu de votre atelier (transcription, notes de reunion, etc.)..."
         className="min-h-[400px] w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-blue-500/20 transition-all"
       />
       
