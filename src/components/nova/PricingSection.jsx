@@ -113,7 +113,7 @@ const plans = [
     price: "Custom",
     users: "50 utilisateurs inclus",
     priceNote: "À partir de 500 CAD/mois",
-    yearlyPrice: "À la carte",
+    priceNote: "À la carte",
     structure: "+ 15 CAD/utilisateur",
     degressiveNote: "≈10-15 CAD/utilisateur à 100+ utilisateurs",
     enterpriseIntro: "Tous les éléments de Pro, +",
