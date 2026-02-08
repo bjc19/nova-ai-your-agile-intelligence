@@ -509,12 +509,7 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.7 }}
-                viewport={{ once: true }}
-              >
+              <div>
                 <Card className="text-center p-6 hover:shadow-lg transition-all border-slate-200 hover:border-slate-300 bg-white">
                   <div className="w-16 h-16 mx-auto mb-3">
                     <svg viewBox="0 0 100 100" className="w-full h-full">
