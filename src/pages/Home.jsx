@@ -70,7 +70,7 @@ const translations = {
     antiPatterns: "Anti-patterns",
     demoData: "Données de démo uniquement",
     keyKPIs: "KPIs Clés",
-    ready: "Prêt à transformer votre équipe?",
+    ready: "Prêts à transformer votre équipe?",
     tryNovaFree: "Essayez Nova gratuitement avec 2 analyses de démo. Puis choisissez le plan qui convient à votre équipe.",
     launchDemo: "Lancer la Démo",
     seePlans: "Voir les Plans",
