@@ -426,7 +426,7 @@ export default function Home() {
             {/* Comparison Table */}
             <div>
             <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-              Tableau Comparatif : Nova vs Concurrents Typiques
+              Tableau Comparatif : Nova vs Les Autres
             </h3>
             <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-0 overflow-x-auto">
