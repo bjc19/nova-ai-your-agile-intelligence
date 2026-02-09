@@ -437,7 +437,7 @@ export default function Home() {
                         Critère
                       </th>
                       <th className="text-left p-5 font-semibold text-slate-900">
-                        Concurrents Typiques
+                        Les Autres
                       </th>
                       <th className="text-left p-5 font-semibold text-slate-900 bg-blue-50/50">
                         Nova
