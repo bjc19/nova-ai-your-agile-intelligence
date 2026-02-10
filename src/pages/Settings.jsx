@@ -333,19 +333,15 @@ export default function Settings() {
     setSwitchingRole(true);
     try {
       const user = await base44.auth.me();
-      const users = await base44.entities.User.filter({ email: user.email });
       
-      if (users.length > 0) {
-        await base44.entities.User.update(users[0].id, { role: newRole });
-        setCurrentRole(newRole);
-        
-        // Small delay to ensure DB update completes
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }
+      // Update the user's role using asServiceRole for admin privileges
+      await base44.asServiceRole.entities.User.update(user.id, { role: newRole });
+      
+      // Force logout and login to refresh session
+      await base44.auth.logout();
     } catch (error) {
       console.error('Error switching role:', error);
+      alert('Erreur lors du changement de rôle: ' + error.message);
       setSwitchingRole(false);
     }
   };
