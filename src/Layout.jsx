@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
+import { LoginDialog } from "@/components/LoginDialog";
 
 function LayoutContent({ children, currentPageName }) {
   const { t } = useLanguage();
