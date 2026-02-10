@@ -73,14 +73,11 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      // Mark reset token as used (we already validated it)
+      // Reset password via backend function
       await base44.functions.invoke("resetPassword", {
         token: token,
         newPassword: newPassword
       });
-
-      // Update the user's password through Base44 auth
-      await base44.auth.updateMe({ password: newPassword });
 
       setSuccess(true);
       
