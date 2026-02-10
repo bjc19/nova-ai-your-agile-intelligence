@@ -102,6 +102,12 @@ function LayoutContent({ children, currentPageName }) {
         {children}
       </main>
 
+      {/* Login Dialog */}
+      <LoginDialog 
+        isOpen={showLoginDialog}
+        onClose={() => setShowLoginDialog(false)}
+      />
+
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8">
