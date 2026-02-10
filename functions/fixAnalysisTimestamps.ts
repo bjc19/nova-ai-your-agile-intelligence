@@ -10,6 +10,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
+    // Get app context
+    const appId = Deno.env.get('BASE44_APP_ID');
+    
     // Fetch all analyses
     const analyses = await base44.asServiceRole.entities.AnalysisHistory.list('-created_date', 1000);
     
@@ -20,25 +23,33 @@ Deno.serve(async (req) => {
       try {
         // Check if inserted_at exists and needs fixing
         if (analysis.analysis_data?.inserted_at) {
-          const storedTime = new Date(analysis.analysis_data.inserted_at);
-          
-          // If timestamp looks wrong (stored as local time instead of UTC),
-          // it will be 5+ hours ahead for Toronto timezone
-          // We can't fix it perfectly without knowing exact local time,
-          // but we can use created_date as reference since DB auto-sets it correctly
-          
+          // Use created_date (which is properly stored as UTC by the DB)
           if (analysis.created_date && analysis.analysis_data.inserted_at !== analysis.created_date) {
-            // Update with correct created_date (which is properly stored as UTC)
+            // Update with correct created_date
             const updatedData = {
               ...analysis.analysis_data,
               inserted_at: analysis.created_date
             };
             
-            await base44.asServiceRole.entities.AnalysisHistory.update(analysis.id, {
-              analysis_data: updatedData
+            // Update using service role bypass
+            const updateUrl = `https://api.base44.io/v1/apps/${appId}/entities/AnalysisHistory/${analysis.id}`;
+            const updateResponse = await fetch(updateUrl, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('BASE44_SERVICE_ROLE_KEY') || ''}`
+              },
+              body: JSON.stringify({
+                analysis_data: updatedData
+              })
             });
-            
-            fixed++;
+
+            if (updateResponse.ok) {
+              fixed++;
+            } else {
+              const error = await updateResponse.text();
+              errors.push(`Analysis ${analysis.id}: ${error}`);
+            }
           }
         }
       } catch (err) {
