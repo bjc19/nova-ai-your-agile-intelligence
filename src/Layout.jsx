@@ -111,9 +111,6 @@ function LayoutContent({ children, currentPageName }) {
               <span className="text-sm font-semibold text-slate-900">Nova</span>
               <span className="text-xs text-slate-400 ml-2">{t('AI Agile Expert')}</span>
             </div>
-            <p className="text-xs text-slate-500">
-              {t('demoVersionNotice')}
-            </p>
           </div>
         </div>
       </footer>
