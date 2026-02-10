@@ -383,7 +383,7 @@ export default function Settings() {
               <SettingsIcon className="w-5 h-5 text-slate-600" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900">
-              {t('Parametres')}
+              {t('Paramètres')}
             </h1>
           </div>
           <p className="text-slate-600">
