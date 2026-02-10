@@ -165,9 +165,14 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
     setIsSendingNotifications(true);
     
     try {
-      const user = await base44.auth.me();
+      const currentUser = await base44.auth.me();
       
-      // Build mini-report for manager
+      // Fetch all admins to find the main account holder
+      const admins = await base44.entities.User.list();
+      const mainAdmin = admins.find(u => u.role === 'admin') || currentUser;
+      const managerEmail = mainAdmin.email;
+      
+      // Build mini-report for main admin
       const miniReport = `
 🔔 ALERTE NOVA – Rapport Friction Systémique
 
@@ -211,10 +216,7 @@ Actions recommandées :
 🔒 Analyse automatisée • Nova AI Scrum Master
       `.trim();
 
-      // Get manager's email (from current user or configured manager email)
-      const managerEmail = user.email; // In production, this would be the manager's email
-
-      // Send mini-report to manager
+      // Send mini-report to main admin
       await base44.integrations.Core.SendEmail({
         from_name: "Nova AI",
         to: managerEmail,
@@ -225,14 +227,14 @@ Actions recommandées :
       // Save notification record
       const notificationRecord = await base44.entities.RealityNotification.create({
         analysis_date: new Date().toISOString(),
-        recipients: [{ name: "Manager", zone: "Executive" }],
+        recipients: [{ name: mainAdmin.full_name || "Admin", zone: "Executive" }],
         friction_index: frictionIndex.label,
         wastes_count: wastesAnalysis.wastes.length,
-        sent_by: user.email
+        sent_by: currentUser.email
       });
 
-      toast.success("Alerte envoyée au manager ✓", {
-        description: "Mini-rapport transmis avec succès"
+      toast.success("Alerte envoyée à l'administrateur ✓", {
+        description: `Mini-rapport transmis à ${mainAdmin.full_name || mainAdmin.email}`
       });
       
       // Dismiss card after 1.5 seconds
