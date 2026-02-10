@@ -44,12 +44,12 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         const user = await base44.auth.me();
         setCurrentUser(user);
         
-        // Load all users (in real app, fetch actual user list)
-        const allUsers = await base44.entities.User.list();
-        setUsers(allUsers || []);
+        // Load workspace members from Nova entity
+        const members = await base44.entities.WorkspaceMember.list();
+        setUsers(members || []);
         
         // Initialize all emails as hidden by default
-        const allHidden = new Set(allUsers?.map(u => u.id) || []);
+        const allHidden = new Set(members?.map(u => u.id) || []);
         setHiddenEmails(allHidden);
         
         // Load plan from team config or assume starter
