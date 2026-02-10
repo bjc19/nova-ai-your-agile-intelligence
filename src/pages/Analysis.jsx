@@ -54,7 +54,10 @@ export default function Analysis() {
   const [outOfContextData, setOutOfContextData] = useState(null);
   const [user, setUser] = useState(null);
   const [canCreateAnalysis, setCanCreateAnalysis] = useState(false);
-  const [showProductGoalCard, setShowProductGoalCard] = useState(true);
+  const [productGoalValidated, setProductGoalValidated] = useState(() => {
+    return localStorage.getItem("productGoalValidated") === "true";
+  });
+  const [hasActiveScopeCreep, setHasActiveScopeCreep] = useState(false);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -484,20 +487,21 @@ Provide a detailed analysis in the following JSON format:`;
             <PostureIndicator postureId={currentPosture.id} size="compact" />
           </div>
           
-          {/* Product Goal Alignment Card - Hide after confirmation, reappear on scope creep */}
-          {showProductGoalCard && alignmentReport && alignmentReport.risk.id !== "insufficient" && (
+          {/* Product Goal Alignment Card - Only if not validated OR scope creep detected */}
+          {alignmentReport && alignmentReport.risk.id !== "insufficient" && (!productGoalValidated || hasActiveScopeCreep) && (
             <div className="mt-6">
               <ProductGoalCard 
                 alignmentReport={alignmentReport}
                 onConfirmGoal={(response) => {
                   console.log("Goal confirmed:", response);
+                  localStorage.setItem("productGoalValidated", "true");
+                  setProductGoalValidated(true);
                   setAlignmentReport(prev => ({
                     ...prev,
                     risk: { id: "stable", label: "Cap stable et aligné", severity: 0 },
                     message: "Cap confirmé par le PO – alignement validé 🟢",
                     productGoal: { ...prev.productGoal, confirmed_date: new Date().toISOString() }
                   }));
-                  setShowProductGoalCard(false);
                 }}
                 onAdjustGoal={() => console.log("Adjust sprint goal")}
                 onShareStatus={() => console.log("Share status")}
