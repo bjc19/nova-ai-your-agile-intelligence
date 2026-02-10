@@ -101,7 +101,7 @@ const translations = {
     aiPoweredScrum: "Votre Expert Agile IA",
     heroPart1: "Transformez votre routine en",
     heroPart2: "Insights Actionnables",
-    heroSubtitle: "Conçu pour vos équipes agiles de projets et de produits. Synchronisation multi-sources, gestion intelligente des risques, détection adaptative du mode projet, recommandations personnalisées, anonymisation intelligente sans rétention — création de valeur mesurable dans chaque sprint ou cycle de développement.",
+    heroSubtitle: "Conçu pour vos équipes agiles de projets et de produits. Synchronisation multi-sources, gestion intelligente des risques, recommandations personnalisées, anonymisation intelligente sans rétention — création de valeur mesurable dans chaque sprint ou cycle de développement.",
     tryDemo: "Essayer la Démo",
     signIn: "Se Connecter",
     daysLeft: "jours restants dans le sprint",
