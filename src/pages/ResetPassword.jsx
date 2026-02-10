@@ -73,15 +73,18 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      // Reset password and change user's password
+      // Mark reset token as used (we already validated it)
       await base44.functions.invoke("resetPassword", {
         token: token,
         newPassword: newPassword
       });
 
+      // Update the user's password through Base44 auth
+      await base44.auth.updateMe({ password: newPassword });
+
       setSuccess(true);
       
-      // Auto-login after 1 second
+      // Auto-login after 2 seconds
       setTimeout(async () => {
         try {
           await base44.auth.login(email, newPassword);
@@ -92,8 +95,9 @@ export default function ResetPassword() {
           setLoading(false);
           setSuccess(false);
         }
-      }, 1000);
+      }, 2000);
     } catch (err) {
+      console.error("Reset error:", err);
       setError(err.message || "Failed to reset password");
       setLoading(false);
     }
