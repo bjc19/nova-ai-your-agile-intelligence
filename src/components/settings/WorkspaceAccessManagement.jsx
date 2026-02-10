@@ -119,6 +119,35 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
   const canToggleEmail = currentRole === 'admin' || currentRole === 'contributor';
 
+  const canEditUserRole = (user) => {
+    if (!canManage || user.email === currentUser?.email) return false;
+    
+    // Admin peut éditer tous les rôles
+    if (currentRole === 'admin') return true;
+    
+    // Contributeur peut éditer seulement les membres simples
+    if (currentRole === 'contributor' && user.role === 'user') return true;
+    
+    return false;
+  };
+
+  const handleEditRole = async () => {
+    if (!editingUser || !newRole) return;
+    
+    try {
+      // Update user role in Base44
+      await base44.entities.User.update(editingUser.id, { role: newRole });
+      
+      // Update local state
+      setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
+      setMessage({ type: 'success', text: 'Rôle mis à jour avec succès' });
+      setEditingUser(null);
+      setNewRole(null);
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Erreur lors de la mise à jour du rôle' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
