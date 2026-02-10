@@ -473,41 +473,70 @@ function analyzeIntention(text) {
 
 // ============ COUCHE 3.5: ANALYSE DU SUJET (QUOI vs COMMENT) ============
 // CRITICAL: Distinction Review (produit/incrément) vs Retrospective (process/équipe)
+// Review = QUOI (démonstration de livrables, feedback produit, valeur fournie)
+// Retrospective = COMMENT (processus d'équipe, amélioration continue, travail ensemble)
 function analyzeSubject(text) {
-  // Termes liés au PRODUIT/INCRÉMENT (Review = QUOI)
+  // === PRODUIT/INCRÉMENT (Review = QUOI) ===
   const productTerms = {
-    features: /fonctionnalité|feature|module|écran|screen|interface|composant|composante/gi,
-    delivery: /livré|delivered|incrément|increment|réalisé|accomplished|déployé|deployed/gi,
-    functionality: /marche|works|fonctionn|fonctionne|opérationnel|operational|prêt|ready/gi,
-    value: /valeur|value|impact|utilité|usefulness|bénéfice|business value|client.*content/gi,
-    external_feedback: /feedback|retour|avis|opinion|qu'en.*pensez|qu'en.*pense|what do you think|ça vous plaît/gi
+    // Démonstration et livraison
+    demo_and_delivery: /démo|démonstration|demonstration|montrer|presenté|shown|livré|delivered|complété|completed|finished|réalisé|accomplished/gi,
+    features_and_modules: /fonctionnalité|feature|features|module|composant|écran|screen|page|interface|dashboard|backend|frontend|ui|ux/gi,
+    
+    // État du produit et capacités
+    functionality: /marche|works|fonctionn|fonctionne|opérationnel|operational|stable|fonctionnaire|working|operational|performs|performance/gi,
+    technical_components: /moteur|engine|système|system|synchronisation|sync|règles|rules|fallback|intégration|api|endpoint|requête|request/gi,
+    
+    // Feedback et validation du produit
+    feedback_product: /feedback|retour|avis|opinion|qu'en.*pensez|qu'en.*pense|what do you think|comment.*trouvez|how does it look|satisfaction/gi,
+    
+    // Valeur et impact
+    value_and_impact: /valeur|value|impact|utilité|usefulness|bénéfice|benefit|business|client|utilisateur|user/gi,
+    
+    // Résultats mesurables du sprint
+    results: /atteint|reached|objectif.*réalisé|goal.*achieved|résultat|result|output|livré|deliver|complété|completed|performance|metrics|test|charge/gi
   };
 
-  // Termes liés au PROCESSUS/ÉQUIPE (Retrospective = COMMENT)
+  // === PROCESSUS/ÉQUIPE (Retrospective = COMMENT) ===
   const processTerms = {
-    collaboration: /collabor|communication|interaction|ensemble|together|coordination.*équipe|team work/gi,
-    methodology: /processus|process|méthode|method|approche|approach|workflow|façon de travailler|way of working/gi,
-    efficiency: /efficacité|efficiency|productivité|productivity|rapidité|speed|lenteur|slowness|friction/gi,
-    team_dynamics: /équipe|team|groupe|group|relationnel|relational|dynamique|dynamics|ressenti|feeling/gi,
-    improvement: /améliorer|improve|optimiser|optimize|adapter|adapt|éviter|avoid|pas assez|trop|not enough/gi,
-    learning: /apprentiss|learning|leçon|lesson|découvert|discovered|réalisé|realized|compris|understood/gi
+    // Discussion de processus/méthode
+    methodology: /processus|process|méthode|method|approche|approach|workflow|façon de travailler|way of working|comment on a|how we|notre approche|our approach/gi,
+    
+    // Collaboration et dynamique d'équipe
+    collaboration: /collabor|collaboration|communication|interaction|ensemble|together|coordination|équipe|team|groupe|group|relationnel|relational|dynamique|dynamics/gi,
+    
+    // Ressenti et émotions
+    feelings: /ressenti|feeling|difficile|difficult|easy|facile|bien|mal|positive|negative|emotion|émotions|satisfaction|frustration/gi,
+    
+    // Amélioration continue ET contexte processus
+    improvement_in_context: /améliorer.*processus|améliorer.*comment|improve.*how|optimize.*méthode|optimiser.*approche|adapter.*processus|faire évoluer.*équipe|better way|differently/gi,
+    
+    // Apprentissage d'équipe
+    learning: /apprentiss|learning|leçon|lesson|découvert|discovered|réalisé|realized|compris|understood|appris|learned|insight/gi
   };
 
-  // Compte les occurrences
-  const productScore = Object.values(productTerms).reduce((sum, pattern) => {
-    return sum + (text.match(pattern) || []).length;
-  }, 0);
+  // Compte les occurrences avec poids
+  let productScore = 0;
+  Object.entries(productTerms).forEach(([key, pattern]) => {
+    const matches = (text.match(pattern) || []).length;
+    // Boost pour les termes critiques Review
+    const weight = (key === 'demo_and_delivery' || key === 'features_and_modules' || key === 'results') ? 3 : 1;
+    productScore += matches * weight;
+  });
 
-  const processScore = Object.values(processTerms).reduce((sum, pattern) => {
-    return sum + (text.match(pattern) || []).length;
-  }, 0);
+  let processScore = 0;
+  Object.entries(processTerms).forEach(([key, pattern]) => {
+    const matches = (text.match(pattern) || []).length;
+    // Boost pour les termes critiques Retrospective avec contexte d'équipe
+    const weight = (key === 'methodology' || key === 'improvement_in_context') ? 3 : 1;
+    processScore += matches * weight;
+  });
 
-  // Évalue les termes clés d'introduction/structure
-  const isProductFocusedIntro = /démontrer|demonstrate|présent|présentation|montrer|show.*livré|show.*fonctionnalité|voici ce qu'on a livré|here's what we delivered/gi.test(text);
-  const isProcessFocusedIntro = /comment on|how we|amélioration|improvement.*processus|réfléchir|reflect.*équipe|bilan.*sprint|ce sprint.*travail/gi.test(text);
+  // CRITICAL: Si productScore >> processScore, c'est clairement un Review
+  const isProductFocusedIntro = /montrer|show|démo|démonstration|présenter|presenting|livré|delivered|réalisé|accomplished|finalisé|finalized|développé|developed/gi.test(text);
+  const isProcessFocusedIntro = /processus|process|collaboration|équipe.*travail|comment on a|how we worked|méthode|methodology/gi.test(text);
 
-  const isFocusedOnProduct = isProductFocusedIntro || productScore > processScore;
-  const isFocusedOnProcess = isProcessFocusedIntro || processScore > productScore + 5;
+  const isFocusedOnProduct = isProductFocusedIntro || productScore > (processScore + 5);
+  const isFocusedOnProcess = isProcessFocusedIntro && processScore > (productScore + 3);
 
   return {
     productScore,
@@ -515,7 +544,8 @@ function analyzeSubject(text) {
     isFocusedOnProduct,
     isFocusedOnProcess,
     dominantSubject: isFocusedOnProduct ? 'PRODUCT' : isFocusedOnProcess ? 'PROCESS' : 'MIXED',
-    confidence: Math.max(Math.abs(productScore - processScore), 1) // Différence pour confiance
+    scoreDifference: Math.abs(productScore - processScore),
+    confidence: Math.max(Math.abs(productScore - processScore), 1)
   };
 }
 
