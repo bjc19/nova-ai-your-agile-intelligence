@@ -122,6 +122,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!userToDelete) return;
 
     try {
+      await base44.entities.WorkspaceMember.delete(userToDelete.id);
       setUsers(users.filter(u => u.id !== userToDelete.id));
       toast.success('Utilisateur supprimé avec succès');
       setUserToDelete(null);
