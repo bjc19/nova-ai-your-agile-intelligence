@@ -455,8 +455,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
             </div>
           )}
 
-          {/* Healthy sprint - No interruption */}
-          {driftAnalysis.status.id === "healthy" && driftAnalysis.canAnalyze && (
+          {/* Healthy sprint - No interruption - Admin/Contributor only */}
+          {(isAdmin || isContributor) && driftAnalysis.status.id === "healthy" && driftAnalysis.canAnalyze && (
             <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
               <p className="text-sm text-emerald-700">
                 🟢 Aucun signal de dérive – flow protégé
