@@ -50,10 +50,10 @@
 import AdminDevTools from './pages/AdminDevTools';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
-import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
@@ -63,10 +63,10 @@ export const PAGES = {
     "AdminDevTools": AdminDevTools,
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
-    "Dashboard": Dashboard,
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
+    "Dashboard": Dashboard,
     "Results": Results,
     "Settings": Settings,
 }

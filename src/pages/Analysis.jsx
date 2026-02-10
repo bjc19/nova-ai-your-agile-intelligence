@@ -176,6 +176,8 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
 
     setIsAnalyzing(true);
     setError(null);
+    
+    try {
 
     // Fetch active sprint context to get delivery mode
     const sprintContexts = await base44.entities.SprintContext.filter({ is_active: true });
@@ -342,7 +344,9 @@ Provide a detailed analysis in the following JSON format:`;
       transcript_preview: transcript.substring(0, 200),
     };
     
+    console.log("Creating analysis record:", analysisRecord);
     const createdAnalysis = await base44.entities.AnalysisHistory.create(analysisRecord);
+    console.log("Analysis created successfully:", createdAnalysis);
 
     // Create PatternDetection records for detected patterns
     const allDetectedPatterns = new Set();
@@ -393,7 +397,12 @@ Provide a detailed analysis in the following JSON format:`;
     sessionStorage.setItem("analysisSource", JSON.stringify(sourceInfo));
 
     navigate(createPageUrl("Results"));
-    setIsAnalyzing(false);
+    } catch (error) {
+      console.error("Analysis error:", error);
+      setError(`Erreur lors de l'analyse: ${error.message}`);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   if (showOutOfContextResult) {
