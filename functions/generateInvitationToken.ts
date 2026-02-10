@@ -40,7 +40,9 @@ Deno.serve(async (req) => {
     });
 
     // Create invitation link
-    const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
+    const invitationUrl = `https://www.novagile.ca/AcceptInvitation?token=${token}`;
+// OU si tu préfères kebab-case :
+// const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
 
     // Send email via Resend API using fetch
     const emailBody = `Hi ${inviteeEmail},
