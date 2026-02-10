@@ -47,6 +47,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AcceptInvitation from './pages/AcceptInvitation';
 import AdminDevTools from './pages/AdminDevTools';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
@@ -57,11 +58,12 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import AcceptInvitation from './pages/AcceptInvitation';
+import acceptInvitation from './pages/accept-invitation';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AcceptInvitation": AcceptInvitation,
     "AdminDevTools": AdminDevTools,
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
@@ -72,7 +74,7 @@ export const PAGES = {
     "Register": Register,
     "Results": Results,
     "Settings": Settings,
-    "AcceptInvitation": AcceptInvitation,
+    "accept-invitation": acceptInvitation,
 }
 
 export const pagesConfig = {
