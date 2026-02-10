@@ -110,9 +110,8 @@ function LayoutContent({ children, currentPageName }) {
               </div>
               <span className="text-sm font-semibold text-slate-900">Nova</span>
               <span className="text-xs text-slate-400 ml-2">{t('AI Agile Expert')}</span>
+              <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
             </div>
-            <p className="text-xs text-slate-500">
-            </p>
           </div>
         </div>
       </footer>
