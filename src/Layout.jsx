@@ -12,12 +12,17 @@ function LayoutContent({ children, currentPageName }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
+    const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const auth = await base44.auth.isAuthenticated();
         setIsAuthenticated(auth);
+        if (auth) {
+          const user = await base44.auth.me();
+          setUserRole(user?.role);
+        }
       } catch (err) {
         setIsAuthenticated(false);
       }
