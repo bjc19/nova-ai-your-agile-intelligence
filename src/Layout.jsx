@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { LoginDialog } from "@/components/LoginDialog";
+import { DemoSimulator } from "@/components/nova/DemoSimulator";
 
 function LayoutContent({ children, currentPageName }) {
     const { t } = useLanguage();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
+    const [showDemoSimulator, setShowDemoSimulator] = useState(false);
     const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
