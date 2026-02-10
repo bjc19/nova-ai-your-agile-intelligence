@@ -387,11 +387,77 @@ export default function Settings() {
             </h1>
           </div>
           <p className="text-slate-600">
-            {t('integrationsDescription')}
+            {t('Vos paramètres')}
           </p>
         </motion.div>
 
-
+        {/* DEV ONLY - Role Switcher */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.03 }}
+          className="mb-8"
+        >
+          <Card className="border-2 border-red-300 bg-red-50/50">
+            <CardHeader>
+              <CardTitle className="text-red-900 flex items-center gap-2 text-base">
+                <AlertTriangle className="w-5 h-5" />
+                ⚠️ DEV ONLY - Role Switcher
+              </CardTitle>
+              <CardDescription className="text-red-700">
+                À SUPPRIMER AVANT PRODUCTION - Permet de tester les vues Admin/Contributor/Member
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Rôle actuel: <span className="font-bold text-red-900">{currentRole}</span>
+                  </label>
+                  <Select value={currentRole} onValueChange={handleRoleSwitch} disabled={switchingRole}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner un rôle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Admin</span>
+                          <span className="text-xs text-slate-500">→ Vue Technique Complète</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="contributor">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Contributor</span>
+                          <span className="text-xs text-slate-500">→ Vue Équipe Actionnable</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="user">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">User</span>
+                          <span className="text-xs text-slate-500">→ Vue Business Constructive</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="bg-red-100 border border-red-200 rounded-lg p-3 space-y-1">
+                  <p className="text-xs text-red-800 font-medium">
+                    💡 Après changement de rôle, lancez une analyse pour voir la vue correspondante
+                  </p>
+                  <p className="text-xs text-red-700">
+                    • Admin → Détails techniques, patterns, métriques brutes
+                  </p>
+                  <p className="text-xs text-red-700">
+                    • Contributor → Actions concrètes, contexte simplifié
+                  </p>
+                  <p className="text-xs text-red-700">
+                    • User → Vision business, formulation constructive
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Workspace Access Management */}
         {(currentRole === 'admin' || currentRole === 'contributor') && (
