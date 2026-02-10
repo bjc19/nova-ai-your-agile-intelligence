@@ -1,89 +1,119 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
-import { createPageUrl } from '@/utils';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { createPageUrl } from "@/utils";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const [token, setToken] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [token, setToken] = useState("");
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [validating, setValidating] = useState(true);
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [tokenValid, setTokenValid] = useState(false);
 
   useEffect(() => {
+    // Get token from URL params
     const params = new URLSearchParams(window.location.search);
-    const tokenParam = params.get('token');
+    const resetToken = params.get("token");
     
-    if (!tokenParam) {
-      setError('Invalid reset link');
-    } else {
-      setToken(tokenParam);
+    if (!resetToken) {
+      setError("No reset token provided");
+      setValidating(false);
+      return;
     }
+
+    setToken(resetToken);
+    validateToken(resetToken);
   }, []);
 
-  const handleSubmit = async (e) => {
+  const validateToken = async (resetToken) => {
+    try {
+      const result = await base44.functions.invoke("resetPassword", {
+        token: resetToken,
+        newPassword: "temp" // Just for validation
+      });
+
+      if (result.data?.success && result.data?.email) {
+        setEmail(result.data.email);
+        setTokenValid(true);
+      }
+    } catch (err) {
+      setError("Invalid or expired reset token");
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  const handleReset = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    if (!password || !confirmPassword) {
-      setError('Please fill in all fields');
+    if (!newPassword || !confirmPassword) {
+      setError("Please fill in all fields");
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await base44.functions.invoke('resetPassword', {
+      // Now actually reset the password with valid token
+      await base44.functions.invoke("resetPassword", {
         token: token,
-        newPassword: password
+        newPassword: newPassword
       });
 
-      if (response.data.success) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate(createPageUrl('Home'));
-        }, 2000);
-      } else {
-        setError(response.data.error || 'Failed to reset password');
-      }
+      setSuccess(true);
+      setTimeout(() => {
+        navigate(createPageUrl("Home"));
+      }, 3000);
     } catch (err) {
-      setError(err.message || 'An error occurred');
-    } finally {
+      setError(err.message || "Failed to reset password");
       setLoading(false);
     }
   };
 
-  if (!token) {
+  if (validating) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center p-6">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-12 text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-slate-600">Validating reset link...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!tokenValid || error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center p-6">
         <Card className="w-full max-w-md border-red-200">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <CardTitle className="text-red-600">Invalid Link</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-slate-600">This password reset link is invalid or has expired.</p>
-            <Button 
-              onClick={() => navigate(createPageUrl('Home'))}
-              className="w-full"
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">Reset Link Invalid</h2>
+            <p className="text-slate-600 mb-6">{error || "This reset link has expired or is invalid."}</p>
+            <Button
+              onClick={() => navigate(createPageUrl("Home"))}
+              className="w-full bg-blue-600 hover:bg-blue-700"
             >
               Back to Home
             </Button>
@@ -95,19 +125,19 @@ export default function ResetPassword() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center p-6">
         <Card className="w-full max-w-md border-emerald-200">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <CardTitle className="text-emerald-600">Password Reset</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-slate-600">
-              Your password has been reset successfully. You can now sign in with your new password.
-            </p>
-            <p className="text-xs text-slate-500">Redirecting...</p>
+          <CardContent className="p-8 text-center">
+            <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-slate-900 mb-2">Password Reset Successful</h2>
+            <p className="text-slate-600 mb-6">Your password has been reset. You can now sign in with your new password.</p>
+            <p className="text-xs text-slate-500 mb-6">Redirecting to Home in 3 seconds...</p>
+            <Button
+              onClick={() => navigate(createPageUrl("Home"))}
+              className="w-full bg-emerald-600 hover:bg-emerald-700"
+            >
+              Go to Home Now
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -115,54 +145,67 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-slate-900">Nova</span>
+            <span className="font-bold text-slate-900">Nova</span>
           </div>
           <CardTitle>Reset Your Password</CardTitle>
-          <CardDescription>Enter your new password below</CardDescription>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleReset} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Email
+              </label>
+              <Input
+                type="email"
+                value={email}
+                disabled
+                className="w-full bg-slate-50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                New Password
+              </label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={loading}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Confirm Password
+              </label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={loading}
+                className="w-full"
+              />
+            </div>
+
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 flex gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                {error}
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                New Password
-              </label>
-              <Input 
-                type="password"
-                placeholder="At least 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Confirm Password
-              </label>
-              <Input 
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <Button 
+            <Button
               type="submit"
               disabled={loading}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
@@ -173,7 +216,7 @@ export default function ResetPassword() {
                   Resetting...
                 </>
               ) : (
-                'Reset Password'
+                "Reset Password"
               )}
             </Button>
           </form>
