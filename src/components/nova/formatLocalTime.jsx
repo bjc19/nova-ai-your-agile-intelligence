@@ -26,10 +26,10 @@ export function formatLocalTime(isoDateString, language = 'en', formatPattern = 
 /**
  * Format a date with time in user's local timezone (no GMT suffix)
  * @param {string | Date} isoDateString - ISO date string or Date object
- * @param {string} language - Language code ('en' or 'fr')
+ * @param {string} localeCode - Locale code ('en-US' or 'fr-CA')
  * @returns {string} Formatted date with time in local timezone (e.g., "Feb 10, 2026 5:36 PM")
  */
-export function formatLocalTimeWithTZ(isoDateString, language = 'en') {
+export function formatLocalTimeWithTZ(isoDateString, localeCode = 'en-US') {
   try {
     const date = new Date(isoDateString);
     if (isNaN(date.getTime())) {
@@ -38,6 +38,7 @@ export function formatLocalTimeWithTZ(isoDateString, language = 'en') {
 
     // Get user's actual timezone from browser
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log('Using timezone:', userTimeZone); // Debug
 
     // Format with explicit timezone
     const options = {
@@ -51,7 +52,9 @@ export function formatLocalTimeWithTZ(isoDateString, language = 'en') {
       timeZone: userTimeZone
     };
 
-    return date.toLocaleString(language === 'fr' ? 'fr-CA' : 'en-US', options);
+    const result = date.toLocaleString(localeCode, options);
+    console.log('Formatted result:', result, 'Original:', isoDateString); // Debug
+    return result;
   } catch (error) {
     console.error('Error formatting date with timezone:', error);
     return 'Invalid date';
