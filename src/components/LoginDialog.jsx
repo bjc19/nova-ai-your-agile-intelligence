@@ -21,12 +21,15 @@ export function LoginDialog({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      // Utiliser le système natif Base44 pour l'authentification
       await base44.auth.login(email, password);
-      // Remplacer l'historique pour éviter de revenir au Home avec le back du navigateur
-      window.history.replaceState(null, '', window.location.pathname);
-      window.location.href = "/Dashboard";
+      setEmail("");
+      setPassword("");
+      onClose();
+      setTimeout(() => {
+        window.location.href = createPageUrl("Dashboard");
+      }, 100);
     } catch (err) {
+      console.error("Login error:", err);
       setError("Email ou mot de passe incorrect");
       setLoading(false);
     }
