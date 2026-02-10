@@ -974,31 +974,42 @@ export function detectWorkshopType(text) {
     }
   }
 
-  // CRITICAL 2: Review vs Retrospective - Subject-centric distinction (HIGHEST PRIORITY)
+  // CRITICAL 2: Review vs Retrospective - Multi-layer distinction (HIGHEST PRIORITY)
   // COUCHE SUJET: QUOI (produit/incrément) = Review | COMMENT (processus/équipe) = Retrospective
+  // COUCHE PATTERNS: Patterns formels de Review (démonstration, feedback, accomplissements)
   if ((bestType === 'RETROSPECTIVE' || bestType === 'SPRINT_REVIEW') && scores.SPRINT_REVIEW && scores.RETROSPECTIVE) {
     const reviewScore = scores.SPRINT_REVIEW.score;
     const retroScore = scores.RETROSPECTIVE.score;
     
-    // Analyse du sujet principal - CETTE COUCHE GAGNE MÊME SUR LES SCORES ÉLEVÉS
+    // Analyse du sujet principal
     const subjectAnalysis = analyzeSubject(text);
     
-    // RÈGLE 1 (DOMINANTE): Sujet clairement PRODUIT → Review gagne SANS APPEL
-    if (subjectAnalysis.isFocusedOnProduct && subjectAnalysis.scoreDifference >= 5) {
+    // Analyse des patterns formels Review
+    const reviewPatterns = analyzeReviewPatterns(text);
+    
+    // RÈGLE 1 (DOMINANTE): Patterns formels Review forts → Review gagne
+    if (reviewPatterns.patternCount >= 3 && reviewPatterns.reviewScore >= 35) {
       bestType = 'SPRINT_REVIEW';
       bestScore = scores.SPRINT_REVIEW;
-      // Boost le score Review pour refléter la confiance sujet-centrée
+      // Boost massif basé sur patterns
+      bestScore.score = Math.min(bestScore.score + reviewPatterns.reviewScore * 0.5, 100);
+    }
+    // RÈGLE 2: Sujet clairement PRODUIT + patterns Review présents → Review gagne SANS APPEL
+    else if (subjectAnalysis.isFocusedOnProduct && subjectAnalysis.scoreDifference >= 5) {
+      bestType = 'SPRINT_REVIEW';
+      bestScore = scores.SPRINT_REVIEW;
+      // Boost sujet-centré
       bestScore.score = Math.min(bestScore.score + Math.min(subjectAnalysis.scoreDifference * 2, 25), 100);
     }
-    // RÈGLE 2 (DOMINANTE): Sujet clairement PROCESSUS → Retrospective gagne SANS APPEL
+    // RÈGLE 3: Sujet clairement PROCESSUS → Retrospective gagne SANS APPEL
     else if (subjectAnalysis.isFocusedOnProcess && subjectAnalysis.scoreDifference >= 5) {
       bestType = 'RETROSPECTIVE';
       bestScore = scores.RETROSPECTIVE;
-      // Boost le score Retro
+      // Boost sujet-centré
       bestScore.score = Math.min(bestScore.score + Math.min(subjectAnalysis.scoreDifference * 2, 25), 100);
     }
-    // RÈGLE 3: Sujet indécis, mais produit dominé légèrement → Review plus probable
-    else if (subjectAnalysis.productScore > subjectAnalysis.processScore) {
+    // RÈGLE 4: Sujet indécis mais patterns Review forts → Review
+    else if (reviewPatterns.patternCount >= 2 && reviewScore > retroScore) {
       bestType = 'SPRINT_REVIEW';
       bestScore = scores.SPRINT_REVIEW;
     }
