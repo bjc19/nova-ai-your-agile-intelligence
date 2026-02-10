@@ -40,15 +40,61 @@ Deno.serve(async (req) => {
     });
 
     // Create invitation link
-    const invitationUrl = `${Deno.env.get('APP_URL') || 'https://novagile.ca'}/accept-invitation?token=${token}`;
+    const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
 
-    // Send email
-    const emailBody = `Hi ${inviteeEmail},\n\n${user.full_name || user.email} vous a invité à rejoindre Nova AI - Agile Intelligence. Nous sommes ravis de vous accueillir!\n\n- À propos de Nova\nNova est un système d'intelligence organisationnelle agile qui aide les équipes à identifier les dysfonctionnements, anticiper les risques et transformer les processus en insights actionnables. Il permet aux organisations d'accélérer la création de valeur, d'augmenter la productivité, de réduire les coûts liés aux erreurs et de prendre des décisions plus intelligentes en temps réel.\n\nPrêt à commencer? Acceptez votre invitation et créez votre compte Nova:\n\n${invitationUrl}\n\nCette invitation expire dans 7 jours.\n\nCordialement,\nL'équipe Nova`;
+    // Send email with HTML template
+    const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: white; padding: 40px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #f8f9fa; padding: 40px; border-radius: 0 0 8px 8px; }
+    .cta-button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
+    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #666; }
+    .about-section { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 style="margin: 0;">You're invited!</h1>
+      <p style="margin: 10px 0 0 0;">Join Nova AI - Your Agile AI Intelligence</p>
+    </div>
+    
+    <div class="content">
+      <p>Hi ${inviteeEmail},</p>
+      
+      <p><strong>${user.full_name || user.email}</strong> has invited you to join Nova AI - Agile Intelligence. We're excited to have you on board!</p>
+      
+      <div class="about-section">
+        <h3 style="margin-top: 0;">About Nova</h3>
+        <p>Nova is an agile organizational intelligence system that helps teams identify dysfunctions, anticipate risks, and transform processes into actionable insights. It enables organizations to accelerate value creation, increase productivity, reduce error-related costs, and make smarter decisions in real time.</p>
+      </div>
+      
+      <p style="text-align: center;">
+        <a href="${invitationUrl}" class="cta-button">Join Nova AI - Your Agile AI Intelligence</a>
+      </p>
+      
+      <p style="text-align: center; color: #666; font-size: 14px;">This invitation expires in 7 days</p>
+      
+      <div class="footer">
+        <p>You are receiving this because you've been invited to join Nova AI - Agile Intelligence</p>
+        <p style="margin-top: 10px;">Sent with ❤️ by Nova Team</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `;
 
     await base44.integrations.Core.SendEmail({
       to: inviteeEmail,
-      subject: 'Rejoignez Nova - Agile Intelligence',
-      body: emailBody,
+      subject: 'You\'re invited to join Nova AI - Agile Intelligence',
+      body: emailHtml,
       from_name: 'Nova'
     });
 
