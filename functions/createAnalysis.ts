@@ -17,6 +17,14 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { analysisRecord, patternDetections } = body;
 
+    // Ensure inserted_at is properly set to UTC ISO string
+    if (!analysisRecord.analysis_data?.inserted_at) {
+      analysisRecord.analysis_data = {
+        ...analysisRecord.analysis_data,
+        inserted_at: new Date().toISOString()
+      };
+    }
+
     // Create analysis record with service role to bypass RLS
     const createdAnalysis = await base44.asServiceRole.entities.AnalysisHistory.create(analysisRecord);
 
