@@ -390,9 +390,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
-            <RealityMapCard
+              {/* Organizational Reality Engine - Only for admin/contributor */}
+              {(user?.role === 'admin' || user?.role === 'contributor') && analysisHistory.length > 0 &&
+              <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -417,7 +417,7 @@ export default function Dashboard() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
-            }
+              }
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
