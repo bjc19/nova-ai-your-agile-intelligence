@@ -69,7 +69,7 @@ export default function GDPRMarkersSection({ sessionId, analysisDate }) {
                 {t('gdprInsights') || 'GDPR Insights'}
                 <Badge className="bg-purple-100 text-purple-700 text-xs">#Slack</Badge>
                 <Badge variant="outline" className="text-xs">
-                   {analysisDate ? format(new Date(analysisDate), "PPp", { locale: language === 'fr' ? fr : enUS }) : format(new Date(), "PPp", { locale: language === 'fr' ? fr : enUS })}
+                   {formatLocalTime(analysisDate || new Date(), language)}
                  </Badge>
               </CardTitle>
               <p className="text-xs text-slate-600 mt-1">
