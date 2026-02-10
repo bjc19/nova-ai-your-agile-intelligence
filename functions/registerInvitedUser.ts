@@ -5,8 +5,8 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { email, fullName, password, invitationId, token } = await req.json();
 
-    if (!email || !fullName || !password || !invitationId || !token) {
-      return Response.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!email || !fullName || !password || !token) {
+      return Response.json({ error: 'Missing required fields', received: { email, fullName, password: !!password, token: !!token, invitationId } }, { status: 400 });
     }
 
     // Find the invitation by token (more reliable than ID)
@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     });
 
     if (!invitationRecord || invitationRecord.length === 0) {
-      return Response.json({ success: false, error: 'Invitation invalide' }, { status: 400 });
+      return Response.json({ success: false, error: 'Invitation invalide ou token inexistant' }, { status: 400 });
     }
 
     const inv = invitationRecord[0];
