@@ -292,8 +292,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
+            {/* Quick Stats - Only show if data in period AND user is admin/contributor */}
+            {(user?.role === 'admin' || user?.role === 'contributor') && (!selectedPeriod || analysisHistory.length > 0) &&
             <QuickStats analysisHistory={analysisHistory} />
             }
           </motion.div>
@@ -434,6 +434,9 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
           </div>
         </div>
         }
