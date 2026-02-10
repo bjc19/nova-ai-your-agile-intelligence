@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     }
 
     // Mark reset token as used FIRST
-    await base44.asServiceRole.entities.PasswordReset.update(resetRecord.id, {
+    await base44.entities.PasswordReset.update(resetRecord.id, {
       used: true
     });
 
