@@ -313,7 +313,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                         <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
                         <div className="flex items-center gap-1.5">
                           <p className="text-xs text-slate-500 min-w-[100px] truncate">
-                            {hiddenEmails.has(user.id) ? '••••••••••' : user.email}
+                            {hiddenEmails.has(user.id) ? '••••••••••' : user.user_email}
                           </p>
                           {canToggleEmail && (
                             <button
