@@ -133,11 +133,14 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
   const handleEditRole = async () => {
     if (!editingUser || !newRole) return;
-    
+
     try {
-      // Update user role in Base44
-      await base44.entities.User.update(editingUser.id, { role: newRole });
-      
+      // Call backend function to update user role
+      await base44.functions.invoke('updateUserRole', {
+        userId: editingUser.id,
+        newRole: newRole
+      });
+
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
       setMessage({ type: 'success', text: 'Rôle mis à jour avec succès' });
