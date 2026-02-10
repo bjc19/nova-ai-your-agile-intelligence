@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     });
 
     if (!invitations || invitations.length === 0) {
-      return Response.json({ error: 'Invalid token' }, { status: 400 });
+      return Response.json({ valid: false, error: 'Token invalide ou expiré' }, { status: 400 });
     }
 
     const invitation = invitations[0];
