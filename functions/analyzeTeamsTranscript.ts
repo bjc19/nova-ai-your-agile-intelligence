@@ -209,7 +209,10 @@ function buildTeamsMarker(meetingInfo, analysis, userEmail, markerType) {
   const now = new Date();
   const issueId = crypto.randomUUID();
   const sessionId = crypto.randomUUID();
+  // Same anonymization strategy as Slack: SHA256 hash of user email
   const hashedTenantId = crypto.createHash('sha256').update(userEmail).digest('hex');
+  // Same: hash of meeting_id for team_id
+  const hashedTeamId = crypto.createHash('sha256').update(meetingInfo.meeting_id).digest('hex');
 
   // Date au format YYYY-MM-DD
   const meetingDate = new Date(meetingInfo.start_time).toISOString().split('T')[0];
@@ -256,7 +259,7 @@ function buildTeamsMarker(meetingInfo, analysis, userEmail, markerType) {
   return {
     issue_id: issueId,
     tenant_id: hashedTenantId,
-    team_id: meetingInfo.meeting_id,
+    team_id: hashedTeamId,
     session_id: sessionId,
     date: meetingDate,
     type,
