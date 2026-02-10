@@ -432,8 +432,10 @@ export default function Dashboard() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
+            {/* Recent Analyses - Only for admin/contributor */}
+            {(user?.role === 'admin' || user?.role === 'contributor') &&
             <RecentAnalyses analyses={analysisHistory} />
+            }
             
             {/* Integration Status */}
             <IntegrationStatus />
