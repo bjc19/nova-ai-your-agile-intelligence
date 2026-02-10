@@ -86,11 +86,22 @@ Deno.serve(async (req) => {
 </html>
     `;
 
-    await base44.integrations.Core.SendEmail({
+    // Send email via SMTP
+    const transporter = nodemailer.createTransport({
+      host: Deno.env.get('SMTP_HOST'),
+      port: parseInt(Deno.env.get('SMTP_PORT')),
+      secure: Deno.env.get('SMTP_PORT') === '465',
+      auth: {
+        user: Deno.env.get('SMTP_USER'),
+        pass: Deno.env.get('SMTP_PASSWORD')
+      }
+    });
+
+    await transporter.sendMail({
+      from: Deno.env.get('SMTP_USER'),
       to: inviteeEmail,
       subject: 'You\'re invited to join Nova AI - Agile Intelligence',
-      body: emailHtml,
-      from_name: 'Nova'
+      html: emailHtml
     });
 
     return Response.json({ success: true, message: 'Invitation sent successfully', token });
