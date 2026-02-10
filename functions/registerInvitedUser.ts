@@ -41,7 +41,11 @@ Deno.serve(async (req) => {
     // Register user using Base44's registration
     try {
       console.log('Attempting to register user:', email);
-      await base44.auth.register(email, password, fullName);
+      await base44.auth.register({
+        email: email,
+        password: password,
+        full_name: fullName
+      });
       console.log('User registered successfully');
     } catch (regErr) {
       console.error('Registration error:', regErr);
