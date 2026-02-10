@@ -52,7 +52,8 @@ Deno.serve(async (req) => {
       if (regErr.message?.includes('already exists') || regErr.message?.includes('déjà')) {
         return Response.json({ success: false, error: 'Un utilisateur avec cet email existe déjà' }, { status: 400 });
       }
-      return Response.json({ success: false, error: 'Erreur lors de l\'enregistrement: ' + regErr.message }, { status: 400 });
+      const errorMsg = regErr.data?.message || regErr.message || 'Unknown registration error';
+      return Response.json({ success: false, error: 'Erreur lors de l\'enregistrement: ' + errorMsg }, { status: 400 });
     }
 
     // Create WorkspaceMember record
