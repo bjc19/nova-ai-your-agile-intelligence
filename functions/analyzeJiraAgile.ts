@@ -237,13 +237,15 @@ function detectVelocityTrend(issues) {
   return 'stable';
 }
 
-function buildAgileRiskMarker(risk, sprintData, boardId, userEmail, tenantId) {
+function buildAgileRiskMarker(risk, sprintData, boardId, userEmail) {
   const now = new Date();
   const issueId = crypto.randomUUID();
   const sessionId = crypto.randomUUID();
 
-  // Anonymize tenant_id (SHA256 hash of user email)
+  // Anonymize tenant_id (SHA256 hash of user email) - same as Slack
   const hashedTenantId = crypto.createHash('sha256').update(userEmail).digest('hex');
+  // Anonymize team_id (SHA256 hash of board_id) - same as Slack
+  const hashedTeamId = crypto.createHash('sha256').update(boardId).digest('hex');
 
   // Extract sprint/iteration info
   const iterationNumber = sprintData.id?.split('-')[1] || 0;
@@ -283,7 +285,7 @@ function buildAgileRiskMarker(risk, sprintData, boardId, userEmail, tenantId) {
   return {
     issue_id: issueId,
     tenant_id: hashedTenantId,
-    team_id: boardId,
+    team_id: hashedTeamId,
     session_id: sessionId,
     date: now.toISOString().split('T')[0],
     type: `jira:agile_${risk.type}`,
