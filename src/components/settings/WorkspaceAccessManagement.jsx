@@ -42,6 +42,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         const allUsers = await base44.entities.User.list();
         setUsers(allUsers || []);
         
+        // Initialize all emails as hidden by default
+        const allHidden = new Set(allUsers?.map(u => u.id) || []);
+        setHiddenEmails(allHidden);
+        
         // Load plan from team config or assume starter
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
