@@ -70,7 +70,7 @@ function LayoutContent({ children, currentPageName }) {
                    variant="ghost" 
                    size="sm"
                    onClick={() => {
-                     base44.auth.logout("/");
+                     base44.auth.logout("/Home");
                    }}
                    className="text-slate-500 hover:text-slate-700"
                  >
