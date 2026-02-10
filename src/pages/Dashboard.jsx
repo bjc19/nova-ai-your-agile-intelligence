@@ -43,10 +43,6 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [productGoalValidated, setProductGoalValidated] = useState(() => {
-    return localStorage.getItem("productGoalValidated") === "true";
-  });
-  const [hasActiveScopeCreep, setHasActiveScopeCreep] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -58,15 +54,6 @@ export default function Dashboard() {
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
-
-        // Check for scope creep in recent signals
-        const scopeCreepPatterns = ["scope creep", "scope_creep", "élargissement", "expansion"];
-        const hasScopeCreep = recentMarkers.some((m) => 
-          scopeCreepPatterns.some(pattern => 
-            m.probleme?.toLowerCase().includes(pattern.toLowerCase())
-          )
-        );
-        setHasActiveScopeCreep(hasScopeCreep);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
       }
@@ -185,9 +172,6 @@ export default function Dashboard() {
   if (!sprintContext) {
     sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
   }
-
-  // Determine if ProductGoalCard should be shown
-  const showProductGoalCard = !productGoalValidated || hasActiveScopeCreep;
 
   // Simulated sprint health data (will come from Jira integration)
   // Only show simulated data if there are analyses in the period
@@ -308,8 +292,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
+            {/* Quick Stats - Only show if data in period and user has access */}
+            {(!selectedPeriod || analysisHistory.length > 0) && (userRole === 'admin' || userRole === 'contributor') &&
             <QuickStats analysisHistory={analysisHistory} />
             }
           </motion.div>
