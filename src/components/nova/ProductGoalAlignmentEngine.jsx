@@ -221,6 +221,29 @@ export function calculateAlignmentScore(sprintGoal, productGoal) {
   return Math.min(100, score);
 }
 
+export function generatePersonalizedQuestion(alignmentReport, sprintGoalData) {
+  const { risk, sprintGoals, productGoal, averageAlignment } = alignmentReport;
+  const currentSprint = sprintGoalData || sprintGoals?.[0];
+  
+  if (!currentSprint || !productGoal) return null;
+
+  // Generate context-specific questions based on alignment status and sprint data
+  const questionTemplates = {
+    instability: () => `Vu que le Product Goal a changé ${sprintGoals.length > 0 ? sprintGoals.length : 2} fois récemment, quels signaux business (churn, DAU, NPS...) confirment que le cap vers "${productGoal.title}" est le bon focus pour les 2–4 prochains sprints ?`,
+    
+    misaligned: () => {
+      const misalignedCount = sprintGoals.filter(sg => sg.alignment_status === "misaligned").length;
+      return `En quoi "${currentSprint.goal_statement}" contribue-t-il directement à "${productGoal.title}" ? ${averageAlignment < 50 ? `(Score d'alignement: ${averageAlignment}% – si c'est flou, quel ajustement minimal proposes-tu ?)` : ''}`;
+    },
+    
+    partial: () => `Nous avons ${sprintGoals.filter(sg => sg.alignment_status === "aligned").length}/${sprintGoals.length} sprints alignés. Pour les sprints partiellement alignés, comment clarifier leur contribution au cap : "${productGoal.title.split(' ').slice(0, 5).join(' ')}..." ?`,
+    
+    stable: () => `Excellent ${averageAlignment}% d'alignement ! Pour confirmer ce cap stable, quels KPIs (rétention, NPS, engagement…) validez-vous dans "${productGoal.title}" ?`,
+  };
+
+  return questionTemplates[risk.id]?.() || questionTemplates.stable();
+}
+
 export function generateAlignmentReport(productGoal, sprintGoals) {
   const analysis = analyzeProductGoalStability(productGoal, sprintGoals);
   
@@ -230,7 +253,7 @@ export function generateAlignmentReport(productGoal, sprintGoals) {
     alignment_score: sg.alignment_score ?? calculateAlignmentScore(sg, productGoal),
   }));
 
-  return {
+  const report = {
     ...analysis,
     productGoal: productGoal,
     sprintGoals: enrichedSprints,
@@ -240,4 +263,11 @@ export function generateAlignmentReport(productGoal, sprintGoals) {
       ? Math.round(enrichedSprints.reduce((sum, sg) => sum + (sg.alignment_score || 0), 0) / enrichedSprints.length)
       : 0,
   };
+
+  // Override question with personalized version
+  if (!report.question) {
+    report.question = generatePersonalizedQuestion(report, enrichedSprints[0]);
+  }
+
+  return report;
 }
