@@ -56,14 +56,16 @@ function LayoutContent({ children, currentPageName }) {
           </Link>
           
           <div className="flex items-center gap-6">
-            {isAuthenticated ? (
+            {isLoading ? (
+              <div className="w-6 h-6 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" />
+            ) : isAuthenticated ? (
               <>
-                <button 
-                   onClick={() => window.location.href = createPageUrl("Dashboard")}
+                <Link 
+                   to={createPageUrl("Dashboard")}
                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                  >
                    {t('dashboard')}
-                 </button>
+                 </Link>
                  {(userRole === 'admin' || userRole === 'contributor') && (
                    <Link 
                      to={createPageUrl("Analysis")}
@@ -81,8 +83,11 @@ function LayoutContent({ children, currentPageName }) {
                 <Button 
                    variant="ghost" 
                    size="sm"
-                   onClick={() => {
-                     base44.auth.logout("/Home");
+                   onClick={async () => {
+                     setIsAuthenticated(false);
+                     setUserRole(null);
+                     await base44.auth.logout();
+                     window.location.href = createPageUrl("Home");
                    }}
                    className="text-slate-500 hover:text-slate-700"
                  >
