@@ -40,6 +40,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [canCreateAnalysis, setCanCreateAnalysis] = useState(false);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -69,6 +70,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setCanCreateAnalysis(currentUser.role === 'admin' || currentUser.role === 'contributor');
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -266,16 +268,18 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  <Link to={createPageUrl("Analysis")}>
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+                  {canCreateAnalysis && (
+                    <Link to={createPageUrl("Analysis")}>
+                      <Button
+                        size="lg"
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
 
-                      <Mic className="w-4 h-4 mr-2" />
-                      {t('newAnalysis')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
+                        <Mic className="w-4 h-4 mr-2" />
+                        {t('newAnalysis')}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
               
@@ -328,27 +332,20 @@ export default function Dashboard() {
             <p className="text-slate-600 mb-6">
               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
-            <Link to={createPageUrl("Analysis")}>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
-                <Mic className="w-4 h-4 mr-2" />
-                Créer une analyse
-              </Button>
-            </Link>
+            {canCreateAnalysis && (
+              <Link to={createPageUrl("Analysis")}>
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                  <Mic className="w-4 h-4 mr-2" />
+                  Créer une analyse
+                </Button>
+              </Link>
+            )}
           </div>
         }
 
-        {/* Recent Analyses */}
-        <RecentAnalyses analyses={analysisHistory} />
-        
-        {/* Key Recommendations */}
-        <KeyRecommendations
-          latestAnalysis={latestAnalysis}
-          sourceUrl={latestAnalysis?.sourceUrl}
-          sourceName={latestAnalysis?.sourceName} />
-
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
@@ -430,11 +427,20 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
@@ -464,12 +470,14 @@ export default function Dashboard() {
                     {t('connectSlack')}
                   </Button>
                 </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
+                {canCreateAnalysis && (
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                      {t('startAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

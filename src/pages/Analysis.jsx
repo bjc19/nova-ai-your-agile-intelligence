@@ -52,6 +52,8 @@ export default function Analysis() {
   const [wordCount, setWordCount] = useState(0);
   const [showOutOfContextResult, setShowOutOfContextResult] = useState(false);
   const [outOfContextData, setOutOfContextData] = useState(null);
+  const [user, setUser] = useState(null);
+  const [canCreateAnalysis, setCanCreateAnalysis] = useState(false);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -72,6 +74,25 @@ export default function Analysis() {
     { sprint_name: "Sprint 12", goal_statement: "Refactoring technique de la base de données", alignment_status: "misaligned", sprint_number: 12 },
     { sprint_name: "Sprint 11", goal_statement: "Optimiser les emails de réengagement", alignment_status: "aligned", sprint_number: 11 },
   ];
+
+  // Check user permissions
+  useEffect(() => {
+    const checkPermissions = async () => {
+      try {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+        const hasPermission = currentUser.role === 'admin' || currentUser.role === 'contributor';
+        setCanCreateAnalysis(hasPermission);
+        
+        if (!hasPermission) {
+          navigate(createPageUrl("Dashboard"));
+        }
+      } catch (error) {
+        console.error('Error checking permissions:', error);
+      }
+    };
+    checkPermissions();
+  }, [navigate]);
 
   // Generate alignment report on mount
   useEffect(() => {
