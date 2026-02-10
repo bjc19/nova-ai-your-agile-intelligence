@@ -469,12 +469,14 @@ export default function Dashboard() {
                     {t('connectSlack')}
                   </Button>
                 </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
+                {canAnalyze && (
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                      {t('startAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
