@@ -8,15 +8,13 @@ import { enUS, fr } from "date-fns/locale";
  * @param {string} formatPattern - date-fns format pattern (default: 'PPp')
  * @returns {string} Formatted date string in local timezone
  */
-export function formatLocalTime(isoDateString, language = 'en', formatPattern = 'PPpp') {
+export function formatLocalTime(isoDateString, language = 'en', formatPattern = 'PPp') {
   try {
     const date = new Date(isoDateString);
     if (isNaN(date.getTime())) {
       return 'Invalid date';
     }
-    // Convert UTC to local timezone using toLocaleString first
-    const localDate = new Date(date.toLocaleString('en-US', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
-    return format(localDate, formatPattern, {
+    return format(date, formatPattern, {
       locale: language === 'fr' ? fr : enUS
     });
   } catch (error) {
@@ -38,7 +36,7 @@ export function formatLocalTimeWithTZ(isoDateString, language = 'en') {
       return 'Invalid date';
     }
 
-    const formatted = format(date, 'PPp', {
+    const formatted = format(date, 'PPpp', {
       locale: language === 'fr' ? fr : enUS
     });
 
