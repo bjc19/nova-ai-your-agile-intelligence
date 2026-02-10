@@ -572,6 +572,64 @@ function analyzeComparative(text, semanticDensity) {
 
 export { CEREMONY_SPECIFIC_VERBS, DETECTION_PATTERNS };
 
+// ============ HELPER: Sprint Review Pattern Scoring (Référentiel formel) ============
+// Scoring précis basé sur patterns forts de Sprint Review
+function analyzeReviewPatterns(text) {
+  const patterns = {
+    ceremony_name: {
+      keywords: /sprint review|review|revue de sprint|sprint review/gi,
+      weight: 12
+    },
+    demo_and_delivery: {
+      keywords: /présenter ce que l'équipe a livré|ce qu'on a livré|ce qu'on a fait|démo|demonstration|show you|vous montrer|démontrer|livré|delivered|complété|completed/gi,
+      weight: 10
+    },
+    product_feedback: {
+      keywords: /retours|vos retours|feedback|avis|commentaires sur le produit|qu'en pensez|qu'en pense|what do you think|questions|opinions|suggestions/gi,
+      weight: 9
+    },
+    accomplishment_summary: {
+      keywords: /finalisé|finalized|mise en place|put in place|optimisé|optimized|revu|reviewed|refonte|redesigned|stable|terminé|finished|atteint|reached|achevé|achieved|réalisé|accomplished/gi,
+      weight: 8
+    },
+    tests_and_validation: {
+      keywords: /tests exploratoires|tests de charge|tests automatisés|testing|stable|rien de bloquant|definition of done|dod|validation|validated|tested|performs well/gi,
+      weight: 7
+    },
+    backlog_impact: {
+      keywords: /ajout.*backlog|add.*backlog|prioritaire|ajoute.*backlog|priorit|pour le prochain sprint|for next sprint|futures stories/gi,
+      weight: 7
+    },
+    closure_typical: {
+      keywords: /on clôture la review|on passe au sprint planning|we close the review|moving to sprint planning|fin de la review|end of review|wrap up/gi,
+      weight: 6
+    }
+  };
+
+  let reviewScore = 0;
+  const detectedPatterns = [];
+
+  Object.entries(patterns).forEach(([category, config]) => {
+    const matches = (text.match(config.keywords) || []).length;
+    if (matches > 0) {
+      reviewScore += Math.min(matches * config.weight, config.weight * 2); // Cap per category
+      detectedPatterns.push({
+        category,
+        matchCount: matches,
+        weight: config.weight,
+        contribution: Math.min(matches * config.weight, config.weight * 2)
+      });
+    }
+  });
+
+  return {
+    reviewScore: Math.min(reviewScore, 100), // Cap total score
+    detectedPatterns,
+    patternCount: detectedPatterns.length,
+    confidence: Math.min(detectedPatterns.length * 15, 100) // More patterns = higher confidence
+  };
+}
+
 // ============ HELPER: Analyser la présence de termes SAFe exclusifs ============
 function analyzeSAFeExclusiveTerms(text) {
   const exclusiveTerms = {
