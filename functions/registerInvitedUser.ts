@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     });
 
     if (!invitation || invitation.length === 0) {
-      return Response.json({ error: 'Invalid invitation' }, { status: 400 });
+      return Response.json({ success: false, error: 'Invitation invalide' }, { status: 400 });
     }
 
     const invitationRecord = invitation[0];
@@ -27,11 +27,18 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.InvitationToken.update(invitationRecord.id, {
         status: 'expired'
       });
-      return Response.json({ error: 'Invitation expired' }, { status: 400 });
+      return Response.json({ success: false, error: 'Lien expiré' }, { status: 400 });
     }
 
     // Register user using Base44's registration
-    await base44.auth.register(email, password, fullName);
+    try {
+      await base44.auth.register(email, password, fullName);
+    } catch (regErr) {
+      if (regErr.message.includes('already exists') || regErr.message.includes('déjà')) {
+        return Response.json({ success: false, error: 'Un utilisateur avec cet email existe déjà' }, { status: 400 });
+      }
+      throw regErr;
+    }
 
     // Create WorkspaceMember record
     await base44.asServiceRole.entities.WorkspaceMember.create({
