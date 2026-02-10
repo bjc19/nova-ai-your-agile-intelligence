@@ -95,9 +95,15 @@ export default function WorkspaceAccessManagement({ currentRole }) {
   const handleRemoveUser = async (userId) => {
     if (!canManage) return;
     
+    const userToRemove = users.find(u => u.id === userId);
+    
+    // Contributeur ne peut pas supprimer les admins
+    if (currentRole === 'contributor' && userToRemove?.role === 'admin') {
+      setMessage({ type: 'error', text: 'Les contributeurs ne peuvent pas supprimer les admins' });
+      return;
+    }
+    
     try {
-      // In real implementation, handle user removal/deactivation
-      // For now, just show confirmation
       const confirmed = window.confirm('Confirmer la suppression de cet utilisateur?');
       if (confirmed) {
         setMessage({ type: 'success', text: 'Utilisateur supprimé' });
@@ -107,6 +113,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setMessage({ type: 'error', text: 'Erreur lors de la suppression' });
     }
   };
+
+  const canToggleEmail = currentRole === 'admin' || currentRole === 'contributor';
 
   if (loading) {
     return (
