@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AcceptInvitation from './pages/AcceptInvitation';
 import AdminDevTools from './pages/AdminDevTools';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
@@ -62,7 +61,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "AcceptInvitation": AcceptInvitation,
     "AdminDevTools": AdminDevTools,
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
