@@ -89,6 +89,13 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         invited_by: currentUser?.email,
         invitation_status: 'pending'
       });
+
+      // Send invitation email
+      await base44.functions.invoke('sendInvitationEmail', {
+        inviteeEmail: inviteEmail,
+        senderEmail: currentUser?.email,
+        senderName: currentUser?.full_name
+      });
       
       setMessage({ type: 'success', text: `Invitation envoyée à ${inviteEmail}` });
       setInviteEmail('');
