@@ -830,7 +830,7 @@ export default function Settings() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <Upload className="w-5 h-5 text-slate-500" />
