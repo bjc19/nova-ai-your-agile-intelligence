@@ -58,8 +58,6 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import acceptInvitation from './pages/accept-invitation';
-import AcceptInvitationLink from './pages/AcceptInvitationLink';
 import __Layout from './Layout.jsx';
 
 
@@ -75,8 +73,6 @@ export const PAGES = {
     "Register": Register,
     "Results": Results,
     "Settings": Settings,
-    "accept-invitation": acceptInvitation,
-    "AcceptInvitationLink": AcceptInvitationLink,
 }
 
 export const pagesConfig = {

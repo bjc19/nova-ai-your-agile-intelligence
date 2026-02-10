@@ -11,7 +11,6 @@ export default function AcceptInvitation() {
   const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
-  const [validating, setValidating] = useState(false);
   const [invitation, setInvitation] = useState(null);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -23,7 +22,6 @@ export default function AcceptInvitation() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Get token from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tokenParam = params.get('token');
@@ -40,7 +38,6 @@ export default function AcceptInvitation() {
 
   const validateToken = async (tokenValue) => {
     try {
-      setValidating(true);
       const response = await base44.functions.invoke('validateInvitationToken', {
         token: tokenValue
       });
@@ -60,8 +57,6 @@ export default function AcceptInvitation() {
     } catch (err) {
       setError(err.message || 'Erreur lors de la validation du token');
       setLoading(false);
-    } finally {
-      setValidating(false);
     }
   };
 
@@ -69,7 +64,6 @@ export default function AcceptInvitation() {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (!formData.fullName.trim()) {
       setError('Le nom complet est requis');
       return;
@@ -88,7 +82,6 @@ export default function AcceptInvitation() {
     setSubmitting(true);
 
     try {
-      // Register user
       const registerResponse = await base44.functions.invoke('registerInvitedUser', {
         email: formData.email,
         fullName: formData.fullName,
@@ -99,7 +92,6 @@ export default function AcceptInvitation() {
 
       if (registerResponse.data.success) {
         setSuccess(true);
-        // Redirect to login after 2 seconds
         setTimeout(() => {
           navigate(createPageUrl('Home'));
         }, 2000);
