@@ -145,14 +145,9 @@ export default function ResetPassword() {
           <CardContent className="p-8 text-center">
             <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-slate-900 mb-2">Password Reset Successful</h2>
-            <p className="text-slate-600 mb-6">Your password has been reset. You can now sign in with your new password.</p>
-            <p className="text-xs text-slate-500 mb-6">Redirecting to Home in 3 seconds...</p>
-            <Button
-              onClick={() => navigate(createPageUrl("Home"))}
-              className="w-full bg-emerald-600 hover:bg-emerald-700"
-            >
-              Go to Home Now
-            </Button>
+            <p className="text-slate-600 mb-6">Your password has been reset. Signing you in...</p>
+            <p className="text-xs text-slate-500 mb-6">Redirecting to Dashboard in 2 seconds...</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600 mx-auto"></div>
           </CardContent>
         </Card>
       </div>
