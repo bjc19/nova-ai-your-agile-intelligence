@@ -267,16 +267,18 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  <Link to={createPageUrl("Analysis")}>
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+                  {canAnalyze && (
+                   <Link to={createPageUrl("Analysis")}>
+                     <Button
+                       size="lg"
+                       className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
 
-                      <Mic className="w-4 h-4 mr-2" />
-                      {t('newAnalysis')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
+                       <Mic className="w-4 h-4 mr-2" />
+                       {t('newAnalysis')}
+                       <ArrowRight className="w-4 h-4 ml-2" />
+                     </Button>
+                   </Link>
+                  )}
                 </div>
               </div>
               
