@@ -328,11 +328,22 @@ export default function Settings() {
   };
 
   const handleRoleSwitch = async (newRole) => {
+    if (newRole === currentRole) return;
+    
     setSwitchingRole(true);
     try {
-      await base44.auth.updateMe({ role: newRole });
-      setCurrentRole(newRole);
-      window.location.reload();
+      const user = await base44.auth.me();
+      const users = await base44.entities.User.filter({ email: user.email });
+      
+      if (users.length > 0) {
+        await base44.entities.User.update(users[0].id, { role: newRole });
+        setCurrentRole(newRole);
+        
+        // Small delay to ensure DB update completes
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
     } catch (error) {
       console.error('Error switching role:', error);
       setSwitchingRole(false);
