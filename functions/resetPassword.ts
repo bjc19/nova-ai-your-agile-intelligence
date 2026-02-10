@@ -2,8 +2,18 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
+    // Get request body
+    let token, newPassword;
+    try {
+      const body = await req.json();
+      token = body.token;
+      newPassword = body.newPassword;
+    } catch (e) {
+      return Response.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
+    // Create client with proper headers
     const base44 = createClientFromRequest(req);
-    const { token, newPassword } = await req.json();
 
     if (!token || !newPassword) {
       return Response.json({ error: 'Token and password are required' }, { status: 400 });
