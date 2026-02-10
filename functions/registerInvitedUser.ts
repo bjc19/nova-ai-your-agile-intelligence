@@ -40,12 +40,15 @@ Deno.serve(async (req) => {
 
     // Register user using Base44's registration
     try {
+      console.log('Attempting to register user:', email);
       await base44.auth.register(email, password, fullName);
+      console.log('User registered successfully');
     } catch (regErr) {
-      if (regErr.message.includes('already exists') || regErr.message.includes('déjà')) {
+      console.error('Registration error:', regErr);
+      if (regErr.message?.includes('already exists') || regErr.message?.includes('déjà')) {
         return Response.json({ success: false, error: 'Un utilisateur avec cet email existe déjà' }, { status: 400 });
       }
-      throw regErr;
+      return Response.json({ success: false, error: 'Erreur lors de l\'enregistrement: ' + regErr.message }, { status: 400 });
     }
 
     // Create WorkspaceMember record
