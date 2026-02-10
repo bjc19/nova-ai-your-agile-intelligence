@@ -373,11 +373,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
       if (outOfContextCheck.isOutOfContext) {
         console.log('🚫 Content detected as OUT OF CONTEXT - Skipping workshop detection');
-        // Décrémenter tries même pour hors contexte
-        const newTries = tries - 1;
-        setTries(newTries);
-        localStorage.setItem("nova_demo_tries", newTries.toString());
-        onTriesUpdate(newTries);
+        // Les essais ont déjà été décrémentés par trackDemoAttempt côté serveur
 
         // Reset detection (important pour éviter confusion UI)
         setDetection(null);
