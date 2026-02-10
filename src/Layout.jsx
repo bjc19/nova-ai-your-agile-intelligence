@@ -119,6 +119,11 @@ function LayoutContent({ children, currentPageName }) {
         onClose={() => setShowLoginDialog(false)}
       />
 
+      {/* Demo Simulator */}
+      {showDemoSimulator && (
+        <DemoSimulator onClose={() => setShowDemoSimulator(false)} />
+      )}
+
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8">
