@@ -148,8 +148,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!editingUser || !newRole) return;
 
     try {
-      // Update user role directly via SDK
-      await base44.asServiceRole.entities.User.update(editingUser.id, { role: newRole });
+      // Update workspace member role
+      await base44.entities.WorkspaceMember.update(editingUser.id, { role: newRole });
 
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
