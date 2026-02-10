@@ -1006,37 +1006,7 @@ export default function Home() {
               </Card>
             </motion.div>
 
-            {/* Trello */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              viewport={{ once: true }}
-            >
-              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                    <svg className="w-14 h-14" viewBox="0 0 256 256">
-                      <defs>
-                        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="c">
-                          <stop stopColor="#0091E6" offset="0%"/>
-                          <stop stopColor="#0079BF" offset="100%"/>
-                        </linearGradient>
-                      </defs>
-                      <rect fill="url(#c)" width="256" height="256" rx="25"/>
-                      <rect fill="#FFF" x="144.64" y="33.28" width="78.08" height="112" rx="12"/>
-                      <rect fill="#FFF" x="33.28" y="33.28" width="78.08" height="176" rx="12"/>
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">Trello</h3>
-                  <p className="text-sm text-slate-600">
-                    {lang === 'fr' 
-                      ? 'Tableaux et cartes' 
-                      : 'Boards & cards'}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+
           </div>
           </div>
           </div>
