@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Mail, Trash2, Copy, CheckCircle2, AlertCircle } from "lucide-react";
+import { Users, Mail, Trash2, Copy, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const PLANS = {
   starter: { name: "Starter", maxUsers: 5, color: "from-blue-500 to-blue-600", bgColor: "bg-blue-100", icon: "🚀" },
