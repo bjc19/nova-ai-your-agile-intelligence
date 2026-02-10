@@ -57,7 +57,7 @@ This invitation expires in 7 days.`;
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('SMTP_PASSWORD')}`,
+        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
