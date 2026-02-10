@@ -89,8 +89,9 @@ export default function ProductGoalCard({
   const [showQuestionDialog, setShowQuestionDialog] = useState(false);
   const [questionResponse, setQuestionResponse] = useState("");
   const [questionAnsweredBy, setQuestionAnsweredBy] = useState(null); // {name, date}
+  const [isHidden, setIsHidden] = useState(false);
 
-  if (!alignmentReport) return null;
+  if (!alignmentReport || isHidden) return null;
 
   const { risk, message, question, suggestions = [], cta, productGoal, averageAlignment } = alignmentReport;
   const config = riskConfig[risk.id] || riskConfig.insufficient;
@@ -108,6 +109,7 @@ export default function ProductGoalCard({
 
   const handleSubmitResponse = () => {
     onConfirmGoal?.(response);
+    setIsHidden(true);
     setShowResponseInput(false);
     setResponse("");
   };
