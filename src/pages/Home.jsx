@@ -248,6 +248,12 @@ export default function Home() {
         />
       )}
 
+      {/* Login Dialog */}
+      <LoginDialog 
+        isOpen={showLoginDialog}
+        onClose={() => setShowLoginDialog(false)}
+      />
+
       {/* Features Section */}
       <div className="max-w-6xl mx-auto px-6 py-16">
         <motion.div
