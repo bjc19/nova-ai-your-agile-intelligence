@@ -54,17 +54,19 @@ function LayoutContent({ children, currentPageName }) {
             {isAuthenticated ? (
               <>
                 <Link 
-                  to={createPageUrl("Dashboard")}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                >
-                  {t('dashboard')}
-                </Link>
-                <Link 
-                  to={createPageUrl("Analysis")}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                >
-                  {t('analyze')}
-                </Link>
+                   to={createPageUrl("Dashboard")}
+                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                 >
+                   {t('dashboard')}
+                 </Link>
+                 {(userRole === 'admin' || userRole === 'contributor') && (
+                   <Link 
+                     to={createPageUrl("Analysis")}
+                     className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                   >
+                     {t('analyze')}
+                   </Link>
+                 )}
                 <Link 
                   to={createPageUrl("Settings")}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
