@@ -53,12 +53,12 @@ function LayoutContent({ children, currentPageName }) {
           <div className="flex items-center gap-6">
             {isAuthenticated ? (
               <>
-                <Link 
-                   to={createPageUrl("Dashboard")}
+                <button 
+                   onClick={() => window.location.href = createPageUrl("Dashboard")}
                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                  >
                    {t('dashboard')}
-                 </Link>
+                 </button>
                  {(userRole === 'admin' || userRole === 'contributor') && (
                    <Link 
                      to={createPageUrl("Analysis")}
