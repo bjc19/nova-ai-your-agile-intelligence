@@ -57,6 +57,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
+import AcceptInvitation from './pages/AcceptInvitation';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +72,7 @@ export const PAGES = {
     "Register": Register,
     "Results": Results,
     "Settings": Settings,
+    "AcceptInvitation": AcceptInvitation,
 }
 
 export const pagesConfig = {
