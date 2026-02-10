@@ -88,12 +88,12 @@ function LayoutContent({ children, currentPageName }) {
               </>
             ) : (
               <>
-                <Link 
-                  to={createPageUrl("Demo")}
+                <button 
+                  onClick={() => setShowDemoSimulator(true)}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                   {t('tryDemo')}
-                </Link>
+                </button>
                 <Button 
                   size="sm"
                   onClick={() => setShowLoginDialog(true)}
