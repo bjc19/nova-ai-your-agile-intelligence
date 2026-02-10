@@ -24,7 +24,8 @@ Deno.serve(async (req) => {
     });
 
     // Send reset email
-    const resetUrl = `${new URL(req.url).origin}/reset-password?token=${resetToken}`;
+    const appUrl = req.headers.get('origin') || new URL(req.url).origin;
+    const resetUrl = `${appUrl}/ResetPassword?token=${resetToken}`;
     
     await base44.integrations.Core.SendEmail({
       to: email,

@@ -55,22 +55,17 @@ export function LoginDialog({ isOpen, onClose }) {
 
   if (showForgotPassword) {
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
-            <button 
-              onClick={() => {
-                setShowForgotPassword(false);
-                setForgotEmail("");
-                setForgotSuccess(false);
-                setError("");
-              }}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </DialogHeader>
+      <Dialog open={isOpen} onOpenChange={() => {
+         setShowForgotPassword(false);
+         setForgotEmail("");
+         setForgotSuccess(false);
+         setError("");
+         onClose();
+       }}>
+         <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+             <DialogTitle>Reset Password</DialogTitle>
+           </DialogHeader>
 
           {forgotSuccess ? (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -139,12 +134,6 @@ export function LoginDialog({ isOpen, onClose }) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Sign In</DialogTitle>
-          <button 
-            onClick={onClose}
-            className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </DialogHeader>
 
         <form onSubmit={handleLogin} className="space-y-4">
