@@ -224,8 +224,9 @@ export default function Home() {
                 variant="outline" 
                 size="lg"
                 className="px-8 py-6 text-lg rounded-xl"
+                onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
               >
-                <a href="#pricing" className="flex items-center">{t("signIn")}</a>
+                {t("signIn")}
               </Button>
             </div>
 

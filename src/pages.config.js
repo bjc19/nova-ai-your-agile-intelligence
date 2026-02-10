@@ -54,9 +54,9 @@ import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
+import Register from './pages/Register';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import Register from './pages/Register';
 import __Layout from './Layout.jsx';
 
 
@@ -68,9 +68,9 @@ export const PAGES = {
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
+    "Register": Register,
     "Results": Results,
     "Settings": Settings,
-    "Register": Register,
 }
 
 export const pagesConfig = {
