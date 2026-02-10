@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
+import { useRoleAccess } from "@/components/dashboard/useRoleAccess";
 
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
@@ -34,13 +35,13 @@ import {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { isAdmin, isContributor, isUser } = useRoleAccess();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [canCreateAnalysis, setCanCreateAnalysis] = useState(false);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -70,7 +71,6 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        setCanCreateAnalysis(currentUser.role === 'admin' || currentUser.role === 'contributor');
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -268,18 +268,16 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  {canCreateAnalysis && (
-                    <Link to={createPageUrl("Analysis")}>
-                      <Button
-                        size="lg"
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
 
-                        <Mic className="w-4 h-4 mr-2" />
-                        {t('newAnalysis')}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                  )}
+                      <Mic className="w-4 h-4 mr-2" />
+                      {t('newAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
               
@@ -332,14 +330,12 @@ export default function Dashboard() {
             <p className="text-slate-600 mb-6">
               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
-            {canCreateAnalysis && (
-              <Link to={createPageUrl("Analysis")}>
-                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
-                  <Mic className="w-4 h-4 mr-2" />
-                  Créer une analyse
-                </Button>
-              </Link>
-            )}
+            <Link to={createPageUrl("Analysis")}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                <Mic className="w-4 h-4 mr-2" />
+                Créer une analyse
+              </Button>
+            </Link>
           </div>
         }
 
@@ -368,9 +364,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
-            <MetricsRadarCard
+              {/* Actionable Metrics Radar - Admin/Contributor only */}
+              {(isAdmin || isContributor) && analysisHistory.length > 0 &&
+              <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -394,11 +390,11 @@ export default function Dashboard() {
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-            }
+              }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
-            <RealityMapCard
+              {/* Organizational Reality Engine - Admin/Contributor only */}
+              {(isAdmin || isContributor) && analysisHistory.length > 0 &&
+              <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -423,10 +419,10 @@ export default function Dashboard() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
-            }
+              }
             
-            {/* Sprint Performance Chart */}
-            <SprintPerformanceChart analysisHistory={analysisHistory} />
+            {/* Sprint Performance Chart - Admin/Contributor only */}
+            {(isAdmin || isContributor) && <SprintPerformanceChart analysisHistory={analysisHistory} />}
             
             {/* Key Recommendations */}
             <KeyRecommendations
@@ -470,14 +466,12 @@ export default function Dashboard() {
                     {t('connectSlack')}
                   </Button>
                 </Link>
-                {canCreateAnalysis && (
-                  <Link to={createPageUrl("Analysis")}>
-                    <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                      {t('startAnalysis')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                )}
+                <Link to={createPageUrl("Analysis")}>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                    {t('startAnalysis')}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
