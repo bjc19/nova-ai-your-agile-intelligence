@@ -46,8 +46,8 @@ Deno.serve(async (req) => {
     // Configure SMTP transporter
     const transporter = nodemailer.createTransport({
       host: Deno.env.get('SMTP_HOST'),
-      port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
-      secure: Deno.env.get('SMTP_PORT') === '465',
+      port: 465,
+      secure: true,
       auth: {
         user: Deno.env.get('SMTP_USER'),
         pass: Deno.env.get('SMTP_PASSWORD')
