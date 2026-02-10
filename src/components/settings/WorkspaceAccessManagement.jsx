@@ -21,7 +21,7 @@ const PLANS = {
 export default function WorkspaceAccessManagement({ currentRole }) {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [currentPlan, setCurrentPlan] = useState('starter');
+  const [currentPlan, setCurrentPlan] = useState('pro');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('user');
   const [inviting, setInviting] = useState(false);
