@@ -421,9 +421,9 @@ export default function Settings() {
                           <span className="text-xs text-slate-500">→ Vue Équipe Actionnable</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="member">
+                      <SelectItem value="user">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">Member</span>
+                          <span className="font-medium">User</span>
                           <span className="text-xs text-slate-500">→ Vue Business Constructive</span>
                         </div>
                       </SelectItem>
@@ -441,7 +441,7 @@ export default function Settings() {
                     • Contributor → Actions concrètes, contexte simplifié
                   </p>
                   <p className="text-xs text-red-700">
-                    • Member → Vision business, formulation constructive
+                    • User → Vision business, formulation constructive
                   </p>
                 </div>
               </div>
