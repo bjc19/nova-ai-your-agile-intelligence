@@ -286,8 +286,8 @@ export const translations = {
     anonymous: "anonymous",
 
     // Footer
-    aiScrumMaster: "AI Scrum Master",
-    demoVersionNotice: "Demo Version • Simulation Mode • No real integrations",
+    aiScrumMaster: "Your Agile Intelligence",
+    demoVersionNotice: "Copyright © 2026 - All Rights Reserved",
 
     // Posture Indicator
     novaIsInMode: "Nova is in",
