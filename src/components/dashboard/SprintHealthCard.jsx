@@ -273,8 +273,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
             </div>
           )}
 
-          {/* Key Question - Only for drift */}
-          {driftAnalysis.status.id === "potential_drift" && (
+          {/* Key Question - Only for drift - Admin/Contributor only */}
+          {(isAdmin || isContributor) && driftAnalysis.status.id === "potential_drift" && (
             <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
               <TooltipProvider>
                 <Tooltip>
