@@ -8,9 +8,10 @@ import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { LoginDialog } from "@/components/LoginDialog";
 
 function LayoutContent({ children, currentPageName }) {
-  const { t } = useLanguage();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+    const { t } = useLanguage();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
