@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
     }
 
     // Check expiration
-    if (new Date(invitationRecord.expires_at) < new Date()) {
-      await base44.asServiceRole.entities.InvitationToken.update(invitationRecord.id, {
+    if (new Date(inv.expires_at) < new Date()) {
+      await base44.asServiceRole.entities.InvitationToken.update(inv.id, {
         status: 'expired'
       });
       return Response.json({ success: false, error: 'Lien expiré' }, { status: 400 });
