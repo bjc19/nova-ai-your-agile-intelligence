@@ -9,7 +9,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admin can update other users' roles
     if (user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -17,15 +16,13 @@ Deno.serve(async (req) => {
     const { userId, newRole } = await req.json();
 
     if (!userId || !newRole) {
-      return Response.json({ error: 'userId and newRole required' }, { status: 400 });
+      return Response.json({ error: 'Missing userId or newRole' }, { status: 400 });
     }
 
-    // Update user role
     const updatedUser = await base44.asServiceRole.entities.User.update(userId, { role: newRole });
 
     return Response.json({ success: true, user: updatedUser });
   } catch (error) {
-    console.error('Error updating user role:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
