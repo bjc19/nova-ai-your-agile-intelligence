@@ -36,9 +36,8 @@ export default function ResetPassword() {
 
   const validateToken = async (resetToken) => {
     try {
-      const result = await base44.functions.invoke("resetPassword", {
-        token: resetToken,
-        newPassword: "temp" // Just for validation
+      const result = await base44.functions.invoke("validatePasswordResetToken", {
+        token: resetToken
       });
 
       if (result.data?.success && result.data?.email) {
