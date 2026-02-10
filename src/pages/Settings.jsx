@@ -330,7 +330,8 @@ export default function Settings() {
   const handleRoleSwitch = async (newRole) => {
     setSwitchingRole(true);
     try {
-      await base44.auth.updateMe({ role: newRole });
+      const user = await base44.auth.me();
+      await base44.entities.User.update(user.id, { role: newRole });
       setCurrentRole(newRole);
       window.location.reload();
     } catch (error) {
