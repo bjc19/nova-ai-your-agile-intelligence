@@ -123,13 +123,23 @@ export default function ResetPassword() {
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-slate-900 mb-2">Reset Link Invalid</h2>
-            <p className="text-slate-600 mb-6">{error || "This reset link has expired or is invalid."}</p>
-            <Button
-              onClick={() => navigate(createPageUrl("Home"))}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              Back to Home
-            </Button>
+            <p className="text-slate-600 mb-2">{error || "This reset link has expired or is invalid."}</p>
+            <p className="text-sm text-slate-500 mb-6">Reset links are valid for 24 hours. Please request a new one.</p>
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => navigate(createPageUrl("Home"))}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                Request New Link
+              </Button>
+              <Button
+                onClick={() => navigate(createPageUrl("Home"))}
+                variant="outline"
+                className="w-full"
+              >
+                Back to Home
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
