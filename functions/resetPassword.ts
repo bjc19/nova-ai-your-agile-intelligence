@@ -30,21 +30,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Reset token has expired' }, { status: 400 });
     }
 
-    // Get the user to update their password
-    const users = await base44.asServiceRole.entities.User.filter({
-      email: resetRecord.email
-    });
-
-    if (!users || users.length === 0) {
-      return Response.json({ error: 'User not found' }, { status: 400 });
-    }
-
-    // Update user password
-    await base44.asServiceRole.entities.User.update(users[0].id, {
-      password: newPassword
-    });
-
-    // Mark reset token as used
+    // Mark reset token as used FIRST
     await base44.asServiceRole.entities.PasswordReset.update(resetRecord.id, {
       used: true
     });
