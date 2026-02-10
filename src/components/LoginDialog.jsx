@@ -22,7 +22,7 @@ export function LoginDialog({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      await base44.auth.login(email, password);
+      await base44.auth.loginViaEmailPassword(email, password);
       setEmail("");
       setPassword("");
       onClose();
