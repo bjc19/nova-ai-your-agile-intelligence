@@ -197,7 +197,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
               <div>
                 <p className="text-sm font-medium text-slate-900">Capacité d'utilisateurs</p>
                 <p className="text-xs text-slate-500 mt-1">
-                  {currentUsers} / {maxUsers} emplacements utilisés
+                  {currentUsers} / {maxUsers} collaborateurs embarqués
                 </p>
               </div>
               <div className="w-32 bg-slate-200 rounded-full h-2">
@@ -312,8 +312,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                       <div className="flex-1">
                         <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs text-slate-500 min-w-[100px] truncate">
-                            {hiddenEmails.has(user.id) ? '••••••••••' : user.user_email}
+                          <p className="text-xs text-slate-500">
+                            {hiddenEmails.has(user.id) ? '••••••••••' : user.email}
                           </p>
                           {canToggleEmail && (
                             <button
