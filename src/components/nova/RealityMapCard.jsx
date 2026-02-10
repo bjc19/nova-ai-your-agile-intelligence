@@ -388,6 +388,18 @@ Actions recommandées :
     );
   }
 
+  // Dismiss card when flagged
+  if (isCardDismissed) {
+    return (
+      <motion.div
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.4 }}
+        className="pointer-events-none"
+      />
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -831,18 +843,18 @@ Actions recommandées :
                 )}
               </AnimatePresence>
 
-              {/* CTA */}
+              {/* CTA - Alert Manager */}
               <div className="flex gap-2">
                 <Button
-                  onClick={handleSendNotifications}
-                  disabled={isSendingNotifications || !decisionAnalysis.decisionMap?.length || notificationsSent}
+                  onClick={handleSendManagerAlert}
+                  disabled={isSendingNotifications || notificationsSent}
                   className={notificationsSent 
                     ? "flex-1 bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
-                    : "flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    : "flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                   }
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  {isSendingNotifications ? "Envoi en cours..." : notificationsSent ? "✓ Notifications envoyées" : "Notifier les responsables"}
+                  {isSendingNotifications ? "Envoi en cours..." : notificationsSent ? "✓ Alerte envoyée – Carte fermée" : "Alerter le manager"}
                 </Button>
 
                 <TooltipProvider>
