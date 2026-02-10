@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useRoleAccess } from "@/components/dashboard/useRoleAccess";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -31,6 +32,7 @@ import { enrichRecommendationWithDependency } from "./DependencyAwarenessEngine"
 import DependencyWarning from "./DependencyWarning";
 
 export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, onDiscussWithCoach, onApplyLever }) {
+  const { isAdmin, isContributor, isUser } = useRoleAccess();
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
@@ -83,6 +85,19 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
         <CardContent className="p-6 text-center">
           <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <p className="text-sm text-slate-600">{analysis.message}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Users see a simplified view
+  if (isUser) {
+    return (
+      <Card className="border-2 border-slate-200 bg-slate-50">
+        <CardContent className="p-6 text-center">
+          <Lightbulb className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+          <p className="text-sm font-medium text-slate-700 mb-2">Métriques de performance analysées</p>
+          <p className="text-xs text-slate-500">Des pistes d'amélioration sont générées automatiquement par Nova</p>
         </CardContent>
       </Card>
     );
