@@ -841,6 +841,16 @@ export function detectWorkshopType(text) {
     }
 
     if (ceremonyType === 'SPRINT_REVIEW') {
+      // Score based on formal Review patterns (référentiel formel)
+      const reviewPatterns = analyzeReviewPatterns(text);
+      score += reviewPatterns.reviewScore * 0.7; // 70% du score vient des patterns formels
+      
+      if (reviewPatterns.patternCount >= 3) {
+        score += 20;
+        matchedMarkers.push(`${reviewPatterns.patternCount} catégories Review détectées`);
+      }
+      
+      // Verb-based bonus
       const reviewVerbMatches = CEREMONY_SPECIFIC_VERBS.SPRINT_REVIEW.patterns.reduce((count, pattern) => {
         return count + (text.match(pattern) || []).length;
       }, 0);
