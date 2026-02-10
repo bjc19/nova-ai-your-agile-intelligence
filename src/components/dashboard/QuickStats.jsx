@@ -20,20 +20,8 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   useEffect(() => {
     const fetchSignals = async () => {
-      const cacheKey = 'gdpr_markers_stats';
-      const cached = sessionStorage.getItem(cacheKey);
-      const cacheTimestamp = sessionStorage.getItem(`${cacheKey}_timestamp`);
-      
-      if (cached && cacheTimestamp) {
-        const age = Date.now() - parseInt(cacheTimestamp);
-        if (age < 5 * 60 * 1000) {
-          const { slack, teams, jira } = JSON.parse(cached);
-          setGdprSignals(slack);
-          setTeamsInsights(teams);
-          setGdprSignals(prev => [...slack, ...jira]);
-          return;
-        }
-      }
+      // Don't use cache when period changes
+      const selectedPeriod = sessionStorage.getItem("selectedPeriod");
       
       try {
         const sevenDaysAgo = new Date();
@@ -54,8 +42,7 @@ export default function QuickStats({ analysisHistory = [] }) {
           m.detection_source === 'jira_backlog'
         );
         
-        // Filter by period if available
-        const selectedPeriod = sessionStorage.getItem("selectedPeriod");
+        // Filter by period
         let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         let filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
@@ -86,20 +73,27 @@ export default function QuickStats({ analysisHistory = [] }) {
         setTeamsInsights(filteredTeams);
         // Store Jira data in gdprSignals too (will be separated by detection_source)
         setGdprSignals(prev => [...filteredSlack, ...filteredJira]);
-        
-        // Cache results
-        sessionStorage.setItem(cacheKey, JSON.stringify({
-          slack: filteredSlack,
-          teams: filteredTeams,
-          jira: filteredJira
-        }));
-        sessionStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
     };
 
     fetchSignals();
+    
+    // Listen for period changes
+    const handleStorageChange = (e) => {
+      if (e.key === 'selectedPeriod' || e.type === 'period-changed') {
+        fetchSignals();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('period-changed', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('period-changed', handleStorageChange);
+    };
   }, []);
 
   const handleStatClick = (labelKey) => {
