@@ -52,14 +52,14 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.WorkspaceMember.create({
       user_email: email,
       user_name: fullName,
-      role: invitationRecord.role,
-      workspace_id: invitationRecord.workspace_id,
-      invited_by: invitationRecord.invited_by,
+      role: inv.role,
+      workspace_id: inv.workspace_id,
+      invited_by: inv.invited_by,
       invitation_status: 'accepted'
     });
 
     // Mark invitation as accepted
-    await base44.asServiceRole.entities.InvitationToken.update(invitationRecord.id, {
+    await base44.asServiceRole.entities.InvitationToken.update(inv.id, {
       status: 'accepted',
       accepted_at: new Date().toISOString()
     });
