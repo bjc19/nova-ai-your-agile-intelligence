@@ -906,36 +906,43 @@ export function detectWorkshopType(text) {
     }
   }
 
-  // CRITICAL 2: Review vs Retrospective - Subject-centric distinction
-  // NOUVELLE COUCHE: Analyse du sujet (QUOI = produit vs COMMENT = process)
+  // CRITICAL 2: Review vs Retrospective - Subject-centric distinction (HIGHEST PRIORITY)
+  // COUCHE SUJET: QUOI (produit/incrément) = Review | COMMENT (processus/équipe) = Retrospective
   if ((bestType === 'RETROSPECTIVE' || bestType === 'SPRINT_REVIEW') && scores.SPRINT_REVIEW && scores.RETROSPECTIVE) {
     const reviewScore = scores.SPRINT_REVIEW.score;
     const retroScore = scores.RETROSPECTIVE.score;
     
-    // Analyse du sujet principal
+    // Analyse du sujet principal - CETTE COUCHE GAGNE MÊME SUR LES SCORES ÉLEVÉS
     const subjectAnalysis = analyzeSubject(text);
     
-    // SUJET PRODUIT/INCRÉMENT = Review
-    if (subjectAnalysis.isFocusedOnProduct) {
-      // Si le focus produit est clair, Review gagne même si scores proches
+    // RÈGLE 1 (DOMINANTE): Sujet clairement PRODUIT → Review gagne SANS APPEL
+    if (subjectAnalysis.isFocusedOnProduct && subjectAnalysis.scoreDifference >= 5) {
       bestType = 'SPRINT_REVIEW';
       bestScore = scores.SPRINT_REVIEW;
+      // Boost le score Review pour refléter la confiance sujet-centrée
+      bestScore.score = Math.min(bestScore.score + Math.min(subjectAnalysis.scoreDifference * 2, 25), 100);
     }
-    // SUJET PROCESSUS/ÉQUIPE = Retrospective
-    else if (subjectAnalysis.isFocusedOnProcess) {
-      // Si le focus process est clair, Retrospective gagne
+    // RÈGLE 2 (DOMINANTE): Sujet clairement PROCESSUS → Retrospective gagne SANS APPEL
+    else if (subjectAnalysis.isFocusedOnProcess && subjectAnalysis.scoreDifference >= 5) {
       bestType = 'RETROSPECTIVE';
       bestScore = scores.RETROSPECTIVE;
+      // Boost le score Retro
+      bestScore.score = Math.min(bestScore.score + Math.min(subjectAnalysis.scoreDifference * 2, 25), 100);
+    }
+    // RÈGLE 3: Sujet indécis, mais produit dominé légèrement → Review plus probable
+    else if (subjectAnalysis.productScore > subjectAnalysis.processScore) {
+      bestType = 'SPRINT_REVIEW';
+      bestScore = scores.SPRINT_REVIEW;
     }
     // Fallback: external participation + product focus → Review
     else if (intention.isReviewIntention && reviewScore >= 45) {
       bestType = 'SPRINT_REVIEW';
       bestScore = scores.SPRINT_REVIEW;
     }
-    // Fallback: product focus + external participation → Review likely
-    else if (intention.hasProductFocus && intention.hasExternalParticipation && reviewScore > retroScore - 5) {
-      bestType = 'SPRINT_REVIEW';
-      bestScore = scores.SPRINT_REVIEW;
+    // Fallback: process dominé → Retrospective
+    else if (intention.isRetrospectiveIntention && retroScore >= 45) {
+      bestType = 'RETROSPECTIVE';
+      bestScore = scores.RETROSPECTIVE;
     }
   }
 
