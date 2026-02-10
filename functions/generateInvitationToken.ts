@@ -42,12 +42,38 @@ Deno.serve(async (req) => {
     // Create invitation link
     const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
 
-    // Send email via Base44 integration
-    await base44.integrations.Core.SendEmail({
-      to: inviteeEmail,
-      subject: 'You\'re invited to join Nova AI - Agile Intelligence',
-      body: `Hi ${inviteeEmail},\n\n${user.full_name || user.email} has invited you to join Nova AI - Agile Intelligence.\n\nAbout Nova:\nNova is an agile organizational intelligence system that helps teams identify dysfunctions, anticipate risks, and transform processes into actionable insights.\n\nAccept invitation: ${invitationUrl}\n\nThis invitation expires in 7 days.`
+    // Send email via Resend using fetch
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    
+    const emailBody = `Hi ${inviteeEmail},
+
+${user.full_name || user.email} has invited you to join Nova AI - Agile Intelligence.
+
+About Nova:
+Nova is an agile organizational intelligence system that helps teams identify dysfunctions, anticipate risks, and transform processes into actionable insights.
+
+Accept invitation: ${invitationUrl}
+
+This invitation expires in 7 days.`;
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'noreply@novagile.ca',
+        to: inviteeEmail,
+        subject: 'You\'re invited to join Nova AI - Agile Intelligence',
+        text: emailBody
+      })
     });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Resend error: ${error.message || response.statusText}`);
+    }
 
     return Response.json({ success: true, message: 'Invitation sent successfully', token });
   } catch (error) {
