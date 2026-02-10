@@ -66,6 +66,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [acknowledgedDate, setAcknowledgedDate] = useState("");
   const [jiraUrl, setJiraUrl] = useState(null);
   const [jiraClicked, setJiraClicked] = useState(false);
+  const [data, setData] = useState(null);
+  const [liveGdprSignals, setLiveGdprSignals] = useState([]);
   const { language } = useLanguage();
   const { role: userRole, isAdmin, isContributor, isUser } = useRoleAccess();
   const [localUserRole, setLocalUserRole] = useState('user');
@@ -78,8 +80,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     return null;
   }
 
-  // Default/demo data if none provided (only in dev/preview)
-  const data = sprintHealth || {
+  // Initialize with provided data or defaults
+  const initialData = sprintHealth || {
     sprint_name: "Sprint 14",
     wip_count: 8,
     wip_historical_avg: 5,
@@ -91,6 +93,48 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     drift_acknowledged: false,
   };
 
+  // Subscribe to real GDPR markers in production
+  useEffect(() => {
+    if (!prodMode) return; // Skip in dev
+
+    const unsubscribe = base44.entities.GDPRMarkers.subscribe((event) => {
+      if (event.type === 'create' || event.type === 'update') {
+        setLiveGdprSignals(prev => {
+          // Update signal in list or add if new
+          const index = prev.findIndex(s => s.id === event.data.id);
+          if (index >= 0) {
+            const newSignals = [...prev];
+            newSignals[index] = event.data;
+            return newSignals;
+          } else {
+            return [...prev, event.data];
+          }
+        });
+      } else if (event.type === 'delete') {
+        setLiveGdprSignals(prev => prev.filter(s => s.id !== event.id));
+      }
+    });
+
+    // Fetch initial GDPR signals
+    base44.entities.GDPRMarkers.list('-created_date', 100)
+      .then(signals => setLiveGdprSignals(signals))
+      .catch(err => console.error("Error fetching GDPR signals:", err));
+
+    return unsubscribe;
+  }, [prodMode]);
+
+  // Merge real data with live signals
+  useEffect(() => {
+    const mergedData = {
+      ...initialData,
+      gdprSignals: liveGdprSignals,
+      // Dynamically update counts based on real signals
+      blocked_tickets_over_48h: liveGdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length || initialData.blocked_tickets_over_48h,
+      tickets_in_progress_over_3d: liveGdprSignals.filter(s => s.criticite === 'moyenne').length || initialData.tickets_in_progress_over_3d
+    };
+    setData(mergedData);
+  }, [liveGdprSignals, initialData]);
+
   // Sync local role state
   useEffect(() => {
     setLocalUserRole(userRole);
@@ -98,6 +142,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
 
   // Load acknowledged state from localStorage
   useEffect(() => {
+    if (!data) return;
     const storedAck = localStorage.getItem(`sprint_ack_${data.sprint_name}`);
     if (storedAck) {
       const ackData = JSON.parse(storedAck);
@@ -109,7 +154,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     if (storedJiraClick) {
       setJiraClicked(true);
     }
-  }, [data.sprint_name]);
+  }, [data?.sprint_name]);
 
   // Load Jira connection URL
   useEffect(() => {
@@ -118,6 +163,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
 
   const handleAcknowledge = async () => {
     try {
+      if (!data) return;
       const user = await base44.auth.me();
       const ackData = {
         by: user.full_name || user.email,
@@ -138,6 +184,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   };
 
   const handleResetForTesting = () => {
+    if (!data) return;
     localStorage.removeItem(`jira_clicked_${data.sprint_name}`);
     localStorage.removeItem(`sprint_ack_${data.sprint_name}`);
     setJiraClicked(false);
@@ -146,7 +193,11 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     setAcknowledgedDate("");
   };
 
-  // Analyze drift using the engine
+  if (!data) {
+    return null; // Wait for data to load
+  }
+
+  // Analyze drift using the engine with live data
   const driftAnalysis = analyzeSprintDrift(data);
   const suggestions = driftAnalysis.status.id === "potential_drift" 
     ? generateDriftSuggestions(driftAnalysis.signals) 
