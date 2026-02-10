@@ -20,14 +20,14 @@ Deno.serve(async (req) => {
 
     const inv = invitationRecord[0];
 
-    // Verify token matches
-    if (inv.token !== token) {
-      return Response.json({ success: false, error: 'Token invalide' }, { status: 400 });
-    }
-
     // Check status
     if (inv.status !== 'pending') {
       return Response.json({ success: false, error: 'Invitation invalide ou déjà utilisée' }, { status: 400 });
+    }
+
+    // Verify email matches
+    if (inv.invitee_email !== email) {
+      return Response.json({ success: false, error: 'Email ne correspond pas à l\'invitation' }, { status: 400 });
     }
 
     // Check expiration
