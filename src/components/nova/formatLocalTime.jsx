@@ -24,10 +24,10 @@ export function formatLocalTime(isoDateString, language = 'en', formatPattern = 
 }
 
 /**
- * Format a date with time and timezone offset
+ * Format a date with time in user's local timezone (no GMT suffix)
  * @param {string | Date} isoDateString - ISO date string or Date object
  * @param {string} language - Language code ('en' or 'fr')
- * @returns {string} Formatted date with timezone (e.g., "Feb 10, 2026 5:36 PM GMT-5")
+ * @returns {string} Formatted date with time in local timezone (e.g., "Feb 10, 2026 5:36 PM")
  */
 export function formatLocalTimeWithTZ(isoDateString, language = 'en') {
   try {
@@ -36,19 +36,18 @@ export function formatLocalTimeWithTZ(isoDateString, language = 'en') {
       return 'Invalid date';
     }
 
-    const formatted = format(date, 'PPpp', {
-      locale: language === 'fr' ? fr : enUS
-    });
+    // Format directly to local time using toLocaleString
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    };
 
-    // Get timezone offset
-    const offset = date.getTimezoneOffset();
-    const absOffset = Math.abs(offset);
-    const hours = Math.floor(absOffset / 60);
-    const minutes = absOffset % 60;
-    const sign = offset <= 0 ? '+' : '-';
-    const tzOffset = `GMT${sign}${String(hours).padStart(2, '0')}${minutes ? `:${String(minutes).padStart(2, '0')}` : ''}`;
-
-    return `${formatted} ${tzOffset}`;
+    return date.toLocaleString(language === 'fr' ? 'fr-CA' : 'en-US', options);
   } catch (error) {
     console.error('Error formatting date with timezone:', error);
     return 'Invalid date';
