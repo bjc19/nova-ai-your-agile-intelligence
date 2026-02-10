@@ -35,6 +35,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const canAnalyze = user && (user.role === 'admin' || user.role === 'contributor');
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -292,8 +293,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period AND user is admin/contributor */}
-            {(user?.role === 'admin' || user?.role === 'contributor') && (!selectedPeriod || analysisHistory.length > 0) &&
+            {/* Quick Stats - Only show if data in period */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
             <QuickStats analysisHistory={analysisHistory} />
             }
           </motion.div>
@@ -390,9 +391,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine - Only for admin/contributor */}
-              {(user?.role === 'admin' || user?.role === 'contributor') && analysisHistory.length > 0 &&
-              <RealityMapCard
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -417,7 +418,7 @@ export default function Dashboard() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
-              }
+            }
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
@@ -432,10 +433,8 @@ export default function Dashboard() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses - Only for admin/contributor */}
-            {(user?.role === 'admin' || user?.role === 'contributor') &&
+            {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
-            }
             
             {/* Integration Status */}
             <IntegrationStatus />
