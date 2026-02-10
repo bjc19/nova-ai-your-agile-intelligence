@@ -276,26 +276,28 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                           <p className="text-xs text-slate-500">
                             {hiddenEmails.has(user.id) ? '••••••••••' : user.email}
                           </p>
-                          <button
-                            onClick={() => {
-                              setHiddenEmails(prev => {
-                                const newSet = new Set(prev);
-                                if (newSet.has(user.id)) {
-                                  newSet.delete(user.id);
-                                } else {
-                                  newSet.add(user.id);
-                                }
-                                return newSet;
-                              });
-                            }}
-                            className="text-slate-400 hover:text-slate-600 transition-colors"
-                          >
-                            {hiddenEmails.has(user.id) ? (
-                              <EyeOff className="w-3.5 h-3.5" />
-                            ) : (
-                              <Eye className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                          {canToggleEmail && (
+                            <button
+                              onClick={() => {
+                                setHiddenEmails(prev => {
+                                  const newSet = new Set(prev);
+                                  if (newSet.has(user.id)) {
+                                    newSet.delete(user.id);
+                                  } else {
+                                    newSet.add(user.id);
+                                  }
+                                  return newSet;
+                                });
+                              }}
+                              className="text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                              {hiddenEmails.has(user.id) ? (
+                                <EyeOff className="w-3.5 h-3.5" />
+                              ) : (
+                                <Eye className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
