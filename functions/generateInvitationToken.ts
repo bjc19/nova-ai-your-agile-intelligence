@@ -42,17 +42,7 @@ Deno.serve(async (req) => {
     // Create invitation link
     const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
 
-    // Configure SMTP transporter
-    const transporter = nodemailer.createTransport({
-      host: Deno.env.get('SMTP_HOST'),
-      port: 465,
-      secure: true,
-      auth: {
-        user: Deno.env.get('SMTP_USER'),
-        pass: Deno.env.get('SMTP_PASSWORD')
-      }
-    });
-
+    // Send email via Resend API using fetch
     const emailBody = `Hi ${inviteeEmail},
 
 ${user.full_name || user.email} has invited you to join Nova AI - Agile Intelligence.
@@ -64,12 +54,24 @@ Accept invitation: ${invitationUrl}
 
 This invitation expires in 7 days.`;
 
-    await transporter.sendMail({
-      from: 'noreply@novagile.ca',
-      to: inviteeEmail,
-      subject: 'You\'re invited to join Nova AI - Agile Intelligence',
-      text: emailBody
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SMTP_PASSWORD')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'noreply@novagile.ca',
+        to: inviteeEmail,
+        subject: 'You\'re invited to join Nova AI - Agile Intelligence',
+        html: `<p>Hi ${inviteeEmail},</p><p>${user.full_name || user.email} has invited you to join Nova AI - Agile Intelligence.</p><p><strong>About Nova:</strong><br>Nova is an agile organizational intelligence system that helps teams identify dysfunctions, anticipate risks, and transform processes into actionable insights.</p><p><a href="${invitationUrl}">Accept invitation</a></p><p>This invitation expires in 7 days.</p>`
+      })
     });
+
+    if (!emailResponse.ok) {
+      const errorData = await emailResponse.json();
+      throw new Error(`Email delivery failed: ${errorData.message || emailResponse.statusText}`);
+    }
 
     return Response.json({ success: true, message: 'Invitation sent successfully', token });
   } catch (error) {
