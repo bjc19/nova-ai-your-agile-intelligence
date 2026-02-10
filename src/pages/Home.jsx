@@ -915,11 +915,36 @@ export default function Home() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Confluence */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 }}
               viewport={{ once: true }}
             >
+              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <svg className="w-14 h-14" viewBox="0 0 256 256">
+                      <defs>
+                        <linearGradient x1="99.14%" y1="112.696%" x2="33.746%" y2="37.947%" id="b">
+                          <stop stopColor="#0052CC" offset="18%"/>
+                          <stop stopColor="#2684FF" offset="100%"/>
+                        </linearGradient>
+                      </defs>
+                      <path d="M12.803 4.542c-6.845 10.52-6.845 22.972-6.845 22.972 0 2.369 1.901 4.27 4.27 4.27h52.44c2.368 0 3.612-2.791 2.052-4.596L19.69.915C17.48-1.476 14.1-.813 12.803 4.542z" fill="url(#b)"/>
+                      <path d="M243.197 251.458c6.845-10.52 6.845-22.972 6.845-22.972 0-2.369-1.901-4.27-4.27-4.27h-52.44c-2.368 0-3.612 2.791-2.052 4.596l45.03 26.273c2.21 2.391 5.59 1.728 6.887-3.627z" fill="#2684FF"/>
+                    </svg>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-2">Confluence</h3>
+                  <p className="text-sm text-slate-600">
+                    {lang === 'fr' 
+                      ? 'Documentation d\'équipe' 
+                      : 'Team documentation'}
+                  </p>
+                </CardContent>
+              </Card>
             </motion.div>
 
             {/* GitHub */}
