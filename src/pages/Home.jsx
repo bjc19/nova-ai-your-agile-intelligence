@@ -923,8 +923,6 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.25 }}
               viewport={{ once: true }}
             >
-              <Card className="border-slate-200 hover:shadow-lg transition-shadow h-full">
-              </Card>
             </motion.div>
 
             {/* GitHub */}
