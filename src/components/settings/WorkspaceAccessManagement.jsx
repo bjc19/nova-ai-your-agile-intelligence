@@ -142,19 +142,16 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!editingUser || !newRole) return;
 
     try {
-      // Call backend function to update user role
-      await base44.functions.invoke('updateUserRole', {
-        userId: editingUser.id,
-        newRole: newRole
-      });
+      // Update user role directly via SDK
+      await base44.asServiceRole.entities.User.update(editingUser.id, { role: newRole });
 
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
-      setMessage({ type: 'success', text: 'Rôle mis à jour avec succès' });
+      toast.success('Rôle mis à jour avec succès');
       setEditingUser(null);
       setNewRole(null);
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erreur lors de la mise à jour du rôle' });
+      toast.error('Erreur lors de la mise à jour du rôle');
     }
   };
 
