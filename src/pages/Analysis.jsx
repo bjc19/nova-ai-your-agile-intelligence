@@ -353,10 +353,6 @@ Provide a detailed analysis in the following JSON format:`;
     const blockersArray = Array.isArray(result.blockers) ? result.blockers : [];
     const risksArray = Array.isArray(result.risks) ? result.risks : [];
     
-    // Get current UTC time - use this for database storage
-    const now = new Date();
-    const utcTimestamp = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
-    
     const analysisRecord = {
       title,
       source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
@@ -368,7 +364,7 @@ Provide a detailed analysis in the following JSON format:`;
         context,
         workshop_type: workshopType,
         workshop_focus: analysisFocus,
-        inserted_at: utcTimestamp
+        inserted_at: new Date().toISOString()
       },
       transcript_preview: transcript.substring(0, 200),
     };
