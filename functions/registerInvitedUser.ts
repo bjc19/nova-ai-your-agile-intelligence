@@ -47,6 +47,18 @@ Deno.serve(async (req) => {
         full_name: fullName
       });
       console.log('User registered successfully');
+      
+      // Send custom welcome email
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: email,
+          subject: 'Welcome to Nova AI - Your Agile Intelligence',
+          body: `Hey ${fullName},\n\nWelcome to Nova AI - Your Agile Intelligence, and happy agile delivery!\n\nSee you there,\nThe Nova AI © - Your Agile Intelligence team`
+        });
+      } catch (emailErr) {
+        console.error('Welcome email error:', emailErr);
+        // Don't fail registration if welcome email fails
+      }
     } catch (regErr) {
       console.error('Registration error:', regErr);
       if (regErr.message?.includes('already exists') || regErr.message?.includes('déjà')) {
