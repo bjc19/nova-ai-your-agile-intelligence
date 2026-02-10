@@ -399,9 +399,43 @@ export default function WorkspaceAccessManagement({ currentRole }) {
             <div className="pt-3 border-t border-slate-200 text-xs text-slate-600">
               <p>💡 <strong>Pour augmenter votre limite :</strong> Accédez à votre espace admin Base44 pour mettre à niveau votre plan</p>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
-  );
-}
+            </CardContent>
+            </Card>
+            </motion.div>
+
+            {/* Edit Role Dialog */}
+            <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+            <DialogContent>
+            <DialogHeader>
+            <DialogTitle>Modifier le rôle</DialogTitle>
+            <DialogDescription>
+             Changer le rôle de {editingUser?.full_name}
+            </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+            <Select value={newRole} onValueChange={setNewRole}>
+             <SelectTrigger>
+               <SelectValue />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="user">Membre</SelectItem>
+               <SelectItem value="contributor">Contributeur</SelectItem>
+               {currentRole === 'admin' && (
+                 <SelectItem value="admin">Admin</SelectItem>
+               )}
+             </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2">
+             <Button variant="outline" onClick={() => setEditingUser(null)}>
+               Annuler
+             </Button>
+             <Button onClick={handleEditRole} className="bg-blue-600 hover:bg-blue-700 text-white">
+               Confirmer
+             </Button>
+            </div>
+            </div>
+            </DialogContent>
+            </Dialog>
+            </div>
+            );
+            }
