@@ -496,8 +496,13 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                       <p className="text-sm font-medium text-slate-700 mb-1">Signal acquitté</p>
                       <p className="text-xs text-slate-500">
                         Par <span className="font-medium">{acknowledgedBy}</span> le{" "}
-                        {new Date(acknowledgedDate).toLocaleDateString('fr-FR')} à{" "}
-                        {new Date(acknowledgedDate).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(acknowledgedDate).toLocaleString('fr-FR', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                        })}
                       </p>
                     </div>
                   </div>

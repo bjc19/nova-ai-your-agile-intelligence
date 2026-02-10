@@ -820,20 +820,19 @@ Actions recommandées :
                               </div>
                               {isApplied && (
                                 <div className="mt-2 pt-2 border-t border-emerald-200">
-                                  <div className="flex items-center gap-1.5 text-xs text-emerald-700">
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span>
-                                      Appliqué par <strong>{isApplied.name}</strong> le{" "}
-                                      {new Date(isApplied.date).toLocaleDateString('fr-FR', { 
-                                        day: 'numeric', 
-                                        month: 'short'
-                                      })} à{" "}
-                                      {new Date(isApplied.date).toLocaleTimeString('fr-FR', { 
-                                        hour: '2-digit', 
-                                        minute: '2-digit' 
-                                      })}
-                                    </span>
-                                  </div>
+                                 <div className="flex items-center gap-1.5 text-xs text-emerald-700">
+                                   <CheckCircle2 className="w-3.5 h-3.5" />
+                                   <span>
+                                     Appliqué par <strong>{isApplied.name}</strong> le{" "}
+                                     {new Date(isApplied.date).toLocaleString('fr-FR', {
+                                       day: 'numeric',
+                                       month: 'short',
+                                       hour: '2-digit',
+                                       minute: '2-digit',
+                                       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                                     })}
+                                   </span>
+                                 </div>
                                 </div>
                               )}
                             </div>
