@@ -11,12 +11,27 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
+import { adaptMessage } from "./RoleBasedMessaging";
 
 export default function QuickStats({ analysisHistory = [] }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
+  const [userRole, setUserRole] = useState('user');
+
+  // Fetch user role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user = await base44.auth.me();
+        setUserRole(user.role || 'user');
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+    fetchUserRole();
+  }, []);
 
   useEffect(() => {
     const fetchSignals = async () => {
@@ -197,7 +212,7 @@ export default function QuickStats({ analysisHistory = [] }) {
               <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
             </div>
             <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
-            <p className="text-sm text-slate-500 mt-1">{t(stat.labelKey)}</p>
+            <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
           </div>
         </motion.div>
       ))}

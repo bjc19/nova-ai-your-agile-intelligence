@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import { base44 } from "@/api/base44Client";
 import { useState, useEffect } from "react";
+import { formatRecommendation, getRoleTone } from "./RoleBasedMessaging";
 import {
   Lightbulb,
   ArrowRight,
@@ -34,6 +35,20 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [completedItems, setCompletedItems] = useState({});
   const [translatedRecommendations, setTranslatedRecommendations] = useState(null);
   const [allSourceRecommendations, setAllSourceRecommendations] = useState([]);
+  const [userRole, setUserRole] = useState('user');
+
+  // Fetch user role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user = await base44.auth.me();
+        setUserRole(user.role || 'user');
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+    fetchUserRole();
+  }, []);
 
   // Fetch all recommendations from all sources via unified endpoint with cache
   useEffect(() => {
@@ -213,7 +228,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     return allRecs;
   };
 
-  const recommendations = getRecommendations();
+  const recommendations = getRecommendations().map(rec => formatRecommendation(rec, userRole));
 
   const priorityColors = {
     high: "bg-red-100 text-red-700 border-red-200",
@@ -357,6 +372,9 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
+                          {rec.prefix && (
+                            <span className="text-xs font-medium text-slate-500">{rec.prefix}</span>
+                          )}
                           <h4 className="font-medium text-slate-900 truncate">
                             {rec.title}
                           </h4>

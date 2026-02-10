@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import { isProduction } from "@/components/nova/isProduction";
+import { adaptMessage, adaptSprintHealthMessage } from "./RoleBasedMessaging";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [jiraUrl, setJiraUrl] = useState(null);
   const [jiraClicked, setJiraClicked] = useState(false);
   const { language } = useLanguage();
+  const [userRole, setUserRole] = useState('user');
 
   const prodMode = isProduction();
 
@@ -86,6 +88,19 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     problematic_tickets: [],
     drift_acknowledged: false,
   };
+
+  // Fetch user role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user = await base44.auth.me();
+        setUserRole(user.role || 'user');
+      } catch (error) {
+        console.error('Error fetching user role:', error);
+      }
+    };
+    fetchUserRole();
+  }, []);
 
   // Load acknowledged state from localStorage
   useEffect(() => {
@@ -172,7 +187,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                   {data.sprint_name}
                 </CardTitle>
                 <Badge className={`${config.bgColor} ${config.color} border-0 mt-1`}>
-                  {config.emoji} {config.label}
+                  {config.emoji} {adaptMessage(driftAnalysis.status.id, userRole, { wip: data.wip_count, blocked: data.blocked_tickets_over_48h })}
                 </Badge>
               </div>
             </div>
@@ -263,7 +278,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                           <div className="flex-1">
                             <p className="text-sm font-medium text-slate-700 mb-1">Question clé</p>
                             <p className="text-sm text-slate-600 italic">
-                              "Qu'est-ce qui empêche actuellement l'équipe de faire avancer le flux ?"
+                              "{adaptMessage('driftQuestion', userRole)}"
                             </p>
                           </div>
                           <Shield className="w-5 h-5 text-emerald-500 mt-0.5" />
