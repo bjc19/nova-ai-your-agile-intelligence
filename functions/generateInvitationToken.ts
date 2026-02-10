@@ -86,19 +86,11 @@ Deno.serve(async (req) => {
 </html>
     `;
 
-    // Send email via SMTP
-    const transporter = nodemailer.createTransport({
-      host: Deno.env.get('SMTP_HOST'),
-      port: parseInt(Deno.env.get('SMTP_PORT')),
-      secure: Deno.env.get('SMTP_PORT') === '465',
-      auth: {
-        user: Deno.env.get('SMTP_USER'),
-        pass: Deno.env.get('SMTP_PASSWORD')
-      }
-    });
+    // Send email via Resend
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
-    await transporter.sendMail({
-      from: Deno.env.get('SMTP_USER'),
+    await resend.emails.send({
+      from: 'noreply@novagile.ca',
       to: inviteeEmail,
       subject: 'You\'re invited to join Nova AI - Agile Intelligence',
       html: emailHtml
