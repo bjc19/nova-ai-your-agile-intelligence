@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import nodemailer from 'npm:nodemailer@6.9.7';
 
 function generateToken() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -42,9 +43,17 @@ Deno.serve(async (req) => {
     // Create invitation link
     const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
 
-    // Send email via Resend using fetch
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    
+    // Configure SMTP transporter
+    const transporter = nodemailer.createTransport({
+      host: Deno.env.get('SMTP_HOST'),
+      port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
+      secure: Deno.env.get('SMTP_PORT') === '465',
+      auth: {
+        user: Deno.env.get('SMTP_USER'),
+        pass: Deno.env.get('SMTP_PASSWORD')
+      }
+    });
+
     const emailBody = `Hi ${inviteeEmail},
 
 ${user.full_name || user.email} has invited you to join Nova AI - Agile Intelligence.
@@ -56,24 +65,12 @@ Accept invitation: ${invitationUrl}
 
 This invitation expires in 7 days.`;
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'noreply@novagile.ca',
-        to: inviteeEmail,
-        subject: 'You\'re invited to join Nova AI - Agile Intelligence',
-        text: emailBody
-      })
+    await transporter.sendMail({
+      from: 'noreply@novagile.ca',
+      to: inviteeEmail,
+      subject: 'You\'re invited to join Nova AI - Agile Intelligence',
+      text: emailBody
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Resend error: ${error.message || response.statusText}`);
-    }
 
     return Response.json({ success: true, message: 'Invitation sent successfully', token });
   } catch (error) {
