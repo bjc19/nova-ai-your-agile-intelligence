@@ -471,6 +471,54 @@ function analyzeIntention(text) {
   };
 }
 
+// ============ COUCHE 3.5: ANALYSE DU SUJET (QUOI vs COMMENT) ============
+// CRITICAL: Distinction Review (produit/incrément) vs Retrospective (process/équipe)
+function analyzeSubject(text) {
+  // Termes liés au PRODUIT/INCRÉMENT (Review = QUOI)
+  const productTerms = {
+    features: /fonctionnalité|feature|module|écran|screen|interface|composant|composante/gi,
+    delivery: /livré|delivered|incrément|increment|réalisé|accomplished|déployé|deployed/gi,
+    functionality: /marche|works|fonctionn|fonctionne|opérationnel|operational|prêt|ready/gi,
+    value: /valeur|value|impact|utilité|usefulness|bénéfice|business value|client.*content/gi,
+    external_feedback: /feedback|retour|avis|opinion|qu'en.*pensez|qu'en.*pense|what do you think|ça vous plaît/gi
+  };
+
+  // Termes liés au PROCESSUS/ÉQUIPE (Retrospective = COMMENT)
+  const processTerms = {
+    collaboration: /collabor|communication|interaction|ensemble|together|coordination.*équipe|team work/gi,
+    methodology: /processus|process|méthode|method|approche|approach|workflow|façon de travailler|way of working/gi,
+    efficiency: /efficacité|efficiency|productivité|productivity|rapidité|speed|lenteur|slowness|friction/gi,
+    team_dynamics: /équipe|team|groupe|group|relationnel|relational|dynamique|dynamics|ressenti|feeling/gi,
+    improvement: /améliorer|improve|optimiser|optimize|adapter|adapt|éviter|avoid|pas assez|trop|not enough/gi,
+    learning: /apprentiss|learning|leçon|lesson|découvert|discovered|réalisé|realized|compris|understood/gi
+  };
+
+  // Compte les occurrences
+  const productScore = Object.values(productTerms).reduce((sum, pattern) => {
+    return sum + (text.match(pattern) || []).length;
+  }, 0);
+
+  const processScore = Object.values(processTerms).reduce((sum, pattern) => {
+    return sum + (text.match(pattern) || []).length;
+  }, 0);
+
+  // Évalue les termes clés d'introduction/structure
+  const isProductFocusedIntro = /démontrer|demonstrate|présent|présentation|montrer|show.*livré|show.*fonctionnalité|voici ce qu'on a livré|here's what we delivered/gi.test(text);
+  const isProcessFocusedIntro = /comment on|how we|amélioration|improvement.*processus|réfléchir|reflect.*équipe|bilan.*sprint|ce sprint.*travail/gi.test(text);
+
+  const isFocusedOnProduct = isProductFocusedIntro || productScore > processScore;
+  const isFocusedOnProcess = isProcessFocusedIntro || processScore > productScore + 5;
+
+  return {
+    productScore,
+    processScore,
+    isFocusedOnProduct,
+    isFocusedOnProcess,
+    dominantSubject: isFocusedOnProduct ? 'PRODUCT' : isFocusedOnProcess ? 'PROCESS' : 'MIXED',
+    confidence: Math.max(Math.abs(productScore - processScore), 1) // Différence pour confiance
+  };
+}
+
 // ============ COUCHE 4: ANALYSE COMPARATIVE AVEC BASE DE CONNAISSANCES ============
 function analyzeComparative(text, semanticDensity) {
   const { retroEval, planningSelect, facilitation } = semanticDensity;
