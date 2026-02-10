@@ -427,12 +427,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
         detectionTags: detected.tags
       });
 
-      // Décrémenter tries
-      const newTries = tries - 1;
-      setTries(newTries);
-      localStorage.setItem("nova_demo_tries", newTries.toString());
-      onTriesUpdate(newTries);
-
+      // Les essais ont déjà été décrémentés par trackDemoAttempt côté serveur
       toast.success("✅ Analyse complète!");
     } catch (error) {
       toast.error("❌ Erreur lors de l'analyse");
