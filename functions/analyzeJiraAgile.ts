@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
 
     // Insert markers into GDPRMarkers (via service role, no schema change)
     const insertedMarkers = [];
+    let failedMarkers = 0;
     for (const marker of markers) {
       try {
         const inserted = await base44.asServiceRole.entities.GDPRMarkers.create({
@@ -81,7 +82,38 @@ Deno.serve(async (req) => {
         insertedMarkers.push(inserted);
       } catch (err) {
         console.error(`Failed to insert marker: ${err.message}`);
+        failedMarkers++;
       }
+    }
+
+    // Log sync into JiraAgileProjectSync for audit/visibility
+    const projectCode = board_id.split('-')[0];
+    const startTime = new Date();
+    try {
+      await base44.asServiceRole.entities.JiraAgileProjectSync.create({
+        user_email: user.email,
+        jira_cloud_id,
+        board_id,
+        project_code: projectCode,
+        sprint_id,
+        sprint_number: sprintData.id?.split('-')[1] || 0,
+        issues_analyzed: issues.length,
+        risks_detected: analysis.risks.length,
+        markers_created: insertedMarkers.length,
+        anonymization_status: 'anonymized',
+        sync_type: 'manual',
+        status: failedMarkers === 0 ? 'success' : 'partial_failure',
+        error_message: failedMarkers > 0 ? `${failedMarkers} marker(s) failed to insert` : null,
+        sync_duration_ms: new Date() - startTime,
+        metadata: {
+          board_name: sprintData.name || board_id,
+          sprint_name: sprintData.name || `Sprint ${sprint_id}`,
+          completion_rate: analysis.metrics.completion_rate,
+          velocity_trend: analysis.metrics.velocity_trend
+        }
+      });
+    } catch (err) {
+      console.error(`Failed to log sync: ${err.message}`);
     }
 
     return Response.json({
@@ -89,6 +121,8 @@ Deno.serve(async (req) => {
       analyzed_issues: issues.length,
       risks_detected: analysis.risks.length,
       markers_created: insertedMarkers.length,
+      project_code: projectCode,
+      anonymization_status: 'anonymized',
       markers: insertedMarkers.map(m => ({
         id: m.id,
         type: m.type,
