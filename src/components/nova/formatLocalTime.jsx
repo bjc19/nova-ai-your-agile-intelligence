@@ -36,16 +36,14 @@ export function formatLocalTimeWithTZ(isoDateString, localeCode = 'en-US') {
       return 'Invalid date';
     }
 
-    // Format with explicit timezone - toLocaleString already handles UTC->local conversion
+    // toLocaleString handles UTC->local conversion automatically
     const options = {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      hour12: true
     };
 
     return date.toLocaleString(localeCode, options);
