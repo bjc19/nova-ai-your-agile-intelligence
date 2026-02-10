@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
-import { formatLocalTime } from "@/components/nova/formatLocalTime";
+import { formatLocalTimeWithTZ } from "@/components/nova/formatLocalTime";
 import {
   MessageSquare,
   Upload,
@@ -336,7 +336,7 @@ export default function RecentAnalyses({ analyses = [] }) {
                           <div className="flex items-center gap-3 mt-1 flex-wrap">
                             <span className="flex items-center gap-1 text-xs text-slate-500">
                               <Clock className="w-3 h-3" />
-                              {formatLocalTime(item.created_date, language, 'PPpp')}
+                              {formatLocalTimeWithTZ(item.created_date, language === 'fr' ? 'fr-CA' : 'en-US')}
                             </span>
                             <Badge variant="outline" className="text-xs py-0">
                               {isJira ? '#Jira' : isTeams ? '#Microsoft Teams' : '#Slack'}
