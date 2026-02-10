@@ -24,9 +24,12 @@ function LayoutContent({ children, currentPageName }) {
         if (auth) {
           const user = await base44.auth.me();
           setUserRole(user?.role);
+        } else {
+          setUserRole(null);
         }
       } catch (err) {
         setIsAuthenticated(false);
+        setUserRole(null);
       }
       setIsLoading(false);
     };
