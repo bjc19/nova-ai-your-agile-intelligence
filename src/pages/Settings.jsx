@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
+import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
 import {
   ArrowLeft,
   MessageSquare,
