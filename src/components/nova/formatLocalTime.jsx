@@ -36,11 +36,7 @@ export function formatLocalTimeWithTZ(isoDateString, localeCode = 'en-US') {
       return 'Invalid date';
     }
 
-    // Get user's actual timezone from browser
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log('Using timezone:', userTimeZone); // Debug
-
-    // Format with explicit timezone
+    // Format with explicit timezone - toLocaleString already handles UTC->local conversion
     const options = {
       year: 'numeric',
       month: 'short',
@@ -49,12 +45,10 @@ export function formatLocalTimeWithTZ(isoDateString, localeCode = 'en-US') {
       minute: '2-digit',
       second: '2-digit',
       hour12: true,
-      timeZone: userTimeZone
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
 
-    const result = date.toLocaleString(localeCode, options);
-    console.log('Formatted result:', result, 'Original:', isoDateString); // Debug
-    return result;
+    return date.toLocaleString(localeCode, options);
   } catch (error) {
     console.error('Error formatting date with timezone:', error);
     return 'Invalid date';
