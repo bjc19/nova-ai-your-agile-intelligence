@@ -346,7 +346,7 @@ export default function Settings() {
     }
   };
 
-  if (loading) {
+  if (loadingConfig) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
