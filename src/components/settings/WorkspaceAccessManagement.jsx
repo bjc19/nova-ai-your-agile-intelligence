@@ -26,6 +26,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [hiddenEmails, setHiddenEmails] = useState(new Set());
+  const [editingUser, setEditingUser] = useState(null);
+  const [newRole, setNewRole] = useState(null);
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
