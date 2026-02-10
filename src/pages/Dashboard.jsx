@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
-import { useRoleAccess } from "@/components/dashboard/useRoleAccess";
 
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
@@ -35,7 +34,6 @@ import {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { isAdmin, isContributor, isUser } = useRoleAccess();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -364,9 +362,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Actionable Metrics Radar - Admin/Contributor only */}
-              {(isAdmin || isContributor) && analysisHistory.length > 0 &&
-              <MetricsRadarCard
+              {/* Actionable Metrics Radar */}
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -390,11 +388,11 @@ export default function Dashboard() {
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-              }
+            }
 
-              {/* Organizational Reality Engine - Admin/Contributor only */}
-              {(isAdmin || isContributor) && analysisHistory.length > 0 &&
-              <RealityMapCard
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -419,10 +417,10 @@ export default function Dashboard() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
-              }
+            }
             
-            {/* Sprint Performance Chart - Admin/Contributor only */}
-            {(isAdmin || isContributor) && <SprintPerformanceChart analysisHistory={analysisHistory} />}
+            {/* Sprint Performance Chart */}
+            <SprintPerformanceChart analysisHistory={analysisHistory} />
             
             {/* Key Recommendations */}
             <KeyRecommendations
@@ -436,9 +434,6 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
           </div>
         </div>
         }
