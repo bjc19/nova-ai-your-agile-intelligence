@@ -54,7 +54,6 @@ export const translations = {
     languageDescription: "Langue de l'interface utilisateur",
     languageApplied: "💡 La langue sera appliquée au prochain rafraîchissement de la page",
     integrations: "Intégrations",
-    integrationsDescription: "Connectez les outils de votre équipe pour activer l'analyse et les insights en temps réel.",
     backendRequired: "Backend Functions Requis",
     backendRequiredDescription: "Pour activer les intégrations en direct avec les services externes, vous devez activer les Backend Functions dans les paramètres de votre app. Cela nécessite le plan Builder ou supérieur.",
     backToDashboard: "Retour au Dashboard",
