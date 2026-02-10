@@ -56,10 +56,10 @@ import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
 import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
 import acceptInvitation from './pages/accept-invitation';
-import ResetPassword from './pages/ResetPassword';
 import __Layout from './Layout.jsx';
 
 
@@ -73,10 +73,10 @@ export const PAGES = {
     "Details": Details,
     "Home": Home,
     "Register": Register,
+    "ResetPassword": ResetPassword,
     "Results": Results,
     "Settings": Settings,
     "accept-invitation": acceptInvitation,
-    "ResetPassword": ResetPassword,
 }
 
 export const pagesConfig = {

@@ -365,15 +365,12 @@ Provide a detailed analysis in the following JSON format:`;
       transcript_preview: transcript.substring(0, 200),
     };
     
-    console.log("Creating analysis record:", analysisRecord);
-    const createdAnalysis = await base44.entities.AnalysisHistory.create(analysisRecord);
-    console.log("Analysis created successfully:", createdAnalysis);
-
-    // Create PatternDetection records for detected patterns
+    // Prepare pattern detection records
     const allDetectedPatterns = new Set();
     blockersArray.forEach(b => b.pattern_ids?.forEach(p => allDetectedPatterns.add(p)));
     risksArray.forEach(r => r.pattern_ids?.forEach(p => allDetectedPatterns.add(p)));
 
+    const patternDetections = [];
     for (const patternId of allDetectedPatterns) {
       const pattern = antiPatterns.find(p => p.pattern_id === patternId);
       if (pattern) {
@@ -384,8 +381,7 @@ Provide a detailed analysis in the following JSON format:`;
           ...relatedRisks.map(r => r.description)
         ].join(' | ');
 
-        await base44.entities.PatternDetection.create({
-          analysis_id: createdAnalysis.id,
+        patternDetections.push({
           pattern_id: patternId,
           pattern_name: pattern.name,
           category: pattern.category,
@@ -398,6 +394,15 @@ Provide a detailed analysis in the following JSON format:`;
         });
       }
     }
+
+    // Call backend function to create analysis with proper permissions
+    console.log("Creating analysis via backend function");
+    const response = await base44.functions.invoke('createAnalysis', {
+      analysisRecord,
+      patternDetections
+    });
+    const createdAnalysis = response.data.analysis;
+    console.log("Analysis created successfully:", createdAnalysis);
 
     // Anonymize analysis data before storing
     const anonymizedAnalysis = anonymizeAnalysisData({ ...result, posture: posture.id, context });
