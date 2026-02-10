@@ -10,9 +10,12 @@ import RecommendationCard from "@/components/nova/RecommendationCard";
 import MetricCard from "@/components/nova/MetricCard";
 import PostureIndicator from "@/components/nova/PostureIndicator";
 import GDPRMarkersSection from "@/components/nova/GDPRMarkersSection";
+import RoleBasedRiskDisplay from "@/components/nova/RoleBasedRiskDisplay";
 import { POSTURES } from "@/components/nova/PostureEngine";
 import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
 import { detectWorkshopType } from "@/components/nova/workshopDetection";
+import { transformRisksForRole, transformBlockersForRole, detectViewForUser } from "@/components/nova/RiskPresentationEngine";
+import { base44 } from "@/api/base44Client";
 import { 
         ArrowLeft, 
         AlertOctagon,
@@ -34,10 +37,25 @@ export default function Results() {
   const [riskUrgencyFilter, setRiskUrgencyFilter] = useState(null);
   const [workshopDetection, setWorkshopDetection] = useState(null);
   const [isOutOfContext, setIsOutOfContext] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [transformedRisks, setTransformedRisks] = useState([]);
+  const [transformedBlockers, setTransformedBlockers] = useState([]);
 
   useEffect(() => {
         const storedAnalysis = sessionStorage.getItem("novaAnalysis");
         const storedTranscript = sessionStorage.getItem("novaTranscript");
+        
+        // Detect user role automatically
+        const detectRole = async () => {
+          try {
+            const user = await base44.auth.me();
+            const detectedRole = detectViewForUser(user);
+            setUserRole(detectedRole);
+          } catch (error) {
+            setUserRole('contributor'); // Défaut sécurisé
+          }
+        };
+        detectRole();
         
         if (storedAnalysis) {
           const parsedAnalysis = JSON.parse(storedAnalysis);
@@ -61,6 +79,14 @@ export default function Results() {
 
           // Display results immediately
           setAnalysis(parsedAnalysis);
+          
+          // Transform risks and blockers for role once role is detected
+          if (userRole) {
+            const riskTransformed = transformRisksForRole(parsedAnalysis.risks || [], userRole);
+            const blockerTransformed = transformBlockersForRole(parsedAnalysis.blockers || [], userRole);
+            setTransformedRisks(riskTransformed);
+            setTransformedBlockers(blockerTransformed);
+          }
 
           // Translate all LLM content if language is French
                if (language === 'fr') {
@@ -144,7 +170,7 @@ export default function Results() {
         } else {
           navigate(createPageUrl("Analysis"));
         }
-      }, [navigate, language, t]);
+      }, [navigate, language, t, userRole]);
 
   if (!analysis || !translationComplete) {
        return (
@@ -306,155 +332,40 @@ export default function Results() {
           </div>
         </div>
 
-        {/* Expanded Details Inline */}
-        {expandedSection === "blockers" && analysis.blockers && analysis.blockers.length > 0 && (
+        {/* Expanded Details Inline - Role-Based View */}
+        {expandedSection === "blockers" && transformedBlockers && transformedBlockers.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-8 p-6 rounded-2xl bg-blue-50/50 border border-blue-200"
+            className="mb-8"
           >
             <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <AlertOctagon className="w-5 h-5 text-blue-600" />
               {t('blockerDetails')}
             </h3>
-            <div className="space-y-3">
-              {analysis.blockers.map((blocker, index) => (
-                <div key={index} className="p-4 bg-white rounded-xl border border-blue-100">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="font-medium text-slate-900">{blocker.member}</span>
-                    <Badge className={
-                      blocker.urgency === "high" ? "bg-red-100 text-red-700" :
-                      blocker.urgency === "medium" ? "bg-amber-100 text-amber-700" :
-                      "bg-slate-100 text-slate-700"
-                    }>
-                      {blocker.urgency}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-700 mb-2">{blocker.issue}</p>
-                  {blocker.patterns && blocker.patterns.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {blocker.patterns.map((pattern, pidx) => (
-                        <Badge key={pidx} variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
-                          {pattern}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-sm text-blue-700">
-                    <span className="font-medium">{language === 'fr' ? 'Action :' : 'Action:'}</span> {blocker.action}
-                  </p>
-                </div>
+            <div className="space-y-4">
+              {transformedBlockers.map((blocker, index) => (
+                <RoleBasedRiskDisplay key={index} risk={blocker} role={userRole} />
               ))}
             </div>
           </motion.div>
         )}
 
-        {expandedSection === "risks" && analysis.risks && analysis.risks.length > 0 && (
+        {expandedSection === "risks" && transformedRisks && transformedRisks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-8 p-6 rounded-2xl bg-amber-50/50 border border-amber-200"
+            className="mb-8"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-amber-600" />
-                {t('riskDetails')}
-              </h3>
-              {(() => {
-                const urgencyCounts = analysis.risks.reduce((acc, r) => {
-                  if (r.urgency) acc[r.urgency] = (acc[r.urgency] || 0) + 1;
-                  return acc;
-                }, {});
-                return Object.keys(urgencyCounts).length > 0 ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setRiskUrgencyFilter(null)}
-                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                        !riskUrgencyFilter 
-                          ? "bg-slate-900 text-white" 
-                          : "bg-white text-slate-600 hover:bg-slate-100"
-                      }`}
-                    >
-                      Tous
-                    </button>
-                    {urgencyCounts.high && (
-                      <button
-                        onClick={() => setRiskUrgencyFilter("high")}
-                        className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                          riskUrgencyFilter === "high"
-                            ? "bg-red-600 text-white"
-                            : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
-                        }`}
-                      >
-                        {t('high')} ({urgencyCounts.high})
-                      </button>
-                    )}
-                    {urgencyCounts.medium && (
-                      <button
-                        onClick={() => setRiskUrgencyFilter("medium")}
-                        className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                          riskUrgencyFilter === "medium"
-                            ? "bg-amber-600 text-white"
-                            : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
-                        }`}
-                      >
-                        {t('medium')} ({urgencyCounts.medium})
-                      </button>
-                    )}
-                    {urgencyCounts.low && (
-                      <button
-                        onClick={() => setRiskUrgencyFilter("low")}
-                        className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                          riskUrgencyFilter === "low"
-                            ? "bg-slate-600 text-white"
-                            : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        {t('low')} ({urgencyCounts.low})
-                      </button>
-                    )}
-                  </div>
-                ) : null;
-              })()}
-            </div>
-            <div className="space-y-3">
-              {analysis.risks
-                .filter(risk => !riskUrgencyFilter || risk.urgency === riskUrgencyFilter)
-                .map((risk, index) => (
-                <div key={index} className="p-4 bg-white rounded-xl border border-amber-100">
-                  <div className="flex items-start justify-between mb-2">
-                    <p className="font-medium text-slate-900 flex-1">{risk.description}</p>
-                    {risk.urgency && (
-                      <Badge 
-                        onClick={() => setRiskUrgencyFilter(risk.urgency)}
-                        className={`shrink-0 ml-3 cursor-pointer hover:opacity-80 transition-opacity ${
-                          risk.urgency === "high" ? "bg-red-100 text-red-700 border-red-200" :
-                          risk.urgency === "medium" ? "bg-amber-100 text-amber-700 border-amber-200" :
-                          "bg-slate-100 text-slate-700 border-slate-200"
-                        }`}
-                      >
-                        {t(risk.urgency)}
-                      </Badge>
-                    )}
-                  </div>
-                  {risk.patterns && risk.patterns.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {risk.patterns.map((pattern, pidx) => (
-                        <Badge key={pidx} variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200">
-                          {pattern}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-sm text-slate-600 mb-1">
-                     <span className="font-medium">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
-                   </p>
-                   <p className="text-sm text-amber-700">
-                     <span className="font-medium">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
-                   </p>
-                </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-amber-600" />
+              {t('riskDetails')}
+            </h3>
+            <div className="space-y-4">
+              {transformedRisks.map((risk, index) => (
+                <RoleBasedRiskDisplay key={index} risk={risk} role={userRole} />
               ))}
             </div>
           </motion.div>
