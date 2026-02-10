@@ -10,17 +10,25 @@ Deno.serve(async (req) => {
     }
 
     // Validate invitation token still exists and is valid
-    const invitation = await base44.asServiceRole.entities.InvitationToken.filter({
-      id: invitationId,
-      token: token,
-      status: 'pending'
+    const invitationRecord = await base44.asServiceRole.entities.InvitationToken.filter({
+      id: invitationId
     });
 
-    if (!invitation || invitation.length === 0) {
+    if (!invitationRecord || invitationRecord.length === 0) {
       return Response.json({ success: false, error: 'Invitation invalide' }, { status: 400 });
     }
 
-    const invitationRecord = invitation[0];
+    const inv = invitationRecord[0];
+
+    // Verify token matches
+    if (inv.token !== token) {
+      return Response.json({ success: false, error: 'Token invalide' }, { status: 400 });
+    }
+
+    // Check status
+    if (inv.status !== 'pending') {
+      return Response.json({ success: false, error: 'Invitation invalide ou déjà utilisée' }, { status: 400 });
+    }
 
     // Check expiration
     if (new Date(invitationRecord.expires_at) < new Date()) {
