@@ -6,7 +6,7 @@ Deno.serve(async (req) => {
     const { token } = await req.json();
 
     if (!token) {
-      return Response.json({ error: 'Missing token' }, { status: 400 });
+      return Response.json({ valid: false, error: 'Token requis' }, { status: 400 });
     }
 
     // Find invitation token
