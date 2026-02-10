@@ -70,9 +70,7 @@ function LayoutContent({ children, currentPageName }) {
                    variant="ghost" 
                    size="sm"
                    onClick={() => {
-                     localStorage.clear();
-                     sessionStorage.clear();
-                     window.location.replace("/");
+                     base44.auth.logout("/");
                    }}
                    className="text-slate-500 hover:text-slate-700"
                  >
