@@ -51,6 +51,15 @@ export default function Results() {
             const user = await base44.auth.me();
             const detectedRole = detectViewForUser(user);
             setUserRole(detectedRole);
+            
+            // Transform data AFTER role is detected
+            if (storedAnalysis) {
+              const parsedAnalysis = JSON.parse(storedAnalysis);
+              const riskTransformed = transformRisksForRole(parsedAnalysis.risks || [], detectedRole);
+              const blockerTransformed = transformBlockersForRole(parsedAnalysis.blockers || [], detectedRole);
+              setTransformedRisks(riskTransformed);
+              setTransformedBlockers(blockerTransformed);
+            }
           } catch (error) {
             setUserRole('contributor'); // Défaut sécurisé
           }
@@ -79,14 +88,6 @@ export default function Results() {
 
           // Display results immediately
           setAnalysis(parsedAnalysis);
-          
-          // Transform risks and blockers for role once role is detected
-          if (userRole) {
-            const riskTransformed = transformRisksForRole(parsedAnalysis.risks || [], userRole);
-            const blockerTransformed = transformBlockersForRole(parsedAnalysis.blockers || [], userRole);
-            setTransformedRisks(riskTransformed);
-            setTransformedBlockers(blockerTransformed);
-          }
 
           // Translate all LLM content if language is French
                if (language === 'fr') {
