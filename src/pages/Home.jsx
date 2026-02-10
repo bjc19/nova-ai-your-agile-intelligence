@@ -135,6 +135,7 @@ const translations = {
 
 export default function Home() {
   const [showDemoSimulator, setShowDemoSimulator] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [demoTriesLeft, setDemoTriesLeft] = useState(2);
   const [lang, setLang] = useState("en");
 
