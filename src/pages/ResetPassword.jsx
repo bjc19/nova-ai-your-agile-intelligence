@@ -74,16 +74,31 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      // Now actually reset the password with valid token
+      // Validate token and mark as used
       await base44.functions.invoke("resetPassword", {
         token: token,
         newPassword: newPassword
       });
 
+      // Update password via auth API
+      try {
+        await base44.auth.updateMe({ password: newPassword });
+      } catch (authErr) {
+        console.log("Auth update note:", authErr.message);
+      }
+
       setSuccess(true);
-      setTimeout(() => {
-        navigate(createPageUrl("Home"));
-      }, 3000);
+      
+      // Auto-login after 2 seconds
+      setTimeout(async () => {
+        try {
+          await base44.auth.login(email, newPassword);
+          window.location.href = createPageUrl("Dashboard");
+        } catch (loginErr) {
+          // If auto-login fails, redirect to Home
+          navigate(createPageUrl("Home"));
+        }
+      }, 2000);
     } catch (err) {
       setError(err.message || "Failed to reset password");
       setLoading(false);
