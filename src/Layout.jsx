@@ -22,7 +22,7 @@ function LayoutContent({ children, currentPageName }) {
     checkAuth();
   }, []);
 
-  const isPublicPage = currentPageName === "Home" || currentPageName === "Demo";
+  const isPublicPage = currentPageName === "Home" || currentPageName === "Demo" || currentPageName === "AcceptInvitation";
 
   return (
     <div className="min-h-screen bg-slate-50">
