@@ -362,9 +362,9 @@ export default function Dashboard() {
 
               }
 
-              {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
-            <MetricsRadarCard
+              {/* Actionable Metrics Radar - Only for admin/contributor */}
+              {analysisHistory.length > 0 && (userRole === 'admin' || userRole === 'contributor') &&
+              <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
