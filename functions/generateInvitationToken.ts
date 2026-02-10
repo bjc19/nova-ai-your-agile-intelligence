@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import nodemailer from 'npm:nodemailer@6.9.7';
 
 function generateToken() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -43,7 +42,7 @@ Deno.serve(async (req) => {
     // Create invitation link
     const invitationUrl = `https://www.novagile.ca/accept-invitation?token=${token}`;
 
-    // Send email with HTML template via SMTP
+    // Send email with HTML template
     const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -92,23 +91,11 @@ Deno.serve(async (req) => {
 </html>
     `;
 
-    // Configure SMTP transporter
-    const transporter = nodemailer.createTransport({
-      host: Deno.env.get('SMTP_HOST'),
-      port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
-      secure: parseInt(Deno.env.get('SMTP_PORT') || '587') === 465,
-      auth: {
-        user: Deno.env.get('SMTP_USER'),
-        pass: Deno.env.get('SMTP_PASSWORD')
-      }
-    });
-
-    // Send email
-    await transporter.sendMail({
-      from: `"Nova" <${Deno.env.get('SMTP_USER')}>`,
+    await base44.integrations.Core.SendEmail({
       to: inviteeEmail,
       subject: 'You\'re invited to join Nova AI - Agile Intelligence',
-      html: emailHtml
+      body: emailHtml,
+      from_name: 'Nova'
     });
 
     return Response.json({ success: true, message: 'Invitation sent successfully', token });
