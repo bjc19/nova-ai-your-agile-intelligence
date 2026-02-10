@@ -307,7 +307,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                   >
                     <div className="flex items-center gap-3 flex-1">
                       <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700">
-                        {user.full_name?.substring(0, 2).toUpperCase() || '??'}
+                        {user.email?.charAt(0).toUpperCase() || '?'}
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
