@@ -52,11 +52,14 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         const allHidden = new Set(members?.map(u => u.id) || []);
         setHiddenEmails(allHidden);
         
-        // Load plan from team config or assume starter
+        // Load plan from team config or assume pro for testing
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
-          // Extract plan from config if stored, otherwise default to starter
-          setCurrentPlan(configs[0].plan || 'starter');
+          // Extract plan from config if stored, otherwise default to pro
+          setCurrentPlan(configs[0].plan || 'pro');
+        } else {
+          // Default to pro for testing
+          setCurrentPlan('pro');
         }
       } catch (error) {
         console.error('Error loading workspace data:', error);
