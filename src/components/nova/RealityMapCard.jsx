@@ -42,8 +42,9 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const [isApplyingRecos, setIsApplyingRecos] = useState(false);
   const [selectedRecos, setSelectedRecos] = useState([]);
   const [appliedRecos, setAppliedRecos] = useState({}); // { recoId: { name, date } }
-  const [persistentIssues, setPersistentIssues] = useState([]); // Recommendations with persistent issues
-  const [notificationId, setNotificationId] = useState(null); // Track if notifications already sent
+   const [persistentIssues, setPersistentIssues] = useState([]); // Recommendations with persistent issues
+   const [notificationId, setNotificationId] = useState(null); // Track if notifications already sent
+   const [isCardDismissed, setIsCardDismissed] = useState(false);
 
   // Demo data if none provided
   const data = flowData || {
@@ -160,74 +161,90 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
     }
   }, [appliedRecommendations, metrics]);
 
-  const handleSendNotifications = async () => {
+  const handleSendManagerAlert = async () => {
     setIsSendingNotifications(true);
     
     try {
       const user = await base44.auth.me();
       
-      // Extract unique responsible persons from decision map
-      const responsiblePersons = decisionAnalysis.decisionMap?.map(entry => ({
-        name: entry.realDecider,
-        zone: entry.zone,
-        ticketsImpacted: entry.ticketsImpacted
-      })) || [];
+      // Build mini-report for manager
+      const miniReport = `
+🔔 ALERTE NOVA – Rapport Friction Systémique
 
-      // Send real email notifications
-      for (const person of responsiblePersons) {
-        const emailBody = `
-🔔 Nova – Signal Systémique Détecté
+═════════════════════════════════════════════
 
-Bonjour ${person.name},
+📊 INDICE DE FRICTION GLOBAL : ${frictionIndex.emoji} ${frictionIndex.label}
 
-Nova a détecté un signal dans votre zone d'influence : "${person.zone}"
+🔴 GASPILLAGES CRITIQUES DÉTECTÉS (${wastesAnalysis.wastes.length}) :
+${wastesAnalysis.wastes.map((w, i) => `
+  ${i + 1}. ${w.name}
+     Métrique : ${w.metric}
+     Impact : ${w.impact}
+     ${w.emoji}
+`).join('')}
 
-📊 Impact : ${person.ticketsImpacted} tickets concernés
-⚠️ Gaspillages identifiés : ${wastesAnalysis.wastes.length}
+👥 CARTOGRAPHIE DÉCISIONNELLE – Zones d'influence réelle vs officielle :
+${decisionAnalysis.decisionMap?.map((entry, i) => `
+  Zone ${i + 1}: ${entry.zone}
+  • Rôle officiel : ${entry.officialRole}
+  • Décideur réel : ${entry.realDecider}
+  • Tickets impactés : ${entry.ticketsImpacted}
+  • Confiance : ${entry.confidence}%
+`).join('')}
 
-${wastesAnalysis.wastes.map((w, i) => `${i + 1}. ${w.name} - ${w.metric}`).join('\n')}
+💡 PISTES SUGGÉRÉES (${suggestions.length}) :
+${suggestions.slice(0, 5).map((s, i) => `
+  ${i + 1}. ${s.text}
+     Effort: ${s.effort} | Impact: ${s.impact}
+`).join('')}
 
-💡 Pistes suggérées :
-${suggestions.slice(0, 3).map((s, i) => `${i + 1}. ${s.text}`).join('\n')}
+📈 DONNÉES : ${data.data_days} jours d'analyse
+⏰ Généré : ${new Date().toLocaleString('fr-FR')}
 
-Cette analyse est basée sur ${data.data_days} jours de données flux.
+═════════════════════════════════════════════
+Actions recommandées :
+1. Consulter le signal en détail dans Nova
+2. Valider la cartographie décisionnelle avec l'équipe
+3. Planifier une session de résolution des gaspillages
+═════════════════════════════════════════════
 
----
-🔒 Message automatique • Nova AI Scrum Master
-        `.trim();
+🔒 Analyse automatisée • Nova AI Scrum Master
+      `.trim();
 
-        // Send actual email - Note: In production, you'd need real email addresses
-        // For demo purposes, we're sending to the current user
-        try {
-          await base44.integrations.Core.SendEmail({
-            from_name: "Nova AI",
-            to: user.email,
-            subject: `🔔 Signal Systémique: ${person.zone}`,
-            body: emailBody
-          });
-        } catch (emailError) {
-          console.error(`Error sending email to ${person.name}:`, emailError);
-        }
-      }
+      // Get manager's email (from current user or configured manager email)
+      const managerEmail = user.email; // In production, this would be the manager's email
+
+      // Send mini-report to manager
+      await base44.integrations.Core.SendEmail({
+        from_name: "Nova AI",
+        to: managerEmail,
+        subject: `📊 Nova – Alerte Friction Systémique : ${frictionIndex.label}`,
+        body: miniReport
+      });
 
       // Save notification record
       const notificationRecord = await base44.entities.RealityNotification.create({
         analysis_date: new Date().toISOString(),
-        recipients: responsiblePersons,
+        recipients: [{ name: "Manager", zone: "Executive" }],
         friction_index: frictionIndex.label,
         wastes_count: wastesAnalysis.wastes.length,
         sent_by: user.email
       });
 
-      toast.success(`${responsiblePersons.length} notification(s) envoyée(s) avec succès`, {
-        description: `Envoyé à ${responsiblePersons.map(p => p.name).join(', ')}`
+      toast.success("Alerte envoyée au manager ✓", {
+        description: "Mini-rapport transmis avec succès"
       });
+      
+      // Dismiss card after 1.5 seconds
+      setTimeout(() => {
+        setIsCardDismissed(true);
+      }, 1500);
       
       setNotificationsSent(true);
       setNotificationId(notificationRecord.id);
     } catch (error) {
-      console.error("Error sending notifications:", error);
-      toast.error("Erreur lors de l'envoi des notifications");
+      console.error("Error sending manager alert:", error);
+      toast.error("Erreur lors de l'envoi de l'alerte");
     } finally {
       setIsSendingNotifications(false);
     }
