@@ -13,10 +13,10 @@ Deno.serve(async (req) => {
     const resetToken = crypto.getRandomValues(new Uint8Array(32))
       .reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), '');
     
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
 
-    // Create PasswordReset record
-    await base44.asServiceRole.entities.PasswordReset.create({
+    // Create PasswordReset record without auth requirement
+    await base44.entities.PasswordReset.create({
       email: email,
       token: resetToken,
       expires_at: expiresAt,
