@@ -51,6 +51,87 @@ export function LoginDialog({ isOpen, onClose }) {
     }
   };
 
+  if (showForgotPassword) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <button 
+              onClick={() => {
+                setShowForgotPassword(false);
+                setForgotEmail("");
+                setForgotSuccess(false);
+                setError("");
+              }}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </DialogHeader>
+
+          {forgotSuccess ? (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700">
+                Check your email for password reset instructions.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <p className="text-sm text-slate-600 mb-4">
+                Enter your email address and we'll send you instructions to reset your password.
+              </p>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">
+                  Email
+                </label>
+                <Input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  required
+                  disabled={forgotLoading}
+                  className="w-full"
+                />
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={forgotLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+              >
+                {forgotLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Reset Link"
+                )}
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(false)}
+                className="w-full text-sm text-blue-600 hover:text-blue-700"
+              >
+                Back to Sign In
+              </button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -115,6 +196,16 @@ export function LoginDialog({ isOpen, onClose }) {
               "Sign In"
             )}
           </Button>
+
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              Forgot Password?
+            </button>
+          </div>
 
           <p className="text-center text-xs text-slate-500 mt-4">
             Access by invitation only
