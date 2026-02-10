@@ -415,37 +415,55 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
             {/* Edit Role Dialog */}
             <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
-            <DialogContent>
-            <DialogHeader>
-            <DialogTitle>Modifier le rôle</DialogTitle>
-            <DialogDescription>
-             Changer le rôle de {editingUser?.full_name}
-            </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-            <Select value={newRole} onValueChange={setNewRole}>
-             <SelectTrigger>
-               <SelectValue />
-             </SelectTrigger>
-             <SelectContent>
-               <SelectItem value="user">Membre</SelectItem>
-               <SelectItem value="contributor">Contributeur</SelectItem>
-               {currentRole === 'admin' && (
-                 <SelectItem value="admin">Admin</SelectItem>
-               )}
-             </SelectContent>
-            </Select>
-            <div className="flex justify-end gap-2">
-             <Button variant="outline" onClick={() => setEditingUser(null)}>
-               Annuler
-             </Button>
-             <Button onClick={handleEditRole} className="bg-blue-600 hover:bg-blue-700 text-white">
-               Confirmer
-             </Button>
-            </div>
-            </div>
-            </DialogContent>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Modifier le rôle</DialogTitle>
+                  <DialogDescription>
+                    Changer le rôle de {editingUser?.full_name}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Select value={newRole} onValueChange={setNewRole}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Membre</SelectItem>
+                      <SelectItem value="contributor">Contributeur</SelectItem>
+                      {currentRole === 'admin' && (
+                        <SelectItem value="admin">Admin</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setEditingUser(null)}>
+                      Annuler
+                    </Button>
+                    <Button onClick={handleEditRole} className="bg-blue-600 hover:bg-blue-700 text-white">
+                      Confirmer
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
             </Dialog>
+
+            {/* Delete User Alert Dialog */}
+            <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer l'utilisateur</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Êtes-vous sûr de vouloir supprimer <strong>{userToDelete?.full_name}</strong> ? Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="flex justify-end gap-2">
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDeleteUser} className="bg-red-600 hover:bg-red-700">
+                    Supprimer
+                  </AlertDialogAction>
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
             </div>
             );
             }
