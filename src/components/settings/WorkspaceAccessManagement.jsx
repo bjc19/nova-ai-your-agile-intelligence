@@ -44,9 +44,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         const user = await base44.auth.me();
         setCurrentUser(user);
 
-        // Load workspace members from User entity
-        const allUsers = await base44.entities.User.list();
-        setUsers(allUsers || []);
+        // Load workspace members from WorkspaceMember entity
+        const members = await base44.entities.WorkspaceMember.list();
+        console.log('Members loaded:', members);
+        setUsers(members || []);
 
          // Initialize emails as visible by default
          setHiddenEmails(new Set());
