@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import { base44 } from "@/api/base44Client";
 import { useState, useEffect } from "react";
 import { formatRecommendation, getRoleTone } from "./RoleBasedMessaging";
+import { useRoleAccess } from "./useRoleAccess";
 import {
   Lightbulb,
   ArrowRight,
@@ -35,20 +36,13 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [completedItems, setCompletedItems] = useState({});
   const [translatedRecommendations, setTranslatedRecommendations] = useState(null);
   const [allSourceRecommendations, setAllSourceRecommendations] = useState([]);
-  const [userRole, setUserRole] = useState('user');
+  const { role: userRole, isAdmin, isContributor, isUser } = useRoleAccess();
+  const [localUserRole, setLocalUserRole] = useState('user');
 
-  // Fetch user role
+  // Sync local role state
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const user = await base44.auth.me();
-        setUserRole(user.role || 'user');
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-      }
-    };
-    fetchUserRole();
-  }, []);
+    setLocalUserRole(userRole);
+  }, [userRole]);
 
   // Fetch all recommendations from all sources via unified endpoint with cache
   useEffect(() => {
@@ -363,8 +357,8 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                   className="rounded-xl border border-slate-200 hover:border-amber-200 transition-all overflow-hidden"
                 >
                   <div 
-                    onClick={() => handleRecommendationClick(rec, index)}
-                    className="group p-4 hover:bg-amber-50/30 transition-all cursor-pointer"
+                    onClick={() => (isAdmin || isContributor) ? handleRecommendationClick(rec, index) : null}
+                    className={`group p-4 transition-all ${(isAdmin || isContributor) ? 'hover:bg-amber-50/30 cursor-pointer' : ''}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="p-1.5 rounded-lg bg-slate-100 group-hover:bg-amber-100 transition-colors">
@@ -386,17 +380,21 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                           {rec.description}
                         </p>
                       </div>
-                      <motion.div
-                        animate={{ rotate: isExpanded ? 90 : 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 shrink-0 transition-colors" />
-                      </motion.div>
+                      {/* Expand arrow - Admin/Contributor only */}
+                      {(isAdmin || isContributor) && (
+                        <motion.div
+                          animate={{ rotate: isExpanded ? 90 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 shrink-0 transition-colors" />
+                        </motion.div>
+                      )}
                     </div>
                   </div>
 
+                  {/* Detailed action plan - Admin/Contributor only */}
                   <AnimatePresence>
-                    {isExpanded && (
+                    {(isAdmin || isContributor) && isExpanded && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -464,7 +462,8 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
             })}
           </div>
           
-          {sourceUrl && (
+          {/* External link - Admin/Contributor only */}
+          {(isAdmin || isContributor) && sourceUrl && (
             <div className="mt-5 pt-5 border-t border-slate-100">
               <Button
                 onClick={() => window.open(sourceUrl, '_blank')}

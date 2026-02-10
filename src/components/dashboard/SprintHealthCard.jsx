@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import { isProduction } from "@/components/nova/isProduction";
 import { adaptMessage, adaptSprintHealthMessage } from "./RoleBasedMessaging";
+import { useRoleAccess } from "./useRoleAccess";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   const [jiraUrl, setJiraUrl] = useState(null);
   const [jiraClicked, setJiraClicked] = useState(false);
   const { language } = useLanguage();
-  const [userRole, setUserRole] = useState('user');
+  const { role: userRole, isAdmin, isContributor, isUser } = useRoleAccess();
+  const [localUserRole, setLocalUserRole] = useState('user');
 
   const prodMode = isProduction();
 
@@ -89,18 +91,10 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     drift_acknowledged: false,
   };
 
-  // Fetch user role
+  // Sync local role state
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const user = await base44.auth.me();
-        setUserRole(user.role || 'user');
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-      }
-    };
-    fetchUserRole();
-  }, []);
+    setLocalUserRole(userRole);
+  }, [userRole]);
 
   // Load acknowledged state from localStorage
   useEffect(() => {
@@ -212,8 +206,9 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
         </CardHeader>
 
         <CardContent className="pt-4 space-y-4">
-          {/* Key Metrics */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Key Metrics - Admin/Contributor only, simplified for Users */}
+          {(isAdmin || isContributor) && (
+            <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-xl bg-white/60 border border-slate-200">
               <div className="flex items-center gap-2 mb-1">
                 <Layers className="w-4 h-4 text-blue-500" />
@@ -243,9 +238,22 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
               </p>
             </div>
           </div>
+          )}
+          
+          {/* Simplified view for Users */}
+          {isUser && driftAnalysis.status.id === "potential_drift" && (
+            <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-center">
+              <p className="text-sm text-blue-800 font-medium mb-2">
+                💪 L'équipe travaille sur quelques défis
+              </p>
+              <p className="text-xs text-blue-600">
+                Votre collaboration et soutien sont importants en ce moment
+              </p>
+            </div>
+          )}
 
-          {/* Detected Signals - Only show if drift detected */}
-          {driftAnalysis.status.id === "potential_drift" && (driftAnalysis.signals.length > 0 || data.gdprSignals?.length > 0) && (
+          {/* Detected Signals - Admin/Contributor only */}
+          {(isAdmin || isContributor) && driftAnalysis.status.id === "potential_drift" && (driftAnalysis.signals.length > 0 || data.gdprSignals?.length > 0) && (
             <div className={`p-4 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
               <p className="text-sm font-medium text-slate-700 mb-2">Signaux observés :</p>
               <ul className="space-y-1">
@@ -345,8 +353,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
             </Dialog>
           )}
 
-          {/* Suggestions - Non prescriptive */}
-          {suggestions.length > 0 && (
+          {/* Suggestions - Admin/Contributor only */}
+          {(isAdmin || isContributor) && suggestions.length > 0 && (
             <div className="space-y-2">
               <Button
                 variant="ghost"
@@ -391,8 +399,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
             </div>
           )}
 
-          {/* Alert status & CTA - Only for drift */}
-          {driftAnalysis.status.id === "potential_drift" && (
+          {/* Alert status & CTA - Admin/Contributor only */}
+          {(isAdmin || isContributor) && driftAnalysis.status.id === "potential_drift" && (
             <div className="space-y-3 pt-2">
               {!acknowledged ? (
                 <>

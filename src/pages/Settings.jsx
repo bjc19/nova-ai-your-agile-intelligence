@@ -346,6 +346,21 @@ export default function Settings() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">{language === 'fr' ? 'Chargement...' : 'Loading...'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!canManageSettings) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-4xl mx-auto px-6 py-12">
