@@ -10,6 +10,10 @@ export function LoginDialog({ isOpen, onClose }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,6 +27,27 @@ export function LoginDialog({ isOpen, onClose }) {
     } catch (err) {
       setError("Email ou mot de passe incorrect");
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setError("");
+
+    try {
+      await base44.functions.invoke('sendPasswordResetEmail', {
+        email: forgotEmail
+      });
+      setForgotSuccess(true);
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setForgotEmail("");
+        setForgotSuccess(false);
+      }, 3000);
+    } catch (err) {
+      setError("Une erreur est survenue. Vérifiez votre email.");
+      setForgotLoading(false);
     }
   };
 
