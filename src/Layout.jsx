@@ -15,8 +15,12 @@ function LayoutContent({ children, currentPageName }) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const auth = await base44.auth.isAuthenticated();
-      setIsAuthenticated(auth);
+      try {
+        const auth = await base44.auth.isAuthenticated();
+        setIsAuthenticated(auth);
+      } catch (err) {
+        setIsAuthenticated(false);
+      }
       setIsLoading(false);
     };
     checkAuth();
