@@ -5,6 +5,8 @@ import { useLanguage } from "@/components/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Shield, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format } from "date-fns";
+import { enUS, fr } from "date-fns/locale";
 
 export default function GDPRMarkersSection({ sessionId, analysisDate }) {
   const { t, language } = useLanguage();
