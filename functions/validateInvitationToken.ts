@@ -6,40 +6,46 @@ Deno.serve(async (req) => {
     const { token } = await req.json();
 
     if (!token) {
-      return Response.json({ error: 'Token required' }, { status: 400 });
+      return Response.json({ error: 'Missing token' }, { status: 400 });
     }
 
-    // Valider le token
-    const activationTokens = await base44.asServiceRole.entities.ActivationToken.filter({
-      token: token,
-      used: false
+    // Find invitation token
+    const invitations = await base44.asServiceRole.entities.InvitationToken.filter({
+      token: token
     });
 
-    if (activationTokens.length === 0) {
-      return Response.json({ 
-        valid: false, 
-        error: 'Invitation expirée, invalide ou déjà utilisée' 
-      }, { status: 400 });
+    if (!invitations || invitations.length === 0) {
+      return Response.json({ error: 'Invalid token' }, { status: 400 });
     }
 
-    const activationToken = activationTokens[0];
+    const invitation = invitations[0];
 
-    // Vérifier l'expiration
-    const expiresAt = new Date(activationToken.expires_at);
-    if (new Date() > expiresAt) {
-      return Response.json({ 
-        valid: false, 
-        error: 'Invitation expirée' 
-      }, { status: 400 });
+    // Check if expired
+    if (new Date(invitation.expires_at) < new Date()) {
+      await base44.asServiceRole.entities.InvitationToken.update(invitation.id, {
+        status: 'expired'
+      });
+      return Response.json({ error: 'Token expired' }, { status: 400 });
     }
 
-    // Token valide
+    // Check if already used
+    if (invitation.status === 'accepted') {
+      return Response.json({ error: 'Invitation already used' }, { status: 400 });
+    }
+
+    if (invitation.status === 'rejected') {
+      return Response.json({ error: 'Invitation rejected' }, { status: 400 });
+    }
+
     return Response.json({
       valid: true,
-      email: activationToken.email,
-      client_id: activationToken.client_id
+      inviteeEmail: invitation.invitee_email,
+      role: invitation.role,
+      workspace_id: invitation.workspace_id,
+      invitationId: invitation.id
     });
   } catch (error) {
+    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
