@@ -54,7 +54,6 @@ Deno.serve(async (req) => {
     .header { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: white; padding: 40px; text-align: center; border-radius: 8px 8px 0 0; }
     .content { background: #f8f9fa; padding: 40px; border-radius: 0 0 8px 8px; }
     .cta-button { display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
-    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center; font-size: 12px; color: #666; }
     .about-section { background: white; padding: 20px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #2563eb; }
   </style>
 </head>
@@ -68,7 +67,7 @@ Deno.serve(async (req) => {
     <div class="content">
       <p>Hi ${inviteeEmail},</p>
       
-      <p><strong>${user.full_name || user.email}</strong> has invited you to join Nova AI - Agile Intelligence. We're excited to have you on board!</p>
+      <p><strong>${user.full_name || user.email}</strong> has invited you to join Nova AI - Agile Intelligence.</p>
       
       <div class="about-section">
         <h3 style="margin-top: 0;">About Nova</h3>
@@ -76,15 +75,10 @@ Deno.serve(async (req) => {
       </div>
       
       <p style="text-align: center;">
-        <a href="${invitationUrl}" class="cta-button">Join Nova AI - Your Agile AI Intelligence</a>
+        <a href="${invitationUrl}" class="cta-button">Join Nova AI</a>
       </p>
       
       <p style="text-align: center; color: #666; font-size: 14px;">This invitation expires in 7 days</p>
-      
-      <div class="footer">
-        <p>You are receiving this because you've been invited to join Nova AI - Agile Intelligence</p>
-        <p style="margin-top: 10px;">Sent with ❤️ by Nova Team</p>
-      </div>
     </div>
   </div>
 </body>
