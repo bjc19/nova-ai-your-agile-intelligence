@@ -342,9 +342,9 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Sprint Health Card - Drift Detection */}
-              {sprintHealth &&
-            <SprintHealthCard
+              {/* Sprint Health Card - Drift Detection - Only for admin/contributor */}
+              {sprintHealth && (userRole === 'admin' || userRole === 'contributor') &&
+              <SprintHealthCard
               sprintHealth={{
                 sprint_name: "Sprint 14",
                 wip_count: 8,
@@ -360,7 +360,7 @@ export default function Dashboard() {
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
 
-            }
+              }
 
               {/* Actionable Metrics Radar */}
               {analysisHistory.length > 0 &&
