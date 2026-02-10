@@ -25,16 +25,16 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.InvitationToken.update(invitation.id, {
         status: 'expired'
       });
-      return Response.json({ error: 'Token expired' }, { status: 400 });
+      return Response.json({ valid: false, error: 'Lien expiré' }, { status: 400 });
     }
 
     // Check if already used
     if (invitation.status === 'accepted') {
-      return Response.json({ error: 'Invitation already used' }, { status: 400 });
+      return Response.json({ valid: false, error: 'Lien invalide ou déjà utilisé' }, { status: 400 });
     }
 
     if (invitation.status === 'rejected') {
-      return Response.json({ error: 'Invitation rejected' }, { status: 400 });
+      return Response.json({ valid: false, error: 'Invitation refusée' }, { status: 400 });
     }
 
     return Response.json({
