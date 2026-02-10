@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     }
 
     // Find reset token (without marking as used)
-    const resetRecords = await base44.asServiceRole.entities.PasswordReset.filter({
+    const resetRecords = await base44.entities.PasswordReset.filter({
       token: token,
       used: false
     });
