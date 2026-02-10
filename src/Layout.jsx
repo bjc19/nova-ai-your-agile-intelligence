@@ -85,7 +85,7 @@ function LayoutContent({ children, currentPageName }) {
                 </Link>
                 <Button 
                   size="sm"
-                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                  onClick={() => setShowLoginDialog(true)}
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
