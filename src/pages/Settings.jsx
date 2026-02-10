@@ -337,12 +337,14 @@ export default function Settings() {
       
       if (users.length > 0) {
         await base44.entities.User.update(users[0].id, { role: newRole });
-        setCurrentRole(newRole);
         
-        // Small delay to ensure DB update completes
+        // Clear any cached auth data and reload with delay
+        localStorage.removeItem('nova_user_role');
+        sessionStorage.clear();
+        
         setTimeout(() => {
           window.location.reload();
-        }, 500);
+        }, 1000);
       }
     } catch (error) {
       console.error('Error switching role:', error);
