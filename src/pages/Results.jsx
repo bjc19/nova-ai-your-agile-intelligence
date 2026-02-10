@@ -215,6 +215,11 @@ export default function Results() {
                 {analysis.posture && (
                   <PostureIndicator postureId={analysis.posture} size="compact" />
                 )}
+                {userRole && (
+                  <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-slate-100 border-slate-300 text-slate-600">
+                    {userRole === 'admin' ? 'Vue Technique' : userRole === 'contributor' ? 'Vue Équipe' : 'Vue Business'}
+                  </Badge>
+                )}
               </div>
               <h1 className="text-3xl font-bold text-slate-900">
                 {t('analysisResults')}
@@ -388,8 +393,8 @@ export default function Results() {
           </motion.div>
         )}
 
-        {/* Blockers Table */}
-         {analysis.blockers && analysis.blockers.length > 0 && (
+        {/* Blockers Section - Role-Based View */}
+         {transformedBlockers && transformedBlockers.length > 0 && (
            <motion.div
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
@@ -400,128 +405,33 @@ export default function Results() {
                <AlertOctagon className="w-5 h-5 text-blue-600" />
                {t('detectedBlockersIssues')}
              </h2>
-             <AnalysisTable data={analysis.blockers} />
+             <div className="space-y-4">
+               {transformedBlockers.map((blocker, index) => (
+                 <RoleBasedRiskDisplay key={index} risk={blocker} role={userRole} />
+               ))}
+             </div>
            </motion.div>
          )}
 
-        {/* Risks Section */}
-         {analysis.risks && analysis.risks.length > 0 && (
+        {/* Risks Section - Role-Based View */}
+         {transformedRisks && transformedRisks.length > 0 && (
            <motion.div
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ duration: 0.5, delay: 0.25 }}
              className="mb-8"
            >
-             <div className="flex items-center justify-between mb-4">
-               <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                 <ShieldAlert className="w-5 h-5 text-amber-600" />
-                 {t('identifiedRisks')}
-               </h2>
-               {(() => {
-                 const urgencyCounts = analysis.risks.reduce((acc, r) => {
-                   if (r.urgency) acc[r.urgency] = (acc[r.urgency] || 0) + 1;
-                   return acc;
-                 }, {});
-                 return Object.keys(urgencyCounts).length > 0 ? (
-                   <div className="flex items-center gap-2 flex-wrap">
-                     <button
-                       onClick={() => setRiskUrgencyFilter(null)}
-                       className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                         !riskUrgencyFilter 
-                           ? "bg-slate-900 text-white" 
-                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                       }`}
-                     >
-                       Tous
-                     </button>
-                     {urgencyCounts.high && (
-                       <button
-                         onClick={() => setRiskUrgencyFilter("high")}
-                         className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                           riskUrgencyFilter === "high"
-                             ? "bg-red-600 text-white"
-                             : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
-                         }`}
-                       >
-                         {t('high')} ({urgencyCounts.high})
-                       </button>
-                     )}
-                     {urgencyCounts.medium && (
-                       <button
-                         onClick={() => setRiskUrgencyFilter("medium")}
-                         className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                           riskUrgencyFilter === "medium"
-                             ? "bg-amber-600 text-white"
-                             : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
-                         }`}
-                       >
-                         {t('medium')} ({urgencyCounts.medium})
-                       </button>
-                     )}
-                     {urgencyCounts.low && (
-                       <button
-                         onClick={() => setRiskUrgencyFilter("low")}
-                         className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                           riskUrgencyFilter === "low"
-                             ? "bg-slate-600 text-white"
-                             : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
-                         }`}
-                       >
-                         {t('low')} ({urgencyCounts.low})
-                       </button>
-                     )}
-                   </div>
-                 ) : null;
-               })()}
+             <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+               <ShieldAlert className="w-5 h-5 text-amber-600" />
+               {t('identifiedRisks')}
+             </h2>
+             <div className="space-y-4">
+               {transformedRisks.map((risk, index) => (
+                 <RoleBasedRiskDisplay key={index} risk={risk} role={userRole} />
+               ))}
              </div>
-           <div className="grid md:grid-cols-2 gap-4">
-             {analysis.risks
-               .filter(risk => !riskUrgencyFilter || risk.urgency === riskUrgencyFilter)
-               .map((risk, index) => (
-               <motion.div
-                 key={index}
-                 initial={{ opacity: 0, y: 10 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                 className="p-5 rounded-xl border border-slate-200 bg-white"
-               >
-                 <div className="flex items-start justify-between mb-2">
-                   <p className="font-medium text-slate-900 flex-1">{risk.description}</p>
-                   {risk.urgency && (
-                     <Badge 
-                       onClick={() => setRiskUrgencyFilter(risk.urgency)}
-                       className={`shrink-0 ml-3 cursor-pointer hover:opacity-80 transition-opacity ${
-                         risk.urgency === "high" ? "bg-red-100 text-red-700 border-red-200" :
-                         risk.urgency === "medium" ? "bg-amber-100 text-amber-700 border-amber-200" :
-                         "bg-slate-100 text-slate-700 border-slate-200"
-                       }`}
-                     >
-                       {t(risk.urgency)}
-                     </Badge>
-                   )}
-                   </div>
-                   {risk.patterns && risk.patterns.length > 0 && (
-                   <div className="flex flex-wrap gap-1 mb-2">
-                     {risk.patterns.map((pattern, pidx) => (
-                       <Badge key={pidx} variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200">
-                         {pattern}
-                       </Badge>
-                     ))}
-                   </div>
-                   )}
-                   <div className="space-y-2 text-sm">
-                   <p className="text-slate-600">
-                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Impact :' : 'Impact:'}</span> {risk.impact}
-                    </p>
-                    <p className="text-slate-600">
-                      <span className="font-medium text-slate-700">{language === 'fr' ? 'Atténuation :' : 'Mitigation:'}</span> {risk.mitigation}
-                    </p>
-                   </div>
-               </motion.div>
-             ))}
-           </div>
-         </motion.div>
-        )}
+           </motion.div>
+         )}
 
         {/* GDPR Markers Section (if from Slack) */}
         {analysis.sourceName === "Slack" && (
