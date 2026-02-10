@@ -334,20 +334,35 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                      </Badge>
-                      {canManage && user.email !== currentUser?.email && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleRemoveUser(user.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
+                       {canEditUserRole(user) ? (
+                         <button
+                           onClick={() => {
+                             setEditingUser(user);
+                             setNewRole(user.role);
+                           }}
+                           className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
+                         >
+                           <Badge variant="outline" className="text-xs">
+                             {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                           </Badge>
+                           <Edit2 className="w-3.5 h-3.5 text-slate-500" />
+                         </button>
+                       ) : (
+                         <Badge variant="outline" className="text-xs">
+                           {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                         </Badge>
+                       )}
+                       {canManage && user.email !== currentUser?.email && (
+                         <Button 
+                           variant="ghost" 
+                           size="icon"
+                           onClick={() => handleRemoveUser(user.id)}
+                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </Button>
+                       )}
+                     </div>
                   </div>
                 ))
               )}
