@@ -305,41 +305,41 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                     key={user.id}
                     className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
                   >
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700">
-                        {user.full_name?.substring(0, 2).toUpperCase() || '??'}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs text-slate-500">
-                            {hiddenEmails.has(user.id) ? '••••••••••' : user.email}
-                          </p>
-                          {canToggleEmail && (
-                            <button
-                              onClick={() => {
-                                setHiddenEmails(prev => {
-                                  const newSet = new Set(prev);
-                                  if (newSet.has(user.id)) {
-                                    newSet.delete(user.id);
-                                  } else {
-                                    newSet.add(user.id);
-                                  }
-                                  return newSet;
-                                });
-                              }}
-                              className="text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                              {hiddenEmails.has(user.id) ? (
-                                <EyeOff className="w-3.5 h-3.5" />
-                              ) : (
-                                <Eye className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                       <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700 flex-shrink-0">
+                         {(user.user_name || user.full_name)?.substring(0, 2).toUpperCase() || '??'}
+                       </div>
+                       <div className="flex-1 min-w-0">
+                         <p className="text-sm font-medium text-slate-900 truncate">{user.user_name || user.full_name}</p>
+                         <div className="flex items-center gap-1.5 min-w-0">
+                           <p className="text-xs text-slate-500 truncate">
+                             {hiddenEmails.has(user.id) ? '••••••••••' : user.user_email || user.email}
+                           </p>
+                           {canToggleEmail && (
+                             <button
+                               onClick={() => {
+                                 setHiddenEmails(prev => {
+                                   const newSet = new Set(prev);
+                                   if (newSet.has(user.id)) {
+                                     newSet.delete(user.id);
+                                   } else {
+                                     newSet.add(user.id);
+                                   }
+                                   return newSet;
+                                 });
+                               }}
+                               className="text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
+                             >
+                               {hiddenEmails.has(user.id) ? (
+                                 <EyeOff className="w-3.5 h-3.5" />
+                               ) : (
+                                 <Eye className="w-3.5 h-3.5" />
+                               )}
+                             </button>
+                           )}
+                         </div>
+                       </div>
+                     </div>
                     <div className="flex items-center gap-2">
                        {canEditUserRole(user) ? (
                          <button
