@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import { format } from "date-fns";
+import { enUS, fr } from "date-fns/locale";
 import {
   MessageSquare,
   Upload,
