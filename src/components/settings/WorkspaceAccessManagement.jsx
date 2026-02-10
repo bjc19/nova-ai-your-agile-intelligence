@@ -47,9 +47,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         // Load workspace members from Nova entity
         const members = await base44.entities.WorkspaceMember.list();
         setUsers(members || []);
-
-        // Initialize all emails as visible by default
-        setHiddenEmails(new Set());
+        
+        // Initialize all emails as hidden by default
+        const allHidden = new Set(members?.map(u => u.id) || []);
+        setHiddenEmails(allHidden);
         
         // Load plan from team config or assume starter
         const configs = await base44.entities.TeamConfiguration.list();
@@ -403,7 +404,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
               </div>
             ))}
             <div className="pt-3 border-t border-slate-200 text-xs text-slate-600">
-              <p>💡 <strong>Pour augmenter votre limite :</strong>Contactez le service client Nova AI</p>
+              <p>💡 <strong>Pour augmenter votre limite :</strong> Contactez le service client Nova AI</p>
             </div>
             </CardContent>
             </Card>
