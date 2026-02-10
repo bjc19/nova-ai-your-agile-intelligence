@@ -98,25 +98,29 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     }
   };
 
-  const handleRemoveUser = async (userId) => {
+  const handleRemoveUser = (userId) => {
     if (!canManage) return;
-    
+
     const userToRemove = users.find(u => u.id === userId);
-    
+
     // Contributeur ne peut pas supprimer les admins
     if (currentRole === 'contributor' && userToRemove?.role === 'admin') {
-      setMessage({ type: 'error', text: 'Les contributeurs ne peuvent pas supprimer les admins' });
+      toast.error('Les contributeurs ne peuvent pas supprimer les admins');
       return;
     }
-    
+
+    setUserToDelete(userToRemove);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
     try {
-      const confirmed = window.confirm('Confirmer la suppression de cet utilisateur?');
-      if (confirmed) {
-        setMessage({ type: 'success', text: 'Utilisateur supprimé' });
-        setUsers(users.filter(u => u.id !== userId));
-      }
+      setUsers(users.filter(u => u.id !== userToDelete.id));
+      toast.success('Utilisateur supprimé avec succès');
+      setUserToDelete(null);
     } catch (error) {
-      setMessage({ type: 'error', text: 'Erreur lors de la suppression' });
+      toast.error('Erreur lors de la suppression');
     }
   };
 
