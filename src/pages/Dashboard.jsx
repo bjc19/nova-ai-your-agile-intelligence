@@ -100,11 +100,19 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history
+  // Fetch analysis history (admin sees all, others see only theirs via RLS)
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
+    queryKey: ['analysisHistory', user?.role],
+    queryFn: async () => {
+      if (user?.role === 'admin') {
+        // Admin: fetch all analyses using service role
+        return await base44.asServiceRole.entities.AnalysisHistory.list('-created_date', 100);
+      } else {
+        // Non-admin: RLS filters automatically
+        return await base44.entities.AnalysisHistory.list('-created_date', 100);
+      }
+    },
+    enabled: !isLoading && !!user
   });
 
   // Filter analysis history based on selected period
@@ -337,18 +345,9 @@ export default function Dashboard() {
           </div>
         }
 
-        {/* Recent Analyses */}
-        <RecentAnalyses analyses={analysisHistory} />
-        
-        {/* Key Recommendations */}
-        <KeyRecommendations
-          latestAnalysis={latestAnalysis}
-          sourceUrl={latestAnalysis?.sourceUrl}
-          sourceName={latestAnalysis?.sourceName} />
-
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
@@ -430,11 +429,20 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
