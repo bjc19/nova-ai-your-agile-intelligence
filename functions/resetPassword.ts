@@ -30,7 +30,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Reset token has expired' }, { status: 400 });
     }
 
-    // Mark reset token as used FIRST
+    // Update the user's password via Auth API
+    try {
+      await base44.auth.resetPassword(resetRecord.email, newPassword);
+    } catch (authErr) {
+      console.error('Auth password reset failed:', authErr);
+      return Response.json({ error: 'Failed to update password' }, { status: 500 });
+    }
+
+    // Mark reset token as used after password is changed
     await base44.entities.PasswordReset.update(resetRecord.id, {
       used: true
     });
