@@ -32,7 +32,10 @@ Deno.serve(async (req) => {
 
     // Update the user's password via Auth API
     try {
-      await base44.auth.resetPassword(resetRecord.email, newPassword);
+      await base44.auth.resetPassword({
+        resetToken: token,
+        newPassword: newPassword
+      });
     } catch (authErr) {
       console.error('Auth password reset failed:', authErr);
       return Response.json({ error: 'Failed to update password' }, { status: 500 });
