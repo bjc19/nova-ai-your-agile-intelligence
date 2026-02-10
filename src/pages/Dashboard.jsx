@@ -11,6 +11,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
+import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
@@ -42,6 +43,10 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [productGoalValidated, setProductGoalValidated] = useState(() => {
+    return localStorage.getItem("productGoalValidated") === "true";
+  });
+  const [hasActiveScopeCreep, setHasActiveScopeCreep] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -53,6 +58,15 @@ export default function Dashboard() {
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
+
+        // Check for scope creep in recent signals
+        const scopeCreepPatterns = ["scope creep", "scope_creep", "élargissement", "expansion"];
+        const hasScopeCreep = recentMarkers.some((m) => 
+          scopeCreepPatterns.some(pattern => 
+            m.probleme?.toLowerCase().includes(pattern.toLowerCase())
+          )
+        );
+        setHasActiveScopeCreep(hasScopeCreep);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
       }
@@ -171,6 +185,9 @@ export default function Dashboard() {
   if (!sprintContext) {
     sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
   }
+
+  // Determine if ProductGoalCard should be shown
+  const showProductGoalCard = !productGoalValidated || hasActiveScopeCreep;
 
   // Simulated sprint health data (will come from Jira integration)
   // Only show simulated data if there are analyses in the period
@@ -433,6 +450,9 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
           </div>
         </div>
         }
