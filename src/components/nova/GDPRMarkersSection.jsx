@@ -70,8 +70,8 @@ export default function GDPRMarkersSection({ sessionId, analysisDate }) {
                 {t('gdprInsights') || 'GDPR Insights'}
                 <Badge className="bg-purple-100 text-purple-700 text-xs">#Slack</Badge>
                 <Badge variant="outline" className="text-xs">
-                  {analysisDate ? new Date(analysisDate).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}
-                </Badge>
+                   {analysisDate ? format(new Date(analysisDate), "PPp", { locale: language === 'fr' ? fr : enUS }) : format(new Date(), "PPp", { locale: language === 'fr' ? fr : enUS })}
+                 </Badge>
               </CardTitle>
               <p className="text-xs text-slate-600 mt-1">
                 {markers.length} {markers.length === 1 ? 'marqueur détecté' : 'marqueurs détectés'} • Anonymisé RGPD
