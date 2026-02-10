@@ -828,17 +828,33 @@ export function detectWorkshopType(text) {
     }
   }
 
-  // CRITICAL 2: Review vs Retrospective - External participation is key differentiator
+  // CRITICAL 2: Review vs Retrospective - Subject-centric distinction
+  // NOUVELLE COUCHE: Analyse du sujet (QUOI = produit vs COMMENT = process)
   if ((bestType === 'RETROSPECTIVE' || bestType === 'SPRINT_REVIEW') && scores.SPRINT_REVIEW && scores.RETROSPECTIVE) {
     const reviewScore = scores.SPRINT_REVIEW.score;
     const retroScore = scores.RETROSPECTIVE.score;
     
-    // If Review has external participation + product focus, it wins decisively
-    if (intention.isReviewIntention && reviewScore >= 45) {
+    // Analyse du sujet principal
+    const subjectAnalysis = analyzeSubject(text);
+    
+    // SUJET PRODUIT/INCRÉMENT = Review
+    if (subjectAnalysis.isFocusedOnProduct) {
+      // Si le focus produit est clair, Review gagne même si scores proches
       bestType = 'SPRINT_REVIEW';
       bestScore = scores.SPRINT_REVIEW;
     }
-    // If Retrospective lacks process discussion markers, Review likely wins
+    // SUJET PROCESSUS/ÉQUIPE = Retrospective
+    else if (subjectAnalysis.isFocusedOnProcess) {
+      // Si le focus process est clair, Retrospective gagne
+      bestType = 'RETROSPECTIVE';
+      bestScore = scores.RETROSPECTIVE;
+    }
+    // Fallback: external participation + product focus → Review
+    else if (intention.isReviewIntention && reviewScore >= 45) {
+      bestType = 'SPRINT_REVIEW';
+      bestScore = scores.SPRINT_REVIEW;
+    }
+    // Fallback: product focus + external participation → Review likely
     else if (intention.hasProductFocus && intention.hasExternalParticipation && reviewScore > retroScore - 5) {
       bestType = 'SPRINT_REVIEW';
       bestScore = scores.SPRINT_REVIEW;
