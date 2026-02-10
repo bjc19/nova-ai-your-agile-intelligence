@@ -43,6 +43,7 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [userRole, setUserRole] = useState(null);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -292,8 +293,8 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period and user has access */}
-            {(!selectedPeriod || analysisHistory.length > 0) && (userRole === 'admin' || userRole === 'contributor') &&
+            {/* Quick Stats - Only show if data in period */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
             <QuickStats analysisHistory={analysisHistory} />
             }
           </motion.div>
@@ -342,9 +343,9 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Sprint Health Card - Drift Detection - Only for admin/contributor */}
-              {sprintHealth && (userRole === 'admin' || userRole === 'contributor') &&
-              <SprintHealthCard
+              {/* Sprint Health Card - Drift Detection */}
+              {sprintHealth &&
+            <SprintHealthCard
               sprintHealth={{
                 sprint_name: "Sprint 14",
                 wip_count: 8,
@@ -360,11 +361,11 @@ export default function Dashboard() {
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
 
-              }
+            }
 
-              {/* Actionable Metrics Radar - Only for admin/contributor */}
-              {analysisHistory.length > 0 && (userRole === 'admin' || userRole === 'contributor') &&
-              <MetricsRadarCard
+              {/* Actionable Metrics Radar */}
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -390,9 +391,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine - Only for admin/contributor */}
-              {analysisHistory.length > 0 && (userRole === 'admin' || userRole === 'contributor') &&
-              <RealityMapCard
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
