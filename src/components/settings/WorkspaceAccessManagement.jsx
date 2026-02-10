@@ -81,29 +81,15 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
     setInviting(true);
     try {
-      // Create workspace member entry
-      await base44.entities.WorkspaceMember.create({
-        user_email: inviteEmail,
-        role: inviteRole,
-        workspace_id: 'default',
-        invited_by: currentUser?.email,
-        invitation_status: 'pending'
-      });
-
-      // Send invitation email
-      await base44.functions.invoke('sendInvitationEmail', {
+      // Generate invitation token and send email
+      await base44.functions.invoke('generateInvitationToken', {
         inviteeEmail: inviteEmail,
-        senderEmail: currentUser?.email,
-        senderName: currentUser?.full_name
+        inviteRole: inviteRole
       });
       
       setMessage({ type: 'success', text: `Invitation envoyée à ${inviteEmail}` });
       setInviteEmail('');
       setInviteRole('user');
-      
-      // Refresh users list
-      const members = await base44.entities.WorkspaceMember.list();
-      setUsers(members || []);
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Erreur lors de l\'invitation' });
     } finally {
