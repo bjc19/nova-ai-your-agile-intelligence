@@ -39,10 +39,10 @@ Deno.serve(async (req) => {
 
     return Response.json({
       valid: true,
+      id: invitation.id,
       inviteeEmail: invitation.invitee_email,
       role: invitation.role,
-      workspace_id: invitation.workspace_id,
-      invitationId: invitation.id
+      workspace_id: invitation.workspace_id
     });
   } catch (error) {
     console.error('Error:', error);

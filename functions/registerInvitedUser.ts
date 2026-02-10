@@ -5,22 +5,14 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { email, fullName, password, invitationId, token } = await req.json();
 
-    console.log('Register payload:', { email, fullName, invitationId, token: token?.substring(0, 10) + '...' });
-
     if (!email || !fullName || !password || !invitationId || !token) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate invitation token still exists and is valid
-    let invitationRecord;
-    try {
-      invitationRecord = await base44.asServiceRole.entities.InvitationToken.filter({
-        id: invitationId
-      });
-    } catch (filterErr) {
-      console.error('Filter error:', filterErr.message);
-      return Response.json({ success: false, error: 'Invitation invalide' }, { status: 400 });
-    }
+    // Find the invitation by token (more reliable than ID)
+    const invitationRecord = await base44.asServiceRole.entities.InvitationToken.filter({
+      token: token
+    });
 
     if (!invitationRecord || invitationRecord.length === 0) {
       return Response.json({ success: false, error: 'Invitation invalide' }, { status: 400 });
