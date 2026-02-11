@@ -26,8 +26,29 @@ export default function DailyQuoteCard() {
     fetchDailyQuote();
   }, []);
 
-  if (loading || !quote) {
+  if (loading) {
     return null;
+  }
+
+  if (!quote) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="rounded-xl border border-amber-200/60 bg-gradient-to-br from-amber-50 to-yellow-50/50 p-4"
+      >
+        <div className="flex gap-3">
+          <div className="shrink-0 p-1.5 rounded-lg bg-amber-100">
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-amber-800 uppercase tracking-wide">Citation du jour</p>
+            <p className="text-sm text-slate-500 mt-1">Prête dans un instant...</p>
+          </div>
+        </div>
+      </motion.div>
+    );
   }
 
   return (
