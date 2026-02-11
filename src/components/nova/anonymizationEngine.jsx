@@ -145,6 +145,14 @@ const COMMON_WORDS = new Set([
   'iteration', 'increment', 'pi', 'innovation', 'milestone', 'deadline',
   'team', 'équipe', 'member', 'membre', 'members', 'membres', 'group', 'groupe',
 
+  // Management Methodologies & Practices (CRITICAL - never anonymize)
+  'agile', 'lean', 'kanban', 'waterfall', 'framework', 'methodology', 'process',
+  'ceremony', 'ceremonies', 'ritual', 'rituals', 'practice', 'practices',
+  'workflow', 'workflows', 'pipeline', 'pipelines', 'cadence', 'cadences',
+  'stakeholder', 'stakeholders', 'backlog', 'portfolio', 'capability', 'capabilities',
+  'enabler', 'enablers', 'epic', 'epics', 'feature', 'features', 'story', 'stories',
+  'maturity', 'velocity', 'throughput', 'capacity', 'planning',
+
   // External Tools & Platforms (CRITICAL - never anonymize)
   'slack', 'jira', 'microsoft', 'teams', 'github', 'gitlab', 'confluence', 'trello',
   'devops', 'azure', 'zoom',
