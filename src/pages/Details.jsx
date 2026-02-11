@@ -430,7 +430,7 @@ export default function Details() {
                       <>
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <h3 className="font-semibold text-slate-900">
-                            {displayItem.member || displayItem.issue || displayItem.description || "-"}
+                            {anonymizeNamesInText(displayItem.member || displayItem.issue || displayItem.description || "-")}
                           </h3>
                           <div className="flex gap-2 flex-wrap justify-end">
                             {item.urgency && (
