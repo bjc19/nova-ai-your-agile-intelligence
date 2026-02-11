@@ -346,7 +346,8 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
         </CardHeader>
         <CardContent className="pt-4">
           <div className="space-y-3">
-            {recommendations.slice(0, 4).map((rec, index) => {
+            {paginatedRecs.map((rec, index) => {
+              const globalIndex = startIdx + index;
               const Icon = recommendationIcons[rec.type] || recommendationIcons.default;
               
               const isExpanded = expandedIndex === index;
