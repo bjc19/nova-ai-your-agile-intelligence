@@ -45,6 +45,7 @@ export default function Results() {
   const [transformedBlockers, setTransformedBlockers] = useState([]);
   const [showExportDialog, setShowExportDialog] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
         const storedAnalysis = sessionStorage.getItem("novaAnalysis");
