@@ -262,10 +262,12 @@ export function PricingSection() {
 
       {/* Contact Sales Modal */}
       {selectedPlan && (
-        <ContactSalesModal 
-          plan={selectedPlan} 
-          onClose={() => setSelectedPlan(null)} 
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ContactSalesModal 
+            plan={selectedPlan} 
+            onClose={() => setSelectedPlan(null)} 
+          />
+        </Suspense>
       )}
     </div>
   );
