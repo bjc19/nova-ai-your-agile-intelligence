@@ -230,11 +230,11 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   if (matchesAny(text, PLANNING_TIME.future)) score += 20;
   if (matchesAny(text, PLANNING_TIME.commitment)) score += 15;
   
-  // Intent patterns
-  if (PATTERNS.planning.futureCommitment.test(text)) score += 15;
-  if (PATTERNS.planning.estimationDiscussion.test(text)) score += 15;
-  if (PATTERNS.planning.backlogSelection.test(text)) score += 15;
-  if (PATTERNS.planning.sprintGoal.test(text)) score += 15;
+  // Intent patterns (strong indicators of Planning)
+  if (PATTERNS.planning.futureCommitment.test(text)) score += 20;
+  if (PATTERNS.planning.estimationDiscussion.test(text)) score += 20;
+  if (PATTERNS.planning.backlogSelection.test(text)) score += 20;
+  if (PATTERNS.planning.sprintGoal.test(text)) score += 20;
   
   // Anti-pattern penalties
   if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 20;
