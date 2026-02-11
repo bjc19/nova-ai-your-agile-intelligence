@@ -252,10 +252,18 @@ export default function RecentAnalyses({ analyses = [] }) {
             size="icon"
             onClick={async () => {
               setIsRefreshing(true);
-              await Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['analysisHistory'] }),
-                fetchSignals()
-              ]);
+              console.log('Refresh clicked');
+              try {
+                await Promise.all([
+                  queryClient.invalidateQueries({ queryKey: ['analysisHistory'] }),
+                  fetchSignals()
+                ]);
+                // Wait for React Query to refetch
+                await new Promise(resolve => setTimeout(resolve, 500));
+                console.log('Refresh complete');
+              } catch (error) {
+                console.error('Refresh error:', error);
+              }
               setIsRefreshing(false);
             }}
             disabled={isRefreshing}
