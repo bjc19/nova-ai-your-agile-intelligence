@@ -189,16 +189,16 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
     }
   }, [allSourceRecommendations, language, translatedRecommendations]);
 
+  // Extract known names from transcript for anonymization
+  const knownNames = new Set();
+  if (latestAnalysis?.transcript) {
+    const interlocutors = extractInterlocutors(latestAnalysis.transcript);
+    interlocutors.forEach(name => knownNames.add(name));
+  }
+
   // Combine recommendations from manual analysis + all unified sources
   const getRecommendations = () => {
     const allRecs = [];
-    const knownNames = new Set();
-    
-    // Extract known names from transcript first
-    if (latestAnalysis?.transcript) {
-      const interlocutors = extractInterlocutors(latestAnalysis.transcript);
-      interlocutors.forEach(name => knownNames.add(name));
-    }
     
     // Add recommendations from all unified sources (backend handles all sources: analysis, slack, teams, etc.)
     allSourceRecommendations.forEach((rec, idx) => {
@@ -241,13 +241,6 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
   };
 
   const allRecommendations = getRecommendations();
-  
-  // Extract known names from all recommendations for anonymization
-  const knownNames = new Set();
-  if (latestAnalysis?.transcript) {
-    const interlocutors = extractInterlocutors(latestAnalysis.transcript);
-    interlocutors.forEach(name => knownNames.add(name));
-  }
   
   // Anonymize all recommendations before pagination
   const anonymizedRecommendations = allRecommendations.map(rec => ({
