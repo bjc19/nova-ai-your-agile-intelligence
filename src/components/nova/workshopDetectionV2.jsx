@@ -25,7 +25,6 @@ const REVIEW_OBJECTS = {
   product: ['démo', 'demo', 'incrément', 'increment', 'fonctionnalité', 'feature', 'livré', 'delivered', 'release', 'version', 'production', 'utilisateur', 'user'],
   validation: ['feedback', 'validation', 'client', 'stakeholder', 'acceptance', 'acceptation', 'testé', 'tested', 'qa', 'quality'],
   demo: ['montrer', 'show', 'présenter', 'present', 'voir', 'look at', 'voici', 'here is', 'démonstration'],
-  retrospective: ['retours', 'feedback', 'suggestions', 'améliorations', 'improvements', 'backlog futur', 'future items'],
 };
 
 const RETROSPECTIVE_OBJECTS = {
@@ -36,9 +35,10 @@ const RETROSPECTIVE_OBJECTS = {
 
 const PLANNING_OBJECTS = {
   future: ['prochain sprint', 'next sprint', 'futur', 'future', 'engagement', 'commitment', 'on s\'engage', 'we commit', 'sprint objectif', 'sprint goal'],
-  estimation: ['estimation', 'story points', 'points', 'capacité', 'capacity', 'vélocité', 'velocity', 'charges', 'effort'],
-  backlogSelection: ['backlog', 'user story', 'user stories', 'histoire utilisateur'],
-  prioritization: ['priorité', 'priority', 'important', 'critère', 'criteria', 'sélection', 'selection', 'choix', 'choice'],
+  estimation: ['estimation', 'story points', 'points', 'capacité', 'capacity', 'vélocité', 'velocity', 'charges', 'effort', 'embarquer', 'undertake'],
+  backlogSelection: ['backlog', 'user story', 'user stories', 'histoire utilisateur', 'sélectionner', 'select'],
+  prioritization: ['priorité', 'priority', 'intervertir', 'swap', 'ordre', 'order', 'criblage', 'filtering'],
+  decomposition: ['découpage', 'breakdown', 'décomposition', 'tâche', 'task', 'sous-tâche', 'subtask'],
 };
 
 // ============================================
@@ -59,8 +59,9 @@ const RETROSPECTIVE_TIME = {
 };
 
 const PLANNING_TIME = {
-  future: ['prochain', 'next', 'semaine prochaine', 'next week', 'futur', 'future', 'à venir', 'upcoming', 'jusqu\'à', 'until'],
-  commitment: ['on s\'engage', 'we commit', 'engagement', 'commitment', 'promise', 'promis'],
+  future: ['prochain', 'next', 'semaine prochaine', 'next week', 'futur', 'future', 'à venir', 'upcoming', 'jusqu\'à', 'until', 'repart', 'restarting'],
+  commitment: ['on s\'engage', 'we commit', 'engagement', 'commitment', 'promise', 'promis', 'embarque', 'embarquer', 'on l\'embarque'],
+  planning_intent: ['qu\'est-ce qu\'on', 'what will', 'comment on', 'how we', 'on va', 'we will'],
 };
 
 // ============================================
@@ -87,10 +88,11 @@ const PATTERNS = {
     teamFocus: /(?:équipe|team|nous|we|ensemble|together|collaboration|collectif)/i,
   },
   planning: {
-    futureCommitment: /(?:prochain sprint|next sprint|engagement|commitment|on s'engage|we commit)/i,
-    estimationDiscussion: /(?:estimation|estimation|story points|points|capacité|capacity|vélocité|velocity)/i,
-    backlogSelection: /(?:backlog|user story|user stories|histoire utilisateur|priorité|priority|sélection|selection)/i,
-    sprintGoal: /(?:objectif|goal|objectif sprint|sprint goal|on fait|we do|on veut|we want)/i,
+    futureCommitment: /(?:prochain sprint|next sprint|engagement|commitment|on s'engage|we commit|repart|embarque)/i,
+    estimationDiscussion: /(?:estimation|story points|points|capacité|capacity|vélocité|velocity|charge)\b/i,
+    backlogSelection: /(?:\bbacklog\b|user story|user stories|histoire utilisateur|qu'est-ce qu'on|what.*on\s+(?:a|have))/i,
+    sprintGoal: /(?:objectif|goal|objectif sprint|sprint goal|comment on|how we)/i,
+    decomposition: /(?:découpage|breakdown|tâche|sous-tâche|subtask|dépendance)/i,
   },
 };
 
