@@ -274,7 +274,11 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
 
 function matchesAny(text, keywords) {
   const keywordArray = Array.isArray(keywords) ? keywords : Object.values(keywords).flat();
-  return keywordArray.some(keyword => text.includes(keyword.toLowerCase()));
+  // Word boundary matching to avoid "démarre" matching "démo"
+  return keywordArray.some(keyword => {
+    const regex = new RegExp(`\\b${keyword.toLowerCase()}\\b`, 'i');
+    return regex.test(text);
+  });
 }
 
 // ============================================
