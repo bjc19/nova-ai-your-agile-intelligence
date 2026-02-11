@@ -174,6 +174,26 @@ export const translations = {
     wantToExport: "Voulez-vous exporter cette analyse en PDF pour la partager ou l'archiver ?",
     yesExport: "Oui, exporter",
     noExport: "Non",
+
+    // RoleBasedRiskDisplay
+    technicalView: "Vue Technique",
+    teamView: "Vue Équipe",
+    businessView: "Vue Business",
+    technicalDetails: "Détails Techniques",
+    patterns: "Patterns",
+    urgency: "Urgence",
+    confidence: "Confiance",
+    affectedMembers: "Membres affectés",
+    expertActions: "Actions Expertes",
+    sprintImpact: "Impact Sprint",
+    actionableSteps: "Actions Concrètes",
+    responsible: "Responsable",
+    teamQuestions: "Questions pour l'équipe",
+    what: "Quoi",
+    importance: "Importance",
+    situation: "Contexte",
+    need: "Besoin",
+    expectedOutcome: "Résultat attendu",
     },
   en: {
     // Navigation
@@ -347,6 +367,26 @@ export const translations = {
     wantToExport: "Would you like to export this analysis as PDF to share or archive it?",
     yesExport: "Yes, export",
     noExport: "No",
+
+    // RoleBasedRiskDisplay
+    technicalView: "Technical View",
+    teamView: "Team View",
+    businessView: "Business View",
+    technicalDetails: "Technical Details",
+    patterns: "Patterns",
+    urgency: "Urgency",
+    confidence: "Confidence",
+    affectedMembers: "Affected Members",
+    expertActions: "Expert Actions",
+    sprintImpact: "Sprint Impact",
+    actionableSteps: "Concrete Actions",
+    responsible: "Responsible",
+    teamQuestions: "Team Questions",
+    what: "What",
+    importance: "Importance",
+    situation: "Situation",
+    need: "Need",
+    expectedOutcome: "Expected Outcome",
     }
     };
 
