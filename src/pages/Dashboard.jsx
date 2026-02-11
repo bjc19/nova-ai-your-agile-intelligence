@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DailyQuoteCard from "@/components/dashboard/DailyQuoteCard";
 
 import {
   Mic,
@@ -292,17 +293,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats + Daily Quote */}
-            {(!selectedPeriod || analysisHistory.length > 0) && (
-              <div className="grid md:grid-cols-4 gap-4">
-                <div className="md:col-span-3">
-                  <QuickStats analysisHistory={analysisHistory} />
-                </div>
-                <div className="md:col-span-1">
-                  <DailyQuoteCard />
-                </div>
-              </div>
-            )}
+            {/* Quick Stats - Only show if data in period */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
