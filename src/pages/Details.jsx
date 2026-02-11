@@ -469,16 +469,16 @@ export default function Details() {
                           </div>
                         )}
                         <p className="text-sm text-slate-600 mt-2">
-                          {displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-"}
+                          {anonymizeNamesInText(displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-")}
                         </p>
                         {displayItem.action && (
                           <p className="text-xs text-slate-500 mt-2">
-                            <strong>{t('action')}:</strong> {displayItem.action}
+                            <strong>{t('action')}:</strong> {anonymizeNamesInText(displayItem.action)}
                           </p>
                         )}
                         {displayItem.impact && (
                           <p className="text-xs text-slate-500 mt-1">
-                            <strong>{t('impact')}:</strong> {displayItem.impact}
+                            <strong>{t('impact')}:</strong> {anonymizeNamesInText(displayItem.impact)}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3 flex-wrap">
