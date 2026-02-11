@@ -95,7 +95,58 @@ const PATTERNS = {
 };
 
 // ============================================
-// STRUCTURAL PATTERN DETECTION (PRIMARY)
+// EXPLICIT CEREMONY DECLARATION (PRIMARY - UNBREAKABLE)
+// ============================================
+
+function detectExplicitCeremony(text) {
+  // Speaker explicitly declares the ceremony in opening
+  const firstLines = text.split('\n').slice(0, 5).join(' ').toLowerCase();
+
+  const ceremonies = {
+    retrospective: [
+      /on\s+démarre\s+la\s+rétrospective/i,
+      /on\s+fait\s+la\s+rétrospective/i,
+      /rétrospective\s+de\s+sprint/i,
+      /we\s+start\s+the\s+retrospective/i,
+      /let's\s+do\s+the\s+retro/i,
+      /sprint\s+retrospective/i,
+    ],
+    review: [
+      /on\s+démarre\s+la\s+sprint\s+review/i,
+      /on\s+fait\s+la\s+sprint\s+review/i,
+      /sprint\s+review/i,
+      /we\s+start\s+the\s+sprint\s+review/i,
+      /démo\s+de\s+sprint/i,
+      /sprint\s+demo/i,
+    ],
+    daily: [
+      /on\s+démarre\s+le\s+daily/i,
+      /daily\s+scrum/i,
+      /standup/i,
+      /stand[\s-]up/i,
+      /voici\s+le\s+daily/i,
+      /here's\s+the\s+daily/i,
+    ],
+    planning: [
+      /on\s+démarre\s+le\s+sprint\s+planning/i,
+      /sprint\s+planning/i,
+      /planification\s+de\s+sprint/i,
+      /we\s+start\s+sprint\s+planning/i,
+      /planning\s+meeting/i,
+    ],
+  };
+
+  for (const [ceremony, patterns] of Object.entries(ceremonies)) {
+    if (patterns.some(p => p.test(firstLines))) {
+      return ceremony;
+    }
+  }
+
+  return null;
+}
+
+// ============================================
+// STRUCTURAL PATTERN DETECTION (SECONDARY)
 // ============================================
 
 function detectYesterdayTodayBlockers(text) {
@@ -106,7 +157,7 @@ function detectYesterdayTodayBlockers(text) {
     /j'ai\s+terminé[\s\S]*je\s+(commence|travaille|continue)/i,
     /i\s+(finished|completed)[\s\S]*i\s+(start|work|continue)/i,
   ];
-  
+
   return patterns.some(p => p.test(text));
 }
 
