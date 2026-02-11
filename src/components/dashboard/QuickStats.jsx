@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
@@ -26,6 +26,8 @@ export default function QuickStats({ analysisHistory = [] }) {
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
   const [userRole, setUserRole] = useState('user');
+  const [visibleCards, setVisibleCards] = useState(2);
+  const containerRef = useRef(null);
 
   // Fetch user role
   useEffect(() => {
@@ -204,6 +206,28 @@ export default function QuickStats({ analysisHistory = [] }) {
     },
   ];
 
+  // Lazy load observer: charge les cartes au scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && visibleCards < 4) {
+          // Charge progressivement les cartes restantes
+          const timer = setTimeout(() => {
+            setVisibleCards(prev => Math.min(prev + 2, 4));
+          }, 200);
+          return () => clearTimeout(timer);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [visibleCards]);
+
   // Anonymize names in text
   const anonymizeNamesInText = (text) => {
     if (!text) return text;
@@ -249,8 +273,8 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
+      <div ref={containerRef} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.slice(0, visibleCards).map((stat, index) => {
           const isHealthCard = stat.labelKey === "technicalHealth";
           const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
           
