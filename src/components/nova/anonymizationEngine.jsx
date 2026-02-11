@@ -102,12 +102,14 @@ const COMMON_WORDS = new Set([
   'waiting', 'need', 'pending', 'blocked', 'done', 'progress', 'ready', 'scheduled',
   'delayed', 'completed', 'resolved', 'reopened', 'verified', 'validated', 'approved',
   'rejected', 'failed', 'passed', 'active', 'inactive', 'enabled', 'disabled',
-  'open', 'closed', 'archived', 'draft', 'published',
+  'open', 'closed', 'archived', 'draft', 'published', 'delay',
   'important', 'urgent', 'critical', 'high', 'medium', 'low', 'trying', 'working',
 
   // Results & Outputs
   'results', 'result', 'outcome', 'output', 'findings', 'finding', 'data', 'report',
   'summary', 'analysis', 'assessment', 'evaluation', 'insights', 'insight', 'conclusion',
+  'interruption', 'interruptions', 'delay', 'delays', 'may', 'might', 'could', 'encourage',
+  'établir', 'establish', 'ensure', 'provide', 'maintenir', 'maintain',
 
   // Generic nouns (not proper names)
   'issue', 'problem', 'blocker', 'risk', 'impact', 'action', 'task', 'item', 'comment',
