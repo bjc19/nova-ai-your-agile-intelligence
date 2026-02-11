@@ -120,16 +120,14 @@ export default function QuickStats({ analysisHistory = [] }) {
   }, []);
 
   const handleStatClick = (labelKey) => {
-    let detailType = null;
-    if (labelKey === "totalBlockers") {
-      detailType = "blockers";
-    } else if (labelKey === "risksIdentified") {
-      detailType = "risks";
-    } else if (labelKey === "patternRecurrence") {
-      detailType = "patterns";
-    } else if (labelKey === "resolved") {
-      detailType = "resolved";
-    }
+     let detailType = null;
+     if (labelKey === "totalBlockers") {
+       detailType = "blockers";
+     } else if (labelKey === "risksIdentified") {
+       detailType = "risks";
+     } else if (labelKey === "resolved") {
+       detailType = "resolved";
+     }
     
     if (detailType) {
       sessionStorage.setItem("detailsType", detailType);
