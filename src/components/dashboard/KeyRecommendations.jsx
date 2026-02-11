@@ -80,12 +80,19 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     fetchAllRecommendations();
     }, []);
 
-    // Extract known names from transcript for anonymization
+    // Extract known names from transcript + recommendations
     const knownNames = new Set();
     if (latestAnalysis?.transcript) {
       const interlocutors = extractInterlocutors(latestAnalysis.transcript);
       interlocutors.forEach(name => knownNames.add(name));
     }
+
+    // Also extract names from recommendations text itself
+    allSourceRecommendations.forEach(rec => {
+      const recText = rec.text || rec.description || '';
+      const capitalizedWords = (recText.match(/\b[A-Z][a-z]+\b/g) || []).filter(w => w.length > 2);
+      capitalizedWords.forEach(name => knownNames.add(name));
+    });
 
     // Combine recommendations from manual analysis + all unified sources
     const getRecommendations = () => {
