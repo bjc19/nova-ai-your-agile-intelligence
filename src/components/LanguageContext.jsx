@@ -339,6 +339,12 @@ export const translations = {
     communication_issues: "Communication Issues",
     scope_creep: "Scope Creep",
     context_switching: "Context Switching",
+
+    // Export
+    exportResults: "Export results?",
+    wantToExport: "Would you like to export this analysis as PDF to share or archive it?",
+    yesExport: "Yes, export",
+    noExport: "No",
     }
     };
 
