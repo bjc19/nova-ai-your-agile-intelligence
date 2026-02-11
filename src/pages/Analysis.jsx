@@ -450,6 +450,16 @@ Provide a detailed analysis in the following JSON format:`;
     // Store result in sessionStorage and navigate
     sessionStorage.setItem("novaAnalysis", JSON.stringify(anonymizedAnalysis));
     sessionStorage.setItem("novaTranscript", transcript);
+    
+    // Store the corrected workshop detection for display in Results
+    sessionStorage.setItem("workshopDetectionCorrected", JSON.stringify({
+      type: deepDetection.type,
+      confidence: deepDetection.confidence,
+      tags: deepDetection.tags,
+      justifications: deepDetection.justifications,
+      scores: deepDetection.scores,
+      corrected: finalWorkshopType !== workshopType
+    }));
 
     // Store source info for external CTA redirection
     const sourceInfo = {
