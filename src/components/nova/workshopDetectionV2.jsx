@@ -99,8 +99,8 @@ const PATTERNS = {
 // ============================================
 
 function detectExplicitCeremony(text) {
-  // Speaker explicitly declares the ceremony in opening
-  const firstLines = text.split('\n').slice(0, 5).join(' ').toLowerCase();
+  // Speaker explicitly declares the ceremony in opening (first 10 lines)
+  const firstLines = text.split('\n').slice(0, 10).join(' ').toLowerCase();
 
   const ceremonies = {
     retrospective: [
@@ -126,6 +126,9 @@ function detectExplicitCeremony(text) {
       /stand[\s-]up/i,
       /voici\s+le\s+daily/i,
       /here's\s+the\s+daily/i,
+      // CRITICAL: Format declaration in opening "ce que vous avez fait hier, ce que vous faites aujourd'hui, vos blocages"
+      /format[\s\w]*:\s*(?=[\s\S]*ce\s+que\s+vous\s+avez\s+fait\s+hier)(?=[\s\S]*ce\s+que\s+vous\s+faites\s+aujourd'hui)(?=[\s\S]*blocages?)/i,
+      /what\s+you\s+(?:did|worked\s+on)\s+yesterday[\s\S]*what\s+you\s+(?:are\s+)?(?:doing|working\s+on)\s+today[\s\S]*(?:blocker|blogging|blocking)/i,
     ],
     planning: [
       /on\s+démarre\s+le\s+sprint\s+planning/i,
