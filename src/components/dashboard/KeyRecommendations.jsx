@@ -424,7 +424,7 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                               </h5>
                               <div className="space-y-2">
                                 {details.map((item, idx) => {
-                                  const isCompleted = completedItems[`${index}-${idx}`];
+                                  const isCompleted = completedItems[`${globalIndex}-${idx}`];
                                   return (
                                     <motion.div
                                       key={idx}
