@@ -34,13 +34,17 @@ Deno.serve(async (req) => {
     // Create analysis record with service role to bypass RLS
     const createdAnalysis = await base44.asServiceRole.entities.AnalysisHistory.create(analysisRecord);
 
-    // Create pattern detection records in bulk
+    // Create pattern detection records in parallel (limit to 20 patterns max to avoid CPU timeout)
     if (patternDetections && patternDetections.length > 0) {
-      const patternsWithAnalysisId = patternDetections.map(pattern => ({
-        ...pattern,
-        analysis_id: createdAnalysis.id
-      }));
-      await base44.asServiceRole.entities.PatternDetection.bulkCreate(patternsWithAnalysisId);
+      const limitedPatterns = patternDetections.slice(0, 20);
+      await Promise.all(
+        limitedPatterns.map(pattern =>
+          base44.asServiceRole.entities.PatternDetection.create({
+            ...pattern,
+            analysis_id: createdAnalysis.id
+          })
+        )
+      );
     }
 
     return Response.json({ analysis: createdAnalysis });
