@@ -130,7 +130,7 @@ export const anonymizeAnalysisData = (analysis) => {
     anonymized.blockers = anonymized.blockers.map(blocker => {
       if (blocker.member) knownNames.add(blocker.member);
       if (blocker.blocked_by) knownNames.add(blocker.blocked_by);
-      
+
       return {
         ...blocker,
         member: blocker.member ? anonymizeFirstName(blocker.member) : blocker.member,
@@ -139,6 +139,13 @@ export const anonymizeAnalysisData = (analysis) => {
         action: blocker.action ? anonymizeNamesInText(blocker.action, Array.from(knownNames)) : blocker.action
       };
     });
+  }
+
+  // Add interlocutors from transcript if available (for comprehensive anonymization)
+  if (anonymized.transcript || typeof anonymized === 'string') {
+    const transcriptText = anonymized.transcript || anonymized;
+    const interlocutors = extractInterlocutors(transcriptText);
+    interlocutors.forEach(name => knownNames.add(name));
   }
 
   // Anonymize risks
