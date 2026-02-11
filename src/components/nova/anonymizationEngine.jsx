@@ -41,6 +41,32 @@ export const extractInterlocutors = (text) => {
 };
 
 /**
+ * Detect if a word is likely a verb (French or English)
+ * Checks infinitive forms and common endings
+ */
+const isVerb = (word) => {
+  const lowerWord = word.toLowerCase();
+
+  // French verb infinitive endings
+  const frenchVerbEndings = ['er', 'ir', 're', 'oir', 'oir'];
+  for (const ending of frenchVerbEndings) {
+    if (lowerWord.endsWith(ending) && lowerWord.length > 3) return true;
+  }
+
+  // Common French verb conjugation patterns
+  const frenchVerbPatterns = /^(je|tu|il|elle|on|nous|vous|ils|elles)?\s*(ai|as|a|avons|avez|ont|suis|es|est|sommes|êtes|sont|fais|fait|faisons|faites|vais|vas|va|allons|allez|vont|dois|doit|devons|devez|doivent|peux|peut|pouvons|pouvez|peuvent|veux|veut|voulons|voulez|veulent|sais|sait|savons|savez|savent|vois|voit|voyons|voyez|voient)/i;
+  if (frenchVerbPatterns.test(lowerWord)) return true;
+
+  // English verb forms
+  const englishVerbEndings = ['ing', 'ed'];
+  for (const ending of englishVerbEndings) {
+    if (lowerWord.endsWith(ending) && lowerWord.length > 4) return true;
+  }
+
+  return false;
+};
+
+/**
  * Whitelist: Terms that should NOT be anonymized
  * Includes common language words + agile/technical ecosystem terms
  */
