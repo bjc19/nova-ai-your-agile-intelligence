@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield } from "lucide-react";
-import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
+import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 
 const translateContent = async (text, targetLanguage) => {
   if (!text || targetLanguage === 'en') return text;
@@ -23,19 +23,6 @@ const translateContent = async (text, targetLanguage) => {
   } catch (error) {
     return text;
   }
-};
-
-const anonymizeNamesInText = (text) => {
-  if (!text) return text;
-  
-  // Extract potential names (capitalized words) and anonymize them
-  const namePattern = /\b([A-ZÀ-ÿ][a-zà-ÿ]+)\b/g;
-  return text.replace(namePattern, (match) => {
-    // Don't anonymize common words, articles, etc.
-    const commonWords = ['Vous', 'Excellent', 'À', 'Continuez', 'Priorisez', 'You', 'Needs', 'Keep', 'Prioritize', 'Resolved', 'Blockers', 'Risks', 'IST', 'Slack', 'Teams', 'Microsoft'];
-    if (commonWords.includes(match)) return match;
-    return anonymizeFirstName(match);
-  });
 };
 
 export default function Details() {
@@ -441,7 +428,7 @@ export default function Details() {
                       <>
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <h3 className="font-semibold text-slate-900">
-                            {anonymizeNamesInText(displayItem.member || displayItem.issue || displayItem.description || "-")}
+                            {anonymizeText(displayItem.member || displayItem.issue || displayItem.description || "-")}
                           </h3>
                           <div className="flex gap-2 flex-wrap justify-end">
                             {item.urgency && (
@@ -480,16 +467,16 @@ export default function Details() {
                           </div>
                         )}
                         <p className="text-sm text-slate-600 mt-2">
-                          {anonymizeNamesInText(displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-")}
+                          {anonymizeText(displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-")}
                         </p>
                         {displayItem.action && (
                           <p className="text-xs text-slate-500 mt-2">
-                            <strong>{t('action')}:</strong> {anonymizeNamesInText(displayItem.action)}
+                            <strong>{t('action')}:</strong> {anonymizeText(displayItem.action)}
                           </p>
                         )}
                         {displayItem.impact && (
                           <p className="text-xs text-slate-500 mt-1">
-                            <strong>{t('impact')}:</strong> {anonymizeNamesInText(displayItem.impact)}
+                            <strong>{t('impact')}:</strong> {anonymizeText(displayItem.impact)}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3 flex-wrap">
