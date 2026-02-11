@@ -80,7 +80,7 @@ export default function RecentAnalyses({ analyses = [] }) {
 
   useEffect(() => {
     fetchSignals();
-  }, [analyses]);
+  }, []);
 
   // Combine and sort analyses and signals chronologically
   useEffect(() => {
