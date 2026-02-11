@@ -42,6 +42,8 @@ export default function Results() {
   const [userRole, setUserRole] = useState(null);
   const [transformedRisks, setTransformedRisks] = useState([]);
   const [transformedBlockers, setTransformedBlockers] = useState([]);
+  const [showExportDialog, setShowExportDialog] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
         const storedAnalysis = sessionStorage.getItem("novaAnalysis");
