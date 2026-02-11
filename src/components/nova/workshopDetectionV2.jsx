@@ -289,6 +289,14 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
     return score; // Exit early: Daily pattern dominates
   }
 
+  // CRITICAL: If estimation keywords present (story points, capacité, velocity) = PLANNING, not Review
+  // This overrides ANY Review signals
+  const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
+  if (hasEstimation) {
+    score = Math.max(0, score - 100); // Absolute penalty: Planning dominates
+    return score;
+  }
+
   // Object scoring (dominant object)
   // Review = PRODUCT + DEMO (not just "feedback" which is in Retro too)
   const hasDemo = matchesAny(text, REVIEW_OBJECTS.demo);
@@ -365,42 +373,38 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
-  // Planning = FUTURE + ESTIMATION + DECOMPOSITION/SELECTION (triple requirement)
   const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
   const hasBacklogSelection = matchesAny(text, PLANNING_OBJECTS.backlogSelection);
   const hasFuture = matchesAny(text, PLANNING_OBJECTS.future);
   const hasDecomposition = matchesAny(text, PLANNING_OBJECTS.decomposition);
   const hasPrioritization = matchesAny(text, PLANNING_OBJECTS.prioritization);
   
-  // CRITICAL: Planning requires ALL THREE elements present
-  // 1. FUTURE commitment language (repart, embarque, prochain sprint)
-  // 2. ESTIMATION discussion (points, capacité, velocity)
-  // 3. DECOMPOSITION or SELECTION (tâches, découpage, sélection)
-  if (hasEstimation && hasFuture && (hasDecomposition || hasBacklogSelection)) score += 50;
+  // CRITICAL: ESTIMATION = PLANNING ABSOLUTE (100% confidence)
+  // Story points, capacity, velocity mention = Planning, period.
+  if (hasEstimation) {
+    score += 100; // Maximum score - cannot be beaten
+    return score;
+  }
   
-  // Strong signal: commitment + estimation
-  if (hasEstimation && matchesAny(text, PLANNING_TIME.commitment)) score += 25;
+  // Secondary signals: Future + Decomposition (without estimation)
+  if (hasFuture && (hasDecomposition || hasBacklogSelection)) score += 50;
+  
+  // Strong signal: commitment language
+  if (matchesAny(text, PLANNING_TIME.commitment) && hasFuture) score += 25;
   
   // Prioritization + selection = Planning activity
   if (hasPrioritization && hasBacklogSelection) score += 20;
   
   // Intent patterns (strong indicators of Planning)
-  if (PATTERNS.planning.futureCommitment.test(text) && hasEstimation) score += 20;
-  if (PATTERNS.planning.estimationDiscussion.test(text) && (hasFuture || hasDecomposition)) score += 25;
-  if (PATTERNS.planning.backlogSelection.test(text) && hasEstimation) score += 15;
-  if (PATTERNS.planning.sprintGoal.test(text) && (hasEstimation || hasFuture)) score += 15;
+  if (PATTERNS.planning.futureCommitment.test(text) && hasFuture) score += 20;
+  if (PATTERNS.planning.backlogSelection.test(text) && (hasFuture || hasDecomposition)) score += 15;
+  if (PATTERNS.planning.sprintGoal.test(text) && hasFuture) score += 15;
   if (PATTERNS.planning.decomposition.test(text) && hasBacklogSelection) score += 20;
-  
-  // CRITICAL PENALTY: Estimation discussed but NO future/decomposition = likely Review discussing improvements
-  if (hasEstimation && !hasFuture && !hasDecomposition) score -= 30;
-  
-  // Penalty: backlog/selection WITHOUT estimation = not Planning
-  if (hasBacklogSelection && !hasEstimation) score -= 25;
   
   // Anti-pattern penalties
   if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 40;
-  if (matchesAny(text, REVIEW_OBJECTS.validation) && !hasEstimation) score -= 20;
-  if (matchesAny(text, DAILY_OBJECTS.blockers) && !hasFuture) score -= 15;
+  if (matchesAny(text, REVIEW_OBJECTS.validation)) score -= 20;
+  if (matchesAny(text, DAILY_OBJECTS.blockers)) score -= 15;
   
   return Math.max(0, score);
 }
