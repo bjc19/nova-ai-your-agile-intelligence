@@ -21,7 +21,14 @@ Deno.serve(async (req) => {
     const hashedIP = hashIP(ip);
     
     // Parse request to check if it's just a status check
-    const { checkOnly } = await req.json().catch(() => ({ checkOnly: false }));
+    let checkOnly = false;
+    try {
+      const body = await req.json();
+      checkOnly = body?.checkOnly === true;
+    } catch (e) {
+      // No body or invalid JSON, assume not check-only
+      checkOnly = false;
+    }
     
     // Check if attempt record exists
     let attempt = await base44.entities.DemoAttempt.filter(
