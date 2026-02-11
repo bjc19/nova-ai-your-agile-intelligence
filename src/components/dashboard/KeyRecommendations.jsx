@@ -45,6 +45,20 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     setLocalUserRole(userRole);
   }, [userRole]);
 
+  // Keyboard navigation for pagination
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft' && currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      } else if (e.key === 'ArrowRight' && currentPage < totalPages - 1) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage, totalPages]);
+
   // Fetch all recommendations from all sources via unified endpoint (no cache - always fresh)
   useEffect(() => {
     const fetchAllRecommendations = async () => {
