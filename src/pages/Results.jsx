@@ -219,6 +219,47 @@ export default function Results() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {language === 'fr' ? 'Exporter le résultat ?' : 'Export results?'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'fr' 
+                ? 'Voulez-vous exporter cette analyse en PDF pour la partager ou l\'archiver ?'
+                : 'Would you like to export this analysis as PDF to share or archive it?'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowExportDialog(false)}
+            >
+              {language === 'fr' ? 'Non' : 'No'}
+            </Button>
+            <Button 
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {language === 'fr' ? 'Export...' : 'Exporting...'}
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  {language === 'fr' ? 'Oui, exporter' : 'Yes, export'}
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Header */}
         <motion.div
