@@ -141,7 +141,11 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
           typeof rec === 'string' ? rec : rec?.description || rec?.title || JSON.stringify(rec)
         );
 
-        const translationPrompt = `Traduis chaque recommandation en français de manière concise:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON avec les traductions en français, au même index que l'original.`;
+        const translationPrompt = `Traduis chaque recommandation en français de manière concise.
+
+RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymisé (première lettre + astérisques + dernière lettre, exemple: A*****e, I**s, S****l), tu DOIS les conserver EXACTEMENT tels quels. NE JAMAIS les dé-anonymiser ou les remplacer par des noms complets.
+
+Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON avec les traductions en français, au même index que l'original.`;
         
         try {
           const translated = await base44.integrations.Core.InvokeLLM({
@@ -261,11 +265,15 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
       const prompt = language === 'fr' 
         ? `Tu es Nova, un Scrum Master IA. Détaille cette recommandation avec un plan d'action concret sous forme de to-do items numérotés et actionnables.
 
+RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymisé (première lettre + astérisques + dernière lettre, exemple: A*****e, I**s, S****l), tu DOIS les conserver EXACTEMENT tels quels dans ton plan d'action. NE JAMAIS les dé-anonymiser.
+
 Recommandation: ${rec.title}
 Description: ${rec.description}
 
 Fournis 3-5 étapes concrètes et spécifiques que l'équipe peut suivre immédiatement. Sois pragmatique et actionnable.`
         : `You are Nova, an AI Scrum Master. Detail this recommendation with a concrete action plan in the form of numbered, actionable to-do items.
+
+ABSOLUTE ANONYMIZATION RULE: If the text contains anonymized names (first letter + asterisks + last letter, example: A*****e, I**s, S****l), you MUST keep them EXACTLY as they are in your action plan. NEVER de-anonymize them.
 
 Recommendation: ${rec.title}
 Description: ${rec.description}
@@ -294,7 +302,11 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
       // Translate action plan if French
       let actionPlan = result.action_plan;
       if (language === 'fr') {
-        const translationPrompt = `Traduis chaque étape en français de manière concise:\n\n${JSON.stringify(actionPlan)}\n\nRetourne le JSON avec les mêmes clés (step, description) mais avec les valeurs traduites en français.`;
+        const translationPrompt = `Traduis chaque étape en français de manière concise.
+
+RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymisé (première lettre + astérisques + dernière lettre, exemple: A*****e, I**s, S****l), tu DOIS les conserver EXACTEMENT tels quels. NE JAMAIS les dé-anonymiser.
+
+Étapes:\n\n${JSON.stringify(actionPlan)}\n\nRetourne le JSON avec les mêmes clés (step, description) mais avec les valeurs traduites en français.`;
         const translated = await base44.integrations.Core.InvokeLLM({
           prompt: translationPrompt,
           response_json_schema: {
