@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, AlertCircle, CheckCircle2, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { detectWorkshopType } from "@/components/nova/workshopDetection";
+import { detectWorkshopType } from "@/components/nova/workshopDetectionV2";
 import { getAntiPatternsByCeremonyType, getPatternSuggestions } from "@/components/nova/antiPatternsByType";
 
 export function DemoSimulator({ onClose, onTriesUpdate }) {
