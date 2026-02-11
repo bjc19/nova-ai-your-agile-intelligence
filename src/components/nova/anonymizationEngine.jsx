@@ -91,28 +91,13 @@ const COMMON_WORDS = new Set([
   ]);
 
 /**
- * Multi-layer name detection:
- * Layer 1: Interlocutors from "Name :" pattern
- * Layer 2: Contextual capitalization (proper nouns mid-sentence)
+ * Name detection from dialogue format:
+ * Only interlocutors (names before ":" at start of line) are considered proper names
+ * No other name detection - no false positives on common words
  */
 const getDetectionLayers = (text) => {
-  const layer1 = extractInterlocutors(text);
-  
-  // Layer 2: Detect proper nouns via capitalization patterns
-   // Matches capitalized words: at text start OR after space (not after sentence punctuation which are grammar capitals)
-   // Includes accented capitals: É, È, Ê, À, Ù, Ç, etc.
-   const properNounPattern = /(^|\s)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']+)/gm;
-  const layer2Set = new Set();
-  
-  let match;
-  while ((match = properNounPattern.exec(text)) !== null) {
-    const word = match[2].trim(); // match[2] is now the name (match[1] is ^|\s)
-    if (word.length > 0 && !COMMON_WORDS.has(word.toLowerCase()) && !layer1.includes(word)) {
-      layer2Set.add(word);
-    }
-  }
-  
-  return [...new Set([...layer1, ...Array.from(layer2Set)])];
+   // ONLY detect names from dialogue format (Name : ...)
+   return extractInterlocutors(text);
 };
 
 /**
