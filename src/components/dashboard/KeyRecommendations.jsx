@@ -174,8 +174,20 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
   const getRecommendations = () => {
     const allRecs = [];
     
-    // Add manual analysis recommendations if available
-    if (latestAnalysis?.recommendations && latestAnalysis.recommendations.length > 0) {
+    // Add recommendations from all unified sources (backend handles all sources: analysis, slack, teams, etc.)
+    allSourceRecommendations.forEach((rec, idx) => {
+      allRecs.push({
+        type: "default",
+        title: rec.text?.substring(0, 50) + (rec.text?.length > 50 ? "..." : ""),
+        description: rec.text,
+        priority: rec.priority || 'medium',
+        source: rec.source,
+        entityType: rec.entityType
+      });
+    });
+    
+    // Add manual analysis recommendations if available (only if no data from backend)
+    if (allRecs.length === 0 && latestAnalysis?.recommendations && latestAnalysis.recommendations.length > 0) {
       allRecs.push(...latestAnalysis.recommendations.map((rec, i) => {
         const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
         return {
@@ -187,18 +199,6 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
         };
       }));
     }
-    
-    // Add recommendations from all unified sources (backend handles new sources automatically)
-    allSourceRecommendations.forEach((rec, idx) => {
-      allRecs.push({
-        type: "default",
-        title: rec.text?.substring(0, 50) + (rec.text?.length > 50 ? "..." : ""),
-        description: rec.text,
-        priority: rec.priority || 'medium',
-        source: rec.source,
-        entityType: rec.entityType
-      });
-    });
     
     // If no recommendations from any source, use samples
     if (allRecs.length === 0) {
