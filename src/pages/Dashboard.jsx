@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import DailyQuoteCard from "@/components/dashboard/DailyQuoteCard";
 
 import {
   Mic,
@@ -434,7 +433,7 @@ export default function Dashboard() {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
+            <RecentAnalyses analyses={analysisHistory} key={analysisHistory.length} />
             
             {/* Integration Status */}
             <IntegrationStatus />
