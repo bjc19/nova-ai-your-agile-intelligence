@@ -117,8 +117,8 @@ function detectDailyHardOverride(text) {
       .replace(/hier/gi, 'HIER')
       .replace(/bloquage|bloquant|blockage|bloquer|obstacle|impediment|empêch/gi, 'BLOCAGE')
       .replace(/ce\s+qu[eo]|what/gi, 'CE_QUE')
-      .replace(/avez|as|a(?!u)|ai\s+(?:fait|do))/gi, 'FAIT')
-      .replace(/faites|fais|fait|doing|fait|going|va(?:is)?|vais|aller|will/gi, 'FAIT_OU_VA');
+      .replace(/avez|as|a(?!u)|ai\s+(?:fait|do)/gi, 'FAIT')
+      .replace(/faites|fais|fait|doing|going|va(?:is)?|vais|aller|will/gi, 'FAIT_OU_VA');
   };
 
   const normalized = normalizeForMatching(words);
