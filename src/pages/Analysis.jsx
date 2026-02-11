@@ -403,10 +403,16 @@ Provide a detailed analysis in the following JSON format:`;
 
     // Call backend function to create analysis with proper permissions
     console.log("Creating analysis via backend function");
-    const response = await base44.functions.invoke('createAnalysis', {
+    console.log("analysisRecord:", analysisRecord);
+    console.log("patternDetections count:", patternDetections.length);
+    
+    const payload = {
       analysisRecord,
       patternDetections
-    });
+    };
+    console.log("Payload to send:", JSON.stringify(payload).substring(0, 300));
+    
+    const response = await base44.functions.invoke('createAnalysis', payload);
     const createdAnalysis = response.data.analysis;
     console.log("Analysis created successfully:", createdAnalysis);
     
