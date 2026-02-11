@@ -166,41 +166,24 @@ export default function QuickStats({ analysisHistory = [] }) {
   const technicalHealthIndex = denominator > 0 ? (resolvedBlockers / denominator).toFixed(1) : 0;
   const healthStatus = technicalHealthIndex > 1 ? "healthy" : "critical";
   
-  // Calculate Pattern Recurrence Reduction
-  const patternRecurrenceReduction = (() => {
-    const patternsWithStatus = gdprSignals.filter(s => s.status);
-    if (patternsWithStatus.length === 0) return 0;
-    const resolvedPatterns = patternsWithStatus.filter(s => s.status === 'resolu' || s.status === 'resolved').length;
-    return Math.round((resolvedPatterns / patternsWithStatus.length) * 100);
-  })();
-
   const stats = [
-    {
-      labelKey: "totalBlockers",
-      value: totalBlockers,
-      icon: AlertOctagon,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-500/10",
-      textColor: "text-blue-600",
-    },
-    {
-      labelKey: "risksIdentified",
-      value: totalRisks,
-      icon: ShieldAlert,
-      color: "from-amber-500 to-amber-600",
-      bgColor: "bg-amber-500/10",
-      textColor: "text-amber-600",
-    },
-    {
-      labelKey: "patternRecurrence",
-      value: patternRecurrenceReduction,
-      suffix: "%",
-      icon: Repeat2,
-      color: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-500/10",
-      textColor: "text-purple-600",
-    },
-    {
+     {
+       labelKey: "totalBlockers",
+       value: totalBlockers,
+       icon: AlertOctagon,
+       color: "from-blue-500 to-blue-600",
+       bgColor: "bg-blue-500/10",
+       textColor: "text-blue-600",
+     },
+     {
+       labelKey: "risksIdentified",
+       value: totalRisks,
+       icon: ShieldAlert,
+       color: "from-amber-500 to-amber-600",
+       bgColor: "bg-amber-500/10",
+       textColor: "text-amber-600",
+     },
+     {
       labelKey: "resolved",
       value: resolvedBlockers,
       icon: CheckCircle2,
