@@ -164,6 +164,7 @@ export default function Details() {
             recurrence: marker.recurrence,
             confidence_score: marker.confidence_score,
             analysisTitle: '#Slack',
+            analysisData: { workshop_type: marker.type },
             analysisDate: marker.created_date,
           }))
       ).concat(
@@ -179,6 +180,7 @@ export default function Details() {
             recurrence: marker.recurrence,
             confidence_score: marker.confidence_score,
             analysisTitle: '#Microsoft Teams',
+            analysisData: { workshop_type: marker.type },
             analysisDate: marker.created_date,
           }))
       );
