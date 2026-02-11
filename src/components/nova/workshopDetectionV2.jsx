@@ -126,9 +126,8 @@ function detectExplicitCeremony(text) {
       /stand[\s-]up/i,
       /voici\s+le\s+daily/i,
       /here's\s+the\s+daily/i,
-      // CRITICAL: Format declaration "ce que vous avez fait hier, ce que vous faites aujourd'hui, vos blocages"
-      /ce\s+que\s+vous\s+avez\s+fait\s+hier[\s\S]*ce\s+que\s+vous\s+faites\s+aujourd'hui[\s\S]*blocages?/i,
-      /what\s+you\s+(?:did|worked\s+on)\s+yesterday[\s\S]*what\s+you\s+(?:are\s+)?(?:doing|working\s+on)\s+today[\s\S]*(?:blocker|blocking)/i,
+      // CRITICAL: Daily format declaration - hier/yesterday + aujourd'hui/today + blocages/blockers
+      /ce\s+qu[eo]\s+(?:vous|tu|on|t'a?|j'a?i)\s+(?:avez|as|a|ai)\s+fait\s+hier[\s\S]*(?:ce\s+qu[eo]|what)\s+(?:vous|tu|on|t'a?|j'a?i)\s+(?:faites|fais|fait|does?)\s+aujourd'hui[\s\S]*(?:blocages?|bloquants?|blockers?)/i,
     ],
     planning: [
       /on\s+démarre\s+le\s+sprint\s+planning/i,
