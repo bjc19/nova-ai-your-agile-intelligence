@@ -91,8 +91,22 @@ const isAdjectiveByContext = (word, text) => {
 /**
  * Whitelist: Terms that should NOT be anonymized
  * Includes common language words + agile/technical ecosystem terms
+ * CRITICAL: Includes state words, results, and generic technical terms
  */
 const COMMON_WORDS = new Set([
+  // Status & State words (CRITICAL - never anonymize)
+  'waiting', 'waiting', 'pending', 'blocked', 'done', 'progress', 'ready', 'scheduled',
+  'delayed', 'completed', 'resolved', 'reopened', 'verified', 'validated', 'approved',
+  'rejected', 'failed', 'passed', 'active', 'inactive', 'enabled', 'disabled',
+  'open', 'closed', 'archived', 'draft', 'published',
+
+  // Results & Outputs
+  'results', 'result', 'outcome', 'output', 'findings', 'finding', 'data', 'report',
+  'summary', 'analysis', 'assessment', 'evaluation', 'insights', 'insight', 'conclusion',
+
+  // Generic nouns (not proper names)
+  'issue', 'problem', 'blocker', 'risk', 'impact', 'action', 'task', 'item', 'comment',
+  'note', 'feedback', 'suggestion', 'recommendation', 'improvement', 'enhancement',
   // Common French/English grammar words
   'le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'mais', 'donc', 'car',
   'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'on', 'ce', 'cet', 'cette',
