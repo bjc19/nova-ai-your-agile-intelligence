@@ -48,13 +48,13 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     // VETO 1: Domaine du Sport (Explicite - Football, Hockey, Basketball, etc.)
     const sportsProperNouns = [
       // Football/Soccer
-      'real madrid', 'real', 'barcelone', 'barca', 'psg', 'bayern', 
-      'cristiano', 'messi', 'ronaldo', 'neymar', 'mbappe', 'clasico',
-      'liverpool', 'manchester', 'arsenal', 'chelsea', 'juventus', 'milan',
+      'real madrid', 'barcelone', 'barca', 'psg', 'bayern munich', 
+      'cristiano ronaldo', 'lionel messi', 'mbappe', 'clasico',
+      'liverpool fc', 'manchester united', 'arsenal fc', 'chelsea fc', 'juventus', 'ac milan',
       // Hockey (équipes NHL communes)
-      'canadiens', 'bruins', 'maple leafs', 'rangers', 'penguins', 'blackhawks',
+      'canadiens de montreal', 'boston bruins', 'maple leafs', 'penguins', 'blackhawks',
       // Basketball
-      'lakers', 'celtics', 'bulls', 'warriors', 'lebron', 'curry', 'jordan'
+      'los angeles lakers', 'boston celtics', 'chicago bulls', 'golden state warriors', 'lebron james', 'stephen curry', 'michael jordan'
     ].map(normalizeText);
     
     const sportsLexicon = [
