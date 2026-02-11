@@ -517,7 +517,7 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
           </div>
           
           {/* Pagination dots */}
-          {totalPages > 1 && (
+          {totalPages >= 1 && (
             <div className="flex justify-center gap-2 mt-6 pb-2">
               {Array.from({ length: totalPages }).map((_, page) => (
                 <motion.button
