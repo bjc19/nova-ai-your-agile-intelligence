@@ -26,8 +26,8 @@ export default function QuickStats({ analysisHistory = [] }) {
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
   const [userRole, setUserRole] = useState('user');
-  const [visibleCards, setVisibleCards] = useState(2);
-  const containerRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
 
   // Fetch user role
   useEffect(() => {
@@ -206,27 +206,7 @@ export default function QuickStats({ analysisHistory = [] }) {
     },
   ];
 
-  // Lazy load observer: charge les cartes au scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && visibleCards < 4) {
-          // Charge progressivement les cartes restantes
-          const timer = setTimeout(() => {
-            setVisibleCards(prev => Math.min(prev + 2, 4));
-          }, 200);
-          return () => clearTimeout(timer);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-    
-    return () => observer.disconnect();
-  }, [visibleCards]);
+
 
   // Anonymize names in text
   const anonymizeNamesInText = (text) => {
@@ -271,50 +251,72 @@ export default function QuickStats({ analysisHistory = [] }) {
     }
   };
 
+  const paginatedStats = stats.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+  const totalPages = Math.ceil(stats.length / itemsPerPage);
+
   return (
     <TooltipProvider>
-      <div ref={containerRef} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.slice(0, visibleCards).map((stat, index) => {
-          const isHealthCard = stat.labelKey === "technicalHealth";
-          const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
-          
-          return (
-            <motion.div
-              key={stat.labelKey}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 * index }}
-              onClick={() => handleStatClick(stat.labelKey)}
-              className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
-            >
-              <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`inline-flex p-2 rounded-xl ${stat.bgColor}`}>
-                    <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
-                  </div>
-                  {isHealthCard && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-xs" side="top">
-                        <div className="space-y-2 text-xs">
-                          <p className="font-semibold text-slate-100">{healthTooltip?.title}</p>
-                          <p className="text-slate-300">{healthTooltip?.formula}</p>
-                          <p className="text-slate-300 italic">{healthTooltip?.interpretation}</p>
-                          <p className="text-slate-400 border-t border-slate-600 pt-2">{healthTooltip?.tips}</p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-                <p className="text-3xl font-bold text-slate-900">{stat.value}{stat.suffix || ''}</p>
-                <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
-              </div>
-            </motion.div>
-          );
-        })}
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {paginatedStats.map((stat, index) => {
+             const isHealthCard = stat.labelKey === "technicalHealth";
+             const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
+
+             return (
+               <motion.div
+                 key={stat.labelKey}
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ duration: 0.4, delay: 0.1 * index }}
+                 onClick={() => handleStatClick(stat.labelKey)}
+                 className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
+               >
+                 <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
+                 <div className="relative">
+                   <div className="flex items-center gap-2 mb-3">
+                     <div className={`inline-flex p-2 rounded-xl ${stat.bgColor}`}>
+                       <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
+                     </div>
+                     {isHealthCard && (
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <HelpCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
+                         </TooltipTrigger>
+                         <TooltipContent className="max-w-xs" side="top">
+                           <div className="space-y-2 text-xs">
+                             <p className="font-semibold text-slate-100">{healthTooltip?.title}</p>
+                             <p className="text-slate-300">{healthTooltip?.formula}</p>
+                             <p className="text-slate-300 italic">{healthTooltip?.interpretation}</p>
+                             <p className="text-slate-400 border-t border-slate-600 pt-2">{healthTooltip?.tips}</p>
+                           </div>
+                         </TooltipContent>
+                       </Tooltip>
+                     )}
+                   </div>
+                   <p className="text-3xl font-bold text-slate-900">{stat.value}{stat.suffix || ''}</p>
+                   <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
+                 </div>
+               </motion.div>
+             );
+           })}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2">
+            {Array.from({ length: totalPages }).map((_, page) => (
+              <motion.button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  currentPage === page ? 'bg-slate-900 w-8' : 'bg-slate-300 hover:bg-slate-400'
+                }`}
+                aria-label={`Page ${page + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );
