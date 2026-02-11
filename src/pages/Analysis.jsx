@@ -388,8 +388,11 @@ Provide a detailed analysis in the following JSON format:`;
         ...result, 
         posture: posture.id, 
         context,
-        workshop_type: workshopType,
+        workshop_type: finalWorkshopType,
         workshop_focus: analysisFocus,
+        initial_detection: workshopType,
+        corrected_detection: finalWorkshopType !== workshopType ? deepDetection.type : null,
+        detection_confidence: deepDetection.confidence,
         inserted_at: new Date().toISOString()
       },
       transcript_preview: transcript.substring(0, 200),
