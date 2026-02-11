@@ -181,21 +181,167 @@ export default function Results() {
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
-      const response = await base44.functions.invoke('generateAnalysisPDF', {
-        analysis: analysis,
-        language: language,
-        userRole: userRole
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
       });
-      
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Nova-Analysis-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pageWidth - 2 * margin;
+      let yPos = margin;
+
+      // Title
+      pdf.setFontSize(20);
+      pdf.setFont(undefined, 'bold');
+      pdf.text('Nova - Analysis Report', margin, yPos);
+      yPos += 12;
+
+      // Date & User
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, 'normal');
+      const dateStr = new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US');
+      pdf.text(`${language === 'fr' ? 'Date' : 'Date'}: ${dateStr}`, margin, yPos);
+      yPos += 6;
+      pdf.text(`${language === 'fr' ? 'Analysé par' : 'Analyzed by'}: ${user?.full_name || 'User'}`, margin, yPos);
+      yPos += 15;
+
+      // Helper function
+      const addSection = (title, color, items, isRisks = false) => {
+        if (yPos + 15 > pageHeight - margin) {
+          pdf.addPage();
+          yPos = margin;
+        }
+
+        // Header background
+        pdf.setFillColor(color[0], color[1], color[2]);
+        pdf.rect(margin, yPos - 8, contentWidth, 10, 'F');
+        
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(title, margin + 3, yPos - 2);
+        yPos += 8;
+
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+
+        items.forEach((item, idx) => {
+          if (yPos + 18 > pageHeight - margin) {
+            pdf.addPage();
+            yPos = margin;
+          }
+
+          pdf.setFont(undefined, 'bold');
+          const title = isRisks ? (item.description || '').substring(0, 40) : (item.member || language === 'fr' ? 'Équipe' : 'Team');
+          pdf.text(`${idx + 1}. ${title}`, margin + 2, yPos);
+          yPos += 5;
+
+          pdf.setFont(undefined, 'normal');
+          const details = isRisks 
+            ? [
+                `${language === 'fr' ? 'Impact' : 'Impact'}: ${item.impact || ''}`,
+                `${language === 'fr' ? 'Atténuation' : 'Mitigation'}: ${item.mitigation || ''}`
+              ]
+            : [
+                `${language === 'fr' ? 'Problème' : 'Issue'}: ${item.issue || ''}`,
+                `${language === 'fr' ? 'Action' : 'Action'}: ${item.action || ''}`
+              ];
+
+          details.forEach(detail => {
+            const splitText = pdf.splitTextToSize(detail, contentWidth - 5);
+            splitText.forEach(line => {
+              if (yPos + 3 > pageHeight - margin) {
+                pdf.addPage();
+                yPos = margin;
+              }
+              pdf.text(line, margin + 5, yPos);
+              yPos += 3;
+            });
+          });
+          yPos += 3;
+        });
+      };
+
+      // Summary
+      if (analysis.summary) {
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'bold');
+        pdf.text(language === 'fr' ? 'Résumé' : 'Summary', margin, yPos);
+        yPos += 6;
+        
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        const summaryLines = pdf.splitTextToSize(analysis.summary, contentWidth);
+        summaryLines.forEach(line => {
+          if (yPos + 3 > pageHeight - margin) {
+            pdf.addPage();
+            yPos = margin;
+          }
+          pdf.text(line, margin, yPos);
+          yPos += 4;
+        });
+        yPos += 8;
+      }
+
+      // Blockers
+      if (analysis.blockers && analysis.blockers.length > 0) {
+        addSection(
+          `${language === 'fr' ? 'Blocages Détectés' : 'Detected Blockers'} (${analysis.blockers.length})`,
+          [37, 99, 235],
+          analysis.blockers.slice(0, 10)
+        );
+        yPos += 8;
+      }
+
+      // Risks
+      if (analysis.risks && analysis.risks.length > 0) {
+        addSection(
+          `${language === 'fr' ? 'Risques Identifiés' : 'Identified Risks'} (${analysis.risks.length})`,
+          [202, 138, 4],
+          analysis.risks.slice(0, 10),
+          true
+        );
+        yPos += 8;
+      }
+
+      // Recommendations
+      if (analysis.recommendations && analysis.recommendations.length > 0) {
+        if (yPos + 12 > pageHeight - margin) {
+          pdf.addPage();
+          yPos = margin;
+        }
+
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'bold');
+        pdf.setFillColor(34, 197, 94);
+        pdf.rect(margin, yPos - 8, contentWidth, 10, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.text(language === 'fr' ? 'Recommandations' : 'Recommendations', margin + 3, yPos - 2);
+        yPos += 8;
+
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        analysis.recommendations.slice(0, 5).forEach(rec => {
+          if (yPos + 4 > pageHeight - margin) {
+            pdf.addPage();
+            yPos = margin;
+          }
+          const recLines = pdf.splitTextToSize(`• ${rec}`, contentWidth - 5);
+          recLines.forEach(line => {
+            pdf.text(line, margin + 2, yPos);
+            yPos += 3;
+          });
+        });
+      }
+
+      // Save
+      pdf.save(`Nova-Analysis-${new Date().toISOString().split('T')[0]}.pdf`);
       setShowExportDialog(false);
     } catch (error) {
       console.error('Error exporting PDF:', error);
