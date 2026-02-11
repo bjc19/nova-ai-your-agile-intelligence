@@ -65,24 +65,33 @@ export default function Results() {
         detectRole();
         
         if (storedAnalysis) {
-          const parsedAnalysis = JSON.parse(storedAnalysis);
-          // Add source info from sessionStorage if available
-          const sourceInfo = sessionStorage.getItem("analysisSource");
-          if (sourceInfo) {
-            const { url, name } = JSON.parse(sourceInfo);
-            parsedAnalysis.sourceUrl = url;
-            parsedAnalysis.sourceName = name;
-          }
+           const parsedAnalysis = JSON.parse(storedAnalysis);
+           // Add source info from sessionStorage if available
+           const sourceInfo = sessionStorage.getItem("analysisSource");
+           if (sourceInfo) {
+             const { url, name } = JSON.parse(sourceInfo);
+             parsedAnalysis.sourceUrl = url;
+             parsedAnalysis.sourceName = name;
+           }
 
-          // Detect workshop type if transcript is available
-          if (storedTranscript) {
-            const detected = detectWorkshopType(storedTranscript);
-            setWorkshopDetection(detected);
-            
-            // Check if out of context
-            const isOutOfContext = detected.tags && detected.tags.includes('#HorsContexte');
-            setIsOutOfContext(isOutOfContext);
-          }
+           // Try to use corrected workshop detection from Analysis phase
+           const storedDetection = sessionStorage.getItem("workshopDetectionCorrected");
+           if (storedDetection) {
+             const correctedDetection = JSON.parse(storedDetection);
+             setWorkshopDetection(correctedDetection);
+
+             // Check if out of context
+             const isOutOfContext = correctedDetection.tags && correctedDetection.tags.includes('#HorsContexte');
+             setIsOutOfContext(isOutOfContext);
+           } else if (storedTranscript) {
+             // Fallback: Detect workshop type if transcript is available and no corrected detection was stored
+             const detected = detectWorkshopType(storedTranscript);
+             setWorkshopDetection(detected);
+
+             // Check if out of context
+             const isOutOfContext = detected.tags && detected.tags.includes('#HorsContexte');
+             setIsOutOfContext(isOutOfContext);
+           }
 
           // Display results immediately
           setAnalysis(parsedAnalysis);
