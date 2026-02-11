@@ -224,7 +224,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       'reviewer', 'merger', 'commiter', 'refactoriser',
       'documenter', 'reporter', 'escalader', 'resoudre blocage',
       'analyser besoin', 'specifier', 'faciliter ceremonie',
-      'animer atelier', 'coordonner equipe', 'piloter projet'
+      'animer atelier', 'piloter projet'
     ].map(normalizeText);
 
     // Champ L4: PROBLÉMATIQUES PROJET (Issues Techniques)
