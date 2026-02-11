@@ -167,23 +167,32 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
   if (hasStructuralPatternDaily) score -= 50;
   
   // Object scoring (dominant object)
-  if (matchesAny(text, REVIEW_OBJECTS.product)) score += 30;
-  if (matchesAny(text, REVIEW_OBJECTS.validation)) score += 25;
-  if (matchesAny(text, REVIEW_OBJECTS.demo)) score += 25;
+  // Review = PRODUCT + DEMO (not just "feedback" which is in Retro too)
+  const hasDemo = matchesAny(text, REVIEW_OBJECTS.demo);
+  const hasProduct = matchesAny(text, REVIEW_OBJECTS.product);
+  
+  if (hasDemo) score += 35;
+  if (hasProduct) score += 30;
+  if (hasDemo && hasProduct) score += 15;
+  
+  // Validation only counts if Demo OR Product is present (context-specific)
+  if (matchesAny(text, REVIEW_OBJECTS.validation) && (hasDemo || hasProduct)) score += 20;
   
   // Temporality scoring (past tense confirms review)
   if (matchesAny(text, REVIEW_TIME.past)) score += 15;
   
   // Intent patterns
-  if (PATTERNS.review.demoIndicator.test(text)) score += 15;
-  if (PATTERNS.review.deliveryFocus.test(text)) score += 15;
-  if (PATTERNS.review.feedbackRequest.test(text)) score += 15;
-  if (PATTERNS.review.stakeholder.test(text)) score += 10;
+  if (PATTERNS.review.demoIndicator.test(text)) score += 20;
+  if (PATTERNS.review.deliveryFocus.test(text)) score += 20;
+  if (PATTERNS.review.stakeholder.test(text)) score += 15;
   
-  // Anti-pattern penalties: Planning-specific keywords (without engagement/estimation)
-  // If Planning keywords exist but NOT followed by capacity/estimation discussion, likely Review proposing future work
+  // Heavy penalty: if team/process/improvement keywords dominate → Retrospective, not Review
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score -= 25;
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score -= 20;
+  
+  // Anti-pattern penalties
   if (matchesAny(text, PLANNING_OBJECTS.future) && !matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 10;
-  if (matchesAny(text, DAILY_OBJECTS.tasks)) score -= 10;
+  if (matchesAny(text, DAILY_OBJECTS.blockers)) score -= 15;
   
   return Math.max(0, score);
 }
