@@ -8,7 +8,11 @@ export async function invokeLLMWithAutoTranslate(prompt, responseSchema, languag
 
   // Auto-translate if language is French
   if (language === 'fr' && typeof result === 'string') {
-    const translationPrompt = `Traduis le texte suivant en français de manière concise et claire:\n\n${result}`;
+    const translationPrompt = `Traduis le texte suivant en français de manière concise et claire.
+
+RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymisé (première lettre + astérisques + dernière lettre, exemple: A*****e, I**s, S****l), tu DOIS les conserver EXACTEMENT tels quels. NE JAMAIS les dé-anonymiser ou les remplacer par des noms complets.
+
+Texte:\n\n${result}`;
     const translated = await base44.integrations.Core.InvokeLLM({
       prompt: translationPrompt
     });
@@ -22,7 +26,11 @@ export async function invokeLLMWithAutoTranslate(prompt, responseSchema, languag
       
       for (const [key, value] of Object.entries(translated)) {
         if (typeof value === 'string' && value.length > 20) {
-          const translationPrompt = `Traduis le texte suivant en français de manière concise et claire:\n\n${value}`;
+          const translationPrompt = `Traduis le texte suivant en français de manière concise et claire.
+
+RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymisé (première lettre + astérisques + dernière lettre, exemple: A*****e, I**s, S****l), tu DOIS les conserver EXACTEMENT tels quels. NE JAMAIS les dé-anonymiser ou les remplacer par des noms complets.
+
+Texte:\n\n${value}`;
           translated[key] = await base44.integrations.Core.InvokeLLM({
             prompt: translationPrompt
           });
@@ -30,7 +38,11 @@ export async function invokeLLMWithAutoTranslate(prompt, responseSchema, languag
           translated[key] = await Promise.all(
             value.map(async (item) => {
               if (typeof item === 'string' && item.length > 20) {
-                const translationPrompt = `Traduis le texte suivant en français de manière concise et claire:\n\n${item}`;
+                const translationPrompt = `Traduis le texte suivant en français de manière concise et claire.
+
+RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymisé (première lettre + astérisques + dernière lettre, exemple: A*****e, I**s, S****l), tu DOIS les conserver EXACTEMENT tels quels. NE JAMAIS les dé-anonymiser ou les remplacer par des noms complets.
+
+Texte:\n\n${item}`;
                 return await base44.integrations.Core.InvokeLLM({
                   prompt: translationPrompt
                 });
