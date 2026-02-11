@@ -45,6 +45,8 @@ export default function Details() {
   const [analysisHistory, setAnalysisHistory] = useState([]);
   const [translatedItems, setTranslatedItems] = useState({});
   const [urgencyFilter, setUrgencyFilter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 10;
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -378,8 +380,15 @@ export default function Details() {
             <p className="text-slate-500 text-lg">{t('noItemsFound')}</p>
           </motion.div>
         ) : (
-          <div className="space-y-3">
-            {filteredItems.map((item, index) => {
+                  <div className="space-y-4">
+                    {/* Pagination info */}
+                    <div className="text-sm text-slate-500 mb-4">
+                      Page {currentPage + 1} / {Math.ceil(filteredItems.length / itemsPerPage)} • {filteredItems.length} total
+                    </div>
+
+                    {/* Items */}
+                    <div className="space-y-3">
+                    {filteredItems.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((item, index) => {
               const cacheKey = `${item.id}-${language}`;
               const displayItem = translatedItems[cacheKey] || item;
               
@@ -512,10 +521,48 @@ export default function Details() {
                   </div>
                 </div>
               </motion.div>
-            );
-            })}
-          </div>
-        )}
+              );
+              })}
+              </div>
+
+              {/* Pagination buttons */}
+              {Math.ceil(filteredItems.length / itemsPerPage) > 1 && (
+              <div className="flex justify-center gap-2 mt-6 pt-4 border-t border-slate-200">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                  disabled={currentPage === 0}
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  ← Précédent
+                </button>
+                <div className="flex gap-1 items-center">
+                  {Array.from({ length: Math.ceil(filteredItems.length / itemsPerPage) }).map((_, page) => (
+                    <motion.button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`w-8 h-8 rounded-lg transition-all ${
+                        currentPage === page
+                          ? 'bg-slate-900 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {page + 1}
+                    </motion.button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredItems.length / itemsPerPage) - 1, prev + 1))}
+                  disabled={currentPage === Math.ceil(filteredItems.length / itemsPerPage) - 1}
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Suivant →
+                </button>
+              </div>
+              )}
+              </div>
+              )}
       </div>
     </div>
   );
