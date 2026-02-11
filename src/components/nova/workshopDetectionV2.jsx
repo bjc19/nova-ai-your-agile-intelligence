@@ -36,7 +36,8 @@ const RETROSPECTIVE_OBJECTS = {
 
 const PLANNING_OBJECTS = {
   future: ['prochain sprint', 'next sprint', 'futur', 'future', 'engagement', 'commitment', 'on s\'engage', 'we commit', 'sprint objectif', 'sprint goal'],
-  estimation: ['estimation', 'estimation', 'story points', 'points', 'capacité', 'capacity', 'vélocité', 'velocity', 'backlog', 'user story'],
+  estimation: ['estimation', 'story points', 'points', 'capacité', 'capacity', 'vélocité', 'velocity', 'charges', 'effort'],
+  backlogSelection: ['backlog', 'user story', 'user stories', 'histoire utilisateur'],
   prioritization: ['priorité', 'priority', 'important', 'critère', 'criteria', 'sélection', 'selection', 'choix', 'choice'],
 };
 
