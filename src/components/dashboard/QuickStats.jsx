@@ -158,8 +158,15 @@ export default function QuickStats({ analysisHistory = [] }) {
   
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
-  const analysesCount = analysisHistory.length;
   const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
+  
+  // Calculate Pattern Recurrence Reduction
+  const patternRecurrenceReduction = (() => {
+    const patternsWithStatus = gdprSignals.filter(s => s.status);
+    if (patternsWithStatus.length === 0) return 0;
+    const resolvedPatterns = patternsWithStatus.filter(s => s.status === 'resolu' || s.status === 'resolved').length;
+    return Math.round((resolvedPatterns / patternsWithStatus.length) * 100);
+  })();
 
   const stats = [
     {
