@@ -25,8 +25,10 @@ import {
         Loader2,
         Zap,
         ArrowRight,
-        AlertTriangle
+        AlertTriangle,
+        Download
       } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Results() {
   const navigate = useNavigate();
