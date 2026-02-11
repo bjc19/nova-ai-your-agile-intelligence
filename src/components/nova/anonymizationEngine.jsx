@@ -95,9 +95,10 @@ const getDetectionLayers = (text) => {
   const layer1 = extractInterlocutors(text);
   
   // Layer 2: Detect proper nouns via capitalization patterns
-  // Matches capitalized words NOT at sentence start and NOT common words
+  // Only matches capitalized words in MIDDLE of sentence (after space, not after sentence punctuation)
+  // Excludes words at sentence start (after . ! ? ) which are capitalized by grammar rules
   // Includes accented capitals: É, È, Ê, À, Ù, Ç, etc.
-  const properNounPattern = /(?:^|\s|:\s)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']+)/gm;
+  const properNounPattern = /(?<![.\!?])\s([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']+)/gm;
   const layer2Set = new Set();
   
   let match;
