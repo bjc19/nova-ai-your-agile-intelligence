@@ -129,17 +129,10 @@ export const anonymizeAnalysisData = (analysis) => {
         issue: blocker.issue ? anonymizeNamesInText(blocker.issue, Array.from(knownNames)) : blocker.issue,
         action: blocker.action ? anonymizeNamesInText(blocker.action, Array.from(knownNames)) : blocker.action
       };
-    });
-  }
+      });
+      }
 
-  // Add interlocutors from transcript if available (for comprehensive anonymization)
-  if (anonymized.transcript || typeof anonymized === 'string') {
-    const transcriptText = anonymized.transcript || anonymized;
-    const interlocutors = extractInterlocutors(transcriptText);
-    interlocutors.forEach(name => knownNames.add(name));
-  }
-
-  // Anonymize risks
+      // Anonymize risks
   if (anonymized.risks && Array.isArray(anonymized.risks)) {
     anonymized.risks = anonymized.risks.map(risk => {
       if (risk.affected_members) {
