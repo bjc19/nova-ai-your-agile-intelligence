@@ -98,8 +98,62 @@ const PATTERNS = {
 // EXPLICIT CEREMONY DECLARATION (PRIMARY - UNBREAKABLE)
 // ============================================
 
+/**
+ * RULE: Daily Hard Override - checks if the opening speaker announces
+ * the Daily Scrum format (hier/aujourd'hui/blocages triplet)
+ * within first 180 words or 10-12 lines
+ * Returns { isForcedDaily: boolean, confidence: number }
+ */
+function detectDailyHardOverride(text) {
+  if (!text) return { isForcedDaily: false, confidence: 0 };
+
+  // Extract first 180 words for analysis
+  const words = text.split(/\s+/).slice(0, 180).join(' ').toLowerCase();
+
+  // Normalize variations: aujourd'hui → auj + hier + bloc + (passé récent + présent/futur + obstacles)
+  const normalizeForMatching = (str) => {
+    return str
+      .replace(/aujourd['´]hui|auj\s*d?[´']?hui|aujdhui|aujourd\s+hui/gi, 'AUJOURD_HUI')
+      .replace(/hier/gi, 'HIER')
+      .replace(/bloquage|bloquant|blockage|bloquer|obstacle|impediment|empêch/gi, 'BLOCAGE')
+      .replace(/ce\s+qu[eo]|what/gi, 'CE_QUE')
+      .replace(/avez|as|a(?!u)|ai\s+(?:fait|do))/gi, 'FAIT')
+      .replace(/faites|fais|fait|doing|fait|going|va(?:is)?|vais|aller|will/gi, 'FAIT_OU_VA');
+  };
+
+  const normalized = normalizeForMatching(words);
+
+  // Pattern 1: Direct triplet detection (hier → aujourd'hui → blocages in sequence)
+  const tripletPattern = /HIER[\s\w]*CE_QUE[\s\w]*FAIT.*?AUJOURD_HUI[\s\w]*CE_QUE[\s\w]*(?:FAIT_OU_VA|vais|va)[\s\w]*(?:BLOCAGE|obstacle|empêch|impediment)/i;
+
+  // Pattern 2: Flexible announcement variations
+  const announcementPatterns = [
+    /format\s+(?:habituel|du\s+jour|de\s+(?:la\s+)?réunion)[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+    /point\s+(?:rapide|quotidien|matinal|journalier)[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+    /tour\s+de\s+table[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+    /réunion\s+(?:matinale|quotidienne|journalière)[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+    /stand[\s-]?up[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+    /daily[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+  ];
+
+  const matchesTriplet = tripletPattern.test(normalized);
+  const matchesAnnouncement = announcementPatterns.some(p => p.test(normalized));
+
+  if (matchesTriplet || matchesAnnouncement) {
+    return { isForcedDaily: true, confidence: 97 };
+  }
+
+  return { isForcedDaily: false, confidence: 0 };
+}
+
 function detectExplicitCeremony(text) {
-  // Speaker explicitly declares the ceremony in opening (first 10 lines)
+  // PRIMARY: Check Daily Hard Override (triplet pattern)
+  const dailyOverride = detectDailyHardOverride(text);
+  if (dailyOverride.isForcedDaily) {
+    return 'daily';
+  }
+
+  // SECONDARY: Check explicit ceremony declarations (first 10 lines)
   const firstLines = text.split('\n').slice(0, 10).join(' ').toLowerCase();
 
   const ceremonies = {
@@ -126,8 +180,6 @@ function detectExplicitCeremony(text) {
       /stand[\s-]up/i,
       /voici\s+le\s+daily/i,
       /here's\s+the\s+daily/i,
-      // CRITICAL: Daily format declaration - hier/yesterday + aujourd'hui/today + blocages/blockers
-      /ce\s+qu[eo]\s+(?:vous|tu|on|t'a?|j'a?i)\s+(?:avez|as|a|ai)\s+fait\s+hier[\s\S]*(?:ce\s+qu[eo]|what)\s+(?:vous|tu|on|t'a?|j'a?i)\s+(?:faites|fais|fait|does?)\s+aujourd'hui[\s\S]*(?:blocages?|bloquants?|blockers?)/i,
     ],
     planning: [
       /on\s+démarre\s+le\s+sprint\s+planning/i,
