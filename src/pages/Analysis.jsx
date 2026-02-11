@@ -16,7 +16,7 @@ import OutOfContextResult from "@/components/nova/OutOfContextResult";
 import { determinePosture, analyzeTranscriptForContext, getPosturePrompt, POSTURES } from "@/components/nova/PostureEngine";
 import ProductGoalCard from "@/components/nova/ProductGoalCard";
 import { generateAlignmentReport } from "@/components/nova/ProductGoalAlignmentEngine";
-import { detectWorkshopType } from "@/components/nova/workshopDetection";
+import { detectWorkshopType } from "@/components/nova/workshopDetectionV2";
 import { detectOutOfContext } from "@/components/nova/outOfContextDetection";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";

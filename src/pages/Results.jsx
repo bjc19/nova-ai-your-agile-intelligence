@@ -13,7 +13,7 @@ import GDPRMarkersSection from "@/components/nova/GDPRMarkersSection";
 import RoleBasedRiskDisplay from "@/components/nova/RoleBasedRiskDisplay";
 import { POSTURES } from "@/components/nova/PostureEngine";
 import { invokeLLMWithAutoTranslate } from "@/components/nova/LLMTranslator";
-import { detectWorkshopType } from "@/components/nova/workshopDetection";
+import { detectWorkshopType } from "@/components/nova/workshopDetectionV2";
 import { transformRisksForRole, transformBlockersForRole, detectViewForUser } from "@/components/nova/RiskPresentationEngine";
 import { base44 } from "@/api/base44Client";
 import { 
