@@ -82,6 +82,8 @@ export default function RecentAnalyses({ analyses = [] }) {
 
   // Combine and sort analyses and signals chronologically
   useEffect(() => {
+    console.log('RecentAnalyses: analyses changed', analyses);
+    
     const sampleAnalyses = language === 'fr' ? [
       {
         id: "1",
@@ -140,7 +142,9 @@ export default function RecentAnalyses({ analyses = [] }) {
       },
     ];
 
-    const displayAnalyses = analyses.length > 0 ? analyses.map(a => ({ ...a, type: 'analysis' })) : sampleAnalyses;
+    const displayAnalyses = Array.isArray(analyses) && analyses.length > 0 
+      ? analyses.map(a => ({ ...a, type: 'analysis' })) 
+      : sampleAnalyses;
     
     const combined = [
       ...displayAnalyses,
