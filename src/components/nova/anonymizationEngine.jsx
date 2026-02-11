@@ -177,17 +177,20 @@ export const anonymizeAnalysisData = (analysis) => {
  * Find and anonymize names mentioned in text using multi-layer detection
  * Layer 1: Interlocutors extracted from "Name :" pattern
  * Layer 2: Common first names found in text
+ * Layer 3: Known names passed via context (for recommendations, etc.)
  */
-const anonymizeNamesInText = (text) => {
+const anonymizeNamesInText = (text, knownNames = []) => {
   if (!text) return text;
 
-  // Get detected names from multi-layer detection
+  // Get detected names from multi-layer detection + add known names
   const detectedNames = getDetectionLayers(text);
+  const allNames = [...new Set([...detectedNames, ...knownNames])];
 
   let result = text;
   
   // Anonymize all detected names (word boundary matching)
-  detectedNames.forEach(name => {
+  // This works even if name is at sentence start (e.g., "Thomas, assure-toi...")
+  allNames.forEach(name => {
     const regex = new RegExp(`\\b${name}\\b`, 'gi');
     result = result.replace(regex, anonymizeFirstName(name));
   });
