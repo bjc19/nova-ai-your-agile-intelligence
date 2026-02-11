@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle2, Info, Lightbulb, Target, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 
 /**
  * Composant d'affichage de risque adapté automatiquement au rôle
@@ -28,6 +29,7 @@ export default function RoleBasedRiskDisplay({ risk, role }) {
 // ============================================================================
 
 function AdminTechnicalView({ risk }) {
+  const { t } = useLanguage();
   return (
     <Card className="border-l-4 border-l-red-500 bg-red-50/30">
       <CardHeader>
@@ -39,7 +41,7 @@ function AdminTechnicalView({ risk }) {
             <p className="text-sm text-slate-600">{risk.content}</p>
           </div>
           <Badge variant="outline" className="bg-slate-100 text-slate-700 ml-4">
-            Vue Technique
+            {t('technicalView')}
           </Badge>
         </div>
       </CardHeader>
@@ -49,12 +51,12 @@ function AdminTechnicalView({ risk }) {
           <div className="bg-slate-50 rounded-lg p-4 space-y-3">
             <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <Info className="w-4 h-4" />
-              Détails Techniques
+              {t('technicalDetails')}
             </h4>
             
             {risk.technical_details.pattern_ids?.length > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Patterns:</span>
+                <span className="text-xs text-slate-500">{t('patterns')}:</span>
                 {risk.technical_details.pattern_ids.map((id, idx) => (
                   <Badge key={idx} variant="outline" className="text-xs bg-blue-50 border-blue-200 text-blue-700">
                     {id}
@@ -65,7 +67,7 @@ function AdminTechnicalView({ risk }) {
             
             {risk.technical_details.urgency_level && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Urgence:</span>
+                <span className="text-xs text-slate-500">{t('urgency')}:</span>
                 <Badge className={getUrgencyColor(risk.technical_details.urgency_level)}>
                   {risk.technical_details.urgency_level}
                 </Badge>
@@ -74,7 +76,7 @@ function AdminTechnicalView({ risk }) {
             
             {risk.technical_details.confidence_score && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Confiance:</span>
+                <span className="text-xs text-slate-500">{t('confidence')}:</span>
                 <span className="text-sm font-medium text-slate-700">
                   {risk.technical_details.confidence_score}%
                 </span>
@@ -83,7 +85,7 @@ function AdminTechnicalView({ risk }) {
             
             {risk.technical_details.affected_members?.length > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Membres affectés:</span>
+                <span className="text-xs text-slate-500">{t('affectedMembers')}:</span>
                 <span className="text-sm text-slate-700">
                   {risk.technical_details.affected_members.join(', ')}
                 </span>
@@ -97,7 +99,7 @@ function AdminTechnicalView({ risk }) {
           <div className="space-y-2">
             <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <Target className="w-4 h-4" />
-              Actions Expertes
+              {t('expertActions')}
             </h4>
             <ul className="space-y-2">
               {risk.expert_actions.map((action, idx) => (
@@ -113,7 +115,7 @@ function AdminTechnicalView({ risk }) {
         {/* Impact Analysis */}
         {risk.impact_analysis && (
           <div className="bg-amber-50 rounded-lg p-3">
-            <p className="text-xs font-medium text-amber-800 mb-1">Impact Sprint</p>
+            <p className="text-xs font-medium text-amber-800 mb-1">{t('sprintImpact')}</p>
             <p className="text-sm text-amber-700">{risk.impact_analysis.sprint_impact}</p>
           </div>
         )}
@@ -127,6 +129,7 @@ function AdminTechnicalView({ risk }) {
 // ============================================================================
 
 function ContributorActionableView({ risk }) {
+  const { t } = useLanguage();
   return (
     <Card className="border-l-4 border-l-orange-500 bg-orange-50/30">
       <CardHeader>
@@ -138,7 +141,7 @@ function ContributorActionableView({ risk }) {
             <p className="text-sm text-slate-600">{risk.content}</p>
           </div>
           <Badge variant="outline" className="bg-orange-100 text-orange-700 ml-4">
-            Vue Équipe
+            {t('teamView')}
           </Badge>
         </div>
       </CardHeader>
@@ -147,15 +150,15 @@ function ContributorActionableView({ risk }) {
         {risk.context_simplified && (
           <div className="bg-slate-50 rounded-lg p-4 space-y-2">
             <div className="flex items-start gap-2">
-              <span className="text-xs font-medium text-slate-500 min-w-[60px]">Quoi:</span>
+              <span className="text-xs font-medium text-slate-500 min-w-[60px]">{t('what')}:</span>
               <span className="text-sm text-slate-700">{risk.context_simplified.what}</span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-xs font-medium text-slate-500 min-w-[60px]">Impact:</span>
+              <span className="text-xs font-medium text-slate-500 min-w-[60px]">{t('impact')}:</span>
               <span className="text-sm text-slate-700">{risk.context_simplified.impact}</span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-xs font-medium text-slate-500 min-w-[60px]">Importance:</span>
+              <span className="text-xs font-medium text-slate-500 min-w-[60px]">{t('importance')}:</span>
               <span className="text-sm text-slate-700">{risk.context_simplified.why_matters}</span>
             </div>
           </div>
@@ -166,7 +169,7 @@ function ContributorActionableView({ risk }) {
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              Actions Concrètes
+              {t('actionableSteps')}
             </h4>
             {risk.actionable_steps.map((step, idx) => (
               <div key={idx} className="bg-white rounded-lg p-4 border border-slate-200 space-y-2">
@@ -178,7 +181,7 @@ function ContributorActionableView({ risk }) {
                 </div>
                 <p className="text-sm font-medium text-slate-800">{step.action}</p>
                 <p className="text-xs text-slate-500">
-                  Responsable: <span className="font-medium">{step.who}</span>
+                  {t('responsible')}: <span className="font-medium">{step.who}</span>
                 </p>
               </div>
             ))}
@@ -190,7 +193,7 @@ function ContributorActionableView({ risk }) {
           <div className="bg-blue-50 rounded-lg p-3 space-y-2">
             <h4 className="text-xs font-semibold text-blue-800 flex items-center gap-1">
               <Lightbulb className="w-3 h-3" />
-              Questions pour l'équipe
+              {t('teamQuestions')}
             </h4>
             {risk.conversation_starters.map((question, idx) => (
               <p key={idx} className="text-sm text-blue-700 italic">"{question}"</p>
@@ -207,6 +210,7 @@ function ContributorActionableView({ risk }) {
 // ============================================================================
 
 function MemberConstructiveView({ risk }) {
+  const { t } = useLanguage();
   return (
     <Card className="border-l-4 border-l-green-500 bg-green-50/30">
       <CardHeader>
@@ -218,7 +222,7 @@ function MemberConstructiveView({ risk }) {
             <p className="text-sm text-slate-600">{risk.content}</p>
           </div>
           <Badge variant="outline" className="bg-green-100 text-green-700 ml-4">
-            Vue Business
+            {t('businessView')}
           </Badge>
         </div>
       </CardHeader>
@@ -230,15 +234,15 @@ function MemberConstructiveView({ risk }) {
               <TrendingUp className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-2">
                 <div>
-                  <p className="text-xs font-medium text-slate-500 mb-1">Contexte</p>
+                  <p className="text-xs font-medium text-slate-500 mb-1">{t('situation')}</p>
                   <p className="text-sm text-slate-700">{risk.business_context.situation}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-slate-500 mb-1">Besoin</p>
+                  <p className="text-xs font-medium text-slate-500 mb-1">{t('need')}</p>
                   <p className="text-sm text-slate-700">{risk.business_context.need}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-slate-500 mb-1">Résultat attendu</p>
+                  <p className="text-xs font-medium text-slate-500 mb-1">{t('expectedOutcome')}</p>
                   <p className="text-sm text-slate-700">{risk.business_context.outcome_desired}</p>
                 </div>
               </div>
