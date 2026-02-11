@@ -242,12 +242,21 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
 
       // Paginated/Anonymized recommendations calculation
       const allRecommendations = getRecommendations();
-      const anonymizedRecommendations = allRecommendations.map(rec => ({
-      ...rec,
-      title: anonymizeRecommendationText(rec.title, Array.from(knownNames)),
-      description: anonymizeRecommendationText(rec.description, Array.from(knownNames))
-      }));
-      const recommendations = anonymizedRecommendations.map(rec => formatRecommendation(rec, userRole));
+      const recommendations = allRecommendations
+        .map(rec => ({
+          ...rec,
+          title: anonymizeRecommendationText(rec.title, Array.from(knownNames)),
+          description: anonymizeRecommendationText(rec.description, Array.from(knownNames))
+        }))
+        .map(rec => {
+          const formatted = formatRecommendation(rec, userRole);
+          // Re-anonymize après formatRecommendation au cas où makeConstructive() l'aurait cassée
+          return {
+            ...formatted,
+            title: anonymizeRecommendationText(formatted.title, Array.from(knownNames)),
+            description: anonymizeRecommendationText(formatted.description, Array.from(knownNames))
+          };
+        });
       const itemsPerPage = 4;
       const totalPages = Math.ceil(recommendations.length / itemsPerPage);
       const startIdx = currentPage * itemsPerPage;
