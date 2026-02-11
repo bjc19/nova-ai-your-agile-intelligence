@@ -114,44 +114,60 @@ const getDetectionLayers = (text) => {
 
 /**
  * Anonymize all first names in analysis data
+ * Extracts known names from blockers/risks to ensure they're anonymized everywhere
  */
 export const anonymizeAnalysisData = (analysis) => {
   if (!analysis) return analysis;
 
   const anonymized = { ...analysis };
+  
+  // Extract all known names from blockers & risks to ensure consistent anonymization
+  // This is critical for recommendations which may reference these names
+  const knownNames = new Set();
 
   // Anonymize blockers
   if (anonymized.blockers && Array.isArray(anonymized.blockers)) {
-    anonymized.blockers = anonymized.blockers.map(blocker => ({
-      ...blocker,
-      member: blocker.member ? anonymizeFirstName(blocker.member) : blocker.member,
-      blocked_by: blocker.blocked_by ? anonymizeFirstName(blocker.blocked_by) : blocker.blocked_by,
-      issue: blocker.issue ? anonymizeNamesInText(blocker.issue) : blocker.issue,
-      action: blocker.action ? anonymizeNamesInText(blocker.action) : blocker.action
-    }));
+    anonymized.blockers = anonymized.blockers.map(blocker => {
+      if (blocker.member) knownNames.add(blocker.member);
+      if (blocker.blocked_by) knownNames.add(blocker.blocked_by);
+      
+      return {
+        ...blocker,
+        member: blocker.member ? anonymizeFirstName(blocker.member) : blocker.member,
+        blocked_by: blocker.blocked_by ? anonymizeFirstName(blocker.blocked_by) : blocker.blocked_by,
+        issue: blocker.issue ? anonymizeNamesInText(blocker.issue, Array.from(knownNames)) : blocker.issue,
+        action: blocker.action ? anonymizeNamesInText(blocker.action, Array.from(knownNames)) : blocker.action
+      };
+    });
   }
 
   // Anonymize risks
   if (anonymized.risks && Array.isArray(anonymized.risks)) {
-    anonymized.risks = anonymized.risks.map(risk => ({
-      ...risk,
-      description: risk.description ? anonymizeNamesInText(risk.description) : risk.description,
-      impact: risk.impact ? anonymizeNamesInText(risk.impact) : risk.impact,
-      mitigation: risk.mitigation ? anonymizeNamesInText(risk.mitigation) : risk.mitigation,
-      affected_members: risk.affected_members?.map(name => anonymizeFirstName(name)) || risk.affected_members
-    }));
+    anonymized.risks = anonymized.risks.map(risk => {
+      if (risk.affected_members) {
+        risk.affected_members.forEach(name => knownNames.add(name));
+      }
+      
+      return {
+        ...risk,
+        description: risk.description ? anonymizeNamesInText(risk.description, Array.from(knownNames)) : risk.description,
+        impact: risk.impact ? anonymizeNamesInText(risk.impact, Array.from(knownNames)) : risk.impact,
+        mitigation: risk.mitigation ? anonymizeNamesInText(risk.mitigation, Array.from(knownNames)) : risk.mitigation,
+        affected_members: risk.affected_members?.map(name => anonymizeFirstName(name)) || risk.affected_members
+      };
+    });
   }
 
-  // Anonymize recommendations
+  // Anonymize recommendations with known names context
   if (anonymized.recommendations && Array.isArray(anonymized.recommendations)) {
     anonymized.recommendations = anonymized.recommendations.map(rec =>
-      typeof rec === 'string' ? anonymizeNamesInText(rec) : rec
+      typeof rec === 'string' ? anonymizeNamesInText(rec, Array.from(knownNames)) : rec
     );
   }
 
-  // Anonymize summary
+  // Anonymize summary with known names context
   if (anonymized.summary) {
-    anonymized.summary = anonymizeNamesInText(anonymized.summary);
+    anonymized.summary = anonymizeNamesInText(anonymized.summary, Array.from(knownNames));
   }
 
   return anonymized;
