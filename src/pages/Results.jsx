@@ -29,6 +29,8 @@ import {
         Download
       } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { jsPDF } from 'npm:jspdf@4.0.0';
+import html2canvas from 'npm:html2canvas@1.4.1';
 
 export default function Results() {
   const navigate = useNavigate();
