@@ -158,8 +158,11 @@ function scoreDaily(text, hasStructuralPattern = false) {
   return Math.max(0, score);
 }
 
-function scoreReview(text) {
+function scoreReview(text, hasStructuralPatternDaily = false) {
   let score = 0;
+  
+  // If structural Daily pattern exists, heavily penalize Review
+  if (hasStructuralPatternDaily) score -= 50;
   
   // Object scoring (dominant object)
   if (matchesAny(text, REVIEW_OBJECTS.product)) score += 30;
