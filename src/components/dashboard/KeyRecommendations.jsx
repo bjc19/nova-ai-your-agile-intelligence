@@ -224,6 +224,10 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   };
 
   const recommendations = getRecommendations().map(rec => formatRecommendation(rec, userRole));
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(recommendations.length / itemsPerPage);
+  const startIdx = currentPage * itemsPerPage;
+  const paginatedRecs = recommendations.slice(startIdx, startIdx + itemsPerPage);
 
   const priorityColors = {
     high: "bg-red-100 text-red-700 border-red-200",
