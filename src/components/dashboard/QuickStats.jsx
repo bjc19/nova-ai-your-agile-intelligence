@@ -8,7 +8,8 @@ import {
   ShieldAlert,
   Clock,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Repeat2
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { adaptMessage } from "./RoleBasedMessaging";
