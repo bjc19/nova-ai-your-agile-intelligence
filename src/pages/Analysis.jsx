@@ -562,7 +562,7 @@ Provide a detailed analysis in the following JSON format:`;
               </div>
             ) : (
               <div className="p-6 rounded-2xl bg-blue-50/50 border border-blue-200">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">
                       {language === 'fr' ? 'Type de Réunion Détecté' : 'Detected Meeting Type'}
@@ -597,6 +597,13 @@ Provide a detailed analysis in the following JSON format:`;
                       {workshopDetection.confidence}%
                     </p>
                   </div>
+                </div>
+                <div className="pt-4 border-t border-blue-200">
+                  <p className="text-xs text-blue-700 italic">
+                    💡 {language === 'fr' 
+                      ? 'Bien que Nova AI soit très performant, la pré-détection peut se tromper de type d\'atelier si son contenu semble mixé avec d\'autres pratiques, mais l\'analyse approfondie une fois lancée corrigera ce faux-positif.'
+                      : 'Although Nova AI is highly accurate, pre-detection may incorrectly classify the workshop type if its content appears mixed with other practices, but the detailed analysis once launched will correct this false positive.'}
+                  </p>
                 </div>
               </div>
             )}
