@@ -187,8 +187,9 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
   if (PATTERNS.review.stakeholder.test(text)) score += 15;
   
   // Heavy penalty: if team/process/improvement keywords dominate → Retrospective, not Review
-  if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score -= 25;
-  if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score -= 20;
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score -= 50;
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score -= 50;
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess) && matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score -= 30;
   
   // Anti-pattern penalties
   if (matchesAny(text, PLANNING_OBJECTS.future) && !matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 10;
