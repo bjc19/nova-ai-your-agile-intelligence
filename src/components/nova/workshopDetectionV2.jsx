@@ -196,6 +196,9 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score += 30;
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.emotion)) score += 20;
   
+  // If Planning keywords dominate, penalize Retrospective heavily
+  if (matchesAny(text, PLANNING_OBJECTS.future) || matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 30;
+  
   // Temporality scoring (reflective confirms retro)
   if (matchesAny(text, RETROSPECTIVE_TIME.reflective)) score += 15;
   
