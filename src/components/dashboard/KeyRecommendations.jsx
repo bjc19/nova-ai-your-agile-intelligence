@@ -194,7 +194,7 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
     const allRecs = [];
     const knownNames = new Set();
     
-    // Extract known names from all recommendations and transcript
+    // Extract known names from transcript first
     if (latestAnalysis?.transcript) {
       const interlocutors = extractInterlocutors(latestAnalysis.transcript);
       interlocutors.forEach(name => knownNames.add(name));
@@ -205,8 +205,8 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
       const recText = rec.text || '';
       allRecs.push({
         type: "default",
-        title: anonymizeRecommendationText(recText.substring(0, 50) + (recText.length > 50 ? "..." : ""), Array.from(knownNames)),
-        description: anonymizeRecommendationText(recText, Array.from(knownNames)),
+        title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
+        description: recText,
         priority: rec.priority || 'medium',
         source: rec.source,
         entityType: rec.entityType
@@ -219,8 +219,8 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
         const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
         return {
           type: "default",
-          title: anonymizeRecommendationText(recText.substring(0, 50) + (recText.length > 50 ? "..." : ""), Array.from(knownNames)),
-          description: anonymizeRecommendationText(recText, Array.from(knownNames)),
+          title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
+          description: recText,
           priority: i === 0 ? "high" : "medium",
           source: 'analysis'
         };
@@ -240,7 +240,23 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
     return allRecs;
   };
 
-  const recommendations = getRecommendations().map(rec => formatRecommendation(rec, userRole));
+  const allRecommendations = getRecommendations();
+  
+  // Extract known names from all recommendations for anonymization
+  const knownNames = new Set();
+  if (latestAnalysis?.transcript) {
+    const interlocutors = extractInterlocutors(latestAnalysis.transcript);
+    interlocutors.forEach(name => knownNames.add(name));
+  }
+  
+  // Anonymize all recommendations before pagination
+  const anonymizedRecommendations = allRecommendations.map(rec => ({
+    ...rec,
+    title: anonymizeRecommendationText(rec.title, Array.from(knownNames)),
+    description: anonymizeRecommendationText(rec.description, Array.from(knownNames))
+  }));
+  
+  const recommendations = anonymizedRecommendations.map(rec => formatRecommendation(rec, userRole));
   const itemsPerPage = 4;
   const totalPages = Math.ceil(recommendations.length / itemsPerPage);
   const startIdx = currentPage * itemsPerPage;
