@@ -409,6 +409,9 @@ Provide a detailed analysis in the following JSON format:`;
     });
     const createdAnalysis = response.data.analysis;
     console.log("Analysis created successfully:", createdAnalysis);
+    
+    // Invalidate the analysisHistory query to refresh the list
+    queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
 
     // Anonymize analysis data before storing
     const anonymizedAnalysis = anonymizeAnalysisData({ ...result, posture: posture.id, context });
