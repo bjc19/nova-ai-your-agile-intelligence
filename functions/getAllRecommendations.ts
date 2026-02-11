@@ -12,6 +12,27 @@ Deno.serve(async (req) => {
     // Fetch from all known sources
     const allRecommendations = [];
 
+    // Source 0: Manual Analysis History
+    try {
+      const analysisHistory = await base44.entities.AnalysisHistory.list('-created_date', 50);
+      analysisHistory.forEach(analysis => {
+        if (analysis.analysis_data?.recommendations && Array.isArray(analysis.analysis_data.recommendations)) {
+          analysis.analysis_data.recommendations.forEach(reco => {
+            const recoText = typeof reco === 'string' ? reco : reco?.description || reco?.action || JSON.stringify(reco);
+            allRecommendations.push({
+              source: 'analysis',
+              text: recoText,
+              priority: 'medium',
+              createdDate: analysis.created_date,
+              entityType: 'AnalysisHistory'
+            });
+          });
+        }
+      });
+    } catch (e) {
+      console.log('AnalysisHistory fetch skipped:', e.message);
+    }
+
     // Source 1: GDPR Markers (Slack & Teams)
     try {
       const gdprMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
