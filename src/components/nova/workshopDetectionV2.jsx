@@ -124,16 +124,13 @@ function detectDailyHardOverride(text) {
   const normalized = normalizeForMatching(words);
 
   // Pattern 1: Direct triplet detection (hier → aujourd'hui → blocages in sequence)
-  const tripletPattern = /HIER[\s\w]*CE_QUE[\s\w]*FAIT.*?AUJOURD_HUI[\s\w]*CE_QUE[\s\w]*(?:FAIT_OU_VA|vais|va)[\s\w]*(?:BLOCAGE|obstacle|empêch|impediment)/i;
+  // Uses [\s\S] to match any character including newlines and punctuation
+  const tripletPattern = /HIER[\s\S]*?CE_QUE[\s\S]*?AUJOURD_HUI[\s\S]*?(?:BLOCAGE|obstacle)/i;
 
-  // Pattern 2: Flexible announcement variations
+  // Pattern 2: Flexible announcement variations - matches "format habituel" or similar
+  // followed by the triplet pattern anywhere in the normalized text
   const announcementPatterns = [
-    /format\s+(?:habituel|du\s+jour|de\s+(?:la\s+)?réunion)[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
-    /point\s+(?:rapide|quotidien|matinal|journalier)[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
-    /tour\s+de\s+table[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
-    /réunion\s+(?:matinale|quotidienne|journalière)[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
-    /stand[\s-]?up[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
-    /daily[\s\w]*:?[\s\w]*HIER[\s\w]*AUJOURD_HUI[\s\w]*BLOCAGE/i,
+    /(?:format|point|tour|réunion|stand|daily)[\s\w:,]*(?=[\s\S]*HIER[\s\S]*AUJOURD_HUI[\s\S]*BLOCAGE)/i,
   ];
 
   const matchesTriplet = tripletPattern.test(normalized);
