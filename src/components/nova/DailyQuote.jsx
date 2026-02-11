@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Lightbulb } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
+import { base44 } from "@/api/base44Client";
 
 const QUOTES = [
   // 1–60 : Lancement, itération & MVP
@@ -126,7 +128,9 @@ const QUOTE_CATEGORIES = {
 };
 
 export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthIndex = 0 }) {
+  const { language } = useLanguage();
   const [quote, setQuote] = useState("");
+  const [displayedQuote, setDisplayedQuote] = useState("");
   const [category, setCategory] = useState("launch");
 
   useEffect(() => {
@@ -147,7 +151,25 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
 
     setCategory(selectedCategory);
     setQuote(QUOTES[quoteIndex]);
-  }, [blockerCount, riskCount, healthIndex]);
+    
+    // Traduire si nécessaire
+    if (language === 'fr') {
+      translateQuote(QUOTES[quoteIndex]);
+    } else {
+      setDisplayedQuote(QUOTES[quoteIndex]);
+    }
+  }, [blockerCount, riskCount, healthIndex, language]);
+
+  const translateQuote = async (quoteText) => {
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Traduis cette citation courte et inspirante en français, en gardant l'auteur original:\n\n"${quoteText}"`,
+      });
+      setDisplayedQuote(result || quoteText);
+    } catch (error) {
+      setDisplayedQuote(quoteText);
+    }
+  };
 
   if (!quote) return null;
 
@@ -170,13 +192,15 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className={`rounded-xl border bg-gradient-to-br p-5 mb-6 ${categoryColors[category]}`}
+      className="flex justify-center mb-6"
     >
-      <div className="flex gap-3">
-        <Lightbulb className={`w-5 h-5 flex-shrink-0 mt-0.5 ${categoryIcons[category]}`} />
-        <p className="text-sm text-slate-700 leading-relaxed italic">
-          "{quote}"
-        </p>
+      <div className={`rounded-xl border bg-gradient-to-br p-5 ${categoryColors[category]} max-w-3xl`}>
+        <div className="flex gap-3">
+          <Lightbulb className={`w-5 h-5 flex-shrink-0 mt-0.5 ${categoryIcons[category]}`} />
+          <p className="text-sm text-slate-700 leading-relaxed italic">
+            "{displayedQuote || quote}"
+          </p>
+        </div>
       </div>
     </motion.div>
   );
