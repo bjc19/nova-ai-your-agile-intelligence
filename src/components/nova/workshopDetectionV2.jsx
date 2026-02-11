@@ -185,8 +185,11 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
   return Math.max(0, score);
 }
 
-function scoreRetrospective(text) {
+function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   let score = 0;
+  
+  // If structural Daily pattern exists, heavily penalize Retrospective
+  if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score += 35;
