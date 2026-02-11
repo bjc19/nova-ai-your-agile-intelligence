@@ -410,7 +410,7 @@ export default function Details() {
                     {detailType === "analyses" ? (
                       <>
                         <h3 className="font-semibold text-slate-900 truncate">
-                          {item.title}
+                          {anonymizeText(item.title)}
                         </h3>
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <Badge variant="outline" className="text-xs">
