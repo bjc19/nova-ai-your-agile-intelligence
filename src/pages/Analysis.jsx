@@ -346,19 +346,25 @@ Provide a detailed analysis in the following JSON format:`;
     // Pour corriger les faux-positifs de la pré-détection
     const deepDetection = detectWorkshopType(transcript);
     
-    // Logique de correction :
-    // - Si la confiance profonde >= 80, utiliser ce type
-    // - Si la confiance > 50 ET elle contredit un type faible, corriger
+    // Logique de correction : PRIORITÉ ABSOLUE À DAILY si détecté
+    // - Daily doit toujours gagne si marqueurs présents (hier/aujourd'hui/blocages)
+    // - Seuil baissé à 65% pour corriger les faux-positifs Review/Retro
     let finalWorkshopType = workshopType;
-    
-    if (deepDetection.confidence >= 80) {
-      // Haute confiance dans la détection approfondie
-      const deepTypeMap = {
-        'Daily Scrum': 'daily_scrum',
-        'Sprint Review': 'sprint_review',
-        'Sprint Rétrospective': 'retrospective',
-        'Sprint Planning': 'sprint_planning'
-      };
+
+    const deepTypeMap = {
+      'Daily Scrum': 'daily_scrum',
+      'Sprint Review': 'sprint_review',
+      'Sprint Rétrospective': 'retrospective',
+      'Sprint Planning': 'sprint_planning'
+    };
+
+    // RÈGLE PRIORITAIRE: Si Daily détecté avec confiance >= 65%, toujours utiliser Daily
+    // C'est l'override maximal pour éviter les faux-positifs
+    if (deepDetection.type === 'Daily Scrum' && deepDetection.confidence >= 65) {
+      finalWorkshopType = 'daily_scrum';
+      console.log(`✅ DAILY PRIORITAIRE: Confiance ${deepDetection.confidence}% > Seuil 65% → Daily confirmé`);
+    } else if (deepDetection.confidence >= 75) {
+      // Confiance normale pour les autres types
       if (deepTypeMap[deepDetection.type]) {
         finalWorkshopType = deepTypeMap[deepDetection.type];
         console.log(`✅ Type corrigé: ${workshopType} → ${finalWorkshopType} (confiance: ${deepDetection.confidence}%)`);
