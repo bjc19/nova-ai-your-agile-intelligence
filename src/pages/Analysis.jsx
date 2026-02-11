@@ -37,6 +37,7 @@ import { Link } from "react-router-dom";
 
 export default function Analysis() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { t, language } = useLanguage();
   const [transcript, setTranscript] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
