@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
 export default function QuickStats({ analysisHistory = [] }) {
   const { t } = useLanguage();
