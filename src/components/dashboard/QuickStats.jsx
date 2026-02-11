@@ -161,6 +161,11 @@ export default function QuickStats({ analysisHistory = [] }) {
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
   const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
   
+  // Calculate Technical Health Index (IST) = Resolved / (Blockers + Risks)
+  const denominator = totalBlockers + totalRisks;
+  const technicalHealthIndex = denominator > 0 ? (resolvedBlockers / denominator).toFixed(1) : 0;
+  const healthStatus = technicalHealthIndex > 1 ? "healthy" : "critical";
+  
   // Calculate Pattern Recurrence Reduction
   const patternRecurrenceReduction = (() => {
     const patternsWithStatus = gdprSignals.filter(s => s.status);
