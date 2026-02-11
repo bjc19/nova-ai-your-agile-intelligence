@@ -188,10 +188,12 @@ const anonymizeNamesInText = (text, knownNames = []) => {
 
   let result = text;
   
-  // Anonymize all detected names (word boundary matching)
-  // This works even if name is at sentence start (e.g., "Thomas, assure-toi...")
+  // Anonymize all detected names
+  // Use lookahead/lookbehind to handle accented characters (word boundaries fail with accents)
   allNames.forEach(name => {
-    const regex = new RegExp(`\\b${name}\\b`, 'gi');
+    // Match: name surrounded by non-letter boundaries (spaces, punctuation, start/end)
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(?<![a-zéèêëàâäîïôöùûüçœæ])${escapedName}(?![a-zéèêëàâäîïôöùûüçœæ])`, 'gi');
     result = result.replace(regex, anonymizeFirstName(name));
   });
 
