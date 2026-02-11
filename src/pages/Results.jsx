@@ -206,7 +206,7 @@ export default function Results() {
       const dateStr = new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US');
       pdf.text(`${language === 'fr' ? 'Date' : 'Date'}: ${dateStr}`, margin, yPos);
       yPos += 6;
-      pdf.text(`${language === 'fr' ? 'Analysé par' : 'Analyzed by'}: ${user?.full_name || 'User'}`, margin, yPos);
+      pdf.text(`${language === 'fr' ? 'Analysé par' : 'Analyzed by'}: ${currentUser?.full_name || 'User'}`, margin, yPos);
       yPos += 15;
 
       // Helper function
