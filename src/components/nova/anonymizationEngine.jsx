@@ -279,6 +279,7 @@ const anonymizeTranscript = (text, knownNames = []) => {
  * Layer 1: Interlocutors extracted from "Name :" pattern
  * Layer 2: Common first names found in text
  * Layer 3: Known names passed via context (for recommendations, etc.)
+ * CRITICAL: Never anonymize verbs, regardless of context
  */
 const anonymizeNamesInText = (text, knownNames = []) => {
   if (!text) return text;
@@ -288,10 +289,13 @@ const anonymizeNamesInText = (text, knownNames = []) => {
   const allNames = [...new Set([...detectedNames, ...knownNames])];
 
   let result = text;
-  
+
   // Anonymize all detected names
   // Use Unicode-safe word boundaries with \p{L} (matches any letter in any language)
   allNames.forEach(name => {
+    // CRITICAL: Never anonymize if it's a verb
+    if (isVerb(name)) return;
+
     // Match: name surrounded by non-letter boundaries
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(?<!\\p{L})${escapedName}(?!\\p{L})`, 'giu');
