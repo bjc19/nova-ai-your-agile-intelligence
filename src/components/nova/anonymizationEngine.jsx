@@ -82,9 +82,13 @@ const COMMON_WORDS = new Set([
   'mural', 'github', 'gitlab', 'azure', 'devops',
   
   // Status & Technical
-  'todo', 'doing', 'done', 'progress', 'blocked', 'ready', 'definition', 'acceptance',
-  'criteria', 'staging', 'production', 'prod', 'hotfix', 'patch', 'release'
-]);
+   'todo', 'doing', 'done', 'progress', 'blocked', 'ready', 'definition', 'acceptance',
+   'criteria', 'staging', 'production', 'prod', 'hotfix', 'patch', 'release',
+
+   // Common technical words that start sentences
+   'potential', 'possible', 'likely', 'unable', 'unable', 'requires', 'involves', 'includes',
+   'pending', 'scheduled', 'expected', 'delayed', 'blocked', 'awaiting'
+  ]);
 
 /**
  * Multi-layer name detection:
