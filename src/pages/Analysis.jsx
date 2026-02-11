@@ -409,10 +409,8 @@ Provide a detailed analysis in the following JSON format:`;
     
     const createdAnalysis = response.data.analysis;
     
-    // Update React Query cache directly instead of just invalidating
-    queryClient.setQueryData(['analysisHistory'], (oldData = []) => {
-      return [createdAnalysis, ...oldData];
-    });
+    // Invalidate query to force refetch from database
+    await queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
 
     // Anonymize analysis data before storing
     const anonymizedAnalysis = anonymizeAnalysisData({ ...result, posture: posture.id, context });
