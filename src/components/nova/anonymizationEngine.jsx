@@ -288,7 +288,7 @@ const anonymizeTranscript = (text, knownNames = []) => {
  * Layer 1: Interlocutors extracted from "Name :" pattern
  * Layer 2: Common first names found in text
  * Layer 3: Known names passed via context (for recommendations, etc.)
- * CRITICAL: Never anonymize verbs, regardless of context
+ * CRITICAL: Never anonymize verbs OR adjectives (detected by context)
  */
 const anonymizeNamesInText = (text, knownNames = []) => {
   if (!text) return text;
@@ -304,6 +304,9 @@ const anonymizeNamesInText = (text, knownNames = []) => {
   allNames.forEach(name => {
     // CRITICAL: Never anonymize if it's a verb
     if (isVerb(name)) return;
+
+    // CRITICAL: Never anonymize if it's an adjective (detected by context)
+    if (isAdjectiveByContext(name, text)) return;
 
     // Match: name surrounded by non-letter boundaries
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
