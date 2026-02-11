@@ -198,7 +198,7 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
         <div className="flex gap-3">
           <Lightbulb className={`w-5 h-5 flex-shrink-0 mt-0.5 ${categoryIcons[category]}`} />
           <p className="text-sm text-slate-700 leading-relaxed italic">
-            "{displayedQuote || quote}"
+            {displayedQuote || quote}
           </p>
         </div>
       </div>
