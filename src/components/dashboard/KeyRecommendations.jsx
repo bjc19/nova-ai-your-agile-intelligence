@@ -356,14 +356,14 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
 
               return (
                 <motion.div
-                  key={index}
+                  key={globalIndex}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.1 * index }}
                   className="rounded-xl border border-slate-200 hover:border-amber-200 transition-all overflow-hidden"
                 >
                   <div 
-                    onClick={() => (isAdmin || isContributor) ? handleRecommendationClick(rec, index) : null}
+                    onClick={() => (isAdmin || isContributor) ? handleRecommendationClick(rec, globalIndex) : null}
                     className={`group p-4 transition-all ${(isAdmin || isContributor) ? 'hover:bg-amber-50/30 cursor-pointer' : ''}`}
                   >
                     <div className="flex items-start gap-3">
