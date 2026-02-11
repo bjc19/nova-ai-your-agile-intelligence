@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
-import { ContactSalesModal } from "@/components/nova/ContactSalesModal";
+
+const ContactSalesModal = lazy(() => import("@/components/nova/ContactSalesModal").then(m => ({ default: m.ContactSalesModal })));
 
 const translations = {
   en: {
