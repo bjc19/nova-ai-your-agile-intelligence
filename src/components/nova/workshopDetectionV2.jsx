@@ -123,21 +123,27 @@ function detectDailyHardOverride(text) {
 
   const normalized = normalizeForMatching(words);
 
-  // Pattern 1: Direct triplet detection (hier → aujourd'hui → blocages in sequence)
-  // Uses [\s\S] to match any character including newlines and punctuation
-  const tripletPattern = /HIER[\s\S]*?CE_QUE[\s\S]*?AUJOURD_HUI[\s\S]*?(?:BLOCAGE|obstacle)/i;
+  // Pattern 1: Check for all three triplet elements (HIER + AUJOURD_HUI + BLOCAGE)
+  // Order-agnostic: just need all three present in first 180 words
+  const hasHier = /HIER/i.test(normalized);
+  const hasAujourdhui = /AUJOURD_HUI/i.test(normalized);
+  const hasBlockage = /BLOCAGE/i.test(normalized);
+  const tripletPresent = hasHier && hasAujourdhui && hasBlockage;
 
-  // Pattern 2: Flexible announcement variations - matches "format habituel" or similar
-  // followed by the triplet pattern anywhere in the normalized text
+  // Pattern 2: Explicit ceremony announcement (format habituel, point quotidien, etc.)
   const announcementPatterns = [
-    /(?:format|point|tour|réunion|stand|daily)[\s\w:,]*(?=[\s\S]*HIER[\s\S]*AUJOURD_HUI[\s\S]*BLOCAGE)/i,
+    /(?:format|point|tour|réunion|stand|daily)[\s\w:,]*(?:habituel|quotidien|journalier|matinal|rapide|de\s+(?:la\s+)?réunion)/i,
   ];
+  const hasAnnouncement = announcementPatterns.some(p => p.test(normalized));
 
-  const matchesTriplet = tripletPattern.test(normalized);
-  const matchesAnnouncement = announcementPatterns.some(p => p.test(normalized));
+  // Daily Hard Override: if triplet present + announcement, force Daily
+  if (tripletPresent && hasAnnouncement) {
+    return { isForcedDaily: true, confidence: 99 };
+  }
 
-  if (matchesTriplet || matchesAnnouncement) {
-    return { isForcedDaily: true, confidence: 97 };
+  // Fallback: just triplet present without explicit announcement (still strong signal)
+  if (tripletPresent) {
+    return { isForcedDaily: true, confidence: 95 };
   }
 
   return { isForcedDaily: false, confidence: 0 };
