@@ -353,8 +353,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     try {
       console.log('🚀 Starting analysis for text:', input.substring(0, 100) + '...');
 
-      // ÉTAPE 0: Vérifier les essais via backend (IP-based)
-      const trackResponse = await base44.functions.invoke('trackDemoAttempt');
+      // ÉTAPE 0: Vérifier et décrémenter les essais via backend (IP-based)
+      const trackResponse = await base44.functions.invoke('trackDemoAttempt', { checkOnly: false });
       const trackData = trackResponse.data;
 
       if (!trackData.allowed || trackData.blocked) {
@@ -366,7 +366,6 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
       // Synchroniser le compteur local avec le serveur
       setTries(trackData.remaining);
-      localStorage.setItem("nova_demo_tries", trackData.remaining.toString());
       onTriesUpdate(trackData.remaining);
 
       // ÉTAPE 1: Vérifier si le contenu est hors contexte (VETO)
