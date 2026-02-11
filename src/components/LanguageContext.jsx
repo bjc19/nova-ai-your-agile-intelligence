@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect } from "react";
 
 const LanguageContext = createContext();
@@ -168,6 +167,12 @@ export const translations = {
     communication_issues: "Problèmes de communication",
     scope_creep: "Glissement de périmètre",
     context_switching: "Changements de contexte",
+
+    // Export
+    exportResults: "Exporter les résultats ?",
+    wantToExport: "Voulez-vous exporter cette analyse en PDF pour la partager ou l'archiver ?",
+    yesExport: "Oui, exporter",
+    noExport: "Non",
     },
   en: {
     // Navigation
