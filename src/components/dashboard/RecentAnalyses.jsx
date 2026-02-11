@@ -236,13 +236,7 @@ export default function RecentAnalyses({ analyses = [] }) {
     basse: "bg-blue-50 border-blue-200 text-blue-700",
   };
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
-    >
-      <Card>
+  return null;
         <CardHeader className="pb-3 flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-slate-900">
             {language === 'fr' ? 'Analyses & Signaux' : 'Analyses & Signals'}
