@@ -244,10 +244,23 @@ export default function RecentAnalyses({ analyses = [] }) {
       transition={{ duration: 0.5, delay: 0.3 }}
     >
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-slate-900">
             {language === 'fr' ? 'Analyses & Signaux' : 'Analyses & Signals'}
           </CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={async () => {
+              setIsRefreshing(true);
+              await queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
+              setIsRefreshing(false);
+            }}
+            disabled={isRefreshing}
+            className="text-slate-500 hover:text-slate-700"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-3">
