@@ -155,9 +155,13 @@ export default function QuickStats({ analysisHistory = [] }) {
   const teamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
   const teamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne' || i.criticite === 'basse').length;
   
+  console.log('QuickStats: analysisHistory', analysisHistory);
+  console.log('QuickStats: gdprSignals', gdprSignals.length);
+  console.log('QuickStats: teamsInsights', teamsInsights.length);
+  
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
-  const analysesCount = analysisHistory.length + gdprSignals.length + teamsInsights.length;
+  const analysesCount = analysisHistory.length; // Only manual analyses
   const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
 
   const stats = [
