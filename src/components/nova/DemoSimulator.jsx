@@ -338,6 +338,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   };
 
   const handleAnalyze = async () => {
+    console.log('🎯 handleAnalyze called');
+    
     if (!input.trim()) {
       toast.error("Remplissez le champ de texte");
       return;
@@ -349,23 +351,19 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       return;
     }
 
+    console.log('🎯 Setting analyzing to true');
     setAnalyzing(true);
+    
+    console.log('🎯 Starting try block');
     try {
       console.log('🚀 Starting analysis for text:', input.substring(0, 100) + '...');
 
       // ÉTAPE 0: Vérifier et décrémenter les essais via backend (IP-based)
-      console.log('📞 Calling trackDemoAttempt...');
-      let trackData;
-      try {
-        const trackResponse = await base44.functions.invoke('trackDemoAttempt', { checkOnly: false });
-        trackData = trackResponse.data;
-        console.log('📞 trackDemoAttempt response:', trackData);
-      } catch (error) {
-        console.error('❌ trackDemoAttempt error:', error);
-        toast.error(`❌ Erreur de connexion: ${error.message}`);
-        setAnalyzing(false);
-        return;
-      }
+      console.log('📞 About to call trackDemoAttempt...');
+      
+      const trackResponse = await base44.functions.invoke('trackDemoAttempt', { checkOnly: false });
+      console.log('📞 trackDemoAttempt response:', trackResponse);
+      const trackData = trackResponse.data;
 
       if (!trackData.allowed || trackData.blocked) {
         toast.error(`❌ ${trackData.message}`);
@@ -381,17 +379,11 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
       // ÉTAPE 1: Vérifier si le contenu est hors contexte (VETO)
       const outOfContextCheck = detectOutOfContext(input);
-
       console.log('📊 Out of context check result:', outOfContextCheck);
 
       if (outOfContextCheck.isOutOfContext) {
         console.log('🚫 Content detected as OUT OF CONTEXT - Skipping workshop detection');
-        // Les essais ont déjà été décrémentés par trackDemoAttempt côté serveur
-
-        // Reset detection (important pour éviter confusion UI)
         setDetection(null);
-
-        // Simuler délai d'analyse
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 500));
 
         setResults({
@@ -414,21 +406,15 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
       console.log('✅ Content passed out-of-context check, proceeding with workshop detection');
 
-      // ÉTAPE 2: Détection sémantique du type d'atelier (seulement si contexte pro validé)
+      // ÉTAPE 2: Détection sémantique du type d'atelier
       const detected = detectWorkshopType(input);
       setDetection(detected);
-
-      // Simuler délai d'analyse (1-2 secondes)
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
 
-      // Déterminer le type de réunion (simulé ou forcé)
       const meetingType = forceType || detected.type;
-
-      // Récupérer anti-patterns spécifiques au type d'atelier
       const ceremonyPatterns = getAntiPatternsByCeremonyType(meetingType);
       const selectedPatterns = ceremonyPatterns.patterns.slice(0, 2 + Math.floor(Math.random() * 2));
 
-      // Résultats simulés
       setResults({
         meetingType,
         patterns: selectedPatterns,
@@ -440,11 +426,12 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
         detectionTags: detected.tags
       });
 
-      // Les essais ont déjà été décrémentés par trackDemoAttempt côté serveur
       toast.success("✅ Analyse complète!");
     } catch (error) {
-      toast.error("❌ Erreur lors de l'analyse");
+      console.error('❌ Error in handleAnalyze:', error);
+      toast.error(`❌ Erreur: ${error.message}`);
     } finally {
+      console.log('🎯 Finally block - setting analyzing to false');
       setAnalyzing(false);
     }
   };
