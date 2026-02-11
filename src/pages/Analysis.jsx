@@ -341,7 +341,31 @@ Provide a detailed analysis in the following JSON format:`;
       response_json_schema: responseSchema
     });
 
-    // Determine title based on workshop type
+    // ===== CORRECTION APPROFONDIE DU TYPE D'ATELIER =====
+    // Relancer la détection avec plus de contexte (résultats LLM + transcript)
+    // Pour corriger les faux-positifs de la pré-détection
+    const deepDetection = detectWorkshopType(transcript);
+    
+    // Logique de correction :
+    // - Si la confiance profonde >= 80, utiliser ce type
+    // - Si la confiance > 50 ET elle contredit un type faible, corriger
+    let finalWorkshopType = workshopType;
+    
+    if (deepDetection.confidence >= 80) {
+      // Haute confiance dans la détection approfondie
+      const deepTypeMap = {
+        'Daily Scrum': 'daily_scrum',
+        'Sprint Review': 'sprint_review',
+        'Sprint Rétrospective': 'retrospective',
+        'Sprint Planning': 'sprint_planning'
+      };
+      if (deepTypeMap[deepDetection.type]) {
+        finalWorkshopType = deepTypeMap[deepDetection.type];
+        console.log(`✅ Type corrigé: ${workshopType} → ${finalWorkshopType} (confiance: ${deepDetection.confidence}%)`);
+      }
+    }
+
+    // Determine title based on corrected workshop type
     const workshopTypeLabels = {
       daily_scrum: "Daily Scrum",
       retrospective: "Rétrospective",
@@ -349,7 +373,7 @@ Provide a detailed analysis in the following JSON format:`;
       sprint_review: "Sprint Review",
       other: "Atelier"
     };
-    const title = `[${workshopTypeLabels[workshopType]}] ${new Date().toLocaleDateString(language)}`;
+    const title = `[${workshopTypeLabels[finalWorkshopType]}] ${new Date().toLocaleDateString(language)}`;
 
     // Save to database for history tracking
     const blockersArray = Array.isArray(result.blockers) ? result.blockers : [];
