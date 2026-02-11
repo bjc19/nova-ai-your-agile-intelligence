@@ -61,6 +61,13 @@ const COMMON_WORDS = new Set([
   'here', 'there', 'where', 'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few',
   'more', 'most', 'some', 'any', 'many', 'much', 'no', 'nor', 'only', 'own', 'same', 'so',
   'such', 'than', 'too', 'very', 'just', 'should', 'now',
+
+  // French verbs (infinitive and conjugated forms)
+  'chercher', 'travailler', 'faire', 'aller', 'pouvoir', 'vouloir', 'devoir', 'avoir', 'être',
+  'dire', 'donner', 'prendre', 'venir', 'voir', 'savoir', 'croire', 'mettre', 'trouver',
+  'entendre', 'laisser', 'tenir', 'montrer', 'utiliser', 'servir', 'appeler', 'passer',
+  'demander', 'parler', 'arriver', 'rester', 'sortir', 'entrer', 'suivre', 'produire',
+  'comparer', 'commencer', 'continuer', 'développer', 'organiser', 'planifier', 'analyser',
   
   // Agile Rituals & Ceremonies
   'daily', 'standup', 'scrum', 'sprint', 'planning', 'review', 'retrospective', 'retro',
