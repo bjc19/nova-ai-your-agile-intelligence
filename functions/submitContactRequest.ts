@@ -59,32 +59,9 @@ Deno.serve(async (req) => {
       status: 'pending'
     });
 
-    // Envoyer email au propriétaire
-    const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'bobbypheno1@gmail.com';
-    
-    await base44.integrations.Core.SendEmail({
-      to: adminEmail,
-      subject: `🎯 Nouvelle demande ${plan.toUpperCase()} - ${company}`,
-      body: `
-Nouvelle demande reçue:
-
-📋 **Informations**
-- Nom: ${name}
-- Email: ${email}
-- Entreprise: ${company}
-- Plan: ${plan.toUpperCase()}
-- Utilisateurs: ${users_count}
-
-📝 Message:
-${message}
-
-🔗 Lien admin: /AdminDevTools
-
----
-Demande ID: ${newRequest.id}
-IP: ${ip}
-      `
-    });
+    // Note: Email sending to external addresses not currently supported
+    // Data is saved to PendingRequest entity and accessible via AdminDevTools
+    // TODO: Implement email notification via SMTP or third-party service
 
     return Response.json({
       success: true,
