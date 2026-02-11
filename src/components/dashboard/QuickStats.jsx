@@ -203,27 +203,80 @@ export default function QuickStats({ analysisHistory = [] }) {
     },
   ];
 
+  // Helper to generate tooltip for technicalHealth
+  const getTechnicalHealthTooltip = () => {
+    const language = useLanguage().language;
+    
+    if (language === 'fr') {
+      return {
+        title: "Indice de Santé Technique (IST)",
+        formula: `Résolus (${resolvedBlockers}) ÷ (Bloquants + Risques) = ${resolvedBlockers} ÷ ${denominator} = ${technicalHealthIndex}`,
+        interpretation: technicalHealthIndex > 1 
+          ? `✓ Excellent : Vous résolvez plus de problèmes que vous n'en créez.`
+          : `⚠ À améliorer : Vous avez plus de problèmes que de résolutions.`,
+        tips: technicalHealthIndex > 1
+          ? "Continuez à résoudre les bloquants et risques détectés."
+          : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
+      };
+    } else {
+      return {
+        title: "Technical Health Index (IST)",
+        formula: `Resolved (${resolvedBlockers}) ÷ (Blockers + Risks) = ${resolvedBlockers} ÷ ${denominator} = ${technicalHealthIndex}`,
+        interpretation: technicalHealthIndex > 1
+          ? `✓ Excellent: You're resolving more problems than you're creating.`
+          : `⚠ Needs improvement: You have more problems than resolutions.`,
+        tips: technicalHealthIndex > 1
+          ? "Keep resolving detected blockers and risks."
+          : "Prioritize resolving blockers before adding new tasks.",
+      };
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <motion.div
-          key={stat.labelKey}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 * index }}
-          onClick={() => handleStatClick(stat.labelKey)}
-          className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
-        >
-          <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
-          <div className="relative">
-            <div className={`inline-flex p-2 rounded-xl ${stat.bgColor} mb-3`}>
-              <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
-            </div>
-            <p className="text-3xl font-bold text-slate-900">{stat.value}{stat.suffix || ''}</p>
-            <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+    <TooltipProvider>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map((stat, index) => {
+          const isHealthCard = stat.labelKey === "technicalHealth";
+          const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
+          
+          return (
+            <motion.div
+              key={stat.labelKey}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 * index }}
+              onClick={() => handleStatClick(stat.labelKey)}
+              className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
+            >
+              <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`inline-flex p-2 rounded-xl ${stat.bgColor}`}>
+                    <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
+                  </div>
+                  {isHealthCard && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs" side="top">
+                        <div className="space-y-2 text-xs">
+                          <p className="font-semibold text-slate-100">{healthTooltip?.title}</p>
+                          <p className="text-slate-300">{healthTooltip?.formula}</p>
+                          <p className="text-slate-300 italic">{healthTooltip?.interpretation}</p>
+                          <p className="text-slate-400 border-t border-slate-600 pt-2">{healthTooltip?.tips}</p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                <p className="text-3xl font-bold text-slate-900">{stat.value}{stat.suffix || ''}</p>
+                <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 }
