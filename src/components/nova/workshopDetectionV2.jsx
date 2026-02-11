@@ -260,7 +260,7 @@ export function detectWorkshopType(transcript) {
     type: ceremonyNames[ceremonyType] || 'Unknown',
     confidence: Math.round(confidence),
     scores,
-    tags: generateTags(ceremonType, scores),
+    tags: generateTags(ceremonyType, scores),
     justifications: generateJustifications(ceremonyType, scores, transcript),
   };
 }
