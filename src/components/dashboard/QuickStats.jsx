@@ -21,12 +21,13 @@ import {
 import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
 export default function QuickStats({ analysisHistory = [] }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
   const [userRole, setUserRole] = useState('user');
   const [currentPage, setCurrentPage] = useState(0);
+  const [translatedTooltips, setTranslatedTooltips] = useState({});
   const itemsPerPage = 10;
 
   // Fetch user role
@@ -224,10 +225,14 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   // Helper to generate tooltip for technicalHealth
   const getTechnicalHealthTooltip = () => {
-    const language = useLanguage().language;
+    const cacheKey = `tooltip-${language}`;
+    
+    if (translatedTooltips[cacheKey]) {
+      return translatedTooltips[cacheKey];
+    }
     
     if (language === 'fr') {
-      return {
+      const tooltip = {
         title: "Indice de Santé Technique (IST)",
         formula: `Résolus (${resolvedBlockers}) ÷ (Bloquants + Risques) = ${resolvedBlockers} ÷ ${denominator} = ${technicalHealthIndex}`,
         interpretation: technicalHealthIndex > 1 
@@ -237,8 +242,10 @@ export default function QuickStats({ analysisHistory = [] }) {
           ? "Continuez à résoudre les bloquants et risques détectés."
           : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
       };
+      setTranslatedTooltips(prev => ({...prev, [cacheKey]: tooltip}));
+      return tooltip;
     } else {
-      return {
+      const tooltip = {
         title: "Technical Health Index (IST)",
         formula: `Resolved (${resolvedBlockers}) ÷ (Blockers + Risks) = ${resolvedBlockers} ÷ ${denominator} = ${technicalHealthIndex}`,
         interpretation: technicalHealthIndex > 1
@@ -248,6 +255,8 @@ export default function QuickStats({ analysisHistory = [] }) {
           ? "Keep resolving detected blockers and risks."
           : "Prioritize resolving blockers before adding new tasks.",
       };
+      setTranslatedTooltips(prev => ({...prev, [cacheKey]: tooltip}));
+      return tooltip;
     }
   };
 

@@ -57,11 +57,15 @@ const isVerb = (word) => {
   const frenchVerbPatterns = /^(je|tu|il|elle|on|nous|vous|ils|elles)?\s*(ai|as|a|avons|avez|ont|suis|es|est|sommes|êtes|sont|fais|fait|faisons|faites|vais|vas|va|allons|allez|vont|dois|doit|devons|devez|doivent|peux|peut|pouvons|pouvez|peuvent|veux|veut|voulons|voulez|veulent|sais|sait|savons|savez|savent|vois|voit|voyons|voyez|voient)/i;
   if (frenchVerbPatterns.test(lowerWord)) return true;
 
-  // English verb forms
+  // English verb forms and common verbs
   const englishVerbEndings = ['ing', 'ed'];
   for (const ending of englishVerbEndings) {
     if (lowerWord.endsWith(ending) && lowerWord.length > 4) return true;
   }
+
+  // Common English verbs
+  const commonEnglishVerbs = ['waiting', 'need', 'important', 'trying', 'working', 'running', 'walking', 'talking', 'knowing', 'understanding', 'thinking', 'coming', 'going', 'doing', 'making', 'taking', 'getting', 'giving', 'asking', 'telling', 'hearing', 'seeing'];
+  if (commonEnglishVerbs.includes(lowerWord)) return true;
 
   return false;
 };
@@ -95,10 +99,11 @@ const isAdjectiveByContext = (word, text) => {
  */
 const COMMON_WORDS = new Set([
   // Status & State words (CRITICAL - never anonymize)
-  'waiting', 'waiting', 'pending', 'blocked', 'done', 'progress', 'ready', 'scheduled',
+  'waiting', 'need', 'pending', 'blocked', 'done', 'progress', 'ready', 'scheduled',
   'delayed', 'completed', 'resolved', 'reopened', 'verified', 'validated', 'approved',
   'rejected', 'failed', 'passed', 'active', 'inactive', 'enabled', 'disabled',
   'open', 'closed', 'archived', 'draft', 'published',
+  'important', 'urgent', 'critical', 'high', 'medium', 'low', 'trying', 'working',
 
   // Results & Outputs
   'results', 'result', 'outcome', 'output', 'findings', 'finding', 'data', 'report',
