@@ -240,23 +240,36 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
       }
       }, [allSourceRecommendations, language, translatedRecommendations]);
 
+      // Paginated/Anonymized recommendations calculation
+      const allRecommendations = getRecommendations();
+      const anonymizedRecommendations = allRecommendations.map(rec => ({
+      ...rec,
+      title: anonymizeRecommendationText(rec.title, Array.from(knownNames)),
+      description: anonymizeRecommendationText(rec.description, Array.from(knownNames))
+      }));
+      const recommendations = anonymizedRecommendations.map(rec => formatRecommendation(rec, userRole));
+      const itemsPerPage = 4;
+      const totalPages = Math.ceil(recommendations.length / itemsPerPage);
+      const startIdx = currentPage * itemsPerPage;
+      const paginatedRecs = recommendations.slice(startIdx, startIdx + itemsPerPage);
+
       // Keyboard navigation for pagination
       useEffect(() => {
-        const handleKeyDown = (e) => {
-          if (e.key === 'ArrowLeft' && currentPage > 0) {
-            setCurrentPage(currentPage - 1);
-          } else if (e.key === 'ArrowRight' && currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
-          }
-        };
+      const handleKeyDown = (e) => {
+       if (e.key === 'ArrowLeft' && currentPage > 0) {
+         setCurrentPage(currentPage - 1);
+       } else if (e.key === 'ArrowRight' && currentPage < totalPages - 1) {
+         setCurrentPage(currentPage + 1);
+       }
+      };
 
-        if (totalPages > 0) {
-          window.addEventListener('keydown', handleKeyDown);
-          return () => window.removeEventListener('keydown', handleKeyDown);
-        }
+      if (totalPages > 0) {
+       window.addEventListener('keydown', handleKeyDown);
+       return () => window.removeEventListener('keydown', handleKeyDown);
+      }
       }, [currentPage, totalPages]);
 
-  const priorityColors = {
+      const priorityColors = {
     high: "bg-red-100 text-red-700 border-red-200",
     medium: "bg-amber-100 text-amber-700 border-amber-200",
     low: "bg-slate-100 text-slate-600 border-slate-200",
