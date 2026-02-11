@@ -217,6 +217,7 @@ export const translations = {
     risksIdentified: "Risks Identified",
     analysesRun: "Analyses Run",
     resolved: "Resolved",
+    technicalHealth: "Technical Health",
     
     // Settings
     languageSettings: "Language / Langue",
