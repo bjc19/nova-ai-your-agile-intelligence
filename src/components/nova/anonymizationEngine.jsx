@@ -102,7 +102,7 @@ const getDetectionLayers = (text) => {
   
   let match;
   while ((match = properNounPattern.exec(text)) !== null) {
-    const word = match[1].trim();
+    const word = match[2].trim(); // match[2] is now the name (match[1] is ^|\s)
     if (word.length > 0 && !COMMON_WORDS.has(word.toLowerCase()) && !layer1.includes(word)) {
       layer2Set.add(word);
     }
