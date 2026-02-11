@@ -34,7 +34,7 @@ export const translations = {
     high: "élevée",
     medium: "moyenne",
     low: "basse",
-    sprintPerformance: "Performance du Sprint",
+    sprintPerformance: "Evolution des bloquants et des risques",
     blockerRiskTrends: "Tendances des blockers et risques durant le sprint",
     blockers: "Blockers",
     risks: "Risques",
