@@ -208,6 +208,14 @@ export default function QuickStats({ analysisHistory = [] }) {
       bgColor: "bg-emerald-500/10",
       textColor: "text-emerald-600",
     },
+    {
+      labelKey: "technicalHealth",
+      value: technicalHealthIndex,
+      icon: Activity,
+      color: healthStatus === "healthy" ? "from-green-500 to-green-600" : "from-red-500 to-red-600",
+      bgColor: healthStatus === "healthy" ? "bg-green-500/10" : "bg-red-500/10",
+      textColor: healthStatus === "healthy" ? "text-green-600" : "text-red-600",
+    },
   ];
 
   return (
