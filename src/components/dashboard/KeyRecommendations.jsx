@@ -351,8 +351,8 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
               const Icon = recommendationIcons[rec.type] || recommendationIcons.default;
               
               const isExpanded = expandedIndex === globalIndex;
-              const details = detailsCache[index];
-              const isLoading = loadingDetails[index];
+              const details = detailsCache[globalIndex];
+              const isLoading = loadingDetails[globalIndex];
 
               return (
                 <motion.div
