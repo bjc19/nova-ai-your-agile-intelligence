@@ -224,8 +224,9 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
-  if (matchesAny(text, PLANNING_OBJECTS.future)) score += 35;
-  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score += 30;
+  // Planning = future + ESTIMATION/ENGAGEMENT, not just "future items" mentioned
+  if (matchesAny(text, PLANNING_OBJECTS.future) && matchesAny(text, PLANNING_OBJECTS.estimation)) score += 40;
+  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score += 35;
   if (matchesAny(text, PLANNING_OBJECTS.prioritization)) score += 20;
   
   // Temporality scoring (future confirms planning)
