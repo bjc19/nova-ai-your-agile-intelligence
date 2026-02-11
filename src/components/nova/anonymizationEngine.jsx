@@ -206,11 +206,13 @@ const extractNamesFromText = (text) => {
 
 /**
  * Name detection from dialogue format:
- * Only interlocutors (names before ":" at start of line) are considered proper names
- * No other name detection - no false positives on common words
+ * CRITICAL: Only interlocutors (names before ":" at start of line) are considered proper names
+ * Do NOT extract names from sentence starts - capital letters are used for ALL sentence starts, not just names
+ * No other name detection - no false positives on verbs or common words starting sentences
  */
 const getDetectionLayers = (text) => {
    // ONLY detect names from dialogue format (Name : ...)
+   // Never use extractNamesFromText - it has too many false positives
    return extractInterlocutors(text);
 };
 
