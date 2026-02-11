@@ -7,10 +7,17 @@ import {
    AlertOctagon,
    ShieldAlert,
    CheckCircle2,
-   Activity
+   Activity,
+   HelpCircle
  } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { adaptMessage } from "./RoleBasedMessaging";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function QuickStats({ analysisHistory = [] }) {
   const { t } = useLanguage();
