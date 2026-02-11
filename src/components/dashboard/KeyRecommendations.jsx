@@ -36,15 +36,31 @@ const anonymizeRecommendationText = (text, knownNames = []) => {
   let result = text;
   const allNames = [...new Set(knownNames)];
   
-  // Anonymize all known names
+  // Anonymize all known names (NEVER anonymize verbs)
   allNames.forEach(name => {
     if (!name || name.length <= 2) return;
+    // CRITICAL: Never anonymize if it's a verb
+    if (anonymizeFirstName.isVerb?.(name) || isVerbFrenchEnglish(name)) return;
+    
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(?<!\\p{L})${escapedName}(?!\\p{L})`, 'giu');
     result = result.replace(regex, anonymizeFirstName(name));
   });
   
   return result;
+};
+
+// Helper: Check if word is a French/English verb
+const isVerbFrenchEnglish = (word) => {
+  const lowerWord = word.toLowerCase();
+  
+  // French infinitives
+  if (/er$|ir$|re$|oir$/.test(lowerWord) && lowerWord.length > 3) return true;
+  
+  // English -ing, -ed
+  if (/(ing|ed)$/.test(lowerWord) && lowerWord.length > 4) return true;
+  
+  return false;
 };
 
 export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, sourceName }) {
