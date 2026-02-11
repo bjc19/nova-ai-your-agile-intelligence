@@ -4,14 +4,11 @@ import { useEffect, useState } from "react";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import {
-  AlertOctagon,
-  ShieldAlert,
-  Clock,
-  TrendingUp,
-  CheckCircle2,
-  Repeat2,
-  Activity
-} from "lucide-react";
+   AlertOctagon,
+   ShieldAlert,
+   CheckCircle2,
+   Activity
+ } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { adaptMessage } from "./RoleBasedMessaging";
 
