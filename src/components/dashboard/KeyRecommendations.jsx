@@ -258,7 +258,7 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
           };
         });
       const itemsPerPage = 4;
-      const totalPages = Math.ceil(recommendations.length / itemsPerPage);
+      const totalPages = Math.max(1, Math.ceil(recommendations.length / itemsPerPage));
       const startIdx = currentPage * itemsPerPage;
       const paginatedRecs = recommendations.slice(startIdx, startIdx + itemsPerPage);
 
