@@ -24,15 +24,12 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     // Charger le compteur depuis le backend
     const loadTries = async () => {
       try {
-        const trackResponse = await base44.functions.invoke('trackDemoAttempt');
+        const trackResponse = await base44.functions.invoke('trackDemoAttempt', { checkOnly: true });
         const trackData = trackResponse.data;
         
         if (trackData.blocked) {
           setTries(0);
         } else {
-          // Ajouter 1 car trackDemoAttempt retourne "remaining" après avoir déjà décrémenté
-          // Mais ici on veut juste CHECK sans décrémenter
-          // Solution: on utilise attempt_count actuel sans toucher
           setTries(trackData.remaining || 0);
         }
       } catch (error) {
