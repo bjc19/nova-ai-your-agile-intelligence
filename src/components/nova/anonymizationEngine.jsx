@@ -145,6 +145,10 @@ const COMMON_WORDS = new Set([
   'iteration', 'increment', 'pi', 'innovation', 'milestone', 'deadline',
   'team', 'équipe', 'member', 'membre', 'members', 'membres', 'group', 'groupe',
 
+  // External Tools & Platforms (CRITICAL - never anonymize)
+  'slack', 'jira', 'microsoft', 'teams', 'github', 'gitlab', 'confluence', 'trello',
+  'devops', 'azure', 'zoom',
+
   // Artifacts & Structure
   'backlog', 'portfolio', 'solution', 'item', 'story', 'user', 'epic', 'feature', 'capability',
   'enabler', 'task', 'subtask', 'spike', 'bug', 'defect', 'ticket', 'roadmap', 'vision',
