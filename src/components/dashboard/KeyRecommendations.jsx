@@ -106,7 +106,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     // Also extract names from recommendations text itself
     allSourceRecommendations.forEach(rec => {
       const recText = rec.text || rec.description || '';
-      const capitalizedWords = (recText.match(/\b[A-Z][a-z]+\b/g) || []).filter(w => w.length > 2);
+      const capitalizedWords = (recText.match(/\b\p{Lu}\p{Ll}+\b/gu) || []).filter(w => w.length > 2);
       capitalizedWords.forEach(name => knownNames.add(name));
     });
 
