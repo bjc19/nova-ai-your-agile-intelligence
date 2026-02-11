@@ -863,8 +863,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                 if (detection) {
                   return (
                     <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
                           <p className="text-sm font-semibold text-slate-900">
                             Atelier détecté: <span className="text-blue-600">{detection.type}</span>
                             {detection.subtype && <span className="text-blue-500"> {detection.subtype}</span>}
@@ -881,7 +881,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                         </div>
                       </div>
 
-                      <div>
+                      <div className="mb-3">
                         <p className="text-xs text-slate-600 font-medium mb-1">Raisons de la détection:</p>
                         <ul className="text-xs text-slate-600 space-y-0.5">
                           {detection.justifications.map((just, idx) => (
@@ -890,12 +890,18 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                         </ul>
                       </div>
 
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 mb-3">
                         {detection.tags.map(tag => (
                           <Badge key={tag} variant="outline" className="text-xs bg-white">
                             {tag}
                           </Badge>
                         ))}
+                      </div>
+
+                      <div className="pt-3 border-t border-blue-200">
+                        <p className="text-xs text-blue-700 italic">
+                          💡 Bien que Nova AI soit très performant, la pré-détection peut se tromper de type d'atelier si son contenu semble mixé avec d'autres pratiques, mais l'analyse approfondie une fois lancée corrigera ce faux-positif.
+                        </p>
                       </div>
 
                       {detection.confidence < 70 && (
