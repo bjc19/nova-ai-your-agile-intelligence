@@ -13,11 +13,15 @@ const getActionPlanPrompt = (rec, language) => {
 
       Recommandation: ${rec}
 
+      IMPORTANT: Conserve TOUS les noms anonymisés au format X****e exactement comme ils apparaissent dans la recommandation (ex: A*****e, S****l, H**o). Ne dé-anonymise JAMAIS les noms.
+
       Fournis 3-5 étapes concrètes et spécifiques que l'équipe peut suivre immédiatement. Sois pragmatique et actionnable. Réponds EN FRANÇAIS.`;
         } else {
           return `You are Nova, an AI Scrum Master. Detail this recommendation with a concrete action plan in the form of numbered, actionable to-do items.
 
       Recommendation: ${rec}
+
+      IMPORTANT: Keep ALL anonymized names in the exact format X****e as they appear (e.g., A*****e, S****l, H**o). NEVER de-anonymize names.
 
       Provide 3-5 concrete and specific steps that the team can follow immediately. Be pragmatic and actionable.`;
         }
@@ -39,7 +43,7 @@ export default function RecommendationCard({ recommendations, sourceUrl, sourceN
           typeof rec === 'string' ? rec : rec?.action || rec?.description || JSON.stringify(rec)
         );
         
-        const prompt = `Traduis ces recommandations en français de manière concise:\n\n${recsToTranslate.map((r, i) => `${i + 1}. ${r}`).join('\n\n')}`;
+        const prompt = `Traduis ces recommandations en français de manière concise. IMPORTANT: Conserve TOUS les noms anonymisés au format X****e exactement comme ils apparaissent (ex: A*****e, S****l, H**o).\n\n${recsToTranslate.map((r, i) => `${i + 1}. ${r}`).join('\n\n')}`;
         
         const result = await invokeLLMWithAutoTranslate(
           prompt,
