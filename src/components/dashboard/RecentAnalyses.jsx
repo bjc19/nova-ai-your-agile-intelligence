@@ -42,44 +42,44 @@ export default function RecentAnalyses({ analyses = [] }) {
   const [loadingActions, setLoadingActions] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const fetchSignals = async () => {
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const [allMarkers, allPatterns] = await Promise.all([
+        base44.entities.GDPRMarkers.list('-created_date', 50),
+        base44.entities.AntiPattern.filter({ is_active: true })
+      ]);
+      
+      // Separate Slack and Teams markers
+      const slackMarkers = allMarkers.filter(m => 
+        m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
+      ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
+      
+      const teamsMarkers = allMarkers.filter(m => 
+        m.detection_source === 'teams_daily'
+      ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
+
+      const jiraMarkers = allMarkers.filter(m => 
+        m.detection_source === 'jira_backlog'
+      ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
+
+      // Attach pattern details to markers
+      const enrichMarkers = (markers) => 
+        markers.map(m => ({
+          ...m,
+          patternDetails: allPatterns.find(p => p.pattern_id === m.pattern_id)
+        }));
+
+      setGdprSignals(enrichMarkers(slackMarkers));
+      setTeamsInsights([...enrichMarkers(teamsMarkers), ...enrichMarkers(jiraMarkers)]);
+    } catch (error) {
+      console.error("Erreur chargement signaux:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
-        const [allMarkers, allPatterns] = await Promise.all([
-          base44.entities.GDPRMarkers.list('-created_date', 50),
-          base44.entities.AntiPattern.filter({ is_active: true })
-        ]);
-        
-        // Separate Slack and Teams markers
-        const slackMarkers = allMarkers.filter(m => 
-          m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
-        ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        
-        const teamsMarkers = allMarkers.filter(m => 
-          m.detection_source === 'teams_daily'
-        ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
-
-        const jiraMarkers = allMarkers.filter(m => 
-          m.detection_source === 'jira_backlog'
-        ).filter(m => new Date(m.created_date) >= sevenDaysAgo);
-
-        // Attach pattern details to markers
-        const enrichMarkers = (markers) => 
-          markers.map(m => ({
-            ...m,
-            patternDetails: allPatterns.find(p => p.pattern_id === m.pattern_id)
-          }));
-
-        setGdprSignals(enrichMarkers(slackMarkers));
-        setTeamsInsights([...enrichMarkers(teamsMarkers), ...enrichMarkers(jiraMarkers)]);
-      } catch (error) {
-        console.error("Erreur chargement signaux:", error);
-      }
-    };
-
     fetchSignals();
   }, []);
 
