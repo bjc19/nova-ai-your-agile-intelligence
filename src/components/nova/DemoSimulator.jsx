@@ -196,7 +196,6 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
     // Champ L2: ORGANISATION & ÉQUIPE (Rôles Pro)
     const L2_terms = [
-      'equipe projet', 'equipe scrum', 'equipe agile', 'equipe dev',
       'product owner', 'scrum master', 'developpeur', 'testeur',
       'po', 'sm', 'dev', 'qa', 'tech lead', 'architect',
       'client projet', 'utilisateur final', 'user', 'product manager',
