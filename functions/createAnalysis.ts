@@ -18,7 +18,6 @@ Deno.serve(async (req) => {
     const { analysisRecord, patternDetections } = body || {};
 
     if (!analysisRecord) {
-      console.error('Missing analysisRecord. Body received:', body);
       return Response.json({ error: 'Missing analysisRecord' }, { status: 400 });
     }
 
@@ -49,7 +48,6 @@ Deno.serve(async (req) => {
 
     return Response.json({ analysis: createdAnalysis });
   } catch (error) {
-    console.error('Analysis creation error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
