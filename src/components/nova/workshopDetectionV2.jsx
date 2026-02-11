@@ -28,9 +28,10 @@ const REVIEW_OBJECTS = {
 };
 
 const RETROSPECTIVE_OBJECTS = {
-  teamProcess: ['communication', 'collaboration', 'workflow', 'processus', 'process', 'dynamique', 'équipe', 'team', 'relation'],
-  improvement: ['amélioration', 'improvement', 'friction', 'friction', 'difficultés', 'difficulties', 'on devrait', 'we should', 'la prochaine fois', 'next time', 'proposer', 'suggest'],
-  emotion: ['frustration', 'stress', 'difficile', 'difficult', 'problème', 'problem', 'sentiment', 'feeling', 'ressenti', 'felt'],
+  teamProcess: ['communication', 'collaboration', 'workflow', 'processus', 'process', 'dynamique', 'équipe', 'team', 'relation', 'entraide', 'mutual support'],
+  improvement: ['amélioration', 'improvement', 'friction', 'friction', 'difficultés', 'difficulties', 'on devrait', 'we should', 'la prochaine fois', 'next time', 'proposer', 'suggest', 'action', 'action de réparation', 'action plan', 'dette technique', 'technical debt'],
+  emotion: ['frustration', 'stress', 'difficile', 'difficult', 'problème', 'problem', 'sentiment', 'feeling', 'ressenti', 'felt', 'sur les rotules', 'burned out', 'ancre', 'anchor'],
+  retrospectiveMethod: ['speedboat', 'voile', 'voiles', 'ancre', 'ancres', 'requin', 'requins', 'rose thorn', 'bud', 'glad sad mad', '4ls', 'sailing', 'sail', 'anchor', 'shark'],
 };
 
 const PLANNING_OBJECTS = {
@@ -82,10 +83,12 @@ const PATTERNS = {
     stakeholder: /(?:client|customer|stakeholder|utilisateur|user|sponsor|product owner)/i,
   },
   retrospective: {
-    processAnalysis: /(?:communication|collaboration|workflow|processus|process|dynamique|friction)/i,
-    improvementProposal: /(?:amélioration|improvement|on devrait|we should|la prochaine fois|next time|proposer|suggest|différent|different)/i,
-    emotionalContext: /(?:frustration|stress|difficile|difficult|problème|problem|sentir|feel|ressenti|felt)/i,
+    processAnalysis: /(?:communication|collaboration|workflow|processus|process|dynamique|friction|entraide)/i,
+    improvementProposal: /(?:amélioration|improvement|on devrait|we should|la prochaine fois|next time|proposer|suggest|différent|different|action\s+(?:de|plan|item)|action\s+de\s+réparation)/i,
+    emotionalContext: /(?:frustration|stress|difficile|difficult|problème|problem|sentir|feel|ressenti|felt|sur\s+les\s+rotules|burned\s+out)/i,
     teamFocus: /(?:équipe|team|nous|we|ensemble|together|collaboration|collectif)/i,
+    retrospectiveMethod: /(?:speedboat|voile|ancre|requin|rose\s+thorn|glad\s+sad\s+mad|4ls|sailing)/i,
+    technicalDebt: /(?:dette\s+technique|technical\s+debt|refactor|refactoring|code\s+(?:rapide|quick)|propre|clean\s+(?:up|code))/i,
   },
   planning: {
     futureCommitment: /(?:prochain sprint|next sprint|engagement|commitment|on s'engage|we commit|repart|embarque)/i,
@@ -335,20 +338,31 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   // If structural Daily pattern exists, heavily penalize Retrospective
   if (hasStructuralPatternDaily) score -= 40;
   
+  // CRITICAL HARD OVERRIDE: If explicit retro method detected (Speedboat, voiles/ancres/requins, etc.) = RETROSPECTIVE
+  const hasRetroMethod = matchesAny(text, RETROSPECTIVE_OBJECTS.retrospectiveMethod);
+  if (hasRetroMethod) {
+    score += 100; // Maximum score - cannot be beaten
+    return score;
+  }
+  
   // Object scoring (dominant object)
   const hasTeamProcess = matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess);
   const hasImprovement = matchesAny(text, RETROSPECTIVE_OBJECTS.improvement);
   const hasEmotion = matchesAny(text, RETROSPECTIVE_OBJECTS.emotion);
+  const hasTechnicalDebt = PATTERNS.retrospective.technicalDebt.test(text);
   
   if (hasTeamProcess) score += 40;
   if (hasImprovement) score += 35;
   if (hasEmotion) score += 25;
+  if (hasTechnicalDebt) score += 30; // Tech debt = retro topic
   
   // Strong bonus if process + improvement (classic retro combo)
   if (hasTeamProcess && hasImprovement) score += 20;
+  if (hasImprovement && hasTechnicalDebt) score += 15;
   
   // If Planning keywords dominate, penalize Retrospective heavily
-  if (matchesAny(text, PLANNING_OBJECTS.future) || matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 30;
+  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 50;
+  // Note: DON'T penalize for "future" - retro discusses future improvements
   
   // Temporality scoring (reflective confirms retro)
   if (matchesAny(text, RETROSPECTIVE_TIME.reflective)) score += 15;
@@ -358,10 +372,11 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   if (PATTERNS.retrospective.improvementProposal.test(text)) score += 20;
   if (PATTERNS.retrospective.emotionalContext.test(text)) score += 15;
   if (PATTERNS.retrospective.teamFocus.test(text)) score += 15;
+  if (PATTERNS.retrospective.retrospectiveMethod.test(text)) score += 40;
+  if (PATTERNS.retrospective.technicalDebt.test(text)) score += 25;
   
   // Anti-pattern penalties
   if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 30;
-  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 15;
   
   return Math.max(0, score);
 }
@@ -385,6 +400,10 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
     score += 100; // Maximum score - cannot be beaten
     return score;
   }
+  
+  // CRITICAL PENALTY: If retrospective method or improvement focus = NOT Planning
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.retrospectiveMethod)) score -= 100;
+  if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement) && PATTERNS.retrospective.improvementProposal.test(text)) score -= 50;
   
   // Secondary signals: Future + Decomposition (without estimation)
   if (hasFuture && (hasDecomposition || hasBacklogSelection)) score += 50;
