@@ -487,7 +487,7 @@ export default function Details() {
                             item.source === 'teams' ? 'text-purple-600 font-medium' : 
                             'text-slate-500'
                           }`}>
-                            {item.analysisTitle}
+                            {item.analysisData?.workshop_type || item.analysisTitle}
                           </span>
                           {item.source === 'gdpr' && (
                             <>
