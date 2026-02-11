@@ -225,23 +225,32 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
-  // Planning = future + ESTIMATION/ENGAGEMENT, not just "future items" mentioned
-  if (matchesAny(text, PLANNING_OBJECTS.future) && matchesAny(text, PLANNING_OBJECTS.estimation)) score += 40;
-  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score += 35;
-  if (matchesAny(text, PLANNING_OBJECTS.prioritization)) score += 20;
+  // Planning REQUIRES estimation + backlog selection together
+  const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
+  const hasBacklogSelection = matchesAny(text, PLANNING_OBJECTS.backlogSelection);
+  const hasFuture = matchesAny(text, PLANNING_OBJECTS.future);
   
-  // Temporality scoring (future confirms planning)
-  if (matchesAny(text, PLANNING_TIME.future)) score += 20;
-  if (matchesAny(text, PLANNING_TIME.commitment)) score += 15;
+  // Planning requires ACTUAL estimation discussion (story points, capacity)
+  // NOT just mentioning "backlog" for future items
+  if (hasEstimation && (hasBacklogSelection || hasFuture)) score += 40;
+  if (hasEstimation && matchesAny(text, PLANNING_TIME.commitment)) score += 30;
+  if (matchesAny(text, PLANNING_OBJECTS.prioritization) && hasEstimation) score += 15;
+  
+  // Temporality scoring (future confirms planning ONLY with estimation)
+  if (matchesAny(text, PLANNING_TIME.commitment) && hasEstimation) score += 15;
   
   // Intent patterns (strong indicators of Planning)
-  if (PATTERNS.planning.futureCommitment.test(text)) score += 20;
-  if (PATTERNS.planning.estimationDiscussion.test(text)) score += 20;
-  if (PATTERNS.planning.backlogSelection.test(text)) score += 20;
-  if (PATTERNS.planning.sprintGoal.test(text)) score += 20;
+  if (PATTERNS.planning.futureCommitment.test(text) && hasEstimation) score += 25;
+  if (PATTERNS.planning.estimationDiscussion.test(text)) score += 30;
+  if (PATTERNS.planning.backlogSelection.test(text) && hasEstimation) score += 20;
+  if (PATTERNS.planning.sprintGoal.test(text) && hasEstimation) score += 20;
+  
+  // Heavy penalty: backlog mentioned WITHOUT estimation = likely Review proposing future items
+  if (hasBacklogSelection && !hasEstimation) score -= 30;
   
   // Anti-pattern penalties
-  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 20;
+  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 30;
+  if (matchesAny(text, REVIEW_OBJECTS.validation)) score -= 15;
   if (matchesAny(text, DAILY_OBJECTS.blockers)) score -= 10;
   
   return Math.max(0, score);
