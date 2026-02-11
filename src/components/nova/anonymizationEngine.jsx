@@ -116,31 +116,40 @@ const COMMON_WORDS = new Set([
   'entendre', 'laisser', 'tenir', 'montrer', 'utiliser', 'servir', 'appeler', 'passer',
   'demander', 'parler', 'arriver', 'rester', 'sortir', 'entrer', 'suivre', 'produire',
   'comparer', 'commencer', 'continuer', 'développer', 'organiser', 'planifier', 'analyser',
-  
+
   // Agile Rituals & Ceremonies & Team Terms
   'daily', 'standup', 'scrum', 'sprint', 'planning', 'review', 'retrospective', 'retro',
   'grooming', 'refinement', 'demo', 'kickoff', 'workshop', 'sync', 'catchup', 'post-mortem',
   'iteration', 'increment', 'pi', 'innovation', 'milestone', 'deadline',
   'team', 'équipe', 'member', 'membre', 'members', 'membres', 'group', 'groupe',
-  
+
   // Artifacts & Structure
   'backlog', 'portfolio', 'solution', 'item', 'story', 'user', 'epic', 'feature', 'capability',
   'enabler', 'task', 'subtask', 'spike', 'bug', 'defect', 'ticket', 'roadmap', 'vision',
   'charter', 'scope', 'requirement', 'specification', 'spec', 'deliverable',
-  
+
   // Roles & Governance
   'owner', 'master', 'lead', 'manager', 'director', 'sponsor', 'stakeholder', 'architect',
   'engineer', 'developer', 'dev', 'qa', 'ux', 'ui', 'designer', 'coach', 'rte', 'ste', 'pmo',
   'project', 'program', 'business', 'squad', 'tribe', 'train',
-  
+
   // Metrics & Tools
   'kpi', 'okr', 'velocity', 'capacity', 'burnup', 'burndown', 'throughput', 'wip', 'kanban',
   'board', 'workflow', 'jira', 'confluence', 'trello', 'slack', 'teams', 'figma', 'miro',
   'mural', 'github', 'gitlab', 'azure', 'devops',
-  
+
   // Status & Technical
   'todo', 'doing', 'done', 'progress', 'blocked', 'ready', 'definition', 'acceptance',
-  'criteria', 'staging', 'production', 'prod', 'hotfix', 'patch', 'release'
+  'criteria', 'staging', 'production', 'prod', 'hotfix', 'patch', 'release',
+
+  // Infrastructure & Environment Variables
+  'environment', 'variable', 'variables', 'config', 'configuration', 'secret', 'secrets',
+  'api', 'endpoint', 'database', 'server', 'client', 'host', 'port', 'url', 'ssl', 'https',
+  'authentication', 'authorization', 'token', 'key', 'password', 'username', 'user',
+  'deployment', 'docker', 'container', 'kubernetes', 'aws', 'gcp', 'azure', 'heroku',
+  'ci', 'cd', 'pipeline', 'build', 'test', 'deploy', 'release', 'version',
+  'error', 'warning', 'log', 'debug', 'trace', 'info', 'exception', 'crash',
+  'performance', 'memory', 'cpu', 'latency', 'throughput', 'bandwidth'
   ]);
 
 /**
