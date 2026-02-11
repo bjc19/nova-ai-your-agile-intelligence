@@ -283,14 +283,17 @@ function scoreDaily(text, hasStructuralPattern = false) {
 function scoreReview(text, hasStructuralPatternDaily = false) {
   let score = 0;
   
-  // If structural Daily pattern exists, heavily penalize Review
-  if (hasStructuralPatternDaily) score -= 50;
-  
+  // If structural Daily pattern exists, HEAVILY penalize Review (UNBREAKABLE)
+  if (hasStructuralPatternDaily) {
+    score = Math.max(0, score - 100); // Absolute penalty
+    return score; // Exit early: Daily pattern dominates
+  }
+
   // Object scoring (dominant object)
   // Review = PRODUCT + DEMO (not just "feedback" which is in Retro too)
   const hasDemo = matchesAny(text, REVIEW_OBJECTS.demo);
   const hasProduct = matchesAny(text, REVIEW_OBJECTS.product);
-  
+
   if (hasDemo) score += 35;
   if (hasProduct) score += 30;
   if (hasDemo && hasProduct) score += 15;
