@@ -250,74 +250,8 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
       };
 
       translateRecommendations();
-    }
-  }, [allSourceRecommendations, language, translatedRecommendations]);
-
-  // Extract known names from transcript for anonymization
-  const knownNames = new Set();
-  if (latestAnalysis?.transcript) {
-    const interlocutors = extractInterlocutors(latestAnalysis.transcript);
-    interlocutors.forEach(name => knownNames.add(name));
-  }
-
-  // Combine recommendations from manual analysis + all unified sources
-  const getRecommendations = () => {
-    const allRecs = [];
-    
-    // Add recommendations from all unified sources (backend handles all sources: analysis, slack, teams, etc.)
-    allSourceRecommendations.forEach((rec, idx) => {
-      const recText = rec.text || '';
-      allRecs.push({
-        type: "default",
-        title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
-        description: recText,
-        priority: rec.priority || 'medium',
-        source: rec.source,
-        entityType: rec.entityType
-      });
-    });
-    
-    // Add manual analysis recommendations if available (only if no data from backend)
-    if (allRecs.length === 0 && latestAnalysis?.recommendations && latestAnalysis.recommendations.length > 0) {
-      allRecs.push(...latestAnalysis.recommendations.map((rec, i) => {
-        const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
-        return {
-          type: "default",
-          title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
-          description: recText,
-          priority: i === 0 ? "high" : "medium",
-          source: 'analysis'
-        };
-      }));
-    }
-    
-    // If no recommendations from any source, use samples
-    if (allRecs.length === 0) {
-      return sampleRecommendations;
-    }
-    
-    // Apply translation if needed
-    if (translatedRecommendations) {
-      return translatedRecommendations;
-    }
-    
-    return allRecs;
-  };
-
-  const allRecommendations = getRecommendations();
-  
-  // Anonymize all recommendations before pagination
-  const anonymizedRecommendations = allRecommendations.map(rec => ({
-    ...rec,
-    title: anonymizeRecommendationText(rec.title, Array.from(knownNames)),
-    description: anonymizeRecommendationText(rec.description, Array.from(knownNames))
-  }));
-  
-  const recommendations = anonymizedRecommendations.map(rec => formatRecommendation(rec, userRole));
-  const itemsPerPage = 4;
-  const totalPages = Math.ceil(recommendations.length / itemsPerPage);
-  const startIdx = currentPage * itemsPerPage;
-  const paginatedRecs = recommendations.slice(startIdx, startIdx + itemsPerPage);
+      }
+      }, [allSourceRecommendations, language, translatedRecommendations]);
 
   // Keyboard navigation for pagination
   useEffect(() => {
