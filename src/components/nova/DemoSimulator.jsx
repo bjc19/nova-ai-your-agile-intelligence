@@ -232,7 +232,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       'blocage', 'bloque', 'impediment', 'blocker',
       'risque projet', 'issue technique', 'bug', 'anomalie',
       'incident production', 'dette technique', 'technical debt',
-      'dependance technique', 'dependance equipe',
+      'dependance technique',
       'retard livraison', 'retard sprint', 'scope change',
       'changement perimetre', 'besoin client', 'feedback client',
       'resolution', 'correctif', 'solution technique', 'workaround',
