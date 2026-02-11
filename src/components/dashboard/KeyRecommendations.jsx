@@ -350,7 +350,7 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
               const globalIndex = startIdx + index;
               const Icon = recommendationIcons[rec.type] || recommendationIcons.default;
               
-              const isExpanded = expandedIndex === index;
+              const isExpanded = expandedIndex === globalIndex;
               const details = detailsCache[index];
               const isLoading = loadingDetails[index];
 
