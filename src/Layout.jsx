@@ -129,7 +129,12 @@ function LayoutContent({ children, currentPageName }) {
 
       {/* Demo Simulator */}
       {showDemoSimulator && (
-        <DemoSimulator onClose={() => setShowDemoSimulator(false)} />
+        <DemoSimulator 
+          onClose={() => setShowDemoSimulator(false)} 
+          onTriesUpdate={(remaining) => {
+            // Optionnel: gérer le compteur ici si nécessaire
+          }} 
+        />
       )}
 
       {/* Footer */}
