@@ -124,8 +124,8 @@ export default function QuickStats({ analysisHistory = [] }) {
       detailType = "blockers";
     } else if (labelKey === "risksIdentified") {
       detailType = "risks";
-    } else if (labelKey === "analysesRun") {
-      detailType = "analyses";
+    } else if (labelKey === "patternRecurrence") {
+      detailType = "patterns";
     } else if (labelKey === "resolved") {
       detailType = "resolved";
     }
