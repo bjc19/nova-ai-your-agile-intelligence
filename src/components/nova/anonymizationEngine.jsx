@@ -360,10 +360,18 @@ const anonymizeNamesInText = (text, knownNames = []) => {
     // CRITICAL: Never anonymize if it's an adjective (detected by context)
     if (isAdjectiveByContext(name, text)) return;
 
-    // Match: name surrounded by non-letter boundaries
+    // CRITICAL: Never anonymize action verbs at sentence start (recommendations)
+    let searchPos = 0;
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(?<!\\p{L})${escapedName}(?!\\p{L})`, 'giu');
-    result = result.replace(regex, anonymizeFirstName(name));
+
+    result = result.replace(regex, (match, offset) => {
+      // Check if this occurrence is an action verb at sentence start
+      if (isActionVerbAtStart(match, text, offset)) {
+        return match; // Don't anonymize action verbs
+      }
+      return anonymizeFirstName(name);
+    });
   });
 
   return result;
