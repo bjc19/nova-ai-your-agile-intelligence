@@ -260,6 +260,8 @@ export function detectWorkshopType(transcript) {
     };
   }
 
+  const lower = transcript.toLowerCase();
+  const hasStructuralDaily = detectYesterdayTodayBlockers(lower);
   const scores = analyzeText(transcript);
   
   // Find dominant score
