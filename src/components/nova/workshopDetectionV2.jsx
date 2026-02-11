@@ -179,8 +179,9 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
   if (PATTERNS.review.feedbackRequest.test(text)) score += 15;
   if (PATTERNS.review.stakeholder.test(text)) score += 10;
   
-  // Anti-pattern penalties
-  if (matchesAny(text, PLANNING_OBJECTS.future)) score -= 20;
+  // Anti-pattern penalties: Planning-specific keywords (without engagement/estimation)
+  // If Planning keywords exist but NOT followed by capacity/estimation discussion, likely Review proposing future work
+  if (matchesAny(text, PLANNING_OBJECTS.future) && !matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 10;
   if (matchesAny(text, DAILY_OBJECTS.tasks)) score -= 10;
   
   return Math.max(0, score);
