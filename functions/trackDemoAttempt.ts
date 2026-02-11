@@ -65,6 +65,15 @@ Deno.serve(async (req) => {
     
     // Reset counter if 24h has passed
     if (now.getTime() - lastReset.getTime() > 24 * 60 * 60 * 1000) {
+      if (checkOnly) {
+        return Response.json({ 
+          allowed: true, 
+          remaining: 2, 
+          message: 'Counter will be reset on next attempt',
+          blocked: false
+        });
+      }
+      
       await base44.entities.DemoAttempt.update(attempt.id, {
         attempt_count: 1,
         last_reset: now.toISOString(),
@@ -99,6 +108,16 @@ Deno.serve(async (req) => {
         message: 'Demo attempts exhausted for this IP. Try again in 24 hours.',
         blocked: true
       }, { status: 429 });
+    }
+    
+    // If checkOnly, don't decrement
+    if (checkOnly) {
+      return Response.json({ 
+        allowed: true, 
+        remaining: attempt.attempt_count, 
+        message: `${attempt.attempt_count} demo attempts remaining`,
+        blocked: false
+      });
     }
     
     // Decrement attempt count
