@@ -253,7 +253,10 @@ export default function RecentAnalyses({ analyses = [] }) {
             size="icon"
             onClick={async () => {
               setIsRefreshing(true);
-              await queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['analysisHistory'] }),
+                fetchSignals()
+              ]);
               setIsRefreshing(false);
             }}
             disabled={isRefreshing}
