@@ -14,22 +14,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const bodyText = await req.text();
-    console.log('Raw body received:', bodyText.substring(0, 500));
-    
-    let body;
-    try {
-      body = JSON.parse(bodyText);
-    } catch (e) {
-      console.error('JSON parse error:', e.message);
-      return Response.json({ error: 'Invalid JSON' }, { status: 400 });
-    }
-    
-    console.log('Body keys:', Object.keys(body));
+    const body = await req.json();
     const { analysisRecord, patternDetections } = body || {};
 
     if (!analysisRecord) {
-      console.error('Missing analysisRecord. Body keys:', Object.keys(body), 'Body:', JSON.stringify(body).substring(0, 200));
+      console.error('Missing analysisRecord. Body received:', body);
       return Response.json({ error: 'Missing analysisRecord' }, { status: 400 });
     }
 
