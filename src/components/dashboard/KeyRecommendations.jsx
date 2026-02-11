@@ -468,6 +468,24 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
             })}
           </div>
           
+          {/* Pagination dots */}
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-6 pb-2">
+              {Array.from({ length: totalPages }).map((_, page) => (
+                <motion.button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    currentPage === page ? 'bg-amber-500 w-6' : 'bg-slate-300 hover:bg-slate-400'
+                  }`}
+                  aria-label={`Page ${page + 1}`}
+                />
+              ))}
+            </div>
+          )}
+          
           {/* External link - Admin/Contributor only */}
           {(isAdmin || isContributor) && sourceUrl && (
             <div className="mt-5 pt-5 border-t border-slate-100">
