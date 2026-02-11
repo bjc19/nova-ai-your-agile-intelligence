@@ -52,15 +52,15 @@ Deno.serve(async (req) => {
     // Reset counter if 24h has passed
     if (now.getTime() - lastReset.getTime() > 24 * 60 * 60 * 1000) {
       await base44.entities.DemoAttempt.update(attempt.id, {
-        attempt_count: 2,
+        attempt_count: 1,
         last_reset: now.toISOString(),
         last_attempt: now.toISOString(),
         is_blocked: false
       });
       return Response.json({ 
         allowed: true, 
-        remaining: 2, 
-        message: 'Counter reset - 2 attempts available'
+        remaining: 1, 
+        message: 'Counter reset - Demo attempt recorded. 1 remaining in 24h window'
       });
     }
     
