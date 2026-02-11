@@ -107,6 +107,7 @@ const COMMON_WORDS = new Set([
   // Generic nouns (not proper names)
   'issue', 'problem', 'blocker', 'risk', 'impact', 'action', 'task', 'item', 'comment',
   'note', 'feedback', 'suggestion', 'recommendation', 'improvement', 'enhancement',
+  'need', 'needs', 'requirement', 'requirements', 'constraint', 'constraints',
   // Common French/English grammar words
   'le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'mais', 'donc', 'car',
   'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'on', 'ce', 'cet', 'cette',
