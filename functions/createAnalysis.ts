@@ -14,7 +14,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const body = await req.json();
+    // Parse body early to catch parsing errors
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return Response.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+
+    console.log('Received body:', JSON.stringify(body).substring(0, 200));
     const { analysisRecord, patternDetections } = body;
 
     // Validate input
