@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield } from "lucide-react";
+import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
 const translateContent = async (text, targetLanguage) => {
   if (!text || targetLanguage === 'en') return text;
