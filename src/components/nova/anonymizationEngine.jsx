@@ -40,10 +40,11 @@ export const extractInterlocutors = (text) => {
 };
 
 /**
- * Common French/English words that should NOT be anonymized
- * (prevents falsely anonymizing "Le", "De", "And", etc.)
+ * Whitelist: Terms that should NOT be anonymized
+ * Includes common language words + agile/technical ecosystem terms
  */
 const COMMON_WORDS = new Set([
+  // Common French/English grammar words
   'le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'mais', 'donc', 'car',
   'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'on', 'ce', 'cet', 'cette',
   'mon', 'ton', 'son', 'notre', 'votre', 'leur', 'quel', 'quelle', 'quels', 'quelles',
@@ -58,7 +59,31 @@ const COMMON_WORDS = new Set([
   'during', 'before', 'after', 'above', 'below', 'between', 'under', 'over',
   'here', 'there', 'where', 'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few',
   'more', 'most', 'some', 'any', 'many', 'much', 'no', 'nor', 'only', 'own', 'same', 'so',
-  'such', 'than', 'too', 'very', 'just', 'should', 'now'
+  'such', 'than', 'too', 'very', 'just', 'should', 'now',
+  
+  // Agile Rituals & Ceremonies
+  'daily', 'standup', 'scrum', 'sprint', 'planning', 'review', 'retrospective', 'retro',
+  'grooming', 'refinement', 'demo', 'kickoff', 'workshop', 'sync', 'catchup', 'post-mortem',
+  'iteration', 'increment', 'pi', 'innovation', 'milestone', 'deadline',
+  
+  // Artifacts & Structure
+  'backlog', 'portfolio', 'solution', 'item', 'story', 'user', 'epic', 'feature', 'capability',
+  'enabler', 'task', 'subtask', 'spike', 'bug', 'defect', 'ticket', 'roadmap', 'vision',
+  'charter', 'scope', 'requirement', 'specification', 'spec', 'deliverable',
+  
+  // Roles & Governance
+  'owner', 'master', 'lead', 'manager', 'director', 'sponsor', 'stakeholder', 'architect',
+  'engineer', 'developer', 'dev', 'qa', 'ux', 'ui', 'designer', 'coach', 'rte', 'ste', 'pmo',
+  'project', 'program', 'business', 'squad', 'tribe', 'train',
+  
+  // Metrics & Tools
+  'kpi', 'okr', 'velocity', 'capacity', 'burnup', 'burndown', 'throughput', 'wip', 'kanban',
+  'board', 'workflow', 'jira', 'confluence', 'trello', 'slack', 'teams', 'figma', 'miro',
+  'mural', 'github', 'gitlab', 'azure', 'devops',
+  
+  // Status & Technical
+  'todo', 'doing', 'done', 'progress', 'blocked', 'ready', 'definition', 'acceptance',
+  'criteria', 'staging', 'production', 'prod', 'hotfix', 'patch', 'release'
 ]);
 
 /**
