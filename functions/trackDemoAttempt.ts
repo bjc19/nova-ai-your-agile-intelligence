@@ -3,7 +3,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { checkOnly = false } = await req.json();
+    
+    // Parse body only if not GET
+    let checkOnly = false;
+    if (req.method === 'POST') {
+      const body = await req.json();
+      checkOnly = body.checkOnly || false;
+    }
 
     // Get client IP from headers
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() 
