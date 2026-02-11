@@ -99,10 +99,10 @@ const PATTERNS = {
 function detectYesterdayTodayBlockers(text) {
   // RÈGLE ABSOLUE: Si structure "Hier - Aujourd'hui - Bloqueurs/Blocages" = DAILY
   const patterns = [
-    /hier\s*:.*aujourd'hui\s*:.*bloc/i,
-    /yesterday\s*:.*today\s*:.*block/i,
-    /j'ai\s+terminé.*je\s+(commence|travaille|continue)/i,
-    /i\s+(finished|completed).*i\s+(start|work|continue)/i,
+    /hier\s*:[\s\S]*aujourd'hui\s*:[\s\S]*bloc/i,
+    /yesterday\s*:[\s\S]*today\s*:[\s\S]*block/i,
+    /j'ai\s+terminé[\s\S]*je\s+(commence|travaille|continue)/i,
+    /i\s+(finished|completed)[\s\S]*i\s+(start|work|continue)/i,
   ];
   
   return patterns.some(p => p.test(text));
