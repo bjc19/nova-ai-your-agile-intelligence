@@ -19,8 +19,9 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertCircle, ChevronRight, Lightbulb } from "lucide-react";
+import { AlertCircle, ChevronRight, Lightbulb, RefreshCw } from "lucide-react";
 
 const sourceIcons = {
   slack: MessageSquare,
