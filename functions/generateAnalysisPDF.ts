@@ -1,4 +1,4 @@
-import { jsPDF } from 'npm:jspdf@4.0.0';
+import { PDFDocument, PDFPage, rgb } from 'npm:pdf-lib@1.17.1';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
@@ -16,139 +16,194 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Analysis data required' }, { status: 400 });
     }
 
-    // Create PDF
-    const doc = new jsPDF();
-    let yPosition = 20;
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+    // Create PDF document
+    const pdfDoc = await PDFDocument.create();
+    const fontSize = 12;
+    const margin = 40;
+    let page = pdfDoc.addPage([595, 842]); // A4 size
+    let yPosition = 800;
+    
+    const pageHeight = 842;
+    const pageWidth = 595;
+    const contentWidth = pageWidth - 2 * margin;
 
-    // Helper function for text wrapping
-    const addWrappedText = (text, x, y, maxWid, fontSize = 12, isBold = false) => {
-      doc.setFontSize(fontSize);
-      if (isBold) doc.setFont(undefined, 'bold');
-      const lines = doc.splitTextToSize(text, maxWid);
-      doc.text(lines, x, y);
-      if (isBold) doc.setFont(undefined, 'normal');
-      return y + lines.length * (fontSize / 2.5);
-    };
-
-    // Helper for new page if needed
-    const checkPageBreak = (needed = 15) => {
-      if (yPosition + needed > pageHeight - margin) {
-        doc.addPage();
-        yPosition = margin;
-      }
-    };
-
-    // Title
-    doc.setFontSize(20);
-    doc.setFont(undefined, 'bold');
-    doc.text(language === 'fr' ? 'Rapport d\'Analyse' : 'Analysis Report', margin, yPosition);
-    yPosition += 15;
-
-    // Date
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    const dateStr = new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US');
-    doc.text(`${language === 'fr' ? 'Date' : 'Date'}: ${dateStr}`, margin, yPosition);
-    yPosition += 8;
-
-    // User info
-    doc.text(`${language === 'fr' ? 'Analysé par' : 'Analyzed by'}: ${user.full_name} (${user.email})`, margin, yPosition);
-    yPosition += 12;
-
-    // Summary
-    if (analysis.summary) {
-      checkPageBreak(20);
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(language === 'fr' ? 'Résumé' : 'Summary', margin, yPosition);
-      yPosition += 8;
+    // Helper: Add text with wrapping
+    const addText = (text, size = 12, bold = false, color = [0, 0, 0], maxWidth = contentWidth) => {
+      const font = pdfDoc.getFont('Helvetica');
+      const lines = [];
+      let currentLine = '';
       
-      doc.setFontSize(11);
-      doc.setFont(undefined, 'normal');
-      yPosition = addWrappedText(analysis.summary, margin, yPosition, maxWidth, 11);
-      yPosition += 10;
+      const words = text.split(' ');
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const width = font.widthOfTextAtSize(testLine, size);
+        if (width > maxWidth) {
+          if (currentLine) lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+
+      lines.forEach((line) => {
+        if (yPosition - size < margin) {
+          page = pdfDoc.addPage([595, 842]);
+          yPosition = 800;
+        }
+        page.drawText(line, {
+          x: margin,
+          y: yPosition,
+          size,
+          font,
+          color: rgb(color[0] / 255, color[1] / 255, color[2] / 255),
+        });
+        yPosition -= size + 4;
+      });
+
+      return yPosition;
+    };
+
+    // Helper: Add colored section header
+    const addHeader = (title, color = [59, 130, 246]) => {
+      if (yPosition - 35 < margin) {
+        page = pdfDoc.addPage([595, 842]);
+        yPosition = 800;
+      }
+      
+      // Header background
+      page.drawRectangle({
+        x: margin,
+        y: yPosition - 30,
+        width: contentWidth,
+        height: 30,
+        color: rgb(color[0] / 255, color[1] / 255, color[2] / 255),
+      });
+      
+      // Title text
+      page.drawText(title, {
+        x: margin + 10,
+        y: yPosition - 22,
+        size: 14,
+        font: pdfDoc.getFont('Helvetica'),
+        color: rgb(1, 1, 1),
+      });
+      
+      yPosition -= 35;
+      return yPosition;
+    };
+
+    // HEADER
+    page.drawText('Nova - Analysis Report', {
+      x: margin,
+      y: yPosition,
+      size: 24,
+      font: pdfDoc.getFont('Helvetica'),
+      color: rgb(15/255, 23/255, 42/255),
+    });
+    yPosition -= 35;
+
+    // Date & User Info
+    const dateStr = new Date().toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US');
+    addText(`${language === 'fr' ? 'Date' : 'Date'}: ${dateStr}`, 10, false, [100, 100, 100]);
+    addText(`${language === 'fr' ? 'Analysé par' : 'Analyzed by'}: ${user.full_name}`, 10, false, [100, 100, 100]);
+    yPosition -= 10;
+
+    // SUMMARY SECTION
+    if (analysis.summary) {
+      addHeader(language === 'fr' ? 'Résumé de la Réunion' : 'Meeting Summary', [59, 130, 246]);
+      yPosition -= 10;
+      addText(analysis.summary, 11, false, [0, 0, 0]);
+      yPosition -= 15;
     }
 
-    // Blockers
+    // BLOCKERS SECTION
     if (analysis.blockers && analysis.blockers.length > 0) {
-      checkPageBreak(20);
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(language === 'fr' ? `Blocages (${analysis.blockers.length})` : `Blockers (${analysis.blockers.length})`, margin, yPosition);
-      yPosition += 8;
-
+      addHeader(`${language === 'fr' ? 'Blocages Détectés' : 'Detected Blockers'} (${analysis.blockers.length})`, [37, 99, 235]);
+      yPosition -= 10;
+      
       analysis.blockers.forEach((blocker, idx) => {
-        checkPageBreak(12);
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${idx + 1}. ${blocker.member || 'Unknown'}`, margin, yPosition);
-        yPosition += 6;
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        yPosition = addWrappedText(`${language === 'fr' ? 'Problème' : 'Issue'}: ${blocker.issue}`, margin + 5, yPosition, maxWidth - 5, 10);
-        yPosition = addWrappedText(`${language === 'fr' ? 'Action' : 'Action'}: ${blocker.action}`, margin + 5, yPosition, maxWidth - 5, 10);
-        yPosition = addWrappedText(`${language === 'fr' ? 'Urgence' : 'Urgency'}: ${blocker.urgency}`, margin + 5, yPosition, maxWidth - 5, 10);
-        yPosition += 4;
+        if (yPosition - 60 < margin) {
+          page = pdfDoc.addPage([595, 842]);
+          yPosition = 800;
+        }
+        
+        // Blocker box
+        page.drawRectangle({
+          x: margin,
+          y: yPosition - 55,
+          width: contentWidth,
+          height: 50,
+          borderColor: rgb(191/255, 219/255, 254/255),
+          borderWidth: 1,
+        });
+        
+        addText(`${idx + 1}. ${blocker.member || language === 'fr' ? 'Équipe' : 'Team'}`, 11, true, [37, 99, 235], contentWidth - 10);
+        addText(`${language === 'fr' ? 'Problème' : 'Issue'}: ${blocker.issue}`, 10, false, [50, 50, 50], contentWidth - 20);
+        addText(`${language === 'fr' ? 'Action' : 'Action'}: ${blocker.action}`, 10, false, [50, 50, 50], contentWidth - 20);
+        yPosition -= 15;
       });
-      yPosition += 5;
+      yPosition -= 10;
     }
 
-    // Risks
+    // RISKS SECTION
     if (analysis.risks && analysis.risks.length > 0) {
-      checkPageBreak(20);
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(language === 'fr' ? `Risques (${analysis.risks.length})` : `Risks (${analysis.risks.length})`, margin, yPosition);
-      yPosition += 8;
-
+      addHeader(`${language === 'fr' ? 'Risques Identifiés' : 'Identified Risks'} (${analysis.risks.length})`, [202, 138, 4]);
+      yPosition -= 10;
+      
       analysis.risks.forEach((risk, idx) => {
-        checkPageBreak(12);
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text(`${idx + 1}. ${risk.description.substring(0, 50)}...`, margin, yPosition);
-        yPosition += 6;
-
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        yPosition = addWrappedText(`${language === 'fr' ? 'Impact' : 'Impact'}: ${risk.impact}`, margin + 5, yPosition, maxWidth - 5, 10);
-        yPosition = addWrappedText(`${language === 'fr' ? 'Urgence' : 'Urgency'}: ${risk.urgency}`, margin + 5, yPosition, maxWidth - 5, 10);
-        yPosition = addWrappedText(`${language === 'fr' ? 'Atténuation' : 'Mitigation'}: ${risk.mitigation}`, margin + 5, yPosition, maxWidth - 5, 10);
-        yPosition += 4;
+        if (yPosition - 60 < margin) {
+          page = pdfDoc.addPage([595, 842]);
+          yPosition = 800;
+        }
+        
+        // Risk box
+        page.drawRectangle({
+          x: margin,
+          y: yPosition - 55,
+          width: contentWidth,
+          height: 50,
+          borderColor: rgb(254/255, 215/255, 170/255),
+          borderWidth: 1,
+        });
+        
+        addText(`${idx + 1}. ${risk.description.substring(0, 60)}`, 11, true, [202, 138, 4], contentWidth - 10);
+        addText(`${language === 'fr' ? 'Impact' : 'Impact'}: ${risk.impact}`, 10, false, [50, 50, 50], contentWidth - 20);
+        addText(`${language === 'fr' ? 'Atténuation' : 'Mitigation'}: ${risk.mitigation}`, 10, false, [50, 50, 50], contentWidth - 20);
+        yPosition -= 15;
       });
-      yPosition += 5;
+      yPosition -= 10;
     }
 
-    // Recommendations
+    // RECOMMENDATIONS
     if (analysis.recommendations && analysis.recommendations.length > 0) {
-      checkPageBreak(20);
-      doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
-      doc.text(language === 'fr' ? 'Recommandations' : 'Recommendations', margin, yPosition);
-      yPosition += 8;
-
-      analysis.recommendations.forEach((rec, idx) => {
-        checkPageBreak(8);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        const bullet = `${idx + 1}. ${rec}`;
-        yPosition = addWrappedText(bullet, margin, yPosition, maxWidth, 10);
-        yPosition += 3;
+      addHeader(language === 'fr' ? 'Recommandations' : 'Recommendations', [34, 197, 94]);
+      yPosition -= 10;
+      
+      analysis.recommendations.slice(0, 5).forEach((rec, idx) => {
+        if (yPosition - 20 < margin) {
+          page = pdfDoc.addPage([595, 842]);
+          yPosition = 800;
+        }
+        addText(`• ${rec}`, 10, false, [0, 0, 0]);
       });
     }
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setFont(undefined, 'normal');
-    doc.text(language === 'fr' ? 'Généré par Nova AI' : 'Generated by Nova AI', margin, pageHeight - 10);
+    // FOOTER
+    const footerY = 20;
+    page.drawText(language === 'fr' ? 'Généré par Nova AI' : 'Generated by Nova AI', {
+      x: margin,
+      y: footerY,
+      size: 8,
+      font: pdfDoc.getFont('Helvetica'),
+      color: rgb(150/255, 150/255, 150/255),
+    });
 
-    // Get PDF as buffer
-    const pdfBuffer = doc.output('arraybuffer');
+    // Save and return
+    const pdfBuffer = await pdfDoc.save();
+    const pdfBytes = Buffer.from(pdfBuffer);
 
-    return new Response(pdfBuffer, {
+    return new Response(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
@@ -156,6 +211,7 @@ Deno.serve(async (req) => {
       }
     });
   } catch (error) {
+    console.error('PDF Generation Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
