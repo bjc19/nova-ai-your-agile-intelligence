@@ -20,8 +20,9 @@ export const extractInterlocutors = (text) => {
   const interlocutors = new Map();
   const lines = text.split('\n');
   
-  // Pattern: "Name (Optional Title) : " at start of line - captures ONLY the name part
-  const interlocutorPattern = /^(\s*)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']*)(\s*(?:\([^)]*\))?)\s*:/;
+  // Pattern: "Name (Optional Title) : " at start of line
+  // Using \p{L} with 'u' flag for robust Unicode letter matching (handles ALL accents)
+  const interlocutorPattern = /^(\s*)(\p{Lu}\p{Ll}+)(\s*(?:\([^)]*\))?)\s*:/u;
   
   lines.forEach(line => {
     const match = line.match(interlocutorPattern);
@@ -95,8 +96,8 @@ const extractNamesFromText = (text) => {
   if (!text) return [];
   
   const names = new Set();
-  // Match capitalized words (accented letters included)
-  const capitalizedPattern = /\b[A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']+\b/g;
+  // Match capitalized words using Unicode-safe pattern (\p{Lu} = uppercase, \p{Ll} = lowercase)
+  const capitalizedPattern = /\b\p{Lu}\p{Ll}+\b/gu;
   const matches = text.match(capitalizedPattern) || [];
   
   matches.forEach(word => {
@@ -216,8 +217,8 @@ const anonymizeTranscript = (text, knownNames = []) => {
 
   // Process each line
   const processedLines = lines.map(line => {
-    // Match "Name (Title) :" at start of line
-    const interlocutorPattern = /^(\s*)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']*)(\s*(?:\([^)]*\))?)\s*(:)/;
+    // Match "Name (Title) :" at start of line - using Unicode-safe pattern
+    const interlocutorPattern = /^(\s*)(\p{Lu}\p{Ll}+)(\s*(?:\([^)]*\))?)\s*(:)/u;
     const match = line.match(interlocutorPattern);
 
     if (match) {
@@ -251,11 +252,11 @@ const anonymizeNamesInText = (text, knownNames = []) => {
   let result = text;
   
   // Anonymize all detected names
-  // Use lookahead/lookbehind to handle accented characters (word boundaries fail with accents)
+  // Use Unicode-safe word boundaries with \p{L} (matches any letter in any language)
   allNames.forEach(name => {
-    // Match: name surrounded by non-letter boundaries (spaces, punctuation, start/end)
+    // Match: name surrounded by non-letter boundaries
     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(?<![a-zéèêëàâäîïôöùûüçœæ])${escapedName}(?![a-zéèêëàâäîïôöùûüçœæ])`, 'gi');
+    const regex = new RegExp(`(?<!\\p{L})${escapedName}(?!\\p{L})`, 'giu');
     result = result.replace(regex, anonymizeFirstName(name));
   });
 
