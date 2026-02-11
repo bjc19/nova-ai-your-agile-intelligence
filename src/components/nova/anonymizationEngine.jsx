@@ -89,24 +89,29 @@ const COMMON_WORDS = new Set([
 
 /**
  * Extract names from text using capitalized word pattern
- * Used for recommendations and other generated content where names might appear
- * Returns array of detected names (capitalized words that are not in common words list)
+ * Only extracts capitalized words that appear:
+ * - At the start of a sentence (after . or at beginning)
+ * - In dialogue format (Name :)
+ * Returns array of detected names (not common words)
  */
 const extractNamesFromText = (text) => {
   if (!text) return [];
-  
+
   const names = new Set();
-  // Match capitalized words using Unicode-safe pattern (\p{Lu} = uppercase, \p{Ll} = lowercase)
-  const capitalizedPattern = /\b\p{Lu}\p{Ll}+\b/gu;
-  const matches = text.match(capitalizedPattern) || [];
-  
-  matches.forEach(word => {
+
+  // ONLY match capitalized words at start of sentence (after . or at text start)
+  // Pattern: (sentence start or period + space) + Capitalized word
+  const sentenceStartPattern = /(^|\.)\s+(\p{Lu}\p{Ll}+)/gu;
+  const sentenceMatches = text.matchAll(sentenceStartPattern);
+
+  for (const match of sentenceMatches) {
+    const word = match[2];
     // Exclude common words and false positives
     if (!COMMON_WORDS.has(word.toLowerCase())) {
       names.add(word);
     }
-  });
-  
+  }
+
   return Array.from(names);
 };
 
