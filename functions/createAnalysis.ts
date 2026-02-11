@@ -30,6 +30,11 @@ Deno.serve(async (req) => {
     if (!analysisRecord.analysis_data.inserted_at) {
       analysisRecord.analysis_data.inserted_at = new Date().toISOString();
     }
+    
+    // Ensure analysis_time is set at the root level
+    if (!analysisRecord.analysis_time) {
+      analysisRecord.analysis_time = new Date().toISOString();
+    }
 
     // Create analysis record with service role to bypass RLS
     const createdAnalysis = await base44.asServiceRole.entities.AnalysisHistory.create(analysisRecord);
