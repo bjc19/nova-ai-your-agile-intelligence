@@ -161,6 +161,11 @@ export const anonymizeAnalysisData = (analysis) => {
     anonymized.summary = anonymizeNamesInText(anonymized.summary, Array.from(knownNames));
   }
 
+  // Anonymize transcript itself with all known names
+  if (anonymized.transcript) {
+    anonymized.transcript = anonymizeTranscript(anonymized.transcript, Array.from(knownNames));
+  }
+
   return anonymized;
 };
 
