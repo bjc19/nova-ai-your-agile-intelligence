@@ -20,6 +20,9 @@ Deno.serve(async (req) => {
     const ip = getClientIP(req);
     const hashedIP = hashIP(ip);
     
+    // Parse request to check if it's just a status check
+    const { checkOnly } = await req.json().catch(() => ({ checkOnly: false }));
+    
     // Check if attempt record exists
     let attempt = await base44.entities.DemoAttempt.filter(
       { ip_address: hashedIP },
@@ -31,7 +34,18 @@ Deno.serve(async (req) => {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     
     if (attempt.length === 0) {
-      // First attempt - create new record with 1 remaining (user is about to use 1)
+      // First time visitor
+      if (checkOnly) {
+        // Just return available tries without creating record
+        return Response.json({ 
+          allowed: true, 
+          remaining: 2, 
+          message: 'Demo attempts available',
+          blocked: false
+        });
+      }
+      
+      // First attempt - create new record with 1 remaining (user just used 1)
       const newAttempt = await base44.entities.DemoAttempt.create({
         ip_address: hashedIP,
         attempt_count: 1,
