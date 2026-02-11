@@ -20,8 +20,8 @@ export const extractInterlocutors = (text) => {
   const interlocutors = new Map();
   const lines = text.split('\n');
   
-  // Pattern: "Anything : " at start of line (after whitespace)
-  const interlocutorPattern = /^\s*([A-Z][a-zA-Z\s\-'éèêëàâäîïôöùûüç()[\]]*?)\s*:/;
+  // Pattern: "Name (Optional Title) : " at start of line - captures ONLY the name part
+   const interlocutorPattern = /^\s*([A-Z][a-zéèêëàâäîïôöùûüç\-']*)\s*(?:\([^)]*\))?\s*:/;
   
   lines.forEach(line => {
     const match = line.match(interlocutorPattern);
