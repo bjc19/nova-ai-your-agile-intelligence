@@ -7,6 +7,7 @@ import { base44 } from "@/api/base44Client";
 import { useState, useEffect } from "react";
 import { formatRecommendation, getRoleTone } from "./RoleBasedMessaging";
 import { useRoleAccess } from "./useRoleAccess";
+import { anonymizeFirstName, extractInterlocutors } from "@/components/nova/anonymizationEngine";
 import {
   Lightbulb,
   ArrowRight,
@@ -26,6 +27,24 @@ const recommendationIcons = {
   timeline: Clock,
   priority: Target,
   default: Lightbulb,
+};
+
+// Anonymize names in recommendation text
+const anonymizeRecommendationText = (text, knownNames = []) => {
+  if (!text) return text;
+  
+  let result = text;
+  const allNames = [...new Set(knownNames)];
+  
+  // Anonymize all known names
+  allNames.forEach(name => {
+    if (!name || name.length <= 2) return;
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(?<!\\p{L})${escapedName}(?!\\p{L})`, 'giu');
+    result = result.replace(regex, anonymizeFirstName(name));
+  });
+  
+  return result;
 };
 
 export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, sourceName }) {
@@ -173,13 +192,21 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
   // Combine recommendations from manual analysis + all unified sources
   const getRecommendations = () => {
     const allRecs = [];
+    const knownNames = new Set();
+    
+    // Extract known names from all recommendations and transcript
+    if (latestAnalysis?.transcript) {
+      const interlocutors = extractInterlocutors(latestAnalysis.transcript);
+      interlocutors.forEach(name => knownNames.add(name));
+    }
     
     // Add recommendations from all unified sources (backend handles all sources: analysis, slack, teams, etc.)
     allSourceRecommendations.forEach((rec, idx) => {
+      const recText = rec.text || '';
       allRecs.push({
         type: "default",
-        title: rec.text?.substring(0, 50) + (rec.text?.length > 50 ? "..." : ""),
-        description: rec.text,
+        title: anonymizeRecommendationText(recText.substring(0, 50) + (recText.length > 50 ? "..." : ""), Array.from(knownNames)),
+        description: anonymizeRecommendationText(recText, Array.from(knownNames)),
         priority: rec.priority || 'medium',
         source: rec.source,
         entityType: rec.entityType
@@ -192,8 +219,8 @@ Recommandations:\n\n${JSON.stringify(descriptions)}\n\nRetourne un tableau JSON 
         const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
         return {
           type: "default",
-          title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
-          description: recText,
+          title: anonymizeRecommendationText(recText.substring(0, 50) + (recText.length > 50 ? "..." : ""), Array.from(knownNames)),
+          description: anonymizeRecommendationText(recText, Array.from(knownNames)),
           priority: i === 0 ? "high" : "medium",
           source: 'analysis'
         };
