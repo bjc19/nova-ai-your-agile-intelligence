@@ -126,8 +126,14 @@ function analyzeText(text) {
   };
 }
 
-function scoreDaily(text) {
+function scoreDaily(text, hasStructuralPattern = false) {
   let score = 0;
+  
+  // STRUCTURAL PATTERN (UNBREAKABLE RULE)
+  if (hasStructuralPattern) {
+    score = 100; // Maximum score - cannot be beaten
+    return score;
+  }
   
   // Object scoring (dominant object)
   if (matchesAny(text, DAILY_OBJECTS.tasks)) score += 30;
