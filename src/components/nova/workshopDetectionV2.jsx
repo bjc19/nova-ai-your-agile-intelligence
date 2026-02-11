@@ -195,9 +195,16 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
-  if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score += 35;
-  if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score += 30;
-  if (matchesAny(text, RETROSPECTIVE_OBJECTS.emotion)) score += 20;
+  const hasTeamProcess = matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess);
+  const hasImprovement = matchesAny(text, RETROSPECTIVE_OBJECTS.improvement);
+  const hasEmotion = matchesAny(text, RETROSPECTIVE_OBJECTS.emotion);
+  
+  if (hasTeamProcess) score += 40;
+  if (hasImprovement) score += 35;
+  if (hasEmotion) score += 25;
+  
+  // Strong bonus if process + improvement (classic retro combo)
+  if (hasTeamProcess && hasImprovement) score += 20;
   
   // If Planning keywords dominate, penalize Retrospective heavily
   if (matchesAny(text, PLANNING_OBJECTS.future) || matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 30;
@@ -206,14 +213,14 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   if (matchesAny(text, RETROSPECTIVE_TIME.reflective)) score += 15;
   
   // Intent patterns
-  if (PATTERNS.retrospective.processAnalysis.test(text)) score += 15;
-  if (PATTERNS.retrospective.improvementProposal.test(text)) score += 15;
-  if (PATTERNS.retrospective.emotionalContext.test(text)) score += 10;
-  if (PATTERNS.retrospective.teamFocus.test(text)) score += 10;
+  if (PATTERNS.retrospective.processAnalysis.test(text)) score += 20;
+  if (PATTERNS.retrospective.improvementProposal.test(text)) score += 20;
+  if (PATTERNS.retrospective.emotionalContext.test(text)) score += 15;
+  if (PATTERNS.retrospective.teamFocus.test(text)) score += 15;
   
   // Anti-pattern penalties
-  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 20;
-  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 10;
+  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 30;
+  if (matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 15;
   
   return Math.max(0, score);
 }
