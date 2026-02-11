@@ -192,9 +192,9 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="flex justify-center mb-6"
+      className="mb-6"
     >
-      <div className={`rounded-xl border bg-gradient-to-br p-5 ${categoryColors[category]} max-w-3xl`}>
+      <div className={`rounded-xl border bg-gradient-to-br p-5 ${categoryColors[category]} max-w-2xl`}>
         <div className="flex gap-3">
           <Lightbulb className={`w-5 h-5 flex-shrink-0 mt-0.5 ${categoryIcons[category]}`} />
           <p className="text-sm text-slate-700 leading-relaxed italic">
