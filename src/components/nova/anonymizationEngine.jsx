@@ -40,46 +40,49 @@ export const extractInterlocutors = (text) => {
 };
 
 /**
- * Multi-layer first name detection
- * Layer 1: Extracted from interlocutors using "Name :" pattern
- * Layer 2: Common first names list (verified in text)
+ * Common French/English words that should NOT be anonymized
+ * (prevents falsely anonymizing "Le", "De", "And", etc.)
+ */
+const COMMON_WORDS = new Set([
+  'le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'mais', 'donc', 'car',
+  'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'on', 'ce', 'cet', 'cette',
+  'mon', 'ton', 'son', 'notre', 'votre', 'leur', 'quel', 'quelle', 'quels', 'quelles',
+  'qui', 'que', 'quoi', 'où', 'quand', 'comment', 'pourquoi',
+  'pour', 'par', 'avec', 'sans', 'sous', 'sur', 'à', 'en', 'au', 'aux', 'aussi',
+  'très', 'plus', 'moins', 'bien', 'mal', 'peu', 'beaucoup', 'assez',
+  'oui', 'non', 'merci', 'bonjour', 'bonsoir', 'au revoir', 'salut', 'hello', 'hi',
+  'mr', 'mme', 'mlle', 'dr', 'pr', 'etc', 'vs', 'vs.',
+  'the', 'a', 'an', 'and', 'or', 'but', 'so', 'if', 'this', 'that', 'these', 'those',
+  'is', 'are', 'be', 'been', 'being', 'have', 'has', 'do', 'does', 'did',
+  'by', 'from', 'in', 'to', 'of', 'as', 'up', 'out', 'off', 'about', 'into', 'through',
+  'during', 'before', 'after', 'above', 'below', 'between', 'under', 'over',
+  'here', 'there', 'where', 'when', 'why', 'how', 'all', 'each', 'every', 'both', 'few',
+  'more', 'most', 'some', 'any', 'many', 'much', 'no', 'nor', 'only', 'own', 'same', 'so',
+  'such', 'than', 'too', 'very', 'just', 'should', 'now'
+]);
+
+/**
+ * Multi-layer name detection:
+ * Layer 1: Interlocutors from "Name :" pattern
+ * Layer 2: Contextual capitalization (proper nouns mid-sentence)
  */
 const getDetectionLayers = (text) => {
   const layer1 = extractInterlocutors(text);
   
-  // Layer 2: Common first names used in Agile team context
-  const commonFirstNames = [
-    'Alex', 'Alice', 'Amina', 'André', 'Antoine', 'Arthur', 'Aurélie', 'Benjamin', 'Bernard', 'Béatrice',
-    'Bruno', 'Camille', 'Caroline', 'Catherine', 'Cédric', 'Céline', 'Charles', 'Christian', 'Christine', 'Christophe',
-    'Claire', 'Clara', 'Claude', 'Clement', 'Corinne', 'Cyrille', 'Cyril', 'Damien', 'Daniel', 'Danielle', 'David',
-    'Deborah', 'Debra', 'Delia', 'Delilah', 'Delores', 'Delphine', 'Denise', 'Dennis', 'Derek', 'Derrick', 'Desiree',
-    'Desmond', 'Devin', 'Diana', 'Diane', 'Dianna', 'Dianne', 'Diego', 'Dimitri', 'Dina', 'Dinah', 'Dino', 'Dion',
-    'Dirk', 'Dolores', 'Dominic', 'Dominique', 'Don', 'Donald', 'Donna', 'Donnie', 'Donovan', 'Dora', 'Doreen',
-    'Dorian', 'Doris', 'Dorothy', 'Dorsey', 'Doug', 'Douglas', 'Doyle', 'Drake', 'Drew', 'Drexel', 'Dreyfus',
-    'Edmund', 'Edna', 'Eduardo', 'Edward', 'Edwin', 'Edwina', 'Efraim', 'Efrain', 'Egbert', 'Egidio', 'Egon',
-    'Eileen', 'Einar', 'Einhard', 'Eivind', 'Elena', 'Eleonore', 'Eleuterio', 'Elfi', 'Elfie', 'Elfredo', 'Elfrida',
-    'Elinor', 'Elinore', 'Elis', 'Elisabeth', 'Elise', 'Elisha', 'Elissa', 'Elizabeth', 'Elizabet', 'Elke', 'Ella',
-    'Ellaina', 'Ellane', 'Ellard', 'Elle', 'Elleen', 'Ellena', 'Ellene', 'Eller', 'Ellerby', 'Ellerd', 'Ellery',
-    'Elles', 'Ellette', 'Elley', 'Elliana', 'Ellice', 'Ellida', 'Ellie', 'Ellies', 'Ellifer', 'Ellifore', 'Ellingham',
-    'Ellinstrom', 'Elliot', 'Elliott', 'Ellis', 'Ellison', 'Ellissa', 'Elliston', 'Ellita', 'Ellium', 'Elliza',
-    'Elizabet', 'Ellizabet', 'Ellman', 'Ellmer', 'Ellmers', 'Ellmore', 'Ellmyer', 'Ellnora', 'Ellnore', 'Ello',
-    'Ellon', 'Ellone', 'Ellopes', 'Ellora', 'Ellorah', 'Ellord', 'Ellore', 'Elloy', 'Ellra', 'Ellray', 'Ellred',
-    'Ellrode', 'Ellrose', 'Ellroy', 'Ells', 'Ellsa', 'Ellsby', 'Ellsea', 'Ellsee', 'Ellsha', 'Ellsie', 'Ellson',
-    'Ellsworth', 'Ellsworth', 'Ellston', 'Ellstrom', 'Ellsworth', 'Ellsworth', 'Ellsworth', 'Ellsworth',
-    'Elluard', 'Ellube', 'Ellway', 'Ellwood', 'Ellwyn', 'Ellwynn', 'Ellwyn', 'Ellwynd', 'Ellwyn', 'Elly',
-    'Ellyce', 'Ellylou', 'Ellyna', 'Ellyne', 'Ellyott', 'Ellys', 'Ellys', 'Ellysandre', 'Ellysandra', 'Ellyse',
-    'Elm', 'Elma', 'Elmachia', 'Elmada', 'Elmadina', 'Elmador', 'Elmadura', 'Elmah', 'Elmahdi', 'Elmahira',
-    'Elmajita', 'Elmajor', 'Elmak', 'Elmaki', 'Elmakis', 'Elmakites', 'Elmakron', 'Elmaku', 'Elmakus', 'Elmala',
-    'Elmalainen', 'Elmam', 'Elmamman', 'Elmamy', 'Elmana', 'Elmanach', 'Elmanachs', 'Elmanahos', 'Elmanahor', 'Elmanas',
-    'Elmanasa', 'Elmanases', 'Elmanavit', 'Elmanbachs', 'Elmanbachs', 'Elmanbachs', 'Elmanbachs',
-    'Julien', 'Alex', 'Lucas', 'Thomas', 'Sophie', 'Marie', 'Pierre', 'Nicolas', 'Jean', 'Anne', 'François'
-  ];
+  // Layer 2: Detect proper nouns via capitalization patterns
+  // Matches capitalized words NOT at sentence start and NOT common words
+  const properNounPattern = /(?:^|\s|:\s)([A-Z][a-zéèêëàâäîïôöùûüçœæ\-']+)/gm;
+  const layer2Set = new Set();
   
-  const layer2 = commonFirstNames.filter(name => 
-    text.includes(name) && layer1.indexOf(name) === -1
-  );
-
-  return [...new Set([...layer1, ...layer2])];
+  let match;
+  while ((match = properNounPattern.exec(text)) !== null) {
+    const word = match[1].trim();
+    if (word.length > 0 && !COMMON_WORDS.has(word.toLowerCase()) && !layer1.includes(word)) {
+      layer2Set.add(word);
+    }
+  }
+  
+  return [...new Set([...layer1, ...Array.from(layer2Set)])];
 };
 
 /**
