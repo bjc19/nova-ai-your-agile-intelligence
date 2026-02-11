@@ -365,33 +365,42 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
-  // Planning REQUIRES estimation + backlog selection together
+  // Planning = FUTURE + ESTIMATION + DECOMPOSITION/SELECTION (triple requirement)
   const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
   const hasBacklogSelection = matchesAny(text, PLANNING_OBJECTS.backlogSelection);
   const hasFuture = matchesAny(text, PLANNING_OBJECTS.future);
+  const hasDecomposition = matchesAny(text, PLANNING_OBJECTS.decomposition);
+  const hasPrioritization = matchesAny(text, PLANNING_OBJECTS.prioritization);
   
-  // Planning requires ACTUAL estimation discussion (story points, capacity)
-  // NOT just mentioning "backlog" for future items
-  if (hasEstimation && (hasBacklogSelection || hasFuture)) score += 40;
-  if (hasEstimation && matchesAny(text, PLANNING_TIME.commitment)) score += 30;
-  if (matchesAny(text, PLANNING_OBJECTS.prioritization) && hasEstimation) score += 15;
+  // CRITICAL: Planning requires ALL THREE elements present
+  // 1. FUTURE commitment language (repart, embarque, prochain sprint)
+  // 2. ESTIMATION discussion (points, capacité, velocity)
+  // 3. DECOMPOSITION or SELECTION (tâches, découpage, sélection)
+  if (hasEstimation && hasFuture && (hasDecomposition || hasBacklogSelection)) score += 50;
   
-  // Temporality scoring (future confirms planning ONLY with estimation)
-  if (matchesAny(text, PLANNING_TIME.commitment) && hasEstimation) score += 15;
+  // Strong signal: commitment + estimation
+  if (hasEstimation && matchesAny(text, PLANNING_TIME.commitment)) score += 25;
+  
+  // Prioritization + selection = Planning activity
+  if (hasPrioritization && hasBacklogSelection) score += 20;
   
   // Intent patterns (strong indicators of Planning)
-  if (PATTERNS.planning.futureCommitment.test(text) && hasEstimation) score += 25;
-  if (PATTERNS.planning.estimationDiscussion.test(text)) score += 30;
-  if (PATTERNS.planning.backlogSelection.test(text) && hasEstimation) score += 20;
-  if (PATTERNS.planning.sprintGoal.test(text) && hasEstimation) score += 20;
+  if (PATTERNS.planning.futureCommitment.test(text) && hasEstimation) score += 20;
+  if (PATTERNS.planning.estimationDiscussion.test(text) && (hasFuture || hasDecomposition)) score += 25;
+  if (PATTERNS.planning.backlogSelection.test(text) && hasEstimation) score += 15;
+  if (PATTERNS.planning.sprintGoal.test(text) && (hasEstimation || hasFuture)) score += 15;
+  if (PATTERNS.planning.decomposition.test(text) && hasBacklogSelection) score += 20;
   
-  // Heavy penalty: backlog mentioned WITHOUT estimation = likely Review proposing future items
-  if (hasBacklogSelection && !hasEstimation) score -= 30;
+  // CRITICAL PENALTY: Estimation discussed but NO future/decomposition = likely Review discussing improvements
+  if (hasEstimation && !hasFuture && !hasDecomposition) score -= 30;
+  
+  // Penalty: backlog/selection WITHOUT estimation = not Planning
+  if (hasBacklogSelection && !hasEstimation) score -= 25;
   
   // Anti-pattern penalties
-  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 30;
-  if (matchesAny(text, REVIEW_OBJECTS.validation)) score -= 15;
-  if (matchesAny(text, DAILY_OBJECTS.blockers)) score -= 10;
+  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 40;
+  if (matchesAny(text, REVIEW_OBJECTS.validation) && !hasEstimation) score -= 20;
+  if (matchesAny(text, DAILY_OBJECTS.blockers) && !hasFuture) score -= 15;
   
   return Math.max(0, score);
 }
