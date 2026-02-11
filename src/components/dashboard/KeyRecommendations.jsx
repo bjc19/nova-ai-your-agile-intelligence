@@ -444,7 +444,7 @@ Provide 3-5 concrete and specific steps that the team can follow immediately. Be
                                       </div>
                                       <motion.div
                                         whileTap={{ scale: 0.9 }}
-                                        onClick={() => handleItemCheck(index, idx)}
+                                        onClick={() => handleItemCheck(globalIndex, idx)}
                                         className="cursor-pointer shrink-0"
                                       >
                                         {isCompleted ? (
