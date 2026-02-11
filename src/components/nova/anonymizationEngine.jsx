@@ -170,6 +170,37 @@ export const anonymizeAnalysisData = (analysis) => {
 };
 
 /**
+ * Anonymize names in dialogue transcript
+ * Replaces names ONLY before ":" at line start, leaving all other occurrences unchanged
+ */
+const anonymizeTranscript = (text, knownNames = []) => {
+  if (!text || knownNames.length === 0) return text;
+
+  let result = text;
+  const lines = result.split('\n');
+
+  // Process each line
+  const processedLines = lines.map(line => {
+    // Match "Name (Title) :" at start of line
+    const interlocutorPattern = /^(\s*)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']*)(\s*(?:\([^)]*\))?)\s*(:)/;
+    const match = line.match(interlocutorPattern);
+
+    if (match) {
+      const [fullMatch, leadingSpace, name, titlePart, colon] = match;
+      // Check if this name should be anonymized
+      if (knownNames.includes(name)) {
+        const anonymized = anonymizeFirstName(name);
+        return `${leadingSpace}${anonymized}${titlePart}${colon}${line.slice(fullMatch.length)}`;
+      }
+    }
+
+    return line;
+  });
+
+  return processedLines.join('\n');
+};
+
+/**
  * Find and anonymize names mentioned in text using multi-layer detection
  * Layer 1: Interlocutors extracted from "Name :" pattern
  * Layer 2: Common first names found in text
