@@ -96,7 +96,8 @@ const getDetectionLayers = (text) => {
   
   // Layer 2: Detect proper nouns via capitalization patterns
   // Matches capitalized words NOT at sentence start and NOT common words
-  const properNounPattern = /(?:^|\s|:\s)([A-Z][a-zéèêëàâäîïôöùûüçœæ\-']+)/gm;
+  // Includes accented capitals: É, È, Ê, À, Ù, Ç, etc.
+  const properNounPattern = /(?:^|\s|:\s)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']+)/gm;
   const layer2Set = new Set();
   
   let match;
