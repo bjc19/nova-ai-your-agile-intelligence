@@ -95,10 +95,11 @@ const COMMON_WORDS = new Set([
   'demander', 'parler', 'arriver', 'rester', 'sortir', 'entrer', 'suivre', 'produire',
   'comparer', 'commencer', 'continuer', 'développer', 'organiser', 'planifier', 'analyser',
   
-  // Agile Rituals & Ceremonies
+  // Agile Rituals & Ceremonies & Team Terms
   'daily', 'standup', 'scrum', 'sprint', 'planning', 'review', 'retrospective', 'retro',
   'grooming', 'refinement', 'demo', 'kickoff', 'workshop', 'sync', 'catchup', 'post-mortem',
   'iteration', 'increment', 'pi', 'innovation', 'milestone', 'deadline',
+  'team', 'équipe', 'member', 'membre', 'members', 'membres', 'group', 'groupe',
   
   // Artifacts & Structure
   'backlog', 'portfolio', 'solution', 'item', 'story', 'user', 'epic', 'feature', 'capability',
