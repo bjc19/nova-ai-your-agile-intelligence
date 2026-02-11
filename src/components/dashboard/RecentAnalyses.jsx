@@ -275,8 +275,9 @@ export default function RecentAnalyses({ analyses = [] }) {
         <CardContent className="pt-0">
           <div className="space-y-3">
             {allItems.map((item, index) => {
+              const SourceIcon = sourceIcons[item.source] || FileText;
+
               if (item.type === 'analysis') {
-                const SourceIcon = sourceIcons[item.source] || FileText;
                 return (
                   <motion.div
                     key={item.id}
@@ -284,21 +285,13 @@ export default function RecentAnalyses({ analyses = [] }) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3, delay: 0.1 * index }}
                     className="group p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 transition-all cursor-pointer"
-                    onClick={async () => {
+                    onClick={() => {
                       sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data || item));
                       window.location.href = createPageUrl("Results");
                     }}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        sessionStorage.setItem("novaAnalysis", JSON.stringify(item.analysis_data || item));
-                        window.location.href = createPageUrl("Results");
-                      }
-                    }}
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-3 flex-1">
                         <div className="p-2 rounded-lg bg-slate-100 group-hover:bg-white transition-colors">
                           <SourceIcon className="w-4 h-4 text-slate-500" />
                         </div>
@@ -307,17 +300,17 @@ export default function RecentAnalyses({ analyses = [] }) {
                             {item.title}
                           </h4>
                           <div className="flex items-center gap-3 mt-1">
-                             <span className="flex items-center gap-1 text-xs text-slate-500">
-                               <Clock className="w-3 h-3" />
-                               {formatLocalTimeWithTZ(item.analysis_time || item.created_date, language === 'fr' ? 'fr-CA' : 'en-US')}
-                             </span>
+                            <span className="flex items-center gap-1 text-xs text-slate-500">
+                              <Clock className="w-3 h-3" />
+                              {formatLocalTimeWithTZ(item.analysis_time || item.created_date, language === 'fr' ? 'fr-CA' : 'en-US')}
+                            </span>
                             <Badge variant="outline" className="text-xs py-0">
                               {sourceLabels[item.source]}
                             </Badge>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 shrink-0">
                         <div className="flex items-center gap-1.5 text-sm">
                           <AlertOctagon className="w-4 h-4 text-blue-500" />
                           <span className="font-medium text-slate-700">{item.blockers_count}</span>
@@ -328,21 +321,23 @@ export default function RecentAnalyses({ analyses = [] }) {
                         </div>
                         <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
                       </div>
-                      </div>
-                      </motion.div>
-                      );
-                      } else if (item.type === 'signal') {
-               const isTeams = item.signalSource === 'teams';
-               const isJira = item.signalSource === 'jira';
-               const bgColor = isJira 
-                 ? 'border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50/50'
-                 : isTeams 
-                 ? 'border-purple-200 bg-purple-50/30 hover:bg-purple-50/50'
-                 : 'border-blue-200 bg-blue-50/30 hover:bg-blue-50/50';
-               const iconBg = isJira ? 'bg-emerald-100' : isTeams ? 'bg-purple-100' : 'bg-blue-100';
-               const iconColor = isJira ? 'text-emerald-600' : isTeams ? 'text-purple-600' : 'text-blue-600';
+                    </div>
+                  </motion.div>
+                );
+              }
 
-               return (
+              if (item.type === 'signal') {
+                const isTeams = item.signalSource === 'teams';
+                const isJira = item.signalSource === 'jira';
+                const bgColor = isJira 
+                  ? 'border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50/50'
+                  : isTeams 
+                  ? 'border-purple-200 bg-purple-50/30 hover:bg-purple-50/50'
+                  : 'border-blue-200 bg-blue-50/30 hover:bg-blue-50/50';
+                const iconBg = isJira ? 'bg-emerald-100' : isTeams ? 'bg-purple-100' : 'bg-blue-100';
+                const iconColor = isJira ? 'text-emerald-600' : isTeams ? 'text-purple-600' : 'text-blue-600';
+
+                return (
                   <motion.div
                     key={item.id}
                     initial={{ opacity: 0, x: -10 }}
@@ -384,8 +379,10 @@ export default function RecentAnalyses({ analyses = [] }) {
                   </motion.div>
                 );
               }
+
+              return null;
             })}
-          </div>
+           </div>
 
           {allItems.length === 0 && (
             <div className="text-center py-8">
