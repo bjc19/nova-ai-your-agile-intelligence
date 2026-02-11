@@ -87,6 +87,29 @@ const COMMON_WORDS = new Set([
   ]);
 
 /**
+ * Extract names from text using capitalized word pattern
+ * Used for recommendations and other generated content where names might appear
+ * Returns array of detected names (capitalized words that are not in common words list)
+ */
+const extractNamesFromText = (text) => {
+  if (!text) return [];
+  
+  const names = new Set();
+  // Match capitalized words (accented letters included)
+  const capitalizedPattern = /\b[A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']+\b/g;
+  const matches = text.match(capitalizedPattern) || [];
+  
+  matches.forEach(word => {
+    // Exclude common words and false positives
+    if (!COMMON_WORDS.has(word.toLowerCase())) {
+      names.add(word);
+    }
+  });
+  
+  return Array.from(names);
+};
+
+/**
  * Name detection from dialogue format:
  * Only interlocutors (names before ":" at start of line) are considered proper names
  * No other name detection - no false positives on common words
@@ -149,7 +172,19 @@ export const anonymizeAnalysisData = (analysis) => {
     });
   }
 
-  // Anonymize recommendations with known names context
+  // CRITICAL: Extract names from recommendations BEFORE anonymizing them
+  // This catches names that appear in recommendations but not in transcript
+  if (anonymized.recommendations && Array.isArray(anonymized.recommendations)) {
+    anonymized.recommendations.forEach(rec => {
+      const recText = typeof rec === 'string' ? rec : rec?.action || rec?.description || '';
+      if (recText) {
+        const namesInRec = extractNamesFromText(recText);
+        namesInRec.forEach(name => knownNames.add(name));
+      }
+    });
+  }
+
+  // Anonymize recommendations with ALL known names (including from recommendations themselves)
   if (anonymized.recommendations && Array.isArray(anonymized.recommendations)) {
     anonymized.recommendations = anonymized.recommendations.map(rec =>
       typeof rec === 'string' ? anonymizeNamesInText(rec, Array.from(knownNames)) : rec
