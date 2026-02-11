@@ -151,20 +151,26 @@ function detectExplicitCeremony(text) {
 
 function detectYesterdayTodayBlockers(text) {
   // RÈGLE ABSOLUE: Si structure "Hier - Aujourd'hui - Bloqueurs/Blocages" = DAILY
+  const lower = text.toLowerCase();
+
+  // Count occurrences of key temporal/blocker keywords
+  const hierCount = (lower.match(/\bhier\b/g) || []).length;
+  const aujourdhuiCount = (lower.match(/\baujourd'hui\b/g) || []).length;
+  const blockageCount = (lower.match(/\b(blocage|blocages|bloqué|bloqués|blocked|blocking)\b/g) || []).length;
+  const pasDeBlockageCount = (lower.match(/pas\s+de\s+(blocage|blocages|bloqué|bloqués|blocked|blocking)/g) || []).length;
+
+  // Daily structure: lots of "hier" + "aujourd'hui" + mention of "blocage" (even "pas de blocage")
+  const hasStructure = hierCount >= 3 && aujourdhuiCount >= 3 && (blockageCount + pasDeBlockageCount) >= 3;
+
+  // OR explicit patterns
   const patterns = [
-    // Strict format: "hier : ... aujourd'hui : ... bloc"
     /hier\s*:[\s\S]*aujourd'hui\s*:[\s\S]*bloc/i,
     /yesterday\s*:[\s\S]*today\s*:[\s\S]*block/i,
-    // Natural language: multiple "hier"/"aujourd'hui"/"blocage" scattered in text
-    // (e.g., "j'ai fait hier... je fais aujourd'hui... blocage")
-    /(?=[\s\S]*\bhier\b)(?=[\s\S]*\baujourd'hui\b)(?=[\s\S]*\b(blocage|blocages|blocages?|bloqué|bloqué?|blocked)\b)/i,
-    /(?=[\s\S]*\byesterday\b)(?=[\s\S]*\btoday\b)(?=[\s\S]*\b(block|blocks|blocking|blocked)\b)/i,
-    // Sequential updates: "j'ai terminé/fait hier... je (commence/travaille/continue/vais)"
     /j'ai\s+(terminé|fait|corrigé|implémenté)[\s\S]{0,200}je\s+(commence|travaille|continue|vais|dois)/i,
     /i\s+(finished|completed|fixed|implemented)[\s\S]{0,200}i\s+(start|work|continue|will|can)/i,
   ];
 
-  return patterns.some(p => p.test(text));
+  return hasStructure || patterns.some(p => p.test(text));
 }
 
 // ============================================
