@@ -77,6 +77,30 @@ const effortBadge = {
   high: "bg-red-50 text-red-700 border-red-200",
 };
 
+const shouldShowCard = (cardKey) => {
+  const storageKey = `pgc_last_shown_${cardKey}`;
+  const lastShown = localStorage.getItem(storageKey);
+  const now = Date.now();
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  
+  // Get all show timestamps from this week
+  const showDatesKey = `pgc_shows_${cardKey}`;
+  const showsStr = localStorage.getItem(showDatesKey);
+  let shows = showsStr ? JSON.parse(showsStr) : [];
+  
+  // Filter to shows in last 7 days
+  shows = shows.filter(timestamp => now - timestamp < sevenDaysMs);
+  
+  // If less than 2 times shown this week, allow display
+  if (shows.length < 2) {
+    shows.push(now);
+    localStorage.setItem(showDatesKey, JSON.stringify(shows));
+    return true;
+  }
+  
+  return false;
+};
+
 export default function ProductGoalCard({ 
   alignmentReport, 
   onConfirmGoal, 
@@ -91,7 +115,7 @@ export default function ProductGoalCard({
   const [questionAnsweredBy, setQuestionAnsweredBy] = useState(null); // {name, date}
   const [isHidden, setIsHidden] = useState(false);
 
-  if (!alignmentReport || isHidden) return null;
+  if (!alignmentReport || isHidden || !shouldShowCard("productGoalCard")) return null;
 
   const { risk, message, question, suggestions = [], cta, productGoal, averageAlignment } = alignmentReport;
   const config = riskConfig[risk.id] || riskConfig.insufficient;
