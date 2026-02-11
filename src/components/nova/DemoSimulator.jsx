@@ -59,24 +59,23 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
     
     const sportsLexicon = [
       // Football/Soccer - Termes SPÉCIFIQUES uniquement
-      'match de foot', 'marquer un but', 'joueur de foot', 'mi-temps', 'gardien de but', 
-      'frappe au but', 'terrain de foot', 'arbitre de foot',
-      'penalty', 'corner', 'coup franc', 'finition foot', 'ligne defensive',
-      'egalisation', 'ballon', 'dribble', 'tacle', 'sortir le ballon',
-      'marquer', 'scorer', 'remontada', 'prolongation', 'carton rouge',
-      'carton jaune', 'hors-jeu', 'mi-temps',
+      'match de football', 'marquer un but', 'joueur de football', 'gardien de but', 
+      'frappe au but', 'terrain de football', 'arbitre de football',
+      'penalty football', 'corner', 'coup franc', 'finition football', 
+      'ballon rond', 'dribble football', 'tacle', 'sortir le ballon',
+      'scorer un but', 'remontada', 'prolongation match', 'carton rouge',
+      'carton jaune', 'hors-jeu', 'but egalise', 'but gagnant',
       // Hockey - Termes SPÉCIFIQUES
-      'rondelle', 'patinoire', 'arena', 'mise en echec', 
+      'rondelle', 'patinoire', 'arena hockey', 'mise en echec hockey', 
       'desavantage numerique', 'avantage numerique', 'filet desert', 
-      'zone offensive hockey', 'zone defensive hockey', 'zone neutre', 'tir au but',
+      'zone offensive hockey', 'zone defensive hockey', 'tir au but hockey',
       'mises en echec',
       // Basketball - Termes SPÉCIFIQUES
-      'panier basket', 'dunk', 'trois points', 'rebond basket', 'passe decisive',
-      'quart-temps', 'temps mort', 'faute personnelle basket',
-      // Général sport - Termes SPÉCIFIQUES
-      'entraineur sportif', 'coach sportif', 'championnat', 'ligue sportive',
-      'classement sportif', 'victoire sportive', 'defaite sportive', 
-      'egalite sportive', 'score sportif', 'adversaire sportif', 'supporter'
+      'panier basket', 'dunk', 'trois points basket', 'rebond basket',
+      'quart-temps', 'temps mort basket', 'faute personnelle basket',
+      // Général sport - Termes TRÈS SPÉCIFIQUES
+      'entraineur sportif', 'coach sportif', 'championnat sportif', 'ligue sportive',
+      'classement ligue', 'supporter equipe', 'match sportif'
     ].map(normalizeText);
     
     const teamBuildingTerms = [
