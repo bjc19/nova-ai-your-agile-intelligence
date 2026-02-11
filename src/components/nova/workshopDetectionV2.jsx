@@ -93,17 +93,36 @@ const PATTERNS = {
 };
 
 // ============================================
+// STRUCTURAL PATTERN DETECTION (PRIMARY)
+// ============================================
+
+function detectYesterdayTodayBlockers(text) {
+  // RÈGLE ABSOLUE: Si structure "Hier - Aujourd'hui - Bloqueurs/Blocages" = DAILY
+  const patterns = [
+    /hier\s*:.*aujourd'hui\s*:.*bloc/i,
+    /yesterday\s*:.*today\s*:.*block/i,
+    /j'ai\s+terminé.*je\s+(commence|travaille|continue)/i,
+    /i\s+(finished|completed).*i\s+(start|work|continue)/i,
+  ];
+  
+  return patterns.some(p => p.test(text));
+}
+
+// ============================================
 // SCORING SYSTEM
 // ============================================
 
 function analyzeText(text) {
   const lower = text.toLowerCase();
   
+  // PRIMARY CHECK: Structural Daily pattern (UNBREAKABLE)
+  const hasYesterdayTodayPattern = detectYesterdayTodayBlockers(lower);
+  
   return {
-    daily: scoreDaily(lower),
-    review: scoreReview(lower),
-    retrospective: scoreRetrospective(lower),
-    planning: scorePlanning(lower),
+    daily: scoreDaily(lower, hasYesterdayTodayPattern),
+    review: scoreReview(lower, hasYesterdayTodayPattern),
+    retrospective: scoreRetrospective(lower, hasYesterdayTodayPattern),
+    planning: scorePlanning(lower, hasYesterdayTodayPattern),
   };
 }
 
