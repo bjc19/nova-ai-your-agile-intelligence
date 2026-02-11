@@ -348,6 +348,25 @@ export function detectWorkshopType(transcript) {
     };
   }
 
+  // PRIMARY: Check for explicit ceremony declaration (UNBREAKABLE)
+  const explicitCeremony = detectExplicitCeremony(transcript);
+  if (explicitCeremony) {
+    const ceremonyNames = {
+      daily: 'Daily Scrum',
+      review: 'Sprint Review',
+      retrospective: 'Sprint Rétrospective',
+      planning: 'Sprint Planning',
+    };
+
+    return {
+      type: ceremonyNames[explicitCeremony],
+      confidence: 99,
+      scores: { [explicitCeremony]: 100 },
+      tags: [`#${explicitCeremony.charAt(0).toUpperCase() + explicitCeremony.slice(1)}`],
+      justifications: ['Ceremony explicitly declared by facilitator'],
+    };
+  }
+
   const lower = transcript.toLowerCase();
   const hasStructuralDaily = detectYesterdayTodayBlockers(lower);
   const scores = analyzeText(transcript);
