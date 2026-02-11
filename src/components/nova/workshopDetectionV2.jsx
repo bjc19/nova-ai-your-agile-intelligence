@@ -210,24 +210,22 @@ function detectYesterdayTodayBlockers(text) {
   // RÈGLE ABSOLUE: Si structure "Hier - Aujourd'hui - Bloqueurs/Blocages" = DAILY
   const lower = text.toLowerCase();
 
-  // Count occurrences of key temporal/blocker keywords
-  const hierCount = (lower.match(/\bhier\b/g) || []).length;
-  const aujourdhuiCount = (lower.match(/\baujourd'hui\b/g) || []).length;
-  const blockageCount = (lower.match(/\b(blocage|blocages|bloqué|bloqués|blocked|blocking)\b/g) || []).length;
-  const pasDeBlockageCount = (lower.match(/pas\s+de\s+(blocage|blocages|bloqué|bloqués|blocked|blocking)/g) || []).length;
+  // Count occurrences of key temporal/blocker keywords (more lenient matching)
+  const hierCount = (lower.match(/hier\b/g) || []).length;
+  const aujourdhuiCount = (lower.match(/auj(?:ourd)?[']?hui\b/g) || []).length;
+  const blockageCount = (lower.match(/blocage|blocages|bloqué|bloqués|pas de blocage|pas de bloquage|blocked|blocking|no blocker/gi) || []).length;
 
-  // Daily structure: lots of "hier" + "aujourd'hui" + mention of "blocage" (even "pas de blocage")
-  const hasStructure = hierCount >= 3 && aujourdhuiCount >= 3 && (blockageCount + pasDeBlockageCount) >= 3;
+  // Daily structure: at least 2 "hier" + 2 "aujourd'hui" + mention of "blocage" pattern
+  // (lowered threshold to catch patterns across multiple speakers)
+  const hasStructure = hierCount >= 2 && aujourdhuiCount >= 2 && blockageCount >= 2;
 
-  // OR explicit patterns
-  const patterns = [
-    /hier\s*:[\s\S]*aujourd'hui\s*:[\s\S]*bloc/i,
-    /yesterday\s*:[\s\S]*today\s*:[\s\S]*block/i,
-    /j'ai\s+(terminé|fait|corrigé|implémenté)[\s\S]{0,200}je\s+(commence|travaille|continue|vais|dois)/i,
-    /i\s+(finished|completed|fixed|implemented)[\s\S]{0,200}i\s+(start|work|continue|will|can)/i,
-  ];
+  // Explicit pattern announcement (format habituel)
+  const hasAnnouncementPattern = /format\s+habituel|point\s+(?:quotidien|daily)|ce\s+que\s+vous\s+avez\s+fait\s+hier|tour\s+de\s+table/i.test(text);
 
-  return hasStructure || patterns.some(p => p.test(text));
+  // Action sequence pattern: "hier...j'ai" + "aujourd'hui...vais/je"
+  const actionSequencePattern = /hier[^.]*(?:j'ai|j'|je\s+(?:ai|suis|vais))[^.]*aujourd['´]?hui[^.]*(?:je\s+(?:vais|fais|continue|dois|vais)|vais|fais)/i;
+
+  return hasStructure || hasAnnouncementPattern || actionSequencePattern.test(text);
 }
 
 // ============================================
