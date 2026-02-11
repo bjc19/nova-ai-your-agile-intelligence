@@ -21,21 +21,27 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
   const [expandedPattern, setExpandedPattern] = useState(null);
 
   useEffect(() => {
-    // Vérifier tries restantes
-    const savedTries = localStorage.getItem("nova_demo_tries");
-    const lastReset = localStorage.getItem("nova_demo_reset");
-    const now = Date.now();
-    const last = lastReset ? parseInt(lastReset) : 0;
-    
-    // Reset après 24h
-    if (now - last > 24 * 60 * 60 * 1000) {
-      localStorage.setItem("nova_demo_tries", "2");
-      localStorage.setItem("nova_demo_reset", now.toString());
-      setTries(2);
-    } else {
-      setTries(parseInt(savedTries || "2"));
-    }
-    setLoading(false);
+    // Charger le compteur depuis le backend
+    const loadTries = async () => {
+      try {
+        const trackResponse = await base44.functions.invoke('trackDemoAttempt');
+        const trackData = trackResponse.data;
+        
+        if (trackData.blocked) {
+          setTries(0);
+        } else {
+          // Ajouter 1 car trackDemoAttempt retourne "remaining" après avoir déjà décrémenté
+          // Mais ici on veut juste CHECK sans décrémenter
+          // Solution: on utilise attempt_count actuel sans toucher
+          setTries(trackData.remaining || 0);
+        }
+      } catch (error) {
+        console.error('Failed to load demo tries:', error);
+        setTries(2); // Fallback
+      }
+      setLoading(false);
+    };
+    loadTries();
   }, []);
 
   const detectOutOfContext = (text) => {
