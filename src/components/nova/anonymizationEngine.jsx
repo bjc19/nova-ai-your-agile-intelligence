@@ -147,8 +147,7 @@ const COMMON_WORDS = new Set([
  * Extract names from text using capitalized word pattern
  * Extracts ONLY:
  * 1. Dialogue format (Name :)
- * 2. Names at START of sentence followed by "should", "must", "can", "needs" (action verbs)
- * 3. Names at START of sentence followed by comma (direct address)
+ * 2. Names at START of sentence (not followed by Majuscule = not start of normal sentence)
  * Avoids false positives from capitalized adjectives or inline verbs
  * Returns array of detected names (not common words, not verbs, not adjectives)
  */
@@ -157,23 +156,20 @@ const extractNamesFromText = (text) => {
 
   const names = new Set();
 
-  // Pattern 1: "Name should...", "Name must...", "Name can...", "Name needs..."
-  // These are clear action recommendations to a person
-  const actionPattern = /(?:^|\n)\s*(\p{Lu}\p{Ll}+)\s+(?:should|must|can|needs|will|could|would|may|might|is|are|has|have|does|do)\b/gu;
-  for (const match of text.matchAll(actionPattern)) {
-    const word = match[1];
-    if (!isVerb(word) && !COMMON_WORDS.has(word.toLowerCase())) {
-      names.add(word);
-    }
-  }
+  // Pattern: Name at START of line/sentence (beginning or after period+space or newline)
+  // Followed by: comma, colon, space+lowercase/action verb, or end
+  // NOT followed by: capital letter (would be normal sentence start)
+  const nameStartPattern = /(?:^|\n|\.[\s\n])\s*(\p{Lu}\p{Ll}+)(?=[\s,:]|$)/gu;
 
-  // Pattern 2: "Name, do something" or "Name: do something" (direct address)
-  const directAddressPattern = /(?:^|\n)\s*(\p{Lu}\p{Ll}+)[\s,:](?:[a-z]|\p{Ll})/gu;
-  for (const match of text.matchAll(directAddressPattern)) {
+  for (const match of text.matchAll(nameStartPattern)) {
     const word = match[1];
-    if (!isVerb(word) && !COMMON_WORDS.has(word.toLowerCase())) {
-      names.add(word);
+
+    // Skip common words, verbs, or adjectives
+    if (isVerb(word) || COMMON_WORDS.has(word.toLowerCase()) || isAdjectiveByContext(word, text)) {
+      continue;
     }
+
+    names.add(word);
   }
 
   return Array.from(names);
