@@ -9,16 +9,18 @@ import { useLanguage } from "@/components/LanguageContext";
  * @param {String} role - Rôle de l'utilisateur (pour affichage indicateur)
  */
 export default function RoleBasedRiskDisplay({ risk, role }) {
+  const { language } = useLanguage();
+  
   if (!risk) return null;
   
   const presentationLevel = risk.presentation_level;
   
   if (presentationLevel === 'admin_technical') {
-    return <AdminTechnicalView risk={risk} />;
+    return <AdminTechnicalView risk={risk} language={language} />;
   } else if (presentationLevel === 'contributor_actionable') {
-    return <ContributorActionableView risk={risk} />;
+    return <ContributorActionableView risk={risk} language={language} />;
   } else if (presentationLevel === 'user_constructive') {
-    return <MemberConstructiveView risk={risk} />;
+    return <MemberConstructiveView risk={risk} language={language} />;
   }
   
   return null;
@@ -28,7 +30,7 @@ export default function RoleBasedRiskDisplay({ risk, role }) {
 // ADMIN VIEW COMPONENT
 // ============================================================================
 
-function AdminTechnicalView({ risk }) {
+function AdminTechnicalView({ risk, language }) {
   const { t } = useLanguage();
   return (
     <Card className="border-l-4 border-l-red-500 bg-red-50/30">
@@ -128,7 +130,7 @@ function AdminTechnicalView({ risk }) {
 // CONTRIBUTOR VIEW COMPONENT
 // ============================================================================
 
-function ContributorActionableView({ risk }) {
+function ContributorActionableView({ risk, language }) {
   const { t } = useLanguage();
   return (
     <Card className="border-l-4 border-l-orange-500 bg-orange-50/30">
@@ -209,7 +211,7 @@ function ContributorActionableView({ risk }) {
 // MEMBER VIEW COMPONENT
 // ============================================================================
 
-function MemberConstructiveView({ risk }) {
+function MemberConstructiveView({ risk, language }) {
   const { t } = useLanguage();
   return (
     <Card className="border-l-4 border-l-green-500 bg-green-50/30">
