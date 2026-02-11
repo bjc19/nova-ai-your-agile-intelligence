@@ -369,6 +369,7 @@ Provide a detailed analysis in the following JSON format:`;
         inserted_at: new Date().toISOString()
       },
       transcript_preview: transcript.substring(0, 200),
+      analysis_time: new Date().toISOString()
     };
     
     // Prepare pattern detection records
