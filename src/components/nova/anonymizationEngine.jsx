@@ -145,16 +145,38 @@ const COMMON_WORDS = new Set([
 
 /**
  * Extract names from text using capitalized word pattern
- * CONSERVATIVE APPROACH: Only extracts names from dialogue format (Name :)
- * Avoids false positives from capitalized adjectifs or verbs in sentences
+ * Extracts ONLY:
+ * 1. Dialogue format (Name :)
+ * 2. Names at START of sentence followed by "should", "must", "can", "needs" (action verbs)
+ * 3. Names at START of sentence followed by comma (direct address)
+ * Avoids false positives from capitalized adjectives or inline verbs
  * Returns array of detected names (not common words, not verbs, not adjectives)
  */
 const extractNamesFromText = (text) => {
   if (!text) return [];
 
-  // Return empty - we only trust interlocutor detection via dialogue format
-  // This prevents false positives from capitalized adjectives or other parts of speech
-  return [];
+  const names = new Set();
+
+  // Pattern 1: "Name should...", "Name must...", "Name can...", "Name needs..."
+  // These are clear action recommendations to a person
+  const actionPattern = /(?:^|\n)\s*(\p{Lu}\p{Ll}+)\s+(?:should|must|can|needs|will|could|would|may|might|is|are|has|have|does|do)\b/gu;
+  for (const match of text.matchAll(actionPattern)) {
+    const word = match[1];
+    if (!isVerb(word) && !COMMON_WORDS.has(word.toLowerCase())) {
+      names.add(word);
+    }
+  }
+
+  // Pattern 2: "Name, do something" or "Name: do something" (direct address)
+  const directAddressPattern = /(?:^|\n)\s*(\p{Lu}\p{Ll}+)[\s,:](?:[a-z]|\p{Ll})/gu;
+  for (const match of text.matchAll(directAddressPattern)) {
+    const word = match[1];
+    if (!isVerb(word) && !COMMON_WORDS.has(word.toLowerCase())) {
+      names.add(word);
+    }
+  }
+
+  return Array.from(names);
 };
 
 /**
