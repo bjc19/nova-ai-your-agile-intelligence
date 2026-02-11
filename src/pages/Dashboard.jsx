@@ -43,7 +43,6 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [userRole, setUserRole] = useState(null);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -102,10 +101,12 @@ export default function Dashboard() {
   }, [navigate]);
 
   // Fetch analysis history
-  const { data: allAnalysisHistory = [] } = useQuery({
+  const { data: allAnalysisHistory = [], refetch: refetchAnalyses } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
+    enabled: !isLoading,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true
   });
 
   // Filter analysis history based on selected period
