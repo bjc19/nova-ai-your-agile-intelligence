@@ -21,12 +21,12 @@ export const extractInterlocutors = (text) => {
   const lines = text.split('\n');
   
   // Pattern: "Name (Optional Title) : " at start of line - captures ONLY the name part
-   const interlocutorPattern = /^\s*([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']*)\s*(?:\([^)]*\))?\s*:/;
+  const interlocutorPattern = /^(\s*)([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']*)(\s*(?:\([^)]*\))?)\s*:/;
   
   lines.forEach(line => {
     const match = line.match(interlocutorPattern);
     if (match) {
-      const candidate = match[1].trim();
+      const candidate = match[2].trim();
       
       // Exclude common false positives
       const falsePositives = ['Ordre', 'Agenda', 'Problème', 'Solution', 'Décision', 'Action', 'Résultat', 'Objectif', 'Rappel', 'Information', 'Conclusion', 'Note', 'Item', 'Liste'];
