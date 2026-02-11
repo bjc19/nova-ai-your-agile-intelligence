@@ -122,30 +122,16 @@ const COMMON_WORDS = new Set([
 
 /**
  * Extract names from text using capitalized word pattern
- * Only extracts capitalized words that appear:
- * - At the start of a sentence (after . or at beginning)
- * - In dialogue format (Name :)
- * Returns array of detected names (not common words)
+ * CONSERVATIVE APPROACH: Only extracts names from dialogue format (Name :)
+ * Avoids false positives from capitalized adjectifs or verbs in sentences
+ * Returns array of detected names (not common words, not verbs, not adjectives)
  */
 const extractNamesFromText = (text) => {
   if (!text) return [];
 
-  const names = new Set();
-
-  // ONLY match capitalized words at start of sentence (after . or at text start)
-  // Pattern: (sentence start or period + space) + Capitalized word
-  const sentenceStartPattern = /(^|\.)\s+(\p{Lu}\p{Ll}+)/gu;
-  const sentenceMatches = text.matchAll(sentenceStartPattern);
-
-  for (const match of sentenceMatches) {
-    const word = match[2];
-    // Exclude common words and false positives
-    if (!COMMON_WORDS.has(word.toLowerCase())) {
-      names.add(word);
-    }
-  }
-
-  return Array.from(names);
+  // Return empty - we only trust interlocutor detection via dialogue format
+  // This prevents false positives from capitalized adjectives or other parts of speech
+  return [];
 };
 
 /**
