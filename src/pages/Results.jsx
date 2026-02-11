@@ -55,6 +55,7 @@ export default function Results() {
         const detectRole = async () => {
           try {
             const user = await base44.auth.me();
+            setCurrentUser(user);
             const detectedRole = detectViewForUser(user);
             setUserRole(detectedRole);
           } catch (error) {
