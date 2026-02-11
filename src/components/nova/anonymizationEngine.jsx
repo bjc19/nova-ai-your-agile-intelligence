@@ -175,6 +175,50 @@ const COMMON_WORDS = new Set([
   ]);
 
 /**
+ * CRITICAL: Detect if a capitalized word is a REAL NAME vs. a common word/phrase start
+ * 
+ * Rules:
+ * 1. If word is in COMMON_WORDS → NOT a name
+ * 2. If word is a verb or adjective → NOT a name
+ * 3. If word appears at sentence start with lowercase following → NOT a name (sentence start)
+ * 4. If word is followed by action (verb conjugation) → NOT a name
+ * 5. Only names preceded by dialogue colon or in true dialogue format → IS a name
+ */
+const isRealPersonName = (word, text, position) => {
+  if (!word) return false;
+
+  const lowerWord = word.toLowerCase();
+
+  // Rule 1: Blacklist check (COMMON_WORDS)
+  if (COMMON_WORDS.has(lowerWord)) return false;
+
+  // Rule 2: Verb check
+  if (isVerb(word)) return false;
+
+  // Rule 3: Adjective check
+  if (isAdjectiveByContext(word, text)) return false;
+
+  // Rule 4: Check if this looks like sentence start with normal prose
+  // Pattern: Word at position 0 or after period/newline, followed by lowercase
+  const beforeWord = position > 0 ? text[position - 1] : '\n';
+  const isAtLineStart = beforeWord === '\n' || beforeWord === '.' || position === 0;
+  
+  if (isAtLineStart) {
+    // Look for what follows - if it's normal prose (lowercase + space + lowercase), it's a sentence start
+    const afterMatch = text.substring(position + word.length, position + word.length + 50);
+    const normalProsePattern = /^\s+[a-zàâäéèêëïîôùûüœæç]/;
+    
+    if (normalProsePattern.test(afterMatch)) {
+      return false; // Looks like normal sentence start
+    }
+  }
+
+  // Rule 5: TRUE name only if followed by dialogue marker (:) or in dialogue pattern
+  const dialoguePattern = new RegExp(`${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(?:\\([^)]*\\))?\\s*:`, 'i');
+  return dialoguePattern.test(text);
+};
+
+/**
  * Extract names from text using capitalized word pattern
  * Extracts ONLY:
  * 1. Dialogue format (Name :)
@@ -194,9 +238,10 @@ const extractNamesFromText = (text) => {
 
   for (const match of text.matchAll(nameStartPattern)) {
     const word = match[1];
+    const position = match.index + (match[0].length - word.length);
 
-    // Skip common words, verbs, or adjectives
-    if (isVerb(word) || COMMON_WORDS.has(word.toLowerCase()) || isAdjectiveByContext(word, text)) {
+    // CRITICAL: Use new isRealPersonName function instead of simple checks
+    if (!isRealPersonName(word, text, position)) {
       continue;
     }
 
