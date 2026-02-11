@@ -9,7 +9,8 @@ import {
   Clock,
   TrendingUp,
   CheckCircle2,
-  Repeat2
+  Repeat2,
+  Activity
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { adaptMessage } from "./RoleBasedMessaging";
