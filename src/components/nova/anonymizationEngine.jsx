@@ -271,6 +271,40 @@ export const anonymizeAnalysisData = (analysis) => {
 };
 
 /**
+ * CRITICAL: Check if word is a conjugated action verb at sentence start
+ * Action verbs used to formulate recommendations (e.g., "Escalade", "Schedule", "Organise")
+ * Should NEVER be anonymized even if they start with capital letter
+ */
+const isActionVerbAtStart = (word, text, position) => {
+  if (!word || word.length <= 2) return false;
+
+  const lowerWord = word.toLowerCase();
+
+  // French action verbs (imperative/conjugated forms common in recommendations)
+  const frenchActionVerbs = [
+    'escalade', 'escalader', 'communiquer', 'organiser', 'planifier', 'revoir', 'prioriser',
+    'réduire', 'augmenter', 'améliorer', 'analyser', 'simplifier', 'clarifier', 'définir',
+    'créer', 'mettre', 'établir', 'identifier', 'documenter', 'valider', 'confirmer',
+    'relancer', 'synchroniser', 'regrouper', 'consolider', 'ajouter', 'retirer',
+    'considérer', 'proposer', 'suggérer', 'demander', 'vérifier', 'tester', 'évaluer'
+  ];
+
+  // English action verbs
+  const englishActionVerbs = [
+    'escalate', 'schedule', 'organize', 'plan', 'review', 'prioritize', 'reduce',
+    'increase', 'improve', 'analyze', 'simplify', 'clarify', 'define', 'create',
+    'set', 'establish', 'identify', 'document', 'validate', 'confirm', 'reach',
+    'sync', 'consolidate', 'add', 'remove', 'consider', 'propose', 'suggest',
+    'ask', 'check', 'verify', 'test', 'evaluate', 'gather', 'align', 'coordinate'
+  ];
+
+  // Check if at sentence start (after period, colon, or start of text)
+  const isAtStart = position === 0 || text[position - 1] === '.' || text[position - 1] === ':';
+
+  return isAtStart && (frenchActionVerbs.includes(lowerWord) || englishActionVerbs.includes(lowerWord));
+};
+
+/**
  * Anonymize names in dialogue transcript
  * Replaces names ONLY before ":" at line start, leaving all other occurrences unchanged
  */
