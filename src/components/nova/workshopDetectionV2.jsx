@@ -152,10 +152,16 @@ function detectExplicitCeremony(text) {
 function detectYesterdayTodayBlockers(text) {
   // RÈGLE ABSOLUE: Si structure "Hier - Aujourd'hui - Bloqueurs/Blocages" = DAILY
   const patterns = [
+    // Strict format: "hier : ... aujourd'hui : ... bloc"
     /hier\s*:[\s\S]*aujourd'hui\s*:[\s\S]*bloc/i,
     /yesterday\s*:[\s\S]*today\s*:[\s\S]*block/i,
-    /j'ai\s+terminé[\s\S]*je\s+(commence|travaille|continue)/i,
-    /i\s+(finished|completed)[\s\S]*i\s+(start|work|continue)/i,
+    // Natural language: multiple "hier"/"aujourd'hui"/"blocage" scattered in text
+    // (e.g., "j'ai fait hier... je fais aujourd'hui... blocage")
+    /(?=[\s\S]*\bhier\b)(?=[\s\S]*\baujourd'hui\b)(?=[\s\S]*\b(blocage|blocages|blocages?|bloqué|bloqué?|blocked)\b)/i,
+    /(?=[\s\S]*\byesterday\b)(?=[\s\S]*\btoday\b)(?=[\s\S]*\b(block|blocks|blocking|blocked)\b)/i,
+    // Sequential updates: "j'ai terminé/fait hier... je (commence/travaille/continue/vais)"
+    /j'ai\s+(terminé|fait|corrigé|implémenté)[\s\S]{0,200}je\s+(commence|travaille|continue|vais|dois)/i,
+    /i\s+(finished|completed|fixed|implemented)[\s\S]{0,200}i\s+(start|work|continue|will|can)/i,
   ];
 
   return patterns.some(p => p.test(text));
