@@ -205,15 +205,20 @@ const extractNamesFromText = (text) => {
 };
 
 /**
- * Name detection from dialogue format:
- * CRITICAL: Only interlocutors (names before ":" at start of line) are considered proper names
- * Do NOT extract names from sentence starts - capital letters are used for ALL sentence starts, not just names
- * No other name detection - no false positives on verbs or common words starting sentences
+ * Name detection from dialogue format + sentence-start detection:
+ * Layer 1: Interlocutors (names before ":" at start of line)
+ * Layer 2: Names at sentence starts (not followed by another capital = not a normal sentence start)
+ * Filters out verbs, adjectives, and common words
  */
 const getDetectionLayers = (text) => {
-   // ONLY detect names from dialogue format (Name : ...)
-   // Never use extractNamesFromText - it has too many false positives
-   return extractInterlocutors(text);
+   // Layer 1: Dialogue format (Name : ...)
+   const interlocutors = extractInterlocutors(text);
+   
+   // Layer 2: Names at sentence starts (better for titles and descriptions)
+   const sentenceStartNames = extractNamesFromText(text);
+   
+   // Combine both layers, removing duplicates
+   return Array.from(new Set([...interlocutors, ...sentenceStartNames]));
 };
 
 /**
