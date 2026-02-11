@@ -103,7 +103,7 @@ export default function Dashboard() {
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-analysis_time', 100),
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -433,7 +433,7 @@ export default function Dashboard() {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
+            <RecentAnalyses analyses={analysisHistory} key={analysisHistory.length} />
             
             {/* Integration Status */}
             <IntegrationStatus />
