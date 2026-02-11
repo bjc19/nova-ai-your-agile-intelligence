@@ -212,8 +212,11 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   return Math.max(0, score);
 }
 
-function scorePlanning(text) {
+function scorePlanning(text, hasStructuralPatternDaily = false) {
   let score = 0;
+  
+  // If structural Daily pattern exists, heavily penalize Planning
+  if (hasStructuralPatternDaily) score -= 40;
   
   // Object scoring (dominant object)
   if (matchesAny(text, PLANNING_OBJECTS.future)) score += 35;
