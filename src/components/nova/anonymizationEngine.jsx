@@ -48,7 +48,7 @@ const isVerb = (word) => {
   const lowerWord = word.toLowerCase();
 
   // French verb infinitive endings
-  const frenchVerbEndings = ['er', 'ir', 're', 'oir', 'oir'];
+  const frenchVerbEndings = ['er', 'ir', 're', 'oir'];
   for (const ending of frenchVerbEndings) {
     if (lowerWord.endsWith(ending) && lowerWord.length > 3) return true;
   }
@@ -61,6 +61,28 @@ const isVerb = (word) => {
   const englishVerbEndings = ['ing', 'ed'];
   for (const ending of englishVerbEndings) {
     if (lowerWord.endsWith(ending) && lowerWord.length > 4) return true;
+  }
+
+  return false;
+};
+
+/**
+ * Detect if a word is likely an adjective based on context
+ * Checks if word precedes a noun (common pattern: Adjective + Noun)
+ * Examples: "communication claire" → "claire" is adjective
+ */
+const isAdjectiveByContext = (word, text) => {
+  if (!text || !word) return false;
+
+  const lowerWord = word.toLowerCase();
+
+  // Common French adjectives that can appear before nouns
+  const commonAdjectives = ['claire', 'clair', 'clairs', 'claires', 'bon', 'bonne', 'bons', 'bonnes', 'mauvais', 'mauvaise', 'meilleur', 'meilleure', 'grand', 'grande', 'petit', 'petite', 'nouveau', 'nouvelle', 'ancien', 'ancienne', 'haut', 'haute', 'bas', 'basse'];
+
+  if (commonAdjectives.includes(lowerWord)) {
+    // Check if word is followed by a noun (word + space + capitalized word or known noun)
+    const pattern = new RegExp(`\\b${word}\\s+\\p{Lu}\\p{Ll}+`, 'u');
+    if (pattern.test(text)) return true;
   }
 
   return false;
