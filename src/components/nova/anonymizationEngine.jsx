@@ -371,7 +371,7 @@ const anonymizeTranscript = (text, knownNames = []) => {
  * Layer 3: Known names passed via context (for recommendations, etc.)
  * CRITICAL: Never anonymize verbs OR adjectives (detected by context)
  */
-const anonymizeNamesInText = (text, knownNames = []) => {
+export const anonymizeNamesInText = (text, knownNames = []) => {
   if (!text) return text;
 
   // Get detected names from multi-layer detection + add known names
