@@ -176,6 +176,32 @@ export default function Results() {
         }
       }, [navigate, language, t, userRole]);
 
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      const response = await base44.functions.invoke('generateAnalysisPDF', {
+        analysis: analysis,
+        language: language,
+        userRole: userRole
+      });
+      
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Nova-Analysis-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      setShowExportDialog(false);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (!analysis || !translationComplete) {
        return (
          <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
