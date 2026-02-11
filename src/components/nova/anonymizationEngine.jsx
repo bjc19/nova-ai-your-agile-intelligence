@@ -21,7 +21,7 @@ export const extractInterlocutors = (text) => {
   const lines = text.split('\n');
   
   // Pattern: "Name (Optional Title) : " at start of line - captures ONLY the name part
-   const interlocutorPattern = /^\s*([A-Z][a-zéèêëàâäîïôöùûüç\-']*)\s*(?:\([^)]*\))?\s*:/;
+   const interlocutorPattern = /^\s*([A-ZÉÈÊËÀÂÄÎÏÔÖÙÛÜÇŒÆ][a-zéèêëàâäîïôöùûüçœæ\-']*)\s*(?:\([^)]*\))?\s*:/;
   
   lines.forEach(line => {
     const match = line.match(interlocutorPattern);
