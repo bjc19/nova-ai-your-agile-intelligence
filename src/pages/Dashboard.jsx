@@ -101,12 +101,10 @@ export default function Dashboard() {
   }, [navigate]);
 
   // Fetch analysis history
-  const { data: allAnalysisHistory = [], refetch: refetchAnalyses } = useQuery({
+  const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true
+    queryFn: () => base44.entities.AnalysisHistory.list('-analysis_time', 100),
+    enabled: !isLoading
   });
 
   // Filter analysis history based on selected period
