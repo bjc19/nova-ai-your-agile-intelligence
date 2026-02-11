@@ -411,6 +411,10 @@ Provide a detailed analysis in the following JSON format:`;
     
     // Invalidate query to force refetch from database
     await queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
+    
+    // Clear all caches to force fresh data fetch
+    sessionStorage.removeItem('gdpr_markers_stats');
+    sessionStorage.removeItem('gdpr_markers_stats_timestamp');
 
     // Anonymize analysis data before storing
     const anonymizedAnalysis = anonymizeAnalysisData({ ...result, posture: posture.id, context });
