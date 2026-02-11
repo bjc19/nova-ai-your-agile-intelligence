@@ -31,18 +31,18 @@ Deno.serve(async (req) => {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     
     if (attempt.length === 0) {
-      // First attempt - create new record
+      // First attempt - create new record with 1 remaining (user is about to use 1)
       const newAttempt = await base44.entities.DemoAttempt.create({
         ip_address: hashedIP,
-        attempt_count: 2,
+        attempt_count: 1,
         last_reset: now.toISOString(),
         last_attempt: now.toISOString(),
         is_blocked: false
       });
       return Response.json({ 
         allowed: true, 
-        remaining: 2, 
-        message: 'Demo attempts available'
+        remaining: 1, 
+        message: 'Demo attempt recorded. 1 remaining in 24h window'
       });
     }
     
