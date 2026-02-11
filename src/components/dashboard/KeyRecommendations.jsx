@@ -38,6 +38,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   const [allSourceRecommendations, setAllSourceRecommendations] = useState([]);
   const { role: userRole, isAdmin, isContributor, isUser } = useRoleAccess();
   const [localUserRole, setLocalUserRole] = useState('user');
+  const [currentPage, setCurrentPage] = useState(0);
 
   // Sync local role state
   useEffect(() => {
