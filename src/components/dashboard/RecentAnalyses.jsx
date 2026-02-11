@@ -32,6 +32,7 @@ const sourceIcons = {
 
 export default function RecentAnalyses({ analyses = [] }) {
   const { language, t } = useLanguage();
+  const queryClient = useQueryClient();
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
   const [allItems, setAllItems] = useState([]);
@@ -39,6 +40,7 @@ export default function RecentAnalyses({ analyses = [] }) {
   const [patternDetails, setPatternDetails] = useState(null);
   const [contextualActions, setContextualActions] = useState(null);
   const [loadingActions, setLoadingActions] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const fetchSignals = async () => {
