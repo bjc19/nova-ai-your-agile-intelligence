@@ -220,7 +220,7 @@ export default function QuickStats({ analysisHistory = [] }) {
             <div className={`inline-flex p-2 rounded-xl ${stat.bgColor} mb-3`}>
               <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
             </div>
-            <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+            <p className="text-3xl font-bold text-slate-900">{stat.value}{stat.suffix || ''}</p>
             <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
           </div>
         </motion.div>
