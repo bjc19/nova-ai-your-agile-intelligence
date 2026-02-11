@@ -354,8 +354,18 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       console.log('🚀 Starting analysis for text:', input.substring(0, 100) + '...');
 
       // ÉTAPE 0: Vérifier et décrémenter les essais via backend (IP-based)
-      const trackResponse = await base44.functions.invoke('trackDemoAttempt', { checkOnly: false });
-      const trackData = trackResponse.data;
+      console.log('📞 Calling trackDemoAttempt...');
+      let trackData;
+      try {
+        const trackResponse = await base44.functions.invoke('trackDemoAttempt', { checkOnly: false });
+        trackData = trackResponse.data;
+        console.log('📞 trackDemoAttempt response:', trackData);
+      } catch (error) {
+        console.error('❌ trackDemoAttempt error:', error);
+        toast.error(`❌ Erreur de connexion: ${error.message}`);
+        setAnalyzing(false);
+        return;
+      }
 
       if (!trackData.allowed || trackData.blocked) {
         toast.error(`❌ ${trackData.message}`);
@@ -367,6 +377,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
       // Synchroniser le compteur local avec le serveur
       setTries(trackData.remaining);
       onTriesUpdate(trackData.remaining);
+      console.log('✅ Tries updated:', trackData.remaining);
 
       // ÉTAPE 1: Vérifier si le contenu est hors contexte (VETO)
       const outOfContextCheck = detectOutOfContext(input);
