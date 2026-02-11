@@ -189,6 +189,19 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     setTranslatedRecommendations(null);
   }, [language]);
 
+  // Paginated/Anonymized recommendations calculation
+  const allRecommendations = getRecommendations();
+  const anonymizedRecommendations = allRecommendations.map(rec => ({
+    ...rec,
+    title: anonymizeRecommendationText(rec.title, Array.from(knownNames)),
+    description: anonymizeRecommendationText(rec.description, Array.from(knownNames))
+  }));
+  const recommendations = anonymizedRecommendations.map(rec => formatRecommendation(rec, userRole));
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(recommendations.length / itemsPerPage);
+  const startIdx = currentPage * itemsPerPage;
+  const paginatedRecs = recommendations.slice(startIdx, startIdx + itemsPerPage);
+
   useEffect(() => {
     const allRecs = getRecommendations();
     if (allRecs.length > 0 && language === 'fr' && !translatedRecommendations && allRecs[0]?.source !== undefined) {
