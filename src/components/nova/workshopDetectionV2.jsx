@@ -25,6 +25,7 @@ const REVIEW_OBJECTS = {
   product: ['démo', 'demo', 'incrément', 'increment', 'fonctionnalité', 'feature', 'livré', 'delivered', 'release', 'version', 'production', 'utilisateur', 'user'],
   validation: ['feedback', 'validation', 'client', 'stakeholder', 'acceptance', 'acceptation', 'testé', 'tested', 'qa', 'quality'],
   demo: ['montrer', 'show', 'présenter', 'present', 'voir', 'look at', 'voici', 'here is', 'démonstration'],
+  retrospective: ['retours', 'feedback', 'suggestions', 'améliorations', 'improvements', 'backlog futur', 'future items'],
 };
 
 const RETROSPECTIVE_OBJECTS = {
