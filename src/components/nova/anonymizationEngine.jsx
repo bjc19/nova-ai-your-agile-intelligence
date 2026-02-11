@@ -98,16 +98,23 @@ const getDetectionLayers = (text) => {
 
 /**
  * Anonymize all first names in analysis data
- * Extracts known names from blockers/risks to ensure they're anonymized everywhere
+ * Extracts known names from blockers/risks and transcript interlocutors to ensure they're anonymized everywhere
  */
 export const anonymizeAnalysisData = (analysis) => {
   if (!analysis) return analysis;
 
   const anonymized = { ...analysis };
   
-  // Extract all known names from blockers & risks to ensure consistent anonymization
-  // This is critical for recommendations which may reference these names
+  // Extract all known names: from transcript interlocutors + blockers + risks
+  // This ensures consistent anonymization everywhere
   const knownNames = new Set();
+  
+  // FIRST: Extract interlocutors from transcript (primary source)
+  if (anonymized.transcript || typeof anonymized === 'string') {
+    const transcriptText = anonymized.transcript || anonymized;
+    const interlocutors = extractInterlocutors(transcriptText);
+    interlocutors.forEach(name => knownNames.add(name));
+  }
 
   // Anonymize blockers
   if (anonymized.blockers && Array.isArray(anonymized.blockers)) {
