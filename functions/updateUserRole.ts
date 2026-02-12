@@ -11,11 +11,11 @@ Deno.serve(async (req) => {
 
     const { userId, userEmail, newRole } = await req.json();
 
-    if (!userEmail || !newRole) {
-      return Response.json({ error: 'Email and role required' }, { status: 400 });
+    if (!userId || !userEmail || !newRole) {
+      return Response.json({ error: 'User ID, email and role required' }, { status: 400 });
     }
 
-    // Update TeamMember role instead
+    // Check if current user can update this member
     const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
     if (teamMembers.length > 0) {
       const teamMember = teamMembers[0];
@@ -24,9 +24,10 @@ Deno.serve(async (req) => {
       if (user.role !== 'admin' && teamMember.manager_email !== user.email) {
         return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
       }
-      
-      await base44.asServiceRole.entities.TeamMember.update(teamMember.id, { role: newRole });
     }
+
+    // Update the User entity directly so it persists
+    await base44.asServiceRole.entities.User.update(userId, { role: newRole });
 
     return Response.json({ success: true, message: 'Role updated' });
   } catch (error) {
