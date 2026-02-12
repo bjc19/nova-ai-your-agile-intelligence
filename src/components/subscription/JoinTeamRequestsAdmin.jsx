@@ -17,9 +17,9 @@ export default function JoinTeamRequestsAdmin() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
 
-        // Fetch pending requests for this admin
+        // Fetch pending requests for this manager
         const pendingRequests = await base44.entities.JoinTeamRequest.filter({
-          admin_email: currentUser.email,
+          manager_email: currentUser.email,
           status: 'pending'
         });
 
@@ -50,7 +50,7 @@ export default function JoinTeamRequestsAdmin() {
         user_email: request.requester_email,
         user_name: request.requester_name,
         subscription_id: subscription.id,
-        admin_email: user.email,
+        manager_email: user.email,
         role: request.assigned_role || 'user',
         joined_at: new Date().toISOString()
       });
