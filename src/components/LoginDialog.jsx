@@ -208,7 +208,9 @@ export function LoginDialog({ isOpen, onClose }) {
               type="button"
               onClick={async () => {
                 onClose();
-                await base44.auth.redirectToLogin(createPageUrl("ChooseAccess") + "?signup=true");
+                const chooseAccessUrl = createPageUrl("ChooseAccess");
+                const loginUrl = `/login?signup=true&from_url=${encodeURIComponent(chooseAccessUrl)}`;
+                window.location.href = loginUrl;
               }}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
