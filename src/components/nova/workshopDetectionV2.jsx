@@ -418,22 +418,38 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   const hasDecomposition = matchesAny(text, PLANNING_OBJECTS.decomposition);
   const hasPrioritization = matchesAny(text, PLANNING_OBJECTS.prioritization);
   
-  // CRITICAL: ESTIMATION = PLANNING ABSOLUTE (100% confidence)
-  // Story points, capacity, velocity mention = Planning, period.
-  if (hasEstimation) {
+  // PLANNING-SPECIFIC SIGNALS (Combined must be present)
+  const hasCommitmentLang = matchesAny(text, PLANNING_DIFFERENTIATORS.commitmentLanguage);
+  const hasEstimationActivity = matchesAny(text, PLANNING_DIFFERENTIATORS.estimationActivity);
+  const hasBacklogWork = matchesAny(text, PLANNING_DIFFERENTIATORS.backlogSelection);
+  const hasScopeBreakdown = matchesAny(text, PLANNING_DIFFERENTIATORS.scopeBreakdown);
+  
+  // CRITICAL: ESTIMATION + COMMITMENT = PLANNING ABSOLUTE (100% confidence)
+  // Story points + "on embarque" / "we commit" / "on prend" = Planning, period.
+  if (hasEstimation && (hasCommitmentLang || hasEstimationActivity)) {
     score += 100; // Maximum score - cannot be beaten
     return score;
   }
+  
+  // CRITICAL: If DEMO or stakeholder validation present (Review signals) → NOT Planning
+  const hasDemo = matchesAny(text, REVIEW_OBJECTS.demo);
+  const hasDemoDelivery = matchesAny(text, REVIEW_DIFFERENTIATORS.demoDelivery);
+  const hasStakeholderValidation = matchesAny(text, REVIEW_DIFFERENTIATORS.stakeholderValidation);
+  
+  if (hasDemo || hasDemoDelivery) score -= 80; // Demo = Review signal
+  if (hasStakeholderValidation && (hasDemo || hasDemoDelivery)) score -= 60; // Stakeholder validation with demo = Review
   
   // CRITICAL PENALTY: If retrospective method or improvement focus = NOT Planning
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.retrospectiveMethod)) score -= 100;
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement) && PATTERNS.retrospective.improvementProposal.test(text)) score -= 50;
   
-  // Secondary signals: Future + Decomposition (without estimation)
-  if (hasFuture && (hasDecomposition || hasBacklogSelection)) score += 50;
+  // Secondary signals: Future + Decomposition (without demo)
+  if (hasFuture && (hasDecomposition || hasBacklogSelection) && !hasDemo) score += 50;
   
   // Strong signal: commitment language
-  if (matchesAny(text, PLANNING_TIME.commitment) && hasFuture) score += 25;
+  if (hasCommitmentLang && hasFuture) score += 30;
+  if (hasEstimationActivity && hasBacklogWork) score += 35;
+  if (hasScopeBreakdown && hasBacklogWork) score += 25;
   
   // Prioritization + selection = Planning activity
   if (hasPrioritization && hasBacklogSelection) score += 20;
@@ -445,8 +461,6 @@ function scorePlanning(text, hasStructuralPatternDaily = false) {
   if (PATTERNS.planning.decomposition.test(text) && hasBacklogSelection) score += 20;
   
   // Anti-pattern penalties
-  if (matchesAny(text, REVIEW_OBJECTS.demo)) score -= 40;
-  if (matchesAny(text, REVIEW_OBJECTS.validation)) score -= 20;
   if (matchesAny(text, DAILY_OBJECTS.blockers)) score -= 15;
   
   return Math.max(0, score);
