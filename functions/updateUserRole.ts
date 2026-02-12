@@ -24,8 +24,11 @@ Deno.serve(async (req) => {
 
     const teamMember = teamMembers[0];
     
-    // Check if current user can update this member (must be manager or admin)
-    if (user.role !== 'admin' && teamMember.manager_email !== user.email) {
+    // Super user (dev/creator) bypass - if user is admin and created the subscription, allow all
+    const isDevMode = user.role === 'admin';
+    
+    // Check if current user can update this member (must be manager or admin or dev mode)
+    if (!isDevMode && teamMember.manager_email !== user.email) {
       return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
     }
 
