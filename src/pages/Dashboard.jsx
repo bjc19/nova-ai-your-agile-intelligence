@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -278,15 +279,8 @@ export default function Dashboard() {
                   </Link>
                 </div>
               </div>
-
-              {/* Daily Quote */}
-              <DailyQuote 
-                blockerCount={latestAnalysis?.blockers_count || 0}
-                riskCount={latestAnalysis?.risks_count || 0}
-                healthIndex={0}
-              />
-
-               {/* Time Period Selector */}
+              
+              {/* Time Period Selector */}
               <div className="flex justify-end">
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
