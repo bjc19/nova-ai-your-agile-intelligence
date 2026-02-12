@@ -403,26 +403,26 @@ export default function Settings() {
           </p>
         </motion.div>
 
-        {/* Workspace Access Management */}
+        {/* Join Requests and Workspace Access */}
         {(currentRole === 'admin' || currentRole === 'contributor') && (
           <>
+            {/* Join Requests Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.05 }}
               className="mb-8"
             >
-              <WorkspaceAccessManagement currentRole={currentRole} />
+              <JoinRequestsManager />
             </motion.div>
             
-            {/* Join Requests Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="mb-8"
             >
-              <JoinRequestsManager />
+              <WorkspaceAccessManagement currentRole={currentRole} />
             </motion.div>
           </>
         )}
