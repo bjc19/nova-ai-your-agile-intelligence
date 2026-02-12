@@ -307,27 +307,24 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
     return score; // Exit early: Daily pattern dominates
   }
 
-  // CRITICAL DIFFERENTIATOR: If estimation keywords present (story points, capacité, velocity) + commitment language = PLANNING, not Review
-  // This overrides ANY Review signals
-  const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
-  const hasCommitment = matchesAny(text, PLANNING_DIFFERENTIATORS.commitmentLanguage);
-  const hasScopeBreakdown = matchesAny(text, PLANNING_DIFFERENTIATORS.scopeBreakdown);
-  
-  if (hasEstimation && (hasCommitment || hasScopeBreakdown)) {
-    score = Math.max(0, score - 100); // Absolute penalty: Planning dominates
-    return score;
-  }
-
   // REVIEW-SPECIFIC: Must have demo OR stakeholder validation (not just future discussion)
   const hasDemo = matchesAny(text, REVIEW_OBJECTS.demo);
   const hasProduct = matchesAny(text, REVIEW_OBJECTS.product);
   const hasStakeholderValidation = matchesAny(text, REVIEW_DIFFERENTIATORS.stakeholderValidation);
   const hasDemoDelivery = matchesAny(text, REVIEW_DIFFERENTIATORS.demoDelivery);
 
-  if (hasDemo) score += 35;
+  // DEMO IS UNBEATABLE - if present with product/validation, Review wins
+  const isDemoWithContext = (hasDemo || hasDemoDelivery) && (hasProduct || hasStakeholderValidation);
+  if (isDemoWithContext) {
+    score += 100; // Maximum score - Review is confirmed
+    return score;
+  }
+
+  // Strong demo alone is very strong signal
+  if (hasDemo) score += 40;
+  if (hasDemoDelivery) score += 35;
   if (hasProduct) score += 30;
-  if (hasDemoDelivery) score += 25;
-  if (hasStakeholderValidation && (hasDemo || hasProduct)) score += 25;
+  if (hasStakeholderValidation && (hasDemo || hasProduct)) score += 30;
   
   // Validation only counts if Demo OR Product is present (context-specific)
   if (matchesAny(text, REVIEW_OBJECTS.validation) && (hasDemo || hasProduct)) score += 20;
@@ -336,14 +333,20 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
   if (matchesAny(text, REVIEW_TIME.past)) score += 15;
   
   // Intent patterns
-  if (PATTERNS.review.demoIndicator.test(text)) score += 20;
-  if (PATTERNS.review.deliveryFocus.test(text)) score += 20;
-  if (PATTERNS.review.stakeholder.test(text)) score += 15;
+  if (PATTERNS.review.demoIndicator.test(text)) score += 25;
+  if (PATTERNS.review.deliveryFocus.test(text)) score += 25;
+  if (PATTERNS.review.stakeholder.test(text)) score += 20;
   
-  // CRITICAL PENALTY: If planning-specific signals are strong → Not Review
-  if (hasEstimation) score -= 60; // Estimation = Planning signal
-  if (hasCommitment) score -= 40; // Commitment language = Planning
-  if (hasScopeBreakdown) score -= 35; // Scope breakdown = Planning
+  // CRITICAL DIFFERENTIATOR: If estimation + commitment/breakdown TOGETHER = PLANNING (not just estimation alone)
+  const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
+  const hasCommitment = matchesAny(text, PLANNING_DIFFERENTIATORS.commitmentLanguage);
+  const hasScopeBreakdown = matchesAny(text, PLANNING_DIFFERENTIATORS.scopeBreakdown);
+  
+  // Only penalize if it's a PLANNING ceremony pattern (estimation + commitment/scope)
+  if (hasEstimation && (hasCommitment || hasScopeBreakdown)) score -= 70;
+  
+  // Lighter penalty for estimation alone (could be Review discussing delivered work)
+  if (hasEstimation && !(hasCommitment || hasScopeBreakdown) && !hasDemo) score -= 20;
   
   // Heavy penalty: if team/process/improvement keywords dominate → Retrospective, not Review
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score -= 50;
