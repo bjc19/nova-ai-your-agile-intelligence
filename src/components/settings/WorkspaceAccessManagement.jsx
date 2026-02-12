@@ -118,11 +118,12 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!userToDelete) return;
 
     try {
-      await base44.entities.WorkspaceMember.delete(userToDelete.id);
+      await base44.asServiceRole.entities.User.delete(userToDelete.id);
       setUsers(users.filter(u => u.id !== userToDelete.id));
       toast.success('Utilisateur supprimé avec succès');
       setUserToDelete(null);
     } catch (error) {
+      console.error('Delete error:', error);
       toast.error('Erreur lors de la suppression');
     }
   };
