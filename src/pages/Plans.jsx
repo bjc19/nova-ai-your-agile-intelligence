@@ -1,73 +1,135 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowLeft, Loader2 } from "lucide-react";
-import { useLanguage } from "@/components/LanguageContext";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, ArrowLeft, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
+import { ContactSalesModal } from "@/components/nova/ContactSalesModal";
 
 const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    description: "Pour les petites équipes",
-    price: 99,
-    currency: "EUR",
-    billing: "month",
-    features: [
-      "Jusqu'à 5 analyses par mois",
-      "Support par email",
-      "Tableau de bord basique",
-      "Un utilisateur"
+    badge: "RECOMMANDÉ POUR DÉBUTER",
+    badgeColor: "bg-green-100 text-green-800",
+    subtitle: "Embarquez et découvrez la puissance de Nova",
+    price: "49",
+    users: "5 utilisateurs inclus",
+    addOn: "+15 CAD/utilisateur/mois (max 10)",
+    included: [
+      "30 analyses manuelles uniquement",
+      "Insights contextualisés",
+      "1 source au choix (Slack, Jira ou Teams)",
+      "Configuration guidée",
+      "Vue basique avec tendances",
+      "Visualisations simples"
     ],
-    cta: "Commencer",
-    recommended: false
+    limitations: [
+      "Pas de rapports mensuels automatiques",
+      "Pas de détection multi-projets",
+      "Pas de croisement avec sources externes",
+      "Pas d'alertes automatiques",
+      "Pas de KPIs détaillés"
+    ],
+    ctaKey: "subscribe"
   },
   {
     id: "growth",
     name: "Growth",
-    description: "Pour les équipes en croissance",
-    price: 299,
-    currency: "EUR",
-    billing: "month",
-    features: [
-      "Analyses illimitées",
-      "Intégrations Slack & Jira",
-      "Tableau de bord avancé",
-      "Jusqu'à 10 utilisateurs",
-      "Support prioritaire",
-      "Recommandations personnalisées"
+    badge: "PLUS DE VALEUR",
+    badgeColor: "bg-blue-100 text-blue-800",
+    subtitle: "Idéal pour les equipes qui veulent plus de volume d'analyses",
+    price: "99",
+    yearlyPrice: "84",
+    users: "10 utilisateurs inclus",
+    addOn: "+10 CAD/utilisateur/mois (max 25)",
+    discount: "15% annuel",
+    included: [
+      "70 analyses manuelles",
+      "30 analyses post-réunion automatiques/mois",
+      "Insights contextualisés avancés",
+      "Intégrations Slack, Jira, Teams",
+      "Croisement limité avec 2 sources externes",
+      "Dashboard tendances complet",
+      "Rapports sommaires mensuels automatiques",
+      "Alertes basiques sur dérives"
     ],
-    cta: "Choisir",
-    recommended: true
+    limitations: [
+      "Max 30 analyses post-réunion automatiques/mois",
+      "Pas de détection multi-projets avancée",
+      "Pas de croisement complet",
+      "Pas de KPIs détaillés",
+      "Pas d'analyses organisationnelles"
+    ],
+    ctaKey: "subscribe"
   },
   {
     id: "pro",
     name: "Pro",
-    description: "Pour les entreprises",
-    price: 999,
-    currency: "EUR",
-    billing: "month",
-    features: [
-      "Tout de Growth +",
-      "Intégrations Teams & Azure DevOps",
-      "Utilisateurs illimités",
-      "API personnalisée",
-      "Support 24/7",
-      "SLA garanti",
-      "Rapports mensuels"
+    badge: "RAPPORT QUALITÉ/PRIX",
+    badgeColor: "bg-purple-100 text-purple-800",
+    badge2: "⭐",
+    subtitle: "Insights actionnables, ROI clair et mesurable",
+    price: "199",
+    yearlyPrice: "169",
+    users: "25 utilisateurs inclus",
+    addOn: "+10 CAD/utilisateur/mois (max 50)",
+    discount: "15% annuel",
+    addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
+    included: [
+      "Analyses post-réunion illimitées",
+      "Croisement complet multi-sources",
+      "Détection et adaptation multi-projets & multi-équipes",
+      "Recommandations courageuses contextualisées",
+      "Stabilité Sprint Goal / Product Goal",
+      "Risques capacité / focus",
+      "Adoption recommandations (~65%)",
+      "Cycle time & flow efficiency",
+      "Dérives anticipées (~80%)",
+      "Rapports mensuels détaillés automatiques",
+      "Exports avancés (PDF, Excel, PowerPoint)",
+      "Support prioritaire"
     ],
-    cta: "Contacter",
-    recommended: false
+    roiValue: "ROI mesurable : anticipation dérives, optimisation capacité",
+    ctaKey: "subscribe"
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    badge: "SOLUTION SUR MESURE",
+    badgeColor: "bg-yellow-100 text-yellow-800",
+    badge2: "👑",
+    subtitle: "Gouvernance, sécurité, insights systémiques",
+    price: "Custom",
+    users: "50 utilisateurs inclus",
+    priceNote: "À partir de 500 CAD/mois - Tarifs annuels sur mesure",
+    structure: "+ 15 CAD/utilisateur",
+    degressiveNote: "≈10-15 CAD/utilisateur à 100+ utilisateurs",
+    enterpriseIntro: "Tous les éléments de Pro, +",
+    included: [
+      "Analyses organisationnelles & systémiques",
+      "Cartographie équipes/projets/dépendances",
+      "Re-analyse historique complète sur demande",
+      "Options sécurité avancées (on-prem/edge)",
+      "Dashboards et reporting custom direction/PMO",
+      "Support dédié + SLA",
+      "KPIs personnalisés et exports exécutifs",
+      "Add-ons usage-based (API calls, analyses)",
+      "Consultations et coaching d'experts à la demande"
+    ],
+    target: "Entreprises, banques, grandes techs, organisations multi-produits",
+    ctaKey: "contactTeam"
   }
 ];
 
 export default function Plans() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
-  const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState(null);
+  const [subscribingPlan, setSubscribingPlan] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -75,10 +137,6 @@ export default function Plans() {
       try {
         const auth = await base44.auth.isAuthenticated();
         setIsAuthenticated(auth);
-        if (auth) {
-          const currentUser = await base44.auth.me();
-          setUser(currentUser);
-        }
       } catch (error) {
         console.error("Error checking auth:", error);
       }
@@ -86,31 +144,36 @@ export default function Plans() {
     checkAuth();
   }, []);
 
-  const handleSelectPlan = async (planId) => {
-    setIsLoading(true);
+  const handleSubscribe = async (plan) => {
+    setSubscribingPlan(plan.id);
     try {
-      if (!isAuthenticated) {
-        // Redirect to login if not authenticated
-        await base44.auth.redirectToLogin(createPageUrl("Plans"));
+      // Vérifier si on est dans un iframe
+      if (window.self !== window.top) {
+        toast.error("Le paiement ne fonctionne que depuis l'application publiée, pas en aperçu");
+        setSubscribingPlan(null);
         return;
       }
 
-      // Create checkout session
+      if (!isAuthenticated) {
+        await base44.auth.redirectToLogin(createPageUrl("Plans"));
+        setSubscribingPlan(null);
+        return;
+      }
+
       const response = await base44.functions.invoke('createStripeCheckout', {
-        plan: planId,
-        user_email: user.email,
-        user_name: user.full_name
+        plan: plan.id
       });
 
-      if (response.data.checkout_url) {
-        window.location.href = response.data.checkout_url;
+      if (response.data?.url) {
+        window.location.href = response.data.url;
       } else {
-        console.error("No checkout URL returned");
+        toast.error(response.data?.error || "Erreur lors de la création du paiement");
+        setSubscribingPlan(null);
       }
     } catch (error) {
-      console.error("Error selecting plan:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Subscription error:", error);
+      toast.error(error?.message || "Erreur lors de la souscription");
+      setSubscribingPlan(null);
     }
   };
 
