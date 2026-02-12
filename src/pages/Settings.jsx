@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
-import ReceivedInvitations from "@/components/subscription/ReceivedInvitations";
+
 import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
 import {
   ArrowLeft,
@@ -419,18 +419,6 @@ export default function Settings() {
             className="mb-8"
           >
             <WorkspaceAccessManagement currentRole={currentRole} />
-          </motion.div>
-        )}
-
-        {/* Received Invitations */}
-        {(currentRole === 'admin' || currentRole === 'contributor') && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-            className="mb-8"
-          >
-            <ReceivedInvitations />
           </motion.div>
         )}
 
