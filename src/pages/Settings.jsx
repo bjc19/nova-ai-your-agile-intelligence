@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 
 export default function Settings() {
+  const navigate = useNavigate();
   const [slackConnected, setSlackConnected] = useState(false);
   const [slackTeamName, setSlackTeamName] = useState(null);
   const [connectingSlack, setConnectingSlack] = useState(false);
@@ -262,6 +263,13 @@ export default function Settings() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Check if user has access
+        const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+        if (!statusRes.data.hasAccess) {
+          navigate(createPageUrl("ChooseAccess"));
+          return;
+        }
+
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
