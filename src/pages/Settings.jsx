@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,18 +31,19 @@ import {
 } from "lucide-react";
 
 export default function Settings() {
-  const [slackConnected, setSlackConnected] = useState(false);
-  const [slackTeamName, setSlackTeamName] = useState(null);
-  const [connectingSlack, setConnectingSlack] = useState(false);
-  const [teamsConnected, setTeamsConnected] = useState(false);
-  const [connectingTeams, setConnectingTeams] = useState(false);
-  const [jiraConnected, setJiraConnected] = useState(false);
-  const [connectingJira, setConnectingJira] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
-  const [teamConfig, setTeamConfig] = useState(null);
-  const [loadingConfig, setLoadingConfig] = useState(true);
-  const [currentRole, setCurrentRole] = useState('contributor');
-  const [switchingRole, setSwitchingRole] = useState(false);
+   const navigate = useNavigate();
+   const [slackConnected, setSlackConnected] = useState(false);
+   const [slackTeamName, setSlackTeamName] = useState(null);
+   const [connectingSlack, setConnectingSlack] = useState(false);
+   const [teamsConnected, setTeamsConnected] = useState(false);
+   const [connectingTeams, setConnectingTeams] = useState(false);
+   const [jiraConnected, setJiraConnected] = useState(false);
+   const [connectingJira, setConnectingJira] = useState(false);
+   const { language, setLanguage, t } = useLanguage();
+   const [teamConfig, setTeamConfig] = useState(null);
+   const [loadingConfig, setLoadingConfig] = useState(true);
+   const [currentRole, setCurrentRole] = useState('contributor');
+   const [switchingRole, setSwitchingRole] = useState(false);
 
   const handleSlackConnect = async () => {
     try {
@@ -263,6 +264,27 @@ export default function Settings() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Check user access first
+        const user = await base44.auth.me();
+        setCurrentRole(user.role || 'contributor');
+        
+        // Check if user is waiting for approval
+        if (user.role === 'user') {
+          // Check if user has any pending or rejected requests
+          const requests = await base44.entities.JoinTeamRequest.filter({
+            requester_email: user.email
+          });
+          
+          if (requests.length > 0) {
+            const status = requests[requests.length - 1].status;
+            if (status === 'pending' || status === 'rejected') {
+              // Redirect to ChooseAccess
+              navigate(createPageUrl("ChooseAccess"));
+              return;
+            }
+          }
+        }
+
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
@@ -270,8 +292,6 @@ export default function Settings() {
         }
 
         // Check Slack, Teams and Jira connections
-        const user = await base44.auth.me();
-        setCurrentRole(user.role || 'contributor');
         const [slackConns, teamsConns, jiraConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
             user_email: user.email,
@@ -306,7 +326,7 @@ export default function Settings() {
       }
     };
     loadData();
-  }, []);
+  }, [navigate]);
 
   const handleProjectModeChange = async (newMode) => {
     try {
