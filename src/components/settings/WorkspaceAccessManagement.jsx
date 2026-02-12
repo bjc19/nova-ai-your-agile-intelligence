@@ -408,7 +408,12 @@ export default function WorkspaceAccessManagement({ currentRole }) {
             </motion.div>
 
             {/* Edit Role Dialog */}
-            <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+            <Dialog open={!!editingUser} onOpenChange={(open) => {
+              if (!open) {
+                setEditingUser(null);
+                setNewRole(null);
+              }
+            }}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Modifier le rôle</DialogTitle>
@@ -417,9 +422,9 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <Select value={newRole} onValueChange={setNewRole}>
+                  <Select value={newRole || ''} onValueChange={setNewRole}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Sélectionner un rôle" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">Membre</SelectItem>
@@ -430,7 +435,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                     </SelectContent>
                   </Select>
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setEditingUser(null)}>
+                    <Button variant="outline" onClick={() => {
+                      setEditingUser(null);
+                      setNewRole(null);
+                    }}>
                       Annuler
                     </Button>
                     <Button onClick={handleEditRole} className="bg-blue-600 hover:bg-blue-700 text-white">
