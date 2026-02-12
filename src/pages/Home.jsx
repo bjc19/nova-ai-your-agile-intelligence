@@ -20,7 +20,7 @@ import {
   X
 } from "lucide-react";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
-import { DailyQuote } from "@/components/nova/DailyQuote";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 const PricingSection = lazy(() => import("@/components/nova/PricingSection").then(m => ({ default: m.PricingSection })));
 
