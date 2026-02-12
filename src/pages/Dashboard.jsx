@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -69,18 +70,6 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-
-        // Admin/contributeur bypass ChooseAccess
-        if (currentUser.role === 'admin' || currentUser.role === 'contributor') {
-          // Continue normally
-        } else {
-          // Non-approved user - redirect to ChooseAccess
-          const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-          if (!statusRes.data.hasAccess) {
-            navigate(createPageUrl("ChooseAccess"));
-            return;
-          }
-        }
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -232,13 +221,18 @@ export default function Dashboard() {
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl" />
         
         <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}>
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.6 }}>
 
-            {/* Welcome Banner */}
-            <div className="flex flex-col gap-6 mb-8">
+             {/* Daily Quote */}
+             <div className="mb-8">
+               <DailyQuote />
+             </div>
+
+             {/* Welcome Banner */}
+             <div className="flex flex-col gap-6 mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">

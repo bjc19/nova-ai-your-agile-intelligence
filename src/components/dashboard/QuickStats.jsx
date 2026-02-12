@@ -209,19 +209,7 @@ export default function QuickStats({ analysisHistory = [] }) {
 
 
 
-  // Anonymize names in text
-  const anonymizeNamesInText = (text) => {
-    if (!text) return text;
-    
-    // Extract potential names (capitalized words) and anonymize them
-    const namePattern = /\b([A-ZÀ-ÿ][a-zà-ÿ]+)\b/g;
-    return text.replace(namePattern, (match) => {
-      // Don't anonymize common words, articles, etc.
-      const commonWords = ['Vous', 'Excellent', 'À', 'Continuez', 'Priorisez', 'You', 'Needs', 'Keep', 'Prioritize', 'Resolved', 'Blockers', 'Risks', 'IST'];
-      if (commonWords.includes(match)) return match;
-      return anonymizeFirstName(match);
-    });
-  };
+
 
   // Helper to generate tooltip for technicalHealth
   const getTechnicalHealthTooltip = () => {
