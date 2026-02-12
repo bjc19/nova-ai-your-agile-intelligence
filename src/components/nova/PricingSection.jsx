@@ -56,7 +56,7 @@ const plans = [
     addOn: "+10 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
-      "70 analyses manuelles illimitées",
+      "70 analyses manuelles",
       "30 analyses post-réunion automatiques/mois",
       "Insights contextualisés avancés",
       "Intégrations Slack, Jira, Teams",
