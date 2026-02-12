@@ -99,6 +99,32 @@ export default function AdminDevTools() {
     }
   };
 
+  const suspendClient = async (clientId, clientEmail) => {
+    if (!window.confirm(`⚠️ Suspendre le client ${clientEmail}? Il n'aura plus accès à l'application.`)) return;
+    try {
+      await base44.entities.Client.update(clientId, {
+        status: "suspended"
+      });
+      toast.success("✅ Client suspendu");
+      loadData();
+    } catch (e) {
+      toast.error("❌ Erreur suspension");
+    }
+  };
+
+  const reactivateClient = async (clientId, clientEmail) => {
+    if (!window.confirm(`✅ Réactiver le client ${clientEmail}?`)) return;
+    try {
+      await base44.entities.Client.update(clientId, {
+        status: "active"
+      });
+      toast.success("✅ Client réactivé");
+      loadData();
+    } catch (e) {
+      toast.error("❌ Erreur réactivation");
+    }
+  };
+
   const filteredRequests = requests.filter(req => {
     const matchesSearch = searchQuery === '' || 
       req.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -284,20 +310,42 @@ export default function AdminDevTools() {
               clients.map(client => (
                 <Card key={client.id} className="bg-slate-800 border-slate-700">
                   <CardContent className="pt-6">
-                    <div className="space-y-2">
-                      <p className="text-white font-semibold">{client.name}</p>
-                      <p className="text-slate-400 text-sm">{client.email}</p>
-                      <div className="flex gap-2 mt-2">
-                        <Badge className="bg-purple-600">{client.plan.toUpperCase()}</Badge>
-                        <Badge variant="outline" className={`${
-                          client.status === "active" ? "bg-green-900/30 text-green-300" :
-                          "bg-red-900/30 text-red-300"
-                        }`}>{client.status}</Badge>
-                        <Badge variant="outline" className="bg-slate-700">{client.max_users} max users</Badge>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-2 flex-1">
+                        <p className="text-white font-semibold">{client.name}</p>
+                        <p className="text-slate-400 text-sm">{client.email}</p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          <Badge className="bg-purple-600">{client.plan.toUpperCase()}</Badge>
+                          <Badge variant="outline" className={`${
+                            client.status === "active" ? "bg-green-900/30 text-green-300" :
+                            client.status === "suspended" ? "bg-orange-900/30 text-orange-300" :
+                            "bg-red-900/30 text-red-300"
+                          }`}>{client.status}</Badge>
+                          <Badge variant="outline" className="bg-slate-700">{client.max_users} max users</Badge>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">
+                          Expire: {new Date(client.expires_at).toLocaleDateString('fr')}
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-2">
-                        Expire: {new Date(client.expires_at).toLocaleDateString('fr')}
-                      </p>
+                      <div className="flex flex-col gap-2">
+                        {client.status === "active" ? (
+                          <Button 
+                            onClick={() => suspendClient(client.id, client.email)}
+                            className="bg-orange-600 hover:bg-orange-700"
+                            size="sm"
+                          >
+                            ⏸️ Suspendre
+                          </Button>
+                        ) : client.status === "suspended" ? (
+                          <Button 
+                            onClick={() => reactivateClient(client.id, client.email)}
+                            className="bg-green-600 hover:bg-green-700"
+                            size="sm"
+                          >
+                            ▶️ Réactiver
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
