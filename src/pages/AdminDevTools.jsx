@@ -126,15 +126,23 @@ export default function AdminDevTools() {
   };
 
   const changePlan = async (clientId, clientEmail, newPlan) => {
-    if (!window.confirm(`🔄 Changer le plan de ${clientEmail} vers ${newPlan.toUpperCase()}?`)) return;
+    if (!window.confirm(`🔄 Changer le plan de ${clientEmail} vers ${newPlan.toUpperCase()}?\n\nUn email de notification sera envoyé au client.`)) return;
     try {
-      await base44.entities.Client.update(clientId, {
-        plan: newPlan
+      const response = await base44.functions.invoke('changePlanAndNotify', {
+        clientId,
+        newPlan
       });
-      toast.success(`✅ Plan changé vers ${newPlan.toUpperCase()}`);
-      loadData();
+
+      if (response.data.success) {
+        toast.success(`✅ Plan changé vers ${newPlan.toUpperCase()} et email envoyé`, {
+          duration: 4000
+        });
+        loadData();
+      } else {
+        toast.error("❌ " + (response.data.error || "Erreur changement de plan"));
+      }
     } catch (e) {
-      toast.error("❌ Erreur changement de plan");
+      toast.error("❌ Erreur changement de plan: " + e.message);
     }
   };
 
