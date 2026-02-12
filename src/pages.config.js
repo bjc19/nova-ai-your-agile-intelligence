@@ -60,8 +60,8 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import TeamManagement from './pages/TeamManagement';
 import acceptInvitation from './pages/accept-invitation';
+import TeamManagement from './pages/TeamManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -79,8 +79,8 @@ export const PAGES = {
     "ResetPassword": ResetPassword,
     "Results": Results,
     "Settings": Settings,
-    "TeamManagement": TeamManagement,
     "accept-invitation": acceptInvitation,
+    "TeamManagement": TeamManagement,
 }
 
 export const pagesConfig = {
