@@ -11,23 +11,26 @@ Deno.serve(async (req) => {
 
     const { userId, userEmail, newRole } = await req.json();
 
-    if (!userId || !userEmail || !newRole) {
-      return Response.json({ error: 'User ID, email and role required' }, { status: 400 });
+    if (!userEmail || !newRole) {
+      return Response.json({ error: 'Email and role required' }, { status: 400 });
     }
 
-    // Check if current user can update this member
+    // Get the TeamMember record
     const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
-    if (teamMembers.length > 0) {
-      const teamMember = teamMembers[0];
-      
-      // Check if current user can update this member (must be manager or admin)
-      if (user.role !== 'admin' && teamMember.manager_email !== user.email) {
-        return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
-      }
+    
+    if (teamMembers.length === 0) {
+      return Response.json({ error: 'Member not found' }, { status: 404 });
     }
 
-    // Update the User entity directly so it persists
-    await base44.asServiceRole.entities.User.update(userId, { role: newRole });
+    const teamMember = teamMembers[0];
+    
+    // Check if current user can update this member (must be manager or admin)
+    if (user.role !== 'admin' && teamMember.manager_email !== user.email) {
+      return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
+    }
+
+    // Update the TeamMember entity
+    await base44.asServiceRole.entities.TeamMember.update(teamMember.id, { role: newRole });
 
     return Response.json({ success: true, message: 'Role updated' });
   } catch (error) {
