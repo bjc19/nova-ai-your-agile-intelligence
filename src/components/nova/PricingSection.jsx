@@ -163,22 +163,38 @@ export function PricingSection() {
       }
 
       const isAuth = await base44.auth.isAuthenticated();
-      if (!isAuth) {
-        navigate(createPageUrl("Home"));
-        toast.error("Veuillez vous connecter pour souscrire");
-        setSubscribingPlan(null);
-        return;
-      }
+      
+      if (isAuth) {
+        // Utilisateur authentifié
+        const response = await base44.functions.invoke('createStripeCheckout', {
+          plan: plan.id
+        });
 
-      const response = await base44.functions.invoke('createStripeCheckout', {
-        plan: plan.id
-      });
-
-      if (response.data?.url) {
-        window.location.href = response.data.url;
+        if (response.data?.url) {
+          window.location.href = response.data.url;
+        } else {
+          toast.error(response.data?.error || "Erreur lors de la création du paiement");
+          setSubscribingPlan(null);
+        }
       } else {
-        toast.error(response.data?.error || "Erreur lors de la création du paiement");
-        setSubscribingPlan(null);
+        // Utilisateur non authentifié - demander l'email
+        const email = prompt("Entrez votre email pour continuer:");
+        if (!email) {
+          setSubscribingPlan(null);
+          return;
+        }
+
+        const response = await base44.functions.invoke('createStripeCheckoutPublic', {
+          plan: plan.id,
+          email: email.trim()
+        });
+
+        if (response.data?.url) {
+          window.location.href = response.data.url;
+        } else {
+          toast.error(response.data?.error || "Erreur lors de la création du paiement");
+          setSubscribingPlan(null);
+        }
       }
     } catch (error) {
       console.error("Subscription error:", error);
