@@ -81,7 +81,6 @@ Deno.serve(async (req) => {
       mode: 'subscription',
       success_url: `${appUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/plans`,
-      customer_email: user.email,
       metadata: {
         base44_app_id: Deno.env.get("BASE44_APP_ID"),
         plan: plan,
