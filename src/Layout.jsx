@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn, Users } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { LoginDialog } from "@/components/LoginDialog";
+import { SignupModal } from "@/components/SignupModal";
 import { DemoSimulator } from "@/components/nova/DemoSimulator";
 import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
 
@@ -14,6 +15,7 @@ function LayoutContent({ children, currentPageName }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
+    const [showSignupModal, setShowSignupModal] = useState(false);
     const [showDemoSimulator, setShowDemoSimulator] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [canInvite, setCanInvite] = useState(false);
@@ -144,6 +146,16 @@ function LayoutContent({ children, currentPageName }) {
       <LoginDialog 
         isOpen={showLoginDialog}
         onClose={() => setShowLoginDialog(false)}
+        onSignupClick={() => {
+          setShowLoginDialog(false);
+          setShowSignupModal(true);
+        }}
+      />
+
+      {/* Signup Modal */}
+      <SignupModal 
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
       />
 
       {/* Demo Simulator */}
