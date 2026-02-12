@@ -101,7 +101,7 @@ export default function AcceptInvitation() {
       if (registerResponse.data.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate(createPageUrl('Dashboard'));
+          navigate(createPageUrl('VerifyEmail') + '?email=' + encodeURIComponent(formData.email));
         }, 2000);
       } else {
         setError(registerResponse.data.error || 'Erreur lors de l\'inscription');
