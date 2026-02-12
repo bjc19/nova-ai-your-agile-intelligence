@@ -208,7 +208,7 @@ export default function Home() {
         <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl" />
         <div className="absolute top-40 right-1/4 w-80 h-80 bg-indigo-200/25 rounded-full blur-3xl" />
         
-        <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-24">
+        <div className="relative max-w-6xl mx-auto px-6 pt-16 pb-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
