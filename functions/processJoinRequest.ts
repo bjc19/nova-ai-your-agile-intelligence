@@ -29,11 +29,11 @@ Deno.serve(async (req) => {
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 
     if (action === 'approve') {
-      await base44.entities.TeamMember.create({
+      await base44.asServiceRole.entities.TeamMember.create({
         user_email: request.requester_email,
         user_name: request.requester_name,
         subscription_id: request.subscription_id,
-        admin_email: user.email,
+        manager_email: user.email,
         role: role,
         joined_at: new Date().toISOString()
       });
