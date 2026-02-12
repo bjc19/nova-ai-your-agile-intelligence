@@ -1,21 +1,23 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import Stripe from 'npm:stripe@17.5.0';
+import Stripe from 'npm:stripe@14.21.0';
 
-const PLAN_PRICES = {
-  starter: { 
-    priceId: 'price_1SzunGRUBY8YrkzQw1bsWlUi', 
-    name: 'Starter', 
-    max_users: 10 
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
+
+const PLANS = {
+  starter: {
+    name: "Starter",
+    price: 4900,
+    priceId: process.env.STRIPE_STARTER_PRICE_ID || null
   },
-  growth: { 
-    priceId: 'price_1SzunGRUBY8YrkzQwkXxGFFC', 
-    name: 'Growth', 
-    max_users: 25 
+  growth: {
+    name: "Growth",
+    price: 9900,
+    priceId: process.env.STRIPE_GROWTH_PRICE_ID || null
   },
-  pro: { 
-    priceId: 'price_1SzunGRUBY8YrkzQMtaYaPxP', 
-    name: 'Pro', 
-    max_users: 50 
+  pro: {
+    name: "Pro",
+    price: 19900,
+    priceId: process.env.STRIPE_PRO_PRICE_ID || null
   }
 };
 
@@ -25,50 +27,76 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
 
     if (!user) {
-      return Response.json({ error: 'Non authentifié' }, { status: 401 });
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { plan } = await req.json();
 
-    if (!plan || !PLAN_PRICES[plan]) {
-      return Response.json({ error: 'Plan invalide' }, { status: 400 });
+    if (!plan || !PLANS[plan]) {
+      return Response.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    const existingSub = await base44.entities.Subscription.filter({ user_email: user.email });
-    if (existingSub.length > 0) {
-      return Response.json({ error: 'Vous avez déjà un abonnement actif' }, { status: 400 });
+    const planConfig = PLANS[plan];
+    const appUrl = Deno.env.get("APP_URL");
+
+    // Create or get Stripe customer
+    const customers = await stripe.customers.list({
+      email: user.email,
+      limit: 1
+    });
+
+    let customerId;
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id;
+    } else {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.full_name,
+        metadata: {
+          base44_user_id: user.id
+        }
+      });
+      customerId = customer.id;
     }
 
-    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-    const stripe = new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' });
-
-    const appUrl = Deno.env.get('APP_URL') || req.headers.get('origin') || 'https://novagile.ca';
-
+    // Create checkout session
     const session = await stripe.checkout.sessions.create({
+      customer: customerId,
       payment_method_types: ['card'],
-      line_items: [{
-        price: PLAN_PRICES[plan].priceId,
-        quantity: 1
-      }],
+      line_items: [
+        {
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: `Plan ${planConfig.name}`,
+              description: `Nova - ${planConfig.name} Plan`
+            },
+            unit_amount: planConfig.price,
+            recurring: {
+              interval: 'month'
+            }
+          },
+          quantity: 1
+        }
+      ],
       mode: 'subscription',
-      success_url: `${appUrl}/Dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/Dashboard`,
+      success_url: `${appUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/plans`,
       customer_email: user.email,
       metadata: {
-        base44_app_id: Deno.env.get('BASE44_APP_ID'),
-        user_email: user.email,
+        base44_app_id: Deno.env.get("BASE44_APP_ID"),
         plan: plan,
-        max_users: PLAN_PRICES[plan].max_users.toString()
+        user_id: user.id,
+        user_email: user.email
       }
     });
 
-    return Response.json({ 
-      sessionId: session.id,
-      url: session.url
-    });
-
+    return Response.json({ url: session.url });
   } catch (error) {
-    console.error('Stripe checkout error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Stripe checkout error:', error.message);
+    return Response.json(
+      { error: error.message || 'Failed to create checkout session' },
+      { status: 500 }
+    );
   }
 });
