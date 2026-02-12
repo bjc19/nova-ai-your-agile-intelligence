@@ -21,48 +21,28 @@ const PLAN_PRICES = {
 
 Deno.serve(async (req) => {
   try {
-    const { plan } = await req.json();
-    
-    // Get user email from request body or session (for public app)
-    let userEmail = null;
-    if (req.body) {
-      const body = await req.json();
-      userEmail = body.userEmail;
-    }
-
     const base44 = createClientFromRequest(req);
-    
-    // Try to get authenticated user first
-    try {
-      const user = await base44.auth.me();
-      if (user) {
-        userEmail = user.email;
-      }
-    } catch (e) {
-      // User not authenticated - will use userEmail from body
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    if (!userEmail) {
-      return Response.json({ error: 'Email requis' }, { status: 400 });
-    }
+    const { plan } = await req.json();
 
     if (!plan || !PLAN_PRICES[plan]) {
       return Response.json({ error: 'Plan invalide' }, { status: 400 });
     }
 
-    const existingSub = await base44.asServiceRole.entities.Subscription.filter({ user_email: userEmail });
+    const existingSub = await base44.entities.Subscription.filter({ user_email: user.email });
     if (existingSub.length > 0) {
       return Response.json({ error: 'Vous avez déjà un abonnement actif' }, { status: 400 });
     }
 
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-    if (!stripeKey) {
-      return Response.json({ error: 'Stripe non configuré' }, { status: 500 });
-    }
-    
     const stripe = new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' });
 
-    const appUrl = Deno.env.get('APP_URL') || 'https://novagile.ca';
+    const appUrl = Deno.env.get('APP_URL') || req.headers.get('origin') || 'https://novagile.ca';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -73,10 +53,10 @@ Deno.serve(async (req) => {
       mode: 'subscription',
       success_url: `${appUrl}/Dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/Dashboard`,
-      customer_email: userEmail,
+      customer_email: user.email,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
-        user_email: userEmail,
+        user_email: user.email,
         plan: plan,
         max_users: PLAN_PRICES[plan].max_users.toString()
       }

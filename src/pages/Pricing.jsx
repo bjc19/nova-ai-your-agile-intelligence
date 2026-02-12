@@ -68,20 +68,17 @@ export default function Pricing() {
     }
   ];
 
-  const handleSelectPlan = async (planName) => {
+  const handleSelectPlan = async (plan) => {
     try {
       const response = await base44.functions.invoke('createStripeCheckout', {
-        plan: planName.toLowerCase()
+        plan: plan.name.toLowerCase()
       });
       
       if (response.data?.url) {
         window.location.href = response.data.url;
-      } else {
-        console.error('No URL in response:', response.data);
       }
     } catch (error) {
-      console.error('Erreur Stripe:', error);
-      alert('Erreur: ' + (error?.response?.data?.error || error.message));
+      console.error('Erreur lors de la sélection du plan:', error);
     }
   };
 
