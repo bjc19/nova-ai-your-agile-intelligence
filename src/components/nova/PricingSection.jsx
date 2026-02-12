@@ -1,19 +1,25 @@
 import React, { useState, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const ContactSalesModal = lazy(() => import("@/components/nova/ContactSalesModal").then(m => ({ default: m.ContactSalesModal })));
 
 const translations = {
   en: {
-    contactSales: "Contact Sales",
-    contactTeam: "Contact Sales"
+    subscribe: "Subscribe",
+    contactTeam: "Contact Sales",
+    subscribing: "Processing..."
   },
   fr: {
-    contactSales: "Contact Sales",
-    contactTeam: "Contact Sales"
+    subscribe: "Souscrire",
+    contactTeam: "Contact Sales",
+    subscribing: "En cours..."
   }
 };
 
@@ -72,7 +78,7 @@ const plans = [
       "Pas de KPIs détaillés",
       "Pas d'analyses organisationnelles"
     ],
-    ctaKey: "contactSales"
+    ctaKey: "subscribe"
   },
   {
     id: "pro",
@@ -102,7 +108,7 @@ const plans = [
       "Support prioritaire"
     ],
     roiValue: "ROI mesurable : anticipation dérives, optimisation capacité",
-    ctaKey: "contactSales"
+    ctaKey: "subscribe"
   },
   {
     id: "enterprise",
@@ -134,8 +140,10 @@ const plans = [
 ];
 
 export function PricingSection() {
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [lang, setLang] = useState("en");
+  const [subscribingPlan, setSubscribingPlan] = useState(null);
 
   React.useEffect(() => {
     const browserLang = navigator.language || navigator.userLanguage;
@@ -143,6 +151,32 @@ export function PricingSection() {
   }, []);
 
   const t = (key) => translations[lang][key] || translations["en"][key];
+
+  const handleSubscribe = async (plan) => {
+    setSubscribingPlan(plan.id);
+    try {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+        navigate(createPageUrl("Home"));
+        toast.error("Veuillez vous connecter pour souscrire");
+        return;
+      }
+
+      const response = await base44.functions.invoke('createStripeCheckout', {
+        plan: plan.id
+      });
+
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        toast.error(response.data.error || "Erreur lors de la création du paiement");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la souscription");
+    } finally {
+      setSubscribingPlan(null);
+    }
+  };
 
   return (
     <div id="pricing-section" className="space-y-8">
@@ -201,7 +235,8 @@ export function PricingSection() {
               )}
 
               <Button 
-                onClick={() => setSelectedPlan(plan)}
+                onClick={() => plan.ctaKey === 'subscribe' ? handleSubscribe(plan) : setSelectedPlan(plan)}
+                disabled={subscribingPlan === plan.id}
                 className={`w-full ${
                   plan.id === 'pro' 
                     ? 'bg-purple-600 hover:bg-purple-700' 
@@ -210,7 +245,14 @@ export function PricingSection() {
                     : 'bg-slate-900 hover:bg-slate-800'
                 }`}
               >
-                {t(plan.ctaKey)}
+                {subscribingPlan === plan.id ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('subscribing')}
+                  </>
+                ) : (
+                  t(plan.ctaKey)
+                )}
               </Button>
 
               {plan.roiValue && (

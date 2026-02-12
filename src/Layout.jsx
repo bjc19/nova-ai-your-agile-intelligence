@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LogOut, LogIn } from "lucide-react";
+import { Sparkles, LogOut, LogIn, Users } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { LoginDialog } from "@/components/LoginDialog";
 import { DemoSimulator } from "@/components/nova/DemoSimulator";
+import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
 
 function LayoutContent({ children, currentPageName }) {
     const { t } = useLanguage();
@@ -15,6 +16,7 @@ function LayoutContent({ children, currentPageName }) {
     const [showLoginDialog, setShowLoginDialog] = useState(false);
     const [showDemoSimulator, setShowDemoSimulator] = useState(false);
     const [userRole, setUserRole] = useState(null);
+    const [canInvite, setCanInvite] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -24,8 +26,16 @@ function LayoutContent({ children, currentPageName }) {
         if (auth) {
           const user = await base44.auth.me();
           setUserRole(user?.role);
+
+          try {
+            const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+            setCanInvite(statusRes.data.canInvite || false);
+          } catch (e) {
+            setCanInvite(false);
+          }
         } else {
           setUserRole(null);
+          setCanInvite(false);
         }
       } catch (err) {
         setIsAuthenticated(false);
@@ -66,7 +76,7 @@ function LayoutContent({ children, currentPageName }) {
                  >
                    {t('dashboard')}
                  </Link>
-                 {(userRole === 'admin' || userRole === 'contributor') && (
+                 {(userRole === 'admin' || userRole === 'contributor' || canInvite) && (
                    <Link 
                      to={createPageUrl("Analysis")}
                      className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
@@ -74,12 +84,21 @@ function LayoutContent({ children, currentPageName }) {
                      {t('analyze')}
                    </Link>
                  )}
-                <Link 
+                 <Link 
                   to={createPageUrl("Settings")}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                >
+                 >
                   {t('settings')}
-                </Link>
+                 </Link>
+                 {canInvite && (
+                  <Link 
+                    to={createPageUrl("TeamManagement")}
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1"
+                  >
+                    <Users className="w-4 h-4" />
+                    Équipe
+                  </Link>
+                 )}
                 <Button 
                    variant="ghost" 
                    size="sm"

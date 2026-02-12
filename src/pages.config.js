@@ -61,6 +61,7 @@ import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
 import acceptInvitation from './pages/accept-invitation';
+import TeamManagement from './pages/TeamManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +80,7 @@ export const PAGES = {
     "Results": Results,
     "Settings": Settings,
     "accept-invitation": acceptInvitation,
+    "TeamManagement": TeamManagement,
 }
 
 export const pagesConfig = {
