@@ -24,17 +24,20 @@ export default function ChooseAccess() {
         const u = await base44.auth.me();
         setUser(u);
 
+        // Exception pour les admins - ils ont toujours accès
+        if (u.role === 'admin') {
+          navigate(createPageUrl("Dashboard"));
+          return;
+        }
+
         const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
         if (statusRes.data.hasAccess) {
           navigate(createPageUrl("Dashboard"));
+          return;
         }
 
         // Check for pending requests
-        const pendingRequests = await base44.entities.JoinTeamRequest.filter({
-          requester_email: u.email,
-          status: 'pending'
-        });
-        setHasPendingRequest(pendingRequests.length > 0);
+        setHasPendingRequest(statusRes.data.pendingRequests || false);
       } catch (e) {
         // User not authenticated, stay on this page to allow sign up
         setUser(null);
@@ -70,11 +73,13 @@ export default function ChooseAccess() {
       if (response.data.success) {
         toast.success(response.data.message, { duration: 5000 });
         setAdminEmail("");
+        // Force le changement d'état pour afficher le pending
         setHasPendingRequest(true);
       } else {
         toast.error(response.data.error || "Erreur lors de l'envoi");
       }
     } catch (error) {
+      console.error("Join team error:", error);
       toast.error("Erreur lors de l'envoi de la demande");
     } finally {
       setSubmitting(false);

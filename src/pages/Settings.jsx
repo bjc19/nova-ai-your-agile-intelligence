@@ -263,11 +263,16 @@ export default function Settings() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Check if user has access
-        const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-        if (!statusRes.data.hasAccess) {
-          navigate(createPageUrl("ChooseAccess"));
-          return;
+        // Check Slack, Teams and Jira connections
+        const user = await base44.auth.me();
+        
+        // Exception pour les admins - ils ont toujours accès
+        if (user.role !== 'admin') {
+          const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+          if (!statusRes.data.hasAccess) {
+            navigate(createPageUrl("ChooseAccess"));
+            return;
+          }
         }
 
         // Load team config
@@ -276,8 +281,6 @@ export default function Settings() {
           setTeamConfig(configs[0]);
         }
 
-        // Check Slack, Teams and Jira connections
-        const user = await base44.auth.me();
         setCurrentRole(user.role || 'contributor');
         const [slackConns, teamsConns, jiraConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
