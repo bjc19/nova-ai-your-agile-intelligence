@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X, Loader2 } from "lucide-react";
 
-export function LoginDialog({ isOpen, onClose, onSignupClick }) {
+export function LoginDialog({ isOpen, onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -206,9 +206,9 @@ export function LoginDialog({ isOpen, onClose, onSignupClick }) {
             Don't have an account yet?{" "}
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 onClose();
-                onSignupClick?.();
+                await base44.auth.redirectToLogin(createPageUrl("ChooseAccess") + "?signup=true");
               }}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >

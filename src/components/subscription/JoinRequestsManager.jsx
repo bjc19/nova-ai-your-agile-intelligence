@@ -62,21 +62,20 @@ export function JoinRequestsManager() {
     );
   }
 
+  if (requests.length === 0) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="w-5 h-5" />
-          Demandes d'accès en attente
+          Demandes d'accès ({requests.length})
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {requests.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-4">
-            Aucune demande en attente pour le moment
-          </p>
-        ) : (
-          requests.map((request) => (
+        {requests.map((request) => (
           <div key={request.id} className="border rounded-lg p-4 space-y-3">
             <div className="flex items-start justify-between">
               <div>
@@ -124,8 +123,7 @@ export function JoinRequestsManager() {
               </Button>
             </div>
           </div>
-          ))
-        )}
+        ))}
       </CardContent>
     </Card>
   );

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -62,22 +63,13 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication
+  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        
-        // Exception pour les admins - ils ont toujours accès
-        if (currentUser.role !== 'admin') {
-          const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-          if (!statusRes.data.hasAccess) {
-            navigate(createPageUrl("ChooseAccess"));
-            return;
-          }
-        }
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -215,6 +207,7 @@ export default function Dashboard() {
   }
 
   return (
+    <SubscriptionGuard>
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Onboarding Modal */}
       <TeamConfigOnboarding
@@ -484,6 +477,7 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
-    </div>);
+    </div>
+    </SubscriptionGuard>);
 
 }

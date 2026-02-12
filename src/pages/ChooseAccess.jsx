@@ -16,7 +16,6 @@ export default function ChooseAccess() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [hasPendingRequest, setHasPendingRequest] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -24,20 +23,10 @@ export default function ChooseAccess() {
         const u = await base44.auth.me();
         setUser(u);
 
-        // Exception pour les admins - ils ont toujours accès
-        if (u.role === 'admin') {
-          navigate(createPageUrl("Dashboard"));
-          return;
-        }
-
         const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
         if (statusRes.data.hasAccess) {
           navigate(createPageUrl("Dashboard"));
-          return;
         }
-
-        // Check for pending requests
-        setHasPendingRequest(statusRes.data.pendingRequests || false);
       } catch (e) {
         // User not authenticated, stay on this page to allow sign up
         setUser(null);
@@ -49,13 +38,7 @@ export default function ChooseAccess() {
   }, [navigate]);
 
   const handleSubscribe = () => {
-    navigate(createPageUrl("Home"));
-    setTimeout(() => {
-      const pricingSection = document.getElementById("pricing");
-      if (pricingSection) {
-        pricingSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 100);
+    navigate(createPageUrl("Home") + "#pricing");
   };
 
   const handleJoinTeam = async () => {
@@ -73,13 +56,10 @@ export default function ChooseAccess() {
       if (response.data.success) {
         toast.success(response.data.message, { duration: 5000 });
         setAdminEmail("");
-        // Force le changement d'état pour afficher le pending
-        setHasPendingRequest(true);
       } else {
         toast.error(response.data.error || "Erreur lors de l'envoi");
       }
     } catch (error) {
-      console.error("Join team error:", error);
       toast.error("Erreur lors de l'envoi de la demande");
     } finally {
       setSubmitting(false);
@@ -104,27 +84,6 @@ export default function ChooseAccess() {
           </h1>
           <p className="text-lg text-slate-600">Pour accéder à Nova AI, choisissez l'une des options ci-dessous :</p>
         </div>
-
-        {hasPendingRequest && (
-          <Card className="border-2 border-amber-500 bg-amber-50">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-amber-900 mb-1">Demande en attente d'approbation</h3>
-                  <p className="text-sm text-amber-700">
-                    Votre demande pour rejoindre une équipe a été envoyée. Vous recevrez un email dès qu'un administrateur l'approuvera.
-                  </p>
-                  <p className="text-xs text-amber-600 mt-2">
-                    Une fois approuvée, vous aurez automatiquement accès au Dashboard de l'équipe.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           
@@ -173,7 +132,7 @@ export default function ChooseAccess() {
                   placeholder="admin@entreprise.com"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  disabled={submitting || hasPendingRequest}
+                  disabled={submitting}
                 />
               </div>
               
@@ -189,10 +148,10 @@ export default function ChooseAccess() {
               <Button 
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
                 onClick={handleJoinTeam}
-                disabled={submitting || hasPendingRequest}
+                disabled={submitting}
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                {hasPendingRequest ? 'Demande déjà envoyée' : 'Envoyer la demande'}
+                Envoyer la demande
               </Button>
             </CardContent>
           </Card>
