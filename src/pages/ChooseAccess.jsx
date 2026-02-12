@@ -159,8 +159,12 @@ export default function ChooseAccess() {
                 L'administrateur a reçu votre demande et peut l'approuver ou la rejeter. Vous recevrez un email de confirmation dès que votre demande sera traitée.
               </p>
               <p className="text-xs text-slate-500">
-                Vous pouvez fermer cette page. Un lien vers votre espace de travail vous sera envoyé par email dès que votre accès sera approuvé.
+                Cet écran se met à jour automatiquement. Un accès instantané vous sera accordé dès que votre demande sera approuvée.
               </p>
+              <div className="flex items-center gap-2 text-xs text-blue-700">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                En attente d'approbation...
+              </div>
             </CardContent>
           </Card>
         )}
