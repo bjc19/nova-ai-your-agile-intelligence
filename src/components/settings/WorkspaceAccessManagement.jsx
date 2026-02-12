@@ -343,9 +343,12 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                          {user.email?.charAt(0).toUpperCase() || '?'}
                        </div>
                        <div className="flex-1">
-                         <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
-                         <p className="text-xs text-slate-700 font-medium">{user.email}</p>
-                       </div>
+                          <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
+                          <p className="text-xs text-slate-500">{user.email}</p>
+                          <p className="text-xs text-slate-600 mt-1">
+                            {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                          </p>
+                        </div>
                      </div>
                     <div className="flex items-center gap-2">
                        {canEditUserRole(user) ? (
