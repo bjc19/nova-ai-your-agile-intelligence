@@ -24,13 +24,15 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
 
     if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      console.error('[Stripe] Auth failed - no user');
+      return Response.json({ error: 'Unauthorized', status: 'auth_failed' }, { status: 401 });
     }
 
     const { plan } = await req.json();
 
     if (!plan || !PLANS[plan]) {
-      return Response.json({ error: 'Invalid plan' }, { status: 400 });
+      console.error('[Stripe] Invalid plan:', plan);
+      return Response.json({ error: 'Invalid plan', status: 'invalid_plan' }, { status: 400 });
     }
 
     const planConfig = PLANS[plan];
