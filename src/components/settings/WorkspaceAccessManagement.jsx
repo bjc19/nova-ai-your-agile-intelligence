@@ -118,12 +118,14 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!userToDelete) return;
 
     try {
-      await base44.entities.WorkspaceMember.delete(userToDelete.id);
+      // Supprimer l'utilisateur (nécessite service role pour avoir les droits)
+      await base44.asServiceRole.entities.User.delete(userToDelete.id);
       setUsers(users.filter(u => u.id !== userToDelete.id));
       toast.success('Utilisateur supprimé avec succès');
       setUserToDelete(null);
     } catch (error) {
-      toast.error('Erreur lors de la suppression');
+      console.error('Delete user error:', error);
+      toast.error('Erreur lors de la suppression: ' + error.message);
     }
   };
 
@@ -145,8 +147,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!editingUser || !newRole) return;
 
     try {
-      // Update workspace member role
-      await base44.entities.WorkspaceMember.update(editingUser.id, { role: newRole });
+      // Update user role (nécessite service role pour avoir les droits)
+      await base44.asServiceRole.entities.User.update(editingUser.id, { role: newRole });
 
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
@@ -154,7 +156,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setEditingUser(null);
       setNewRole(null);
     } catch (error) {
-      toast.error('Erreur lors de la mise à jour du rôle');
+      console.error('Update role error:', error);
+      toast.error('Erreur lors de la mise à jour du rôle: ' + error.message);
     }
   };
 
