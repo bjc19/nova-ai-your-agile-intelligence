@@ -15,55 +15,10 @@ export function SignupModal({ isOpen, onClose }) {
   const [error, setError] = useState("");
   const [showBackButton, setShowBackButton] = useState(false);
 
-  const handleSignup = async (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
-    setError("");
-
-    // Validation
-    if (!email.trim()) {
-      setError("Email requis");
-      return;
-    }
-    if (!fullName.trim()) {
-      setError("Nom complet requis");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await base44.functions.invoke('registerClientAdmin', {
-        email,
-        password,
-        fullName
-      });
-
-      if (response.data.success) {
-        setEmail("");
-        setFullName("");
-        setPassword("");
-        setConfirmPassword("");
-        onClose();
-        // Redirect to ChooseAccess after successful signup
-        setTimeout(() => {
-          window.location.href = createPageUrl("ChooseAccess");
-        }, 100);
-      } else {
-        setError(response.data.message || "Erreur lors de l'inscription.");
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error("Signup error:", err);
-      setError(err.message || "Erreur lors de l'inscription. Cet email est peut-être déjà utilisé.");
-      setLoading(false);
-    }
+    onClose();
+    base44.auth.redirectToSignup(createPageUrl("ChooseAccess"));
   };
 
   return (
