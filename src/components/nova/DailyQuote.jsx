@@ -44,7 +44,7 @@ export function DailyQuote({ lang = "en" }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.3 }}
-      className="mt-8 max-w-2xl mx-auto"
+      className="my-8"
     >
       <div className="flex items-start gap-4 p-6 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
         <Quote className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
