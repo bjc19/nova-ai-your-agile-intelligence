@@ -15,10 +15,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'not_authenticated', message: 'Non authentifié' }, { status: 401 });
     }
 
-    if (!managerEmail) {
-      return Response.json({ error: 'missing_manager_email', message: 'Email gestionnaire requis' }, { status: 400 });
-    }
-
     // Vérif: l'utilisateur n'a pas déjà un abonnement
     const existingSub = await base44.entities.Subscription.filter({ user_email: user.email });
     if (existingSub.length > 0) {
