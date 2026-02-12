@@ -3,6 +3,7 @@ import { Resend } from 'npm:resend@4.0.5';
 
 Deno.serve(async (req) => {
   try {
+    // Approve client request and send activation email
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
