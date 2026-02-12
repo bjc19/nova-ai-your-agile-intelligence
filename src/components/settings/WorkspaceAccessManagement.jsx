@@ -146,8 +146,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!editingUser || !newRole) return;
 
     try {
-      // Update workspace member role
-      await base44.entities.WorkspaceMember.update(editingUser.id, { role: newRole });
+      await base44.functions.invoke('updateUserRole', { userId: editingUser.id, newRole });
 
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
@@ -155,6 +154,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setEditingUser(null);
       setNewRole(null);
     } catch (error) {
+      console.error('Update role error:', error);
       toast.error('Erreur lors de la mise à jour du rôle');
     }
   };
