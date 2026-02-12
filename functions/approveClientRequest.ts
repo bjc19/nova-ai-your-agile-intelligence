@@ -1,3 +1,4 @@
+// Approve client request and send activation email
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { Resend } from 'npm:resend@4.0.5';
 
