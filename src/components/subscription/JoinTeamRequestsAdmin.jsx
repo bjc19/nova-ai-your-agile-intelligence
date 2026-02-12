@@ -40,12 +40,22 @@ export default function JoinTeamRequestsAdmin() {
 
   const handleApprove = async (request) => {
     try {
+      if (!request.subscription_id) {
+        console.error('No subscription_id in request:', request);
+        alert('Erreur: Subscription ID manquant');
+        return;
+      }
+
       // Get subscription
       const subs = await base44.asServiceRole.entities.Subscription.filter({
         id: request.subscription_id
       });
 
-      if (subs.length === 0) return;
+      if (subs.length === 0) {
+        console.error('Subscription not found:', request.subscription_id);
+        alert('Erreur: Abonnement introuvable');
+        return;
+      }
 
       const subscription = subs[0];
 
