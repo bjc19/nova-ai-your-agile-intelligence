@@ -68,7 +68,8 @@ export default function ChooseAccess() {
       });
 
       if (response.data.success) {
-        toast.success(response.data.message, { duration: 5000 });
+        toast.success("Demande envoyée avec succès", { duration: 5000 });
+        setRequestStatus("pending");
         setAdminEmail("");
       } else {
         toast.error(response.data.error || "Erreur lors de l'envoi");
@@ -78,6 +79,12 @@ export default function ChooseAccess() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleRejectionConfirm = () => {
+    setRequestStatus(null);
+    setPendingRequestId(null);
+    setAdminEmail("");
   };
 
   if (loading) {
