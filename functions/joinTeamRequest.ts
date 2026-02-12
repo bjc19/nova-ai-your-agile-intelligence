@@ -9,10 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'not_authenticated', message: 'Non authentifié' }, { status: 401 });
     }
 
-    const { adminEmail } = await req.json();
+    const { managerEmail } = await req.json();
 
-    if (!adminEmail) {
-      return Response.json({ error: 'missing_admin_email', message: 'Email admin requis' }, { status: 400 });
+    if (!managerEmail) {
+      return Response.json({ error: 'missing_manager_email', message: 'Email gestionnaire requis' }, { status: 400 });
     }
 
     // Vérif: l'utilisateur n'a pas déjà un abonnement
@@ -31,28 +31,28 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'pending_request_exists', message: 'Vous avez déjà une demande en cours' }, { status: 400 });
     }
 
-    // Chercher l'abonnement de l'admin
-    const adminSub = await base44.asServiceRole.entities.Subscription.filter({
-      user_email: adminEmail,
+    // Chercher l'abonnement du gestionnaire
+    const managerSub = await base44.asServiceRole.entities.Subscription.filter({
+      user_email: managerEmail,
       status: 'active'
     });
 
-    if (adminSub.length === 0) {
+    if (managerSub.length === 0) {
       return Response.json({ success: true, message: 'Demande enregistrée' }, { status: 200 });
     }
 
-    const subscription = adminSub[0];
+    const subscription = managerSub[0];
 
     // Créer la demande
     const joinRequest = await base44.entities.JoinTeamRequest.create({
       requester_email: user.email,
       requester_name: user.full_name,
-      admin_email: adminEmail,
+      manager_email: managerEmail,
       subscription_id: subscription.id,
       status: 'pending'
     });
 
-    // Envoyer un email à l'administrateur
+    // Envoyer un email au gestionnaire
     const appUrl = Deno.env.get("APP_URL") || "https://nova.app";
     const emailBody = `
 Bonjour,
@@ -73,7 +73,7 @@ Nova
 
     try {
       await base44.integrations.Core.SendEmail({
-        to: adminEmail,
+        to: managerEmail,
         subject: `Nouvelle demande d'adhésion à votre équipe Nova`,
         body: emailBody,
         from_name: 'Nova'
