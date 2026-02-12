@@ -137,7 +137,7 @@ export default function ChooseAccess() {
                 <div className="flex gap-2">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-blue-900">
-                    Si l'email correspond à un administrateur d'équipe actif, il recevra votre demande et pourra vous donner accès.
+                    Saisissez l'email de l'administrateur qui vous a invité. Il recevra votre demande d'accès et pourra l'approuver depuis son tableau de bord.
                   </p>
                 </div>
               </div>

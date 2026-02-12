@@ -44,10 +44,18 @@ export default function TeamManagement() {
 
     setSendingInvite(true);
     try {
-      await base44.users.inviteUser(inviteEmail, inviteRole === 'contributor' ? 'contributor' : 'user');
-      toast.success("Invitation envoyée avec succès");
-      setInviteEmail("");
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+      const response = await base44.functions.invoke('sendTeamInvitation', {
+        email: inviteEmail,
+        role: inviteRole
+      });
+
+      if (response.data.success) {
+        toast.success("Invitation envoyée avec succès");
+        setInviteEmail("");
+        queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+      } else {
+        toast.error(response.data.error || "Erreur lors de l'envoi");
+      }
     } catch (error) {
       toast.error("Erreur lors de l'envoi de l'invitation");
     } finally {
