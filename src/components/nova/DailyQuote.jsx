@@ -36,7 +36,7 @@ const quotes = [
   }
 ];
 
-export function DailyQuote({ lang = "fr" }) {
+export default function DailyQuote({ lang = "fr" }) {
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
   
   return (
