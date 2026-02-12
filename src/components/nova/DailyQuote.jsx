@@ -21,24 +21,23 @@ const progressQuotes = [
   { en: "The fastest way to learn is to ship.", fr: "Le moyen le plus rapide d'apprendre est de lancer.", author: "Marty Cagan" }
 ];
 
-export default function DailyQuote({ lang = "fr" }) {
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 0 }) {
+  // Select quote pool based on detected issues
+  const quotePool = (blockerCount > 0 || riskCount > 0) ? riskQuotes : progressQuotes;
+  const randomQuote = quotePool[Math.floor(Math.random() * quotePool.length)];
   
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full my-6"
+      className="w-full"
     >
-      <div className="flex items-start gap-4 p-8 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-md">
-        <Quote className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
-        <div className="flex-1">
-          <p className="text-lg italic text-slate-700 font-light mb-3">
-            {randomQuote[lang]}
-          </p>
-          <p className="text-sm text-blue-600 font-semibold">
-            — {randomQuote.author}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm">
+        <Quote className="w-4 h-4 text-blue-500 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm italic text-slate-700 font-light">
+            "{randomQuote[lang]}" — <span className="font-semibold text-blue-600">{randomQuote.author}</span>
           </p>
         </div>
       </div>
