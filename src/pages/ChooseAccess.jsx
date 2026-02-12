@@ -232,7 +232,8 @@ export default function ChooseAccess() {
 
         </div>
 
-      </div>
-    </div>
-  );
-}
+        </div>
+        )}
+        </div>
+        );
+        }
