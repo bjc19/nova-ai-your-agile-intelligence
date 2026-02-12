@@ -93,10 +93,24 @@ Deno.serve(async (req) => {
     console.log('[Stripe] Checkout session created:', session.id);
     return Response.json({ url: session.url, status: 'success' });
   } catch (error) {
-    console.error('Stripe checkout error:', error.message);
+    const errorMsg = error.message || 'Unknown error';
+    console.error('[Stripe] Checkout error:', {
+      message: errorMsg,
+      type: error.type,
+      code: error.code,
+      statusCode: error.statusCode,
+      timestamp: new Date().toISOString()
+    });
     return Response.json(
-      { error: error.message || 'Failed to create checkout session' },
-      { status: 500 }
+      { 
+        error: errorMsg,
+        status: error.code || 'stripe_error',
+        details: {
+          type: error.type,
+          code: error.code
+        }
+      },
+      { status: error.statusCode || 500 }
     );
   }
 });
