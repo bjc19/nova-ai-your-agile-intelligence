@@ -28,6 +28,18 @@ export default function ChooseAccess() {
         const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
         if (statusRes.data.hasAccess) {
           navigate(createPageUrl("Dashboard"));
+          return;
+        }
+
+        // Check for pending or rejected requests
+        const requests = await base44.entities.JoinTeamRequest.filter({
+          requester_email: u.email
+        });
+
+        if (requests.length > 0) {
+          const latestRequest = requests[requests.length - 1];
+          setRequestStatus(latestRequest.status);
+          setPendingRequestId(latestRequest.id);
         }
       } catch (e) {
         // User not authenticated, stay on this page to allow sign up
