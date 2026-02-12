@@ -17,6 +17,9 @@ Deno.serve(async (req) => {
 
     // Admins (platform) can update any role
     if (user.role === 'admin') {
+      // Update User entity
+      await base44.asServiceRole.entities.User.update(userId, { role: newRole });
+
       const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
       const workspaceMembers = await base44.asServiceRole.entities.WorkspaceMember.filter({ user_email: userEmail });
 
