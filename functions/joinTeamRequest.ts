@@ -2,14 +2,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
     const { managerEmail } = await req.json();
 
     if (!managerEmail) {
       return Response.json({ error: 'missing_manager_email', message: 'Email gestionnaire requis' }, { status: 400 });
     }
-
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
     if (!user) {
       return Response.json({ error: 'not_authenticated', message: 'Non authentifié' }, { status: 401 });
