@@ -21,14 +21,30 @@ const PLAN_PRICES = {
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Non authentifié' }, { status: 401 });
+    const { plan } = await req.json();
+    
+    // Get user email from request body or session (for public app)
+    let userEmail = null;
+    if (req.body) {
+      const body = await req.json();
+      userEmail = body.userEmail;
     }
 
-    const { plan } = await req.json();
+    const base44 = createClientFromRequest(req);
+    
+    // Try to get authenticated user first
+    try {
+      const user = await base44.auth.me();
+      if (user) {
+        userEmail = user.email;
+      }
+    } catch (e) {
+      // User not authenticated - will use userEmail from body
+    }
+
+    if (!userEmail) {
+      return Response.json({ error: 'Email requis' }, { status: 400 });
+    }
 
     if (!plan || !PLAN_PRICES[plan]) {
       return Response.json({ error: 'Plan invalide' }, { status: 400 });
