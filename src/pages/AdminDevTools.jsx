@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Zap, Database, Users } from "lucide-react";
+import { AlertCircle, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDevTools() {
@@ -14,6 +14,9 @@ export default function AdminDevTools() {
   const [requests, setRequests] = useState([]);
   const [clients, setClients] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [planFilter, setPlanFilter] = useState('all');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,43 +52,7 @@ export default function AdminDevTools() {
     }
   };
 
-  const createTestRequest = async () => {
-    try {
-      await base44.entities.PendingRequest.create({
-        name: `Test User ${Date.now()}`,
-        email: `test${Date.now()}@example.com`,
-        company: "Test Company",
-        plan: "starter",
-        users_count: 3,
-        message: "Test request from DevTools",
-        turnstile_score: 0.9,
-        ip_address: "127.0.0.1",
-        status: "pending"
-      });
-      toast.success("✅ Demande test créée");
-      loadData();
-    } catch (e) {
-      toast.error("❌ Erreur création");
-    }
-  };
 
-  const createTestClient = async () => {
-    try {
-      await base44.entities.Client.create({
-        name: `Test Client ${Date.now()}`,
-        email: `client${Date.now()}@example.com`,
-        plan: "pro",
-        max_users: 10,
-        status: "active",
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        admin_email: user?.email || "admin@test.com"
-      });
-      toast.success("✅ Client test créé");
-      loadData();
-    } catch (e) {
-      toast.error("❌ Erreur création");
-    }
-  };
 
   const approveRequest = async (requestId) => {
     try {
@@ -107,20 +74,31 @@ export default function AdminDevTools() {
     }
   };
 
-  const deleteAllTestData = async () => {
-    if (!window.confirm("⚠️ Supprimer TOUTES les données test? Cette action est irréversible.")) return;
+  const rejectRequest = async (requestId, requestEmail) => {
+    if (!window.confirm(`⚠️ Rejeter la demande de ${requestEmail}?`)) return;
     try {
-      // Supprimer en cascade
-      await Promise.all([
-        base44.entities.PendingRequest.delete({ status: "pending" }),
-        base44.entities.AuditLog.delete({})
-      ]);
-      toast.success("✅ Données test supprimées");
+      await base44.entities.PendingRequest.update(requestId, {
+        status: "rejected",
+        approved_by: user?.email
+      });
+      toast.success("✅ Demande rejetée");
       loadData();
     } catch (e) {
-      toast.error("❌ Erreur suppression");
+      toast.error("❌ Erreur rejet");
     }
   };
+
+  const filteredRequests = requests.filter(req => {
+    const matchesSearch = searchQuery === '' || 
+      req.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      req.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      req.company.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
+    const matchesPlan = planFilter === 'all' || req.plan === planFilter;
+    
+    return matchesSearch && matchesStatus && matchesPlan;
+  });
 
   if (loading) return <div className="p-8">Vérification authentification...</div>;
 
@@ -155,23 +133,12 @@ export default function AdminDevTools() {
         {/* Quick Actions */}
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white">⚡ Actions rapides</CardTitle>
+            <CardTitle className="text-white">⚡ Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={createTestRequest} className="bg-blue-600 hover:bg-blue-700">
-                ➕ Demande test
-              </Button>
-              <Button onClick={createTestClient} className="bg-green-600 hover:bg-green-700">
-                ➕ Client test
-              </Button>
-              <Button onClick={loadData} variant="outline" className="border-slate-600 text-white hover:bg-slate-700">
-                🔄 Rafraîchir
-              </Button>
-              <Button onClick={deleteAllTestData} className="bg-red-600 hover:bg-red-700">
-                🗑️ Supprimer test
-              </Button>
-            </div>
+          <CardContent>
+            <Button onClick={loadData} variant="outline" className="w-full border-slate-600 text-white hover:bg-slate-700">
+              🔄 Rafraîchir les données
+            </Button>
           </CardContent>
         </Card>
 
@@ -190,13 +157,62 @@ export default function AdminDevTools() {
           </TabsList>
 
           {/* Pending Requests */}
-          <TabsContent value="requests" className="space-y-3">
-            {requests.length === 0 ? (
+          <TabsContent value="requests" className="space-y-4">
+            {/* Filtres et recherche */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="pt-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">🔍 Recherche</label>
+                    <input
+                      type="text"
+                      placeholder="Nom, email, entreprise..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">📊 Statut</label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="all">Tous les statuts</option>
+                      <option value="pending">En attente</option>
+                      <option value="approved">Approuvées</option>
+                      <option value="rejected">Rejetées</option>
+                      <option value="spam">Spam</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 mb-1 block">💼 Plan</label>
+                    <select
+                      value={planFilter}
+                      onChange={(e) => setPlanFilter(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="all">Tous les plans</option>
+                      <option value="starter">Starter</option>
+                      <option value="growth">Growth</option>
+                      <option value="pro">Pro</option>
+                      <option value="enterprise">Enterprise</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-400">
+                  {filteredRequests.length} demande(s) trouvée(s) sur {requests.length} total
+                </div>
+              </CardContent>
+            </Card>
+
+            {filteredRequests.length === 0 ? (
               <Card className="bg-slate-800 border-slate-700">
-                <CardContent className="pt-6 text-slate-400">Aucune demande en attente</CardContent>
+                <CardContent className="pt-6 text-slate-400">Aucune demande trouvée</CardContent>
               </Card>
             ) : (
-              requests.map(req => (
+              filteredRequests.map(req => (
                 <Card key={req.id} className="bg-slate-800 border-slate-700">
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
@@ -214,13 +230,22 @@ export default function AdminDevTools() {
                         </div>
                       </div>
                       {req.status === "pending" && (
-                        <Button 
-                          onClick={() => approveRequest(req.id)}
-                          className="bg-green-600 hover:bg-green-700"
-                          size="sm"
-                        >
-                          ✅ Approuver
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => approveRequest(req.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                            size="sm"
+                          >
+                            ✅ Approuver
+                          </Button>
+                          <Button 
+                            onClick={() => rejectRequest(req.id, req.email)}
+                            className="bg-red-600 hover:bg-red-700"
+                            size="sm"
+                          >
+                            ❌ Rejeter
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </CardContent>
@@ -281,13 +306,13 @@ export default function AdminDevTools() {
           </TabsContent>
         </Tabs>
 
-        {/* Warning */}
-        <Card className="bg-amber-950/30 border-amber-600/50">
-          <CardContent className="pt-6 flex gap-3 text-amber-200 text-sm">
+        {/* Info */}
+        <Card className="bg-blue-950/30 border-blue-600/50">
+          <CardContent className="pt-6 flex gap-3 text-blue-200 text-sm">
             <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold">Mode développement uniquement</p>
-              <p className="text-xs mt-1">Cette page doit être supprimée avant production. Masquez-la avec une vérification d'environnement.</p>
+              <p className="font-semibold">Interface d'administration</p>
+              <p className="text-xs mt-1">Gérez les demandes d'accès clients et approuvez/rejetez en temps réel. Accessible uniquement aux admins.</p>
             </div>
           </CardContent>
         </Card>
