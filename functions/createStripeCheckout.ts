@@ -6,18 +6,15 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
 const PLANS = {
   starter: {
     name: "Starter",
-    price: 4900,
-    priceId: process.env.STRIPE_STARTER_PRICE_ID || null
+    priceId: "price_1T04VYJwNnYYgxKr1rn4r7t7"
   },
   growth: {
     name: "Growth",
-    price: 9900,
-    priceId: process.env.STRIPE_GROWTH_PRICE_ID || null
+    priceId: "price_1T04VYJwNnYYgxKrq8HH7cw7"
   },
   pro: {
     name: "Pro",
-    price: 19900,
-    priceId: process.env.STRIPE_PRO_PRICE_ID || null
+    priceId: "price_1T04VYJwNnYYgxKrdGllbnqy"
   }
 };
 
