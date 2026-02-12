@@ -5,8 +5,8 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user || (user.role !== 'admin' && user.role !== 'contributor')) {
-      return Response.json({ error: 'Only admins and contributors can update roles' }, { status: 403 });
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { userId, userEmail, newRole } = await req.json();
@@ -15,9 +15,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'User ID, email and role required' }, { status: 400 });
     }
 
-    // Admins can update any role
+    // Admins (platform) can update any role
     if (user.role === 'admin') {
-      await base44.asServiceRole.entities.User.update(userId, { role: newRole });
+      const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
+      if (teamMembers.length > 0) {
+        await base44.asServiceRole.entities.TeamMember.update(teamMembers[0].id, { role: newRole });
+      }
       return Response.json({ success: true, message: 'Role updated' });
     }
 
@@ -33,8 +36,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
     }
 
-    // Update the User entity
-    await base44.asServiceRole.entities.User.update(userId, { role: newRole });
+    // Update the TeamMember entity (not User)
+    await base44.asServiceRole.entities.TeamMember.update(teamMember.id, { role: newRole });
 
     return Response.json({ success: true, message: 'Role updated' });
   } catch (error) {
