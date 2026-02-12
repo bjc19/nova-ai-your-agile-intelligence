@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn, Users } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { LoginDialog } from "@/components/LoginDialog";
+import { RegisterDialog } from "@/components/RegisterDialog";
 import { DemoSimulator } from "@/components/nova/DemoSimulator";
 import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
 
@@ -14,6 +15,7 @@ function LayoutContent({ children, currentPageName }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
+    const [showRegisterDialog, setShowRegisterDialog] = useState(false);
     const [showDemoSimulator, setShowDemoSimulator] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [canInvite, setCanInvite] = useState(false);
@@ -122,29 +124,43 @@ function LayoutContent({ children, currentPageName }) {
                   {t('tryDemo')}
                 </button>
                 <Button 
+                  variant="ghost"
                   size="sm"
                   onClick={() => setShowLoginDialog(true)}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  className="text-slate-600 hover:text-slate-900"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   {t('signIn')}
                 </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => setShowRegisterDialog(true)}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                >
+                  Register
+                </Button>
               </>
-            )}
-          </div>
-        </div>
-      </nav>
+              )}
+              </div>
+              </div>
+              </nav>
 
-      {/* Main Content */}
-      <main>
-        {children}
-      </main>
+              {/* Main Content */}
+              <main>
+              {children}
+              </main>
 
-      {/* Login Dialog */}
-      <LoginDialog 
-        isOpen={showLoginDialog}
-        onClose={() => setShowLoginDialog(false)}
-      />
+              {/* Login Dialog */}
+              <LoginDialog 
+              isOpen={showLoginDialog}
+              onClose={() => setShowLoginDialog(false)}
+              />
+
+              {/* Register Dialog */}
+              <RegisterDialog 
+              isOpen={showRegisterDialog}
+              onClose={() => setShowRegisterDialog(false)}
+              />
 
       {/* Demo Simulator */}
       {showDemoSimulator && (
