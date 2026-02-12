@@ -72,10 +72,14 @@ export default function ChooseAccess() {
         setRequestStatus("pending");
         setAdminEmail("");
       } else {
-        toast.error(response.data.error || "Erreur lors de l'envoi");
+        const errMsg = response.data.error || "Erreur lors de l'envoi";
+        const status = response.data.status || "unknown";
+        toast.error(`${errMsg} [${status}]`);
       }
     } catch (error) {
-      toast.error("Erreur lors de l'envoi de la demande");
+      const msg = error?.message || "Erreur lors de l'envoi de la demande";
+      toast.error(`${msg} [network_error]`);
+      console.error('Join team error:', error);
     } finally {
       setSubmitting(false);
     }
