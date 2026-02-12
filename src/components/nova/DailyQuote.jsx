@@ -165,7 +165,7 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
       const result = await base44.integrations.Core.InvokeLLM({
         prompt: `Traduis cette citation courte et inspirante en français, en gardant l'auteur original:\n\n"${quoteText}"`,
       });
-      setDisplayedQuote(result || quoteText);
+      setDisplayedQuote(typeof result === 'string' ? result : result?.content || quoteText);
     } catch (error) {
       setDisplayedQuote(quoteText);
     }
