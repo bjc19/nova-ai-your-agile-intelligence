@@ -206,9 +206,9 @@ export function LoginDialog({ isOpen, onClose }) {
             Don't have an account yet?{" "}
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 onClose();
-                window.location.href = "/SignUp";
+                await base44.auth.redirectToLogin(createPageUrl("ChooseAccess") + "?signup=true");
               }}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
