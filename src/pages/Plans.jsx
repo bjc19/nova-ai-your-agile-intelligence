@@ -167,12 +167,16 @@ export default function Plans() {
       if (response.data?.url) {
         window.location.href = response.data.url;
       } else {
-        toast.error(response.data?.error || "Erreur lors de la création du paiement");
+        const errMsg = response.data?.error || "Erreur lors de la création du paiement";
+        const status = response.data?.status || "unknown";
+        const details = response.data?.details ? ` - ${JSON.stringify(response.data.details)}` : "";
+        toast.error(`${errMsg} [${status}]${details}`);
         setSubscribingPlan(null);
       }
     } catch (error) {
       console.error("Subscription error:", error);
-      toast.error(error?.message || "Erreur lors de la souscription");
+      const msg = error?.message || "Erreur lors de la souscription";
+      toast.error(`${msg} [network_error]`);
       setSubscribingPlan(null);
     }
   };
