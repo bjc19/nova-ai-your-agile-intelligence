@@ -184,15 +184,24 @@ export function PricingSection() {
           return;
         }
 
-        const response = await base44.functions.invoke('createStripeCheckoutPublic', {
-          plan: plan.id,
-          email: email.trim()
-        });
+        try {
+          const response = await base44.functions.invoke('createStripeCheckoutPublic', {
+            plan: plan.id,
+            email: email.trim()
+          });
 
-        if (response.data?.url) {
-          window.location.href = response.data.url;
-        } else {
-          toast.error(response.data?.error || "Erreur lors de la création du paiement");
+          console.log('[PricingSection] Checkout response:', response);
+
+          if (response.data?.url) {
+            window.location.href = response.data.url;
+          } else {
+            console.error('[PricingSection] No URL in response:', response.data);
+            toast.error(response.data?.error || "Erreur lors de la création du paiement");
+            setSubscribingPlan(null);
+          }
+        } catch (error) {
+          console.error('[PricingSection] Checkout error:', error);
+          toast.error(error?.message || "Erreur lors de la création du paiement");
           setSubscribingPlan(null);
         }
       }
