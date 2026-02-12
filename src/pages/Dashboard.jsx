@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -70,6 +69,28 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+
+        // Check if user has access (role must not be 'user' or they must have a subscription/team membership)
+        if (currentUser.role === 'user') {
+          // Check if user has any pending or rejected requests
+          const requests = await base44.entities.JoinTeamRequest.filter({
+            requester_email: currentUser.email
+          });
+          
+          if (requests.length > 0) {
+            const status = requests[requests.length - 1].status;
+            if (status === 'pending' || status === 'rejected') {
+              navigate(createPageUrl("ChooseAccess"));
+              setIsLoading(false);
+              return;
+            }
+          } else {
+            // No requests at all, new user
+            navigate(createPageUrl("ChooseAccess"));
+            setIsLoading(false);
+            return;
+          }
+        }
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -225,9 +246,6 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}>
-
-            {/* Daily Quote */}
-            <DailyQuote blockerCount={gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length} riskCount={gdprSignals.filter(s => s.criticite === 'moyenne').length} />
 
             {/* Welcome Banner */}
             <div className="flex flex-col gap-6 mb-8">
