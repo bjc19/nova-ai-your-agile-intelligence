@@ -32,24 +32,33 @@ Deno.serve(async (req) => {
     }
 
     // Chercher l'abonnement du gestionnaire
-    const managerSub = await base44.asServiceRole.entities.Subscription.filter({
-      user_email: managerEmail,
-      status: 'active'
-    });
+    let subscriptionId = null;
+    try {
+      const managerSub = await base44.asServiceRole.entities.Subscription.filter({
+        user_email: managerEmail,
+        status: 'active'
+      });
 
-    if (managerSub.length === 0) {
-      return Response.json({ success: true, message: 'Demande enregistrée' }, { status: 200 });
+      if (managerSub.length > 0) {
+        subscriptionId = managerSub[0].id;
+      }
+    } catch (subError) {
+      console.error('Error fetching manager subscription:', subError);
     }
 
-    const subscription = managerSub[0];
-
-    // Créer la demande
+    // Créer la demande (avec ou sans subscription_id)
     const joinRequest = await base44.entities.JoinTeamRequest.create({
       requester_email: user.email,
       requester_name: user.full_name,
       manager_email: managerEmail,
-      subscription_id: subscription.id,
+      subscription_id: subscriptionId || null,
       status: 'pending'
+    });
+    
+    console.log('Join request created:', { 
+      requestId: joinRequest.id, 
+      managerEmail, 
+      subscriptionId 
     });
 
     // Envoyer un email au gestionnaire
