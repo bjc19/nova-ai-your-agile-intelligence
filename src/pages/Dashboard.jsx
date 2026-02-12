@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -30,21 +31,19 @@ import {
   Loader2,
   TrendingUp } from
 "lucide-react";
-import { useAccessControl } from "@/components/dashboard/useAccessControl";
 
 export default function Dashboard() {
-   const navigate = useNavigate();
-   const { t } = useLanguage();
-   useAccessControl();
-   const [user, setUser] = useState(null);
-   const [latestAnalysis, setLatestAnalysis] = useState(null);
-   const [isLoading, setIsLoading] = useState(true);
-   const [showOnboarding, setShowOnboarding] = useState(false);
-   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
-   const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+  const [user, setUser] = useState(null);
+  const [latestAnalysis, setLatestAnalysis] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [multiProjectAlert, setMultiProjectAlert] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
 
-   const [sprintContext, setSprintContext] = useState(null);
-   const [gdprSignals, setGdprSignals] = useState([]);
+  const [sprintContext, setSprintContext] = useState(null);
+  const [gdprSignals, setGdprSignals] = useState([]);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -64,48 +63,43 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication
+  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        if (authenticated) {
-          const currentUser = await base44.auth.me();
-          setUser(currentUser);
+      const authenticated = await base44.auth.isAuthenticated();
+      if (authenticated) {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
 
-          // Charger contexte sprint actif
-          const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-          if (activeSprints.length > 0) {
-            setSprintContext(activeSprints[0]);
-          }
-
-          // Vérifier onboarding
-          const teamConfigs = await base44.entities.TeamConfiguration.list();
-          if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-            setShowOnboarding(true);
-          }
-
-          // Vérifier alertes multi-projets en attente
-          const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-            admin_response: "pending"
-          });
-          if (pendingAlerts.length > 0) {
-            const latest = pendingAlerts[pendingAlerts.length - 1];
-            setMultiProjectAlert({
-              confidence: latest.detection_score,
-              signals: latest.weighted_signals,
-              log_id: latest.id
-            });
-          }
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
         }
-      } catch (error) {
-        console.error("Error checking auth:", error);
-      } finally {
-        setIsLoading(false);
+
+        // Vérifier onboarding
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
       }
+      setIsLoading(false);
     };
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
