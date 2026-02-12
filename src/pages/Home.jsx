@@ -134,10 +134,12 @@ const translations = {
 };
 
 export default function Home() {
+  const navigate = useNavigate();
   const [showDemoSimulator, setShowDemoSimulator] = useState(false);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [demoTriesLeft, setDemoTriesLeft] = useState(2);
   const [lang, setLang] = useState("en");
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     // Détecter la langue du navigateur
@@ -147,7 +149,21 @@ export default function Home() {
     // Vérifier tries de démo (localStorage + IP-based)
     const tries = localStorage.getItem("nova_demo_tries") || "2";
     setDemoTriesLeft(parseInt(tries));
-  }, []);
+
+    // Rediriger utilisateurs authenticated
+    const checkAuth = async () => {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (isAuth) {
+        const user = await base44.auth.me();
+        setUserRole(user?.role || null);
+        // Rediriger vers Dashboard si admin/contributor, sinon vers ChooseAccess
+        setTimeout(() => {
+          navigate(createPageUrl(user?.role ? "Dashboard" : "ChooseAccess"));
+        }, 0);
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const t = (key) => translations[lang][key] || translations["en"][key];
 
