@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -69,18 +70,6 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-
-        // Admin/contributeur bypass ChooseAccess
-        if (currentUser.role === 'admin' || currentUser.role === 'contributor') {
-          // Continue normally
-        } else {
-          // Non-approved user - redirect to ChooseAccess
-          const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-          if (!statusRes.data.hasAccess) {
-            navigate(createPageUrl("ChooseAccess"));
-            return;
-          }
-        }
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
