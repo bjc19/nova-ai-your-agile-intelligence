@@ -56,9 +56,14 @@ export default function DailyQuote({ lang = "fr" }) {
     >
       <div className="flex items-start gap-4 p-8 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-md">
         <Quote className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
-        <p className="text-lg italic text-slate-700 font-light">
-          {randomQuote[lang]}
-        </p>
+        <div className="flex-1">
+          <p className="text-lg italic text-slate-700 font-light mb-3">
+            {randomQuote[lang]}
+          </p>
+          <p className="text-sm text-blue-600 font-semibold">
+            — {randomQuote.author}
+          </p>
+        </div>
       </div>
     </motion.div>
   );
