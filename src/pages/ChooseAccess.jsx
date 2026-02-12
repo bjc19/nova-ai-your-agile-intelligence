@@ -28,7 +28,8 @@ export default function ChooseAccess() {
           navigate(createPageUrl("Dashboard"));
         }
       } catch (e) {
-        navigate(createPageUrl("Home"));
+        // User not authenticated, stay on this page to allow sign up
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -78,7 +79,9 @@ export default function ChooseAccess() {
       <div className="max-w-4xl mx-auto space-y-8">
         
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-slate-900">Bienvenue {user?.full_name} 👋</h1>
+          <h1 className="text-4xl font-bold text-slate-900">
+            {user ? `Bienvenue ${user.full_name} 👋` : "Bienvenue 👋"}
+          </h1>
           <p className="text-lg text-slate-600">Pour accéder à Nova AI, choisissez l'une des options ci-dessous :</p>
         </div>
 
