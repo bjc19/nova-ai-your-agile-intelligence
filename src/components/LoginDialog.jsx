@@ -208,7 +208,7 @@ export function LoginDialog({ isOpen, onClose }) {
               type="button"
               onClick={() => {
                 onClose();
-                window.location.href = "/ChooseAccess";
+                window.location.href = "/SignUp";
               }}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
