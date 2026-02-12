@@ -50,15 +50,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Plan invalide' }, { status: 400 });
     }
 
-    const existingSub = await base44.entities.Subscription.filter({ user_email: user.email });
+    const existingSub = await base44.asServiceRole.entities.Subscription.filter({ user_email: userEmail });
     if (existingSub.length > 0) {
       return Response.json({ error: 'Vous avez déjà un abonnement actif' }, { status: 400 });
     }
 
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      return Response.json({ error: 'Stripe non configuré' }, { status: 500 });
+    }
+    
     const stripe = new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' });
 
-    const appUrl = Deno.env.get('APP_URL') || req.headers.get('origin') || 'https://novagile.ca';
+    const appUrl = Deno.env.get('APP_URL') || 'https://novagile.ca';
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -69,10 +73,10 @@ Deno.serve(async (req) => {
       mode: 'subscription',
       success_url: `${appUrl}/Dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/Dashboard`,
-      customer_email: user.email,
+      customer_email: userEmail,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
-        user_email: user.email,
+        user_email: userEmail,
         plan: plan,
         max_users: PLAN_PRICES[plan].max_users.toString()
       }
