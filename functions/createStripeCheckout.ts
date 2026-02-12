@@ -38,7 +38,13 @@ Deno.serve(async (req) => {
     const planConfig = PLANS[plan];
     const appUrl = Deno.env.get("APP_URL");
 
+    if (!appUrl) {
+      console.error('[Stripe] APP_URL not set');
+      return Response.json({ error: 'APP_URL not configured', status: 'app_url_missing' }, { status: 500 });
+    }
+
     // Create or get Stripe customer
+    console.log('[Stripe] Creating/fetching customer for:', user.email);
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1
@@ -47,7 +53,9 @@ Deno.serve(async (req) => {
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      console.log('[Stripe] Found existing customer:', customerId);
     } else {
+      console.log('[Stripe] Creating new customer...');
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.full_name,
@@ -56,9 +64,11 @@ Deno.serve(async (req) => {
         }
       });
       customerId = customer.id;
+      console.log('[Stripe] Created customer:', customerId);
     }
 
     // Create checkout session
+    console.log('[Stripe] Creating checkout session for plan:', plan, 'priceId:', planConfig.priceId);
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -80,7 +90,8 @@ Deno.serve(async (req) => {
       }
     });
 
-    return Response.json({ url: session.url });
+    console.log('[Stripe] Checkout session created:', session.id);
+    return Response.json({ url: session.url, status: 'success' });
   } catch (error) {
     console.error('Stripe checkout error:', error.message);
     return Response.json(
