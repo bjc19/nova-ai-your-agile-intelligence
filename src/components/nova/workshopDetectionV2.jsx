@@ -42,6 +42,21 @@ const PLANNING_OBJECTS = {
   decomposition: ['découpage', 'breakdown', 'décomposition', 'tâche', 'task', 'sous-tâche', 'subtask'],
 };
 
+// CRITICAL REVIEW vs PLANNING DIFFERENTIATORS
+const REVIEW_DIFFERENTIATORS = {
+  demoDelivery: ['démo', 'demo', 'partage d\'écran', 'screen share', 'montrer', 'show', 'voici', 'here', 'regardez', 'look at'],
+  stakeholderValidation: ['feedback', 'avis', 'opinion', 'stakeholder', 'client', 'utilisateur', 'acceptation', 'acceptance', 'testé', 'validated'],
+  retrospectiveDiscussion: ['comment on', 'how we', 'nous avons', 'we have', 'données', 'data', 'signaux', 'signals', 'apprentissage', 'learning'],
+  priorForwardDiscussion: ['prochain sprint', 'next sprint', 'backlog prochain', 'next backlog', 'envisager', 'consider', 'ajouter au backlog', 'add to backlog'],
+};
+
+const PLANNING_DIFFERENTIATORS = {
+  estimationActivity: ['combien de points', 'how many points', 'story points', 'capacité', 'capacity', 'on embarque', 'we take', 'on peut', 'we can'],
+  commitmentLanguage: ['on s\'engage', 'we commit', 'embarquer', 'undertake', 'c\'est dans', 'that\'s in', 'promesse', 'promise'],
+  backlogSelection: ['qu\'est-ce qu\'on', 'what are we', 'sélectionner', 'select', 'choisir', 'choose', 'dans le sprint', 'in the sprint'],
+  scopeBreakdown: ['découpage', 'breakdown', 'dépendance', 'dependency', 'comment on découpe', 'how we break down', 'sous-tâche', 'subtask'],
+};
+
 // ============================================
 // TEMPORALITY KEYWORDS
 // ============================================
