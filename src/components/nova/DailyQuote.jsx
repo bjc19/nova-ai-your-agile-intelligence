@@ -195,7 +195,7 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
       transition={{ duration: 0.6 }}
       className="mb-6"
     >
-      <div className={`rounded-xl border bg-gradient-to-br p-5 ${categoryColors[category]} w-fit`}>
+      <div className={`rounded-xl border bg-gradient-to-br p-5 ${categoryColors[category]} w-full`}>
         <div className="flex gap-3">
           <Lightbulb className={`w-5 h-5 flex-shrink-0 mt-0.5 ${categoryIcons[category]}`} />
           <p className="text-sm text-slate-700 leading-relaxed italic">
