@@ -384,13 +384,26 @@ export default function Settings() {
             {t('backToDashboard')}
           </Link>
 
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2.5 rounded-xl bg-slate-100">
-              <SettingsIcon className="w-5 h-5 text-slate-600" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 rounded-xl bg-slate-100">
+                <SettingsIcon className="w-5 h-5 text-slate-600" />
+              </div>
+              <h1 className="text-3xl font-bold text-slate-900">
+                {t('Paramètres')}
+              </h1>
             </div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              {t('Paramètres')}
-            </h1>
+            <div className="text-right">
+              <Badge className={`text-sm px-3 py-1 ${
+                currentRole === 'admin' 
+                  ? 'bg-red-100 text-red-700' 
+                  : currentRole === 'contributor'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-100 text-slate-700'
+              }`}>
+                {currentRole === 'admin' ? '🔑 Admin' : currentRole === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+              </Badge>
+            </div>
           </div>
           <p className="text-slate-600">
             {t('Vos paramètres')}
