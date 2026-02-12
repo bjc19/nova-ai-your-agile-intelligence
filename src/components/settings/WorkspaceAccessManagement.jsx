@@ -146,11 +146,16 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!editingUser || !newRole) return;
 
     try {
-      await base44.functions.invoke('updateUserRole', { 
+      const response = await base44.functions.invoke('updateUserRole', { 
         userId: editingUser.id, 
         userEmail: editingUser.email,
         newRole 
       });
+
+      if (response.data?.error) {
+        toast.error(response.data.error);
+        return;
+      }
 
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
@@ -159,7 +164,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setNewRole(null);
     } catch (error) {
       console.error('Update role error:', error);
-      toast.error('Erreur lors de la mise à jour du rôle');
+      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour du rôle');
     }
   };
 
