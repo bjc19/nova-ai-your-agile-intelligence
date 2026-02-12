@@ -48,16 +48,27 @@ Deno.serve(async (req) => {
       });
       console.log('User registered successfully');
       
-      // Send custom welcome email
+      // Generate 6-digit verification code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+      // Store verification code
+      await base44.asServiceRole.entities.EmailVerificationCode.create({
+        email,
+        code: verificationCode,
+        expires_at: expiresAt
+      });
+
+      // Send verification email with code
       try {
         await base44.integrations.Core.SendEmail({
           to: email,
-          subject: 'Welcome to Nova AI - Your Agile Intelligence',
-          body: `Hey ${fullName},\n\nWelcome to Nova AI - Your Agile Intelligence, and happy agile delivery!\n\nSee you there,\nThe Nova AI © - Your Agile Intelligence team`
+          subject: 'Verify your Nova account',
+          body: `Hey ${fullName},\n\nWelcome to Nova AI!\n\nYour verification code is: ${verificationCode}\n\nPlease enter this code in the app to verify your email address. The code expires in 24 hours.\n\nSee you there,\nThe Nova AI team`
         });
       } catch (emailErr) {
-        console.error('Welcome email error:', emailErr);
-        // Don't fail registration if welcome email fails
+        console.error('Verification email error:', emailErr);
+        // Don't fail registration if email fails
       }
     } catch (regErr) {
       console.error('Registration error:', regErr);
