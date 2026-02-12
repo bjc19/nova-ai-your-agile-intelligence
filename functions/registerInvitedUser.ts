@@ -68,15 +68,32 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Erreur lors de l\'enregistrement: ' + errorMsg }, { status: 400 });
     }
 
+    // Get subscription of the inviter
+    const subscription = await base44.asServiceRole.entities.Subscription.filter({
+     user_email: inv.invited_by
+    });
+
     // Create WorkspaceMember record
     await base44.asServiceRole.entities.WorkspaceMember.create({
-      user_email: email,
-      user_name: fullName,
-      role: inv.role,
-      workspace_id: inv.workspace_id,
-      invited_by: inv.invited_by,
-      invitation_status: 'accepted'
+     user_email: email,
+     user_name: fullName,
+     role: inv.role,
+     workspace_id: inv.workspace_id,
+     invited_by: inv.invited_by,
+     invitation_status: 'accepted'
     });
+
+    // Create TeamMember record
+    if (subscription && subscription.length > 0) {
+     await base44.asServiceRole.entities.TeamMember.create({
+       user_email: email,
+       user_name: fullName,
+       subscription_id: subscription[0].id,
+       manager_email: inv.invited_by,
+       role: inv.role,
+       joined_at: new Date().toISOString()
+     });
+    }
 
     // Mark invitation as accepted
     await base44.asServiceRole.entities.InvitationToken.update(inv.id, {
