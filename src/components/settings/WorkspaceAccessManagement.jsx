@@ -40,6 +40,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
   // Load users and plan info
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
         const user = await base44.auth.me();
         setCurrentUser(user);
@@ -69,7 +70,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     };
     
     loadData();
-  }, []);
+  }, [currentRole]);
 
   const handleInvite = async () => {
     if (!inviteEmail) {
