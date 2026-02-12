@@ -20,6 +20,7 @@ import {
   X
 } from "lucide-react";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
+import { DailyQuote } from "@/components/nova/DailyQuote";
 
 const PricingSection = lazy(() => import("@/components/nova/PricingSection").then(m => ({ default: m.PricingSection })));
 
@@ -252,6 +253,8 @@ export default function Home() {
             <p className="text-sm text-slate-500 mt-4">
               {t("noReg")}
             </p>
+
+            <DailyQuote lang={lang} />
           </motion.div>
         </div>
       </div>

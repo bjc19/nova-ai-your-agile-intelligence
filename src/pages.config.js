@@ -62,8 +62,8 @@ import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
-import acceptInvitation from './pages/accept-invitation';
 import VerifyEmail from './pages/VerifyEmail';
+import acceptInvitation from './pages/accept-invitation';
 import __Layout from './Layout.jsx';
 
 
@@ -83,8 +83,8 @@ export const PAGES = {
     "Results": Results,
     "Settings": Settings,
     "TeamManagement": TeamManagement,
-    "accept-invitation": acceptInvitation,
     "VerifyEmail": VerifyEmail,
+    "accept-invitation": acceptInvitation,
 }
 
 export const pagesConfig = {
