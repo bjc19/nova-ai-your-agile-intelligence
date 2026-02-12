@@ -62,17 +62,7 @@ Deno.serve(async (req) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'cad',
-            product_data: {
-              name: `Plan ${planConfig.name}`,
-              description: `Nova - ${planConfig.name} Plan`
-            },
-            unit_amount: planConfig.price,
-            recurring: {
-              interval: 'month'
-            }
-          },
+          price: planConfig.priceId,
           quantity: 1
         }
       ],
