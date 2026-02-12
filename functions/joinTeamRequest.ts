@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     });
 
     if (managerSub.length === 0) {
-      return Response.json({ error: 'invalid_manager', message: 'Cet administrateur n\'existe pas ou n\'a pas d\'abonnement actif' }, { status: 400 });
+      return Response.json({ success: true, message: 'Demande enregistrée' }, { status: 200 });
     }
 
     const subscription = managerSub[0];
