@@ -132,15 +132,11 @@ export default function WorkspaceAccessManagement({ currentRole }) {
   const canToggleEmail = currentRole === 'admin' || currentRole === 'contributor';
 
   const canEditUserRole = (user) => {
-    if (!canManage || user.email === currentUser?.email) return false;
-    
-    // Admin peut éditer tous les rôles
-    if (currentRole === 'admin') return true;
-    
-    // Contributeur peut éditer seulement les membres simples
-    if (currentRole === 'contributor' && user.role === 'user') return true;
-    
-    return false;
+    // Only true platform admins can edit roles
+    if (currentRole !== 'admin') return false;
+    if (user.email === currentUser?.email) return false;
+
+    return true;
   };
 
   const handleEditRole = async () => {
