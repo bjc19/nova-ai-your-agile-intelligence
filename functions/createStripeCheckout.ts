@@ -3,17 +3,17 @@ import Stripe from 'npm:stripe@17.5.0';
 
 const PLAN_PRICES = {
   starter: { 
-    priceId: 'price_1SztiwRUBY8YrkzQkZKFwQ71', 
+    priceId: 'price_1SzunGRUBY8YrkzQw1bsWlUi', 
     name: 'Starter', 
     max_users: 10 
   },
   growth: { 
-    priceId: 'price_1SztiwRUBY8YrkzQZzlhEHxF', 
+    priceId: 'price_1SzunGRUBY8YrkzQwkXxGFFC', 
     name: 'Growth', 
     max_users: 25 
   },
   pro: { 
-    priceId: 'price_1SztiwRUBY8YrkzQPQZ9Sqkb', 
+    priceId: 'price_1SzunGRUBY8YrkzQMtaYaPxP', 
     name: 'Pro', 
     max_users: 50 
   }
