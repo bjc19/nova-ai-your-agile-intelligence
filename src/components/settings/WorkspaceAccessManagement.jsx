@@ -146,7 +146,11 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     if (!editingUser || !newRole) return;
 
     try {
-      await base44.functions.invoke('updateUserRole', { userId: editingUser.id, newRole });
+      await base44.functions.invoke('updateUserRole', { 
+        userId: editingUser.id, 
+        userEmail: editingUser.email,
+        newRole 
+      });
 
       // Update local state
       setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
