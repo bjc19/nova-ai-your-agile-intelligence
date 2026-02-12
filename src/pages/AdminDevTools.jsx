@@ -125,6 +125,19 @@ export default function AdminDevTools() {
     }
   };
 
+  const changePlan = async (clientId, clientEmail, newPlan) => {
+    if (!window.confirm(`🔄 Changer le plan de ${clientEmail} vers ${newPlan.toUpperCase()}?`)) return;
+    try {
+      await base44.entities.Client.update(clientId, {
+        plan: newPlan
+      });
+      toast.success(`✅ Plan changé vers ${newPlan.toUpperCase()}`);
+      loadData();
+    } catch (e) {
+      toast.error("❌ Erreur changement de plan");
+    }
+  };
+
   const filteredRequests = requests.filter(req => {
     const matchesSearch = searchQuery === '' || 
       req.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -328,6 +341,16 @@ export default function AdminDevTools() {
                         </p>
                       </div>
                       <div className="flex flex-col gap-2">
+                        <select
+                          value={client.plan}
+                          onChange={(e) => changePlan(client.id, client.email, e.target.value)}
+                          className="px-3 py-1.5 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="starter">Starter</option>
+                          <option value="growth">Growth</option>
+                          <option value="pro">Pro</option>
+                          <option value="enterprise">Enterprise</option>
+                        </select>
                         {client.status === "active" ? (
                           <Button 
                             onClick={() => suspendClient(client.id, client.email)}
