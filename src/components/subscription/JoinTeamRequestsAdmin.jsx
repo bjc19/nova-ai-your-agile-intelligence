@@ -11,27 +11,31 @@ export default function JoinTeamRequestsAdmin() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
+  const loadRequests = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+
+      // Fetch pending requests for this manager
+      const pendingRequests = await base44.entities.JoinTeamRequest.filter({
+        manager_email: currentUser.email,
+        status: 'pending'
+      });
+
+      setRequests(pendingRequests);
+    } catch (error) {
+      console.error('Error loading join requests:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadRequests = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-
-        // Fetch pending requests for this manager
-        const pendingRequests = await base44.entities.JoinTeamRequest.filter({
-          manager_email: currentUser.email,
-          status: 'pending'
-        });
-
-        setRequests(pendingRequests);
-      } catch (error) {
-        console.error('Error loading join requests:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadRequests();
+    
+    // Set up polling to refresh every 5 seconds
+    const interval = setInterval(loadRequests, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleApprove = async (request) => {
