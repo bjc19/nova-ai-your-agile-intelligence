@@ -14,50 +14,10 @@ export function SignupModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSignup = async (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
-    setError("");
-
-    if (!email.trim()) {
-      setError("Email requis");
-      return;
-    }
-    if (!fullName.trim()) {
-      setError("Nom complet requis");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Utiliser Base44 pour créer un compte
-      await base44.auth.createEmailPasswordUser({
-        email,
-        password,
-        full_name: fullName
-      });
-
-      // Après création réussie, rediriger vers ChooseAccess
-      setEmail("");
-      setFullName("");
-      setPassword("");
-      setConfirmPassword("");
-      onClose();
-      setTimeout(() => {
-        window.location.href = createPageUrl("ChooseAccess");
-      }, 100);
-    } catch (err) {
-      console.error("Signup error:", err);
-      setError(err.message || "Erreur lors de l'inscription. Cet email est peut-être déjà utilisé.");
-      setLoading(false);
-    }
+    onClose();
+    base44.auth.redirectToSignup(createPageUrl("ChooseAccess"));
   };
 
   return (
