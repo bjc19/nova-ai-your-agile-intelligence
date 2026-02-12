@@ -49,7 +49,37 @@ export default function ChooseAccess() {
       }
     };
     checkAuth();
-  }, [navigate]);
+
+    // Setup polling every 10 seconds to check for status updates
+    const interval = setInterval(async () => {
+      try {
+        const u = await base44.auth.me();
+        const requests = await base44.entities.JoinTeamRequest.filter({
+          requester_email: u.email
+        });
+
+        if (requests.length > 0) {
+          const latestRequest = requests[requests.length - 1];
+          // Only update if status changed
+          if (latestRequest.status !== requestStatus) {
+            setRequestStatus(latestRequest.status);
+            setPendingRequestId(latestRequest.id);
+            
+            // If approved, redirect to dashboard
+            if (latestRequest.status === 'approved') {
+              setTimeout(() => {
+                navigate(createPageUrl("Dashboard"));
+              }, 1500);
+            }
+          }
+        }
+      } catch (e) {
+        // Silently fail, user might not be authenticated
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [navigate, requestStatus]);
 
   const handleSubscribe = () => {
     navigate(createPageUrl("Plans"));
