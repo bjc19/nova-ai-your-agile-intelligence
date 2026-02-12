@@ -56,13 +56,13 @@ import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
+import Plans from './pages/Plans';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import acceptInvitation from './pages/accept-invitation';
-import Plans from './pages/Plans';
 import __Layout from './Layout.jsx';
 
 
@@ -76,13 +76,13 @@ export const PAGES = {
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
+    "Plans": Plans,
     "Register": Register,
     "ResetPassword": ResetPassword,
     "Results": Results,
     "Settings": Settings,
     "TeamManagement": TeamManagement,
     "accept-invitation": acceptInvitation,
-    "Plans": Plans,
 }
 
 export const pagesConfig = {

@@ -12,6 +12,7 @@ import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
 import ReceivedInvitations from "@/components/subscription/ReceivedInvitations";
+import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
 import {
   ArrowLeft,
   MessageSquare,
