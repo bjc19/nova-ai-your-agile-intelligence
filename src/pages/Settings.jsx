@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
+import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
 import {
   ArrowLeft,
   MessageSquare,
@@ -404,14 +405,26 @@ export default function Settings() {
 
         {/* Workspace Access Management */}
         {(currentRole === 'admin' || currentRole === 'contributor') && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className="mb-8"
-          >
-            <WorkspaceAccessManagement currentRole={currentRole} />
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="mb-8"
+            >
+              <WorkspaceAccessManagement currentRole={currentRole} />
+            </motion.div>
+            
+            {/* Join Requests Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-8"
+            >
+              <JoinRequestsManager />
+            </motion.div>
+          </>
         )}
 
         {/* Team & Projects Configuration */}
