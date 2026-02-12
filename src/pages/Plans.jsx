@@ -196,10 +196,10 @@ export default function Plans() {
           className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Plans de tarification
+            Plans et tarifs
           </h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Choisissez le plan qui correspond à vos besoins. Tous les plans incluent une période d'essai gratuite.
+            Choisissez le plan adapté à votre équipe
           </p>
         </motion.div>
       </div>
