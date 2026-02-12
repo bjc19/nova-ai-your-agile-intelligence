@@ -31,9 +31,9 @@ export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full"
+      className="mb-8"
     >
-      <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm w-fit">
         <Quote className="w-4 h-4 text-blue-500 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm italic text-slate-700 font-light">
