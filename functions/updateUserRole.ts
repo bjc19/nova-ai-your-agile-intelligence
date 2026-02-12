@@ -45,10 +45,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
     }
 
-    // Update User entity
-    await base44.asServiceRole.entities.User.update(userId, { role: newRole });
-
-    // Update both TeamMember and WorkspaceMember
+    // Contributors: Update only TeamMember and WorkspaceMember (not User)
     await base44.asServiceRole.entities.TeamMember.update(teamMember.id, { role: newRole });
     if (workspaceMembers.length > 0) {
       await base44.asServiceRole.entities.WorkspaceMember.update(workspaceMembers[0].id, { role: newRole });
