@@ -208,7 +208,8 @@ export function LoginDialog({ isOpen, onClose }) {
               type="button"
               onClick={() => {
                 onClose();
-                base44.auth.redirectToSignup(createPageUrl("ChooseAccess"));
+                // Redirect to signup which will handle account creation
+                base44.auth.redirectToSignup();
               }}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
