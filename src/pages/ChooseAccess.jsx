@@ -46,7 +46,13 @@ export default function ChooseAccess() {
   }, [navigate]);
 
   const handleSubscribe = () => {
-    navigate(createPageUrl("Home") + "#pricing");
+    navigate(createPageUrl("Home"));
+    setTimeout(() => {
+      const pricingSection = document.getElementById("pricing");
+      if (pricingSection) {
+        pricingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   };
 
   const handleJoinTeam = async () => {
