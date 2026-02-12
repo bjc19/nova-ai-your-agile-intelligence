@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Lightbulb } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { base44 } from "@/api/base44Client";
-import { anonymizeNamesInText } from "@/components/nova/anonymizationEngine";
 
 const QUOTES = [
   // 1–60 : Lancement, itération & MVP
@@ -199,7 +198,7 @@ export default function DailyQuote({ blockerCount = 0, riskCount = 0, healthInde
         <div className="flex gap-3">
           <Lightbulb className={`w-5 h-5 flex-shrink-0 mt-0.5 ${categoryIcons[category]}`} />
           <p className="text-sm text-slate-700 leading-relaxed italic">
-            {anonymizeNamesInText(displayedQuote || quote) || quote}
+            {displayedQuote || quote}
           </p>
         </div>
       </div>
