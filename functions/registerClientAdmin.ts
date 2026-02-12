@@ -60,6 +60,20 @@ Deno.serve(async (req) => {
       used_at: new Date().toISOString()
     });
 
+    // Créer une subscription pour l'admin
+    const subscription = await base44.asServiceRole.entities.Subscription.create({
+      user_email: email,
+      plan: client.plan,
+      status: 'active',
+      stripe_customer_id: '',
+      stripe_subscription_id: '',
+      current_period_start: new Date().toISOString(),
+      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      cancel_at_period_end: false,
+      max_users: client.max_users,
+      is_admin: true
+    });
+
     // Créer workspace pour le client
     await base44.asServiceRole.entities.WorkspaceMember.create({
       user_email: email,
@@ -67,6 +81,16 @@ Deno.serve(async (req) => {
       role: 'admin',
       workspace_id: client.id,
       invitation_status: 'accepted'
+    });
+
+    // Créer TeamMember pour tracker l'admin
+    await base44.asServiceRole.entities.TeamMember.create({
+      user_email: email,
+      user_name: fullName,
+      subscription_id: subscription.id,
+      manager_email: email,
+      role: 'admin',
+      joined_at: new Date().toISOString()
     });
 
     // Log d'audit
