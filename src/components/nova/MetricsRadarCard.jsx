@@ -7,6 +7,7 @@ import { useRoleAccess } from "@/components/dashboard/useRoleAccess";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 import {
   AlertTriangle,
   TrendingUp,

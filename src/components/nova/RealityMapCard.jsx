@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
+import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 import {
   Network,
   AlertTriangle,
@@ -455,16 +456,16 @@ Actions recommandées :
                       className="p-3 rounded-lg bg-white border border-slate-200"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">{entry.zone}</p>
-                          <div className="flex items-center gap-2 mt-1 text-xs">
-                            <span className="text-slate-500">Rôle officiel:</span>
-                            <span className="text-slate-700">{entry.officialRole}</span>
-                            <span className="text-slate-400">→</span>
-                            <span className="text-slate-500">Décideur réel:</span>
-                            <span className="font-semibold text-slate-900">{entry.realDecider}</span>
-                          </div>
-                        </div>
+                      <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">{anonymizeText(entry.zone)}</p>
+                      <div className="flex items-center gap-2 mt-1 text-xs">
+                        <span className="text-slate-500">Rôle officiel:</span>
+                        <span className="text-slate-700">{anonymizeText(entry.officialRole)}</span>
+                        <span className="text-slate-400">→</span>
+                        <span className="text-slate-500">Décideur réel:</span>
+                        <span className="font-semibold text-slate-900">{anonymizeText(entry.realDecider)}</span>
+                      </div>
+                      </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className={`text-xs ${confLevel.bgColor} ${confLevel.color}`}>
                             {confLevel.emoji} {entry.confidence}%
@@ -677,11 +678,11 @@ Actions recommandées :
                   <div key={idx} className="p-3 rounded-lg bg-white border border-red-200">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{issue.recommendation_text}</p>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
-                          <span>Appliqué il y a {issue.daysSince} jours par <strong>{issue.applied_by}</strong></span>
-                        </div>
-                      </div>
+                         <p className="text-sm font-medium text-slate-900">{anonymizeText(issue.recommendation_text)}</p>
+                         <div className="flex items-center gap-2 mt-1 text-xs text-slate-600">
+                           <span>Appliqué il y a {issue.daysSince} jours par <strong>{anonymizeText(issue.applied_by)}</strong></span>
+                         </div>
+                       </div>
                       <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300">
                         {issue.status === 'worsened' ? '📈 Aggravé' : '⏸️ Stagnant'}
                       </Badge>
@@ -823,7 +824,7 @@ Actions recommandées :
                                  <div className="flex items-center gap-1.5 text-xs text-emerald-700">
                                    <CheckCircle2 className="w-3.5 h-3.5" />
                                    <span>
-                                     Appliqué par <strong>{isApplied.name}</strong> le{" "}
+                                     Appliqué par <strong>{anonymizeText(isApplied.name)}</strong> le{" "}
                                      {new Date(isApplied.date).toLocaleString('fr-FR', {
                                        day: 'numeric',
                                        month: 'short',

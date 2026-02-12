@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -490,12 +491,12 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
                 </>
               ) : (
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="flex items-start gap-3">
-                    <BellOff className="w-5 h-5 text-slate-400 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-700 mb-1">Signal acquitté</p>
-                      <p className="text-xs text-slate-500">
-                        Par <span className="font-medium">{acknowledgedBy}</span> le{" "}
+                <div className="flex items-start gap-3">
+                 <BellOff className="w-5 h-5 text-slate-400 mt-0.5" />
+                 <div>
+                   <p className="text-sm font-medium text-slate-700 mb-1">Signal acquitté</p>
+                   <p className="text-xs text-slate-500">
+                     Par <span className="font-medium">{anonymizeText(acknowledgedBy)}</span> le{" "}
                         {new Date(acknowledgedDate).toLocaleString('fr-FR', {
                           day: 'numeric',
                           month: 'short',
