@@ -163,6 +163,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       toast.success('Rôle mis à jour avec succès');
       setEditingUser(null);
       setNewRole(null);
+      
+      // Force refresh from database to ensure persistence
+      const allUsers = await base44.entities.User.list();
+      setUsers(allUsers || []);
     } catch (error) {
       console.error('Update role error:', error);
       toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour du rôle');
