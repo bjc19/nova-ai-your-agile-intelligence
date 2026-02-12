@@ -2,9 +2,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import Stripe from 'npm:stripe@17.5.0';
 
 const PLAN_PRICES = {
-  starter: { price: 4900, name: 'Starter', max_users: 3 },
-  growth: { price: 14900, name: 'Growth', max_users: 10 },
-  pro: { price: 29900, name: 'Pro', max_users: 25 }
+  starter: { 
+    priceId: 'price_1SztiwRUBY8YrkzQkZKFwQ71', 
+    name: 'Starter', 
+    max_users: 10 
+  },
+  growth: { 
+    priceId: 'price_1SztiwRUBY8YrkzQZzlhEHxF', 
+    name: 'Growth', 
+    max_users: 25 
+  },
+  pro: { 
+    priceId: 'price_1SztiwRUBY8YrkzQPQZ9Sqkb', 
+    name: 'Pro', 
+    max_users: 50 
+  }
 };
 
 Deno.serve(async (req) => {
@@ -35,17 +47,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
-        price_data: {
-          currency: 'cad',
-          product_data: {
-            name: `Nova AI - Plan ${PLAN_PRICES[plan].name}`,
-            description: `Jusqu'à ${PLAN_PRICES[plan].max_users} utilisateurs`
-          },
-          unit_amount: PLAN_PRICES[plan].price,
-          recurring: {
-            interval: 'month'
-          }
-        },
+        price: PLAN_PRICES[plan].priceId,
         quantity: 1
       }],
       mode: 'subscription',
@@ -53,6 +55,7 @@ Deno.serve(async (req) => {
       cancel_url: `${appUrl}/Dashboard`,
       customer_email: user.email,
       metadata: {
+        base44_app_id: Deno.env.get('BASE44_APP_ID'),
         user_email: user.email,
         plan: plan,
         max_users: PLAN_PRICES[plan].max_users.toString()
