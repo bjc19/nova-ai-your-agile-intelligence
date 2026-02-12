@@ -64,7 +64,7 @@ export default function ChooseAccess() {
     setSubmitting(true);
     try {
       const response = await base44.functions.invoke('joinTeamRequest', {
-        adminEmail: adminEmail.trim()
+        managerEmail: adminEmail.trim()
       });
 
       if (response.data.success) {
