@@ -10,6 +10,7 @@ import { DemoSimulator } from "@/components/nova/DemoSimulator";
 import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
 
 function LayoutContent({ children, currentPageName }) {
+    const navigate = useNavigate();
     const { t } = useLanguage();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
