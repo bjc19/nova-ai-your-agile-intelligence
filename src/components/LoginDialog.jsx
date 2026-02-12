@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { X, Loader2 } from "lucide-react";
 
 export function LoginDialog({ isOpen, onClose }) {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -210,7 +208,7 @@ export function LoginDialog({ isOpen, onClose }) {
               type="button"
               onClick={() => {
                 onClose();
-                navigate("/ChooseAccess");
+                window.location.href = "/ChooseAccess";
               }}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
