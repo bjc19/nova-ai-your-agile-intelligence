@@ -155,10 +155,18 @@ export function PricingSection() {
   const handleSubscribe = async (plan) => {
     setSubscribingPlan(plan.id);
     try {
+      // Vérifier si on est dans un iframe
+      if (window.self !== window.top) {
+        toast.error("Le paiement ne fonctionne que depuis l'application publiée, pas en aperçu");
+        setSubscribingPlan(null);
+        return;
+      }
+
       const isAuth = await base44.auth.isAuthenticated();
       if (!isAuth) {
         navigate(createPageUrl("Home"));
         toast.error("Veuillez vous connecter pour souscrire");
+        setSubscribingPlan(null);
         return;
       }
 
@@ -166,14 +174,15 @@ export function PricingSection() {
         plan: plan.id
       });
 
-      if (response.data.url) {
+      if (response.data?.url) {
         window.location.href = response.data.url;
       } else {
-        toast.error(response.data.error || "Erreur lors de la création du paiement");
+        toast.error(response.data?.error || "Erreur lors de la création du paiement");
+        setSubscribingPlan(null);
       }
     } catch (error) {
-      toast.error("Erreur lors de la souscription");
-    } finally {
+      console.error("Subscription error:", error);
+      toast.error(error?.message || "Erreur lors de la souscription");
       setSubscribingPlan(null);
     }
   };
