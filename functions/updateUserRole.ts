@@ -18,15 +18,21 @@ Deno.serve(async (req) => {
     // Admins (platform) can update any role
     if (user.role === 'admin') {
       const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
+      const workspaceMembers = await base44.asServiceRole.entities.WorkspaceMember.filter({ user_email: userEmail });
+
       if (teamMembers.length > 0) {
         await base44.asServiceRole.entities.TeamMember.update(teamMembers[0].id, { role: newRole });
+      }
+      if (workspaceMembers.length > 0) {
+        await base44.asServiceRole.entities.WorkspaceMember.update(workspaceMembers[0].id, { role: newRole });
       }
       return Response.json({ success: true, message: 'Role updated' });
     }
 
     // Contributors can only update members they invited
     const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
-    
+    const workspaceMembers = await base44.asServiceRole.entities.WorkspaceMember.filter({ user_email: userEmail });
+
     if (teamMembers.length === 0) {
       return Response.json({ error: 'Member not found' }, { status: 404 });
     }
@@ -36,8 +42,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
     }
 
-    // Update the TeamMember entity (not User)
+    // Update both TeamMember and WorkspaceMember
     await base44.asServiceRole.entities.TeamMember.update(teamMember.id, { role: newRole });
+    if (workspaceMembers.length > 0) {
+      await base44.asServiceRole.entities.WorkspaceMember.update(workspaceMembers[0].id, { role: newRole });
+    }
 
     return Response.json({ success: true, message: 'Role updated' });
   } catch (error) {
