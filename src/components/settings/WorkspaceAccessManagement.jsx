@@ -347,24 +347,9 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                         </div>
                      </div>
                     <div className="flex items-center gap-2">
-                       {canEditUserRole(user) ? (
-                         <button
-                           onClick={() => {
-                             setEditingUser(user);
-                             setNewRole(user.role);
-                           }}
-                           className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
-                         >
-                           <Badge variant="outline" className="text-xs">
-                             {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                           </Badge>
-                           <Edit2 className="w-3.5 h-3.5 text-slate-500" />
-                         </button>
-                       ) : (
-                         <Badge variant="outline" className="text-xs">
-                           {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                         </Badge>
-                       )}
+                       <Badge variant="outline" className="text-xs">
+                         {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                       </Badge>
                        {canManage && user.email !== currentUser?.email && (
                          <Button 
                            variant="ghost" 
