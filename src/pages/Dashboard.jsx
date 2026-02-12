@@ -226,6 +226,12 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}>
 
+            {/* Daily Quote */}
+            <DailyQuote 
+              blockerCount={gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length} 
+              riskCount={gdprSignals.filter(s => s.criticite === 'moyenne').length} 
+            />
+
             {/* Welcome Banner */}
             <div className="flex flex-col gap-6 mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
