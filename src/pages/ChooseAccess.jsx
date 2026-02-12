@@ -106,6 +106,59 @@ export default function ChooseAccess() {
           <p className="text-lg text-slate-600">Pour accéder à Nova AI, choisissez l'une des options ci-dessous :</p>
         </div>
 
+        {/* Pending Request Status */}
+        {requestStatus === "pending" && (
+          <Card className="border-2 border-blue-500 bg-blue-50">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Demande en attente</CardTitle>
+                  <CardDescription>Votre demande a été envoyée avec succès</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-600">
+                L'administrateur a reçu votre demande et peut l'approuver ou la rejeter. Vous recevrez un email de confirmation dès que votre demande sera traitée.
+              </p>
+              <p className="text-xs text-slate-500">
+                Vous pouvez fermer cette page. Un lien vers votre espace de travail vous sera envoyé par email dès que votre accès sera approuvé.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {requestStatus === "rejected" && (
+          <Card className="border-2 border-red-500 bg-red-50">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-red-200 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Demande refusée</CardTitle>
+                  <CardDescription>Votre demande a été rejetée</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Malheureusement, votre demande pour rejoindre cette équipe a été refusée. Vous pouvez essayer avec un autre administrateur ou souscrire à votre propre plan.
+              </p>
+              <Button 
+                onClick={handleRejectionConfirm}
+                className="w-full"
+              >
+                Je comprends
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {!requestStatus && (
         <div className="grid md:grid-cols-2 gap-6">
           
           <Card className="border-2 hover:border-blue-500 transition-all cursor-pointer" onClick={handleSubscribe}>
