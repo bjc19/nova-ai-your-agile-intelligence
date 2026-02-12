@@ -16,6 +16,8 @@ export default function ChooseAccess() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [requestStatus, setRequestStatus] = useState(null); // 'pending', 'rejected'
+  const [pendingRequestId, setPendingRequestId] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
