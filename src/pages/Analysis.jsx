@@ -87,11 +87,32 @@ export default function Analysis() {
       try {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        
+        // Check if user has access
+        if (currentUser.role === 'user') {
+          // Check if user has any pending or rejected requests
+          const requests = await base44.entities.JoinTeamRequest.filter({
+            requester_email: currentUser.email
+          });
+          
+          if (requests.length > 0) {
+            const status = requests[requests.length - 1].status;
+            if (status === 'pending' || status === 'rejected') {
+              navigate(createPageUrl("ChooseAccess"));
+              return;
+            }
+          } else {
+            // No requests at all, new user
+            navigate(createPageUrl("ChooseAccess"));
+            return;
+          }
+        }
+        
         const hasPermission = currentUser.role === 'admin' || currentUser.role === 'contributor';
         setCanCreateAnalysis(hasPermission);
         
         if (!hasPermission) {
-          navigate(createPageUrl("Dashboard"));
+          navigate(createPageUrl("ChooseAccess"));
         }
       } catch (error) {
         console.error('Error checking permissions:', error);
