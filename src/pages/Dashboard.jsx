@@ -30,19 +30,21 @@ import {
   Loader2,
   TrendingUp } from
 "lucide-react";
+import { useAccessControl } from "@/components/dashboard/useAccessControl";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const { t } = useLanguage();
-  const [user, setUser] = useState(null);
-  const [latestAnalysis, setLatestAnalysis] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [multiProjectAlert, setMultiProjectAlert] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState(null);
+   const navigate = useNavigate();
+   const { t } = useLanguage();
+   useAccessControl();
+   const [user, setUser] = useState(null);
+   const [latestAnalysis, setLatestAnalysis] = useState(null);
+   const [isLoading, setIsLoading] = useState(true);
+   const [showOnboarding, setShowOnboarding] = useState(false);
+   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
+   const [selectedPeriod, setSelectedPeriod] = useState(null);
 
-  const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
+   const [sprintContext, setSprintContext] = useState(null);
+   const [gdprSignals, setGdprSignals] = useState([]);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -69,28 +71,6 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-
-        // Check if user has access (role must not be 'user' or they must have a subscription/team membership)
-        if (currentUser.role === 'user') {
-          // Check if user has any pending or rejected requests
-          const requests = await base44.entities.JoinTeamRequest.filter({
-            requester_email: currentUser.email
-          });
-          
-          if (requests.length > 0) {
-            const status = requests[requests.length - 1].status;
-            if (status === 'pending' || status === 'rejected') {
-              navigate(createPageUrl("ChooseAccess"));
-              setIsLoading(false);
-              return;
-            }
-          } else {
-            // No requests at all, new user
-            navigate(createPageUrl("ChooseAccess"));
-            setIsLoading(false);
-            return;
-          }
-        }
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });

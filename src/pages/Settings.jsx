@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { useAccessControl } from "@/components/dashboard/useAccessControl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ import {
 } from "lucide-react";
 
 export default function Settings() {
+   useAccessControl();
    const navigate = useNavigate();
    const [slackConnected, setSlackConnected] = useState(false);
    const [slackTeamName, setSlackTeamName] = useState(null);
@@ -264,26 +266,8 @@ export default function Settings() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Check user access first
         const user = await base44.auth.me();
         setCurrentRole(user.role || 'contributor');
-        
-        // Check if user is waiting for approval
-        if (user.role === 'user') {
-          // Check if user has any pending or rejected requests
-          const requests = await base44.entities.JoinTeamRequest.filter({
-            requester_email: user.email
-          });
-          
-          if (requests.length > 0) {
-            const status = requests[requests.length - 1].status;
-            if (status === 'pending' || status === 'rejected') {
-              // Redirect to ChooseAccess
-              navigate(createPageUrl("ChooseAccess"));
-              return;
-            }
-          }
-        }
 
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();

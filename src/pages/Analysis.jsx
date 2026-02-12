@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
+import { useAccessControl } from "@/components/dashboard/useAccessControl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,9 +37,10 @@ import {
 import { Link } from "react-router-dom";
 
 export default function Analysis() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { t, language } = useLanguage();
+   useAccessControl();
+   const navigate = useNavigate();
+   const queryClient = useQueryClient();
+   const { t, language } = useLanguage();
   const [transcript, setTranscript] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
@@ -88,38 +90,14 @@ export default function Analysis() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
         
-        // Check if user has access
-        if (currentUser.role === 'user') {
-          // Check if user has any pending or rejected requests
-          const requests = await base44.entities.JoinTeamRequest.filter({
-            requester_email: currentUser.email
-          });
-          
-          if (requests.length > 0) {
-            const status = requests[requests.length - 1].status;
-            if (status === 'pending' || status === 'rejected') {
-              navigate(createPageUrl("ChooseAccess"));
-              return;
-            }
-          } else {
-            // No requests at all, new user
-            navigate(createPageUrl("ChooseAccess"));
-            return;
-          }
-        }
-        
         const hasPermission = currentUser.role === 'admin' || currentUser.role === 'contributor';
         setCanCreateAnalysis(hasPermission);
-        
-        if (!hasPermission) {
-          navigate(createPageUrl("ChooseAccess"));
-        }
       } catch (error) {
         console.error('Error checking permissions:', error);
       }
     };
     checkPermissions();
-  }, [navigate]);
+  }, []);
 
   // Generate alignment report on mount
   useEffect(() => {
