@@ -48,7 +48,7 @@ const plans = [
       "Pas d'alertes automatiques",
       "Pas de KPIs détaillés"
     ],
-    ctaKey: "contactSales"
+    ctaKey: "subscribe"
   },
   {
     id: "growth",
