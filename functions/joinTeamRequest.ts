@@ -100,7 +100,16 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Join team request error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    const errorMsg = error.message || 'Erreur inconnue';
+    console.error('Join team request error:', {
+      message: errorMsg,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+    return Response.json({ 
+      success: false,
+      error: errorMsg,
+      status: 'error'
+    }, { status: 500 });
   }
 });
