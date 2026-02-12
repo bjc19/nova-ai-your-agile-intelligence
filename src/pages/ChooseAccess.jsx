@@ -159,7 +159,7 @@ export default function ChooseAccess() {
         )}
 
         {!requestStatus && (
-        <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
           
           <Card className="border-2 hover:border-blue-500 transition-all cursor-pointer" onClick={handleSubscribe}>
             <CardHeader>
@@ -231,9 +231,8 @@ export default function ChooseAccess() {
           </Card>
 
         </div>
-
-        </div>
         )}
+        </div>
         </div>
         );
         }
