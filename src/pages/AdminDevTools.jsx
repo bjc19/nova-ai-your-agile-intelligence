@@ -89,14 +89,21 @@ export default function AdminDevTools() {
 
   const approveRequest = async (requestId) => {
     try {
-      await base44.entities.PendingRequest.update(requestId, {
-        status: "approved",
-        approved_by: user?.email
+      const response = await base44.functions.invoke('approveClientRequest', {
+        requestId
       });
-      toast.success("✅ Demande approuvée");
-      loadData();
+
+      if (response.data.success) {
+        toast.success("✅ Demande approuvée et email d'activation envoyé", {
+          description: "Le client recevra un lien pour créer son compte.",
+          duration: 5000
+        });
+        loadData();
+      } else {
+        toast.error("❌ " + (response.data.error || "Erreur approbation"));
+      }
     } catch (e) {
-      toast.error("❌ Erreur approbation");
+      toast.error("❌ Erreur approbation: " + e.message);
     }
   };
 

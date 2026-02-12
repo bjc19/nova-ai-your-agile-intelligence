@@ -47,7 +47,10 @@ export function ContactSalesModal({ plan, onClose }) {
       });
 
       if (response.data.success) {
-        toast.success("✅ Demande envoyée! Réponse sous 24h.");
+        toast.success("✅ Demande envoyée avec succès!", {
+          description: "Notre service client examinera votre demande et vous contactera sous 24h avec vos accès.",
+          duration: 6000
+        });
         onClose();
       } else {
         toast.error("❌ " + (response.data.error || "Erreur lors de l'envoi"));
