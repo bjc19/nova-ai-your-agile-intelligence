@@ -52,7 +52,7 @@ export default function ChooseAccess() {
   }, [navigate]);
 
   const handleSubscribe = () => {
-    navigate(createPageUrl("Home") + "#pricing");
+    navigate(createPageUrl("Pricing"));
   };
 
   const handleJoinTeam = async () => {
