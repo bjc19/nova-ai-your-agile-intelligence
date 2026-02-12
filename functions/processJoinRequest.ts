@@ -77,26 +77,7 @@ Deno.serve(async (req) => {
         processed_at: new Date().toISOString()
       });
 
-      await resend.emails.send({
-        from: 'Nova AI <contact@novagile.ca>',
-        to: request.requester_email,
-        subject: 'Votre demande n\'a pas été approuvée',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #f8fafc; padding: 30px;">
-              <p style="font-size: 16px; color: #334155;">Votre demande pour rejoindre l'équipe n'a pas été approuvée pour le moment.</p>
-              <p style="font-size: 16px; color: #334155;">Vous pouvez toujours souscrire à un plan individuel pour accéder à Nova.</p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${Deno.env.get('APP_URL')}/Dashboard" 
-                   style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                  Voir les plans
-                </a>
-              </div>
-              <p style="font-size: 12px; color: #94a3b8;">© 2026 Nova AI - Tous droits réservés</p>
-            </div>
-          </div>
-        `
-      });
+      // No email sent on rejection per requirements
 
       return Response.json({ success: true, message: 'Demande rejetée' });
     }
