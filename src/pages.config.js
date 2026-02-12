@@ -51,6 +51,7 @@ import AcceptInvitation from './pages/AcceptInvitation';
 import AdminDevTools from './pages/AdminDevTools';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
+import ChooseAccess from './pages/ChooseAccess';
 import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
@@ -60,7 +61,6 @@ import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
 import acceptInvitation from './pages/accept-invitation';
-import ChooseAccess from './pages/ChooseAccess';
 import __Layout from './Layout.jsx';
 
 
@@ -69,6 +69,7 @@ export const PAGES = {
     "AdminDevTools": AdminDevTools,
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
+    "ChooseAccess": ChooseAccess,
     "Dashboard": Dashboard,
     "Demo": Demo,
     "Details": Details,
@@ -78,7 +79,6 @@ export const PAGES = {
     "Results": Results,
     "Settings": Settings,
     "accept-invitation": acceptInvitation,
-    "ChooseAccess": ChooseAccess,
 }
 
 export const pagesConfig = {

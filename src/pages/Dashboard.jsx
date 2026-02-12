@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -19,7 +20,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -207,6 +207,7 @@ export default function Dashboard() {
   }
 
   return (
+    <SubscriptionGuard>
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Onboarding Modal */}
       <TeamConfigOnboarding
@@ -291,19 +292,12 @@ export default function Dashboard() {
                   }} />
 
               </div>
-              </div>
+            </div>
 
-              {/* Daily Quote */}
-              <DailyQuote
-              blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-              riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-              healthIndex={analysisHistory.length > 0 ? 1.2 : 0}
-              />
-
-              {/* Quick Stats - Only show if data in period */}
-              {(!selectedPeriod || analysisHistory.length > 0) &&
-              <QuickStats analysisHistory={analysisHistory} />
-              }
+            {/* Quick Stats - Only show if data in period */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
@@ -483,6 +477,7 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
-    </div>);
+    </div>
+    </SubscriptionGuard>);
 
 }
