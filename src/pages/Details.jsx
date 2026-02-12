@@ -12,6 +12,18 @@ import { useLanguage } from "@/components/LanguageContext";
 import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield } from "lucide-react";
 import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 
+// Anonymize names in text
+const anonymizeNamesInText = (text) => {
+  if (!text) return text;
+  
+  const namePattern = /\b([A-ZÀ-ÿ][a-zà-ÿ]+)\b/g;
+  return text.replace(namePattern, (match) => {
+    const commonWords = ['Vous', 'Excellent', 'À', 'Continuez', 'Priorisez', 'You', 'Needs', 'Keep', 'Prioritize', 'Resolved', 'Blockers', 'Risks', 'IST'];
+    if (commonWords.includes(match)) return match;
+    return anonymizeText(match);
+  });
+};
+
 const translateContent = async (text, targetLanguage) => {
   if (!text || targetLanguage === 'en') return text;
   
@@ -467,16 +479,16 @@ export default function Details() {
                           </div>
                         )}
                         <p className="text-sm text-slate-600 mt-2">
-                          {anonymizeText(displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-")}
+                          {anonymizeNamesInText(anonymizeText(displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-"))}
                         </p>
                         {displayItem.action && (
                           <p className="text-xs text-slate-500 mt-2">
-                            <strong>{t('action')}:</strong> {anonymizeText(displayItem.action)}
+                            <strong>{t('action')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.action))}
                           </p>
                         )}
                         {displayItem.impact && (
                           <p className="text-xs text-slate-500 mt-1">
-                            <strong>{t('impact')}:</strong> {anonymizeText(displayItem.impact)}
+                            <strong>{t('impact')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.impact))}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-3 flex-wrap">
