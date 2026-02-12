@@ -206,119 +206,132 @@ export default function Plans() {
 
       {/* Plans Grid */}
       <div className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {PLANS.map((plan, index) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className={`relative rounded-2xl transition-all ${
-                plan.recommended
-                  ? "ring-2 ring-blue-600 scale-105 shadow-2xl"
-                  : "border border-slate-200 shadow-lg"
-              } bg-white overflow-hidden`}
             >
-              {plan.recommended && (
-                <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 text-center text-sm font-semibold">
-                  ⭐ Plan Recommandé
-                </div>
-              )}
-
-              <div className={`p-8 ${plan.recommended ? "pt-16" : ""}`}>
-                {/* Plan Name */}
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                  {plan.name}
-                </h3>
-                <p className="text-slate-600 mb-6">{plan.description}</p>
-
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-slate-900">
-                      {plan.price}
-                    </span>
-                    <span className="text-slate-600">€/{plan.billing}</span>
-                  </div>
-                  <p className="text-sm text-slate-500 mt-2">
-                    Facturation mensuelle, sans engagement
-                  </p>
-                </div>
-
-                {/* CTA Button */}
-                <Button
-                  onClick={() => handleSelectPlan(plan.id)}
-                  disabled={isLoading}
-                  className={`w-full mb-8 ${
-                    plan.recommended
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
-                      : "border border-slate-300 text-slate-900 hover:bg-slate-50"
-                  }`}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : null}
-                  {plan.cta}
-                </Button>
-
-                {/* Features */}
-                <div className="space-y-4">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-700">{feature}</span>
+              <Card 
+                className={`flex flex-col h-full ${plan.id === 'pro' ? 'border-2 border-purple-500 shadow-lg' : 'border-slate-200'}`}
+              >
+                <CardHeader className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <Badge className={plan.badgeColor}>
+                        {plan.badge}
+                      </Badge>
+                      {plan.badge2 && <span className="ml-2 text-xl">{plan.badge2}</span>}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                  
+                  <div>
+                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardDescription>{plan.subtitle}</CardDescription>
+                  </div>
+
+                  <div className="space-y-1 pt-2">
+                    <div className="text-3xl font-bold">
+                      {plan.price === 'Custom' ? 'Custom' : `${plan.price} CAD`}
+                      {plan.price !== 'Custom' && <span className="text-sm font-normal text-slate-500">/mois</span>}
+                    </div>
+                    
+                    {plan.priceNote && <p className="text-xs text-slate-600">{plan.priceNote}</p>}
+                    {plan.yearlyPrice && (
+                      <p className="text-xs text-green-600">
+                        💰 {plan.yearlyPrice} CAD/mois avec {plan.discount}
+                      </p>
+                    )}
+                    {plan.structure && <p className="text-xs text-slate-600">{plan.structure}</p>}
+                    {plan.degressiveNote && <p className="text-xs text-slate-600">{plan.degressiveNote}</p>}
+
+                    <p className="text-sm text-slate-600 pt-2">{plan.users}</p>
+                    <p className="text-xs text-slate-500">{plan.addOn}</p>
+                    {plan.addonOption && <p className="text-xs text-slate-500 italic">{plan.addonOption}</p>}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex-1 space-y-6">
+                  <Button 
+                    onClick={() => plan.ctaKey === 'subscribe' ? handleSubscribe(plan) : setSelectedPlan(plan)}
+                    disabled={subscribingPlan === plan.id}
+                    className={`w-full ${
+                      plan.id === 'pro' 
+                        ? 'bg-purple-600 hover:bg-purple-700' 
+                        : plan.id === 'starter' || plan.id === 'growth' || plan.id === 'enterprise'
+                        ? 'bg-[#197aed] hover:bg-[#1568d3]'
+                        : 'bg-slate-900 hover:bg-slate-800'
+                    }`}
+                  >
+                    {subscribingPlan === plan.id ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Souscription...
+                      </>
+                    ) : (
+                      plan.ctaKey === 'subscribe' ? 'S\'abonner' : 'Contacter'
+                    )}
+                  </Button>
+
+                  {plan.roiValue && (
+                    <div className="bg-green-50 p-3 rounded border border-green-200">
+                      <p className="text-sm text-green-800">{plan.roiValue}</p>
+                    </div>
+                  )}
+
+                  {plan.target && (
+                    <div className="bg-amber-50 p-3 rounded border border-amber-200">
+                      <p className="text-xs text-amber-800"><strong>Cible:</strong> {plan.target}</p>
+                    </div>
+                  )}
+
+                  {/* Included Features */}
+                  <div>
+                    <p className="font-semibold text-sm mb-3">Ce qui est inclus:</p>
+                    {plan.enterpriseIntro && (
+                      <p className="text-sm text-slate-700 mb-3 font-medium italic">{plan.enterpriseIntro}</p>
+                    )}
+                    <ul className="space-y-2">
+                      {plan.included.map((feature, idx) => (
+                        <li key={idx} className="flex gap-2 text-sm text-slate-700">
+                          <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Limitations */}
+                  {plan.limitations && (
+                    <div>
+                      <p className="font-semibold text-sm mb-3 text-red-700">Limitations:</p>
+                      <ul className="space-y-1">
+                        {plan.limitations.map((limit, idx) => (
+                          <li key={idx} className="flex gap-2 text-xs text-slate-600">
+                            <X className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
+                            <span>{limit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </div>
 
-        {/* FAQ Section */}
-        <div className="mt-20 max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
-            Questions fréquentes
-          </h2>
-          
-          <div className="space-y-6">
-            <div className="rounded-xl border border-slate-200 p-6">
-              <h4 className="font-semibold text-slate-900 mb-2">
-                Puis-je changer de plan à tout moment ?
-              </h4>
-              <p className="text-slate-600">
-                Oui, vous pouvez changer de plan à tout moment. Le changement prendra effet immédiatement et nous ajusterons votre facturation en conséquence.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 p-6">
-              <h4 className="font-semibold text-slate-900 mb-2">
-                Y a-t-il une période d'essai gratuite ?
-              </h4>
-              <p className="text-slate-600">
-                Oui, tous les plans incluent une période d'essai gratuite de 14 jours. Aucune carte de crédit requise.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 p-6">
-              <h4 className="font-semibold text-slate-900 mb-2">
-                Avez-vous des plans personnalisés ?
-              </h4>
-              <p className="text-slate-600">
-                Oui, pour les entreprises avec des besoins spécifiques. Veuillez nous contacter pour discuter d'un plan personnalisé.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 p-6">
-              <h4 className="font-semibold text-slate-900 mb-2">
-                Quelle est votre politique de remboursement ?
-              </h4>
-              <p className="text-slate-600">
-                Nous offrons un remboursement complet dans les 30 jours si vous n'êtes pas satisfait.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Contact Sales Modal */}
+        {selectedPlan && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ContactSalesModal 
+              plan={selectedPlan} 
+              onClose={() => setSelectedPlan(null)} 
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   );
