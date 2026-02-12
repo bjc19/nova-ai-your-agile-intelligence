@@ -9,16 +9,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const { userId, newRole } = await req.json();
+    const { userId, userEmail, newRole } = await req.json();
 
-    if (!userId || !newRole) {
-      return Response.json({ error: 'User ID and role required' }, { status: 400 });
+    if (!userEmail || !newRole) {
+      return Response.json({ error: 'Email and role required' }, { status: 400 });
     }
 
     // Update TeamMember role instead
-    const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: user.email });
+    const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
     if (teamMembers.length > 0) {
-      await base44.asServiceRole.entities.TeamMember.update(teamMembers[0].id, { role: newRole });
+      const teamMember = teamMembers[0];
+      
+      // Check if current user can update this member (must be manager or admin)
+      if (user.role !== 'admin' && teamMember.manager_email !== user.email) {
+        return Response.json({ error: 'You can only update members you invited' }, { status: 403 });
+      }
+      
+      await base44.asServiceRole.entities.TeamMember.update(teamMember.id, { role: newRole });
     }
 
     return Response.json({ success: true, message: 'Role updated' });
