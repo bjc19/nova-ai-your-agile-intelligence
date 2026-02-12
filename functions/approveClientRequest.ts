@@ -68,7 +68,8 @@ Deno.serve(async (req) => {
       enterprise: 'Enterprise'
     };
 
-    const activationUrl = `${Deno.env.get('APP_URL') || 'https://yourapp.com'}/Register?token=${token}`;
+    const appUrl = Deno.env.get('APP_URL') || req.headers.get('origin') || 'https://novagile.ca';
+    const activationUrl = `${appUrl}/Register?token=${token}`;
 
     await resend.emails.send({
       from: 'Nova AI <contact@novagile.ca>',

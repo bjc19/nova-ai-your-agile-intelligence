@@ -55,10 +55,13 @@ export default function AdminDevTools() {
 
 
   const approveRequest = async (requestId) => {
+    const loadingToast = toast.loading("Approbation en cours...");
     try {
       const response = await base44.functions.invoke('approveClientRequest', {
         requestId
       });
+
+      toast.dismiss(loadingToast);
 
       if (response.data.success) {
         toast.success("✅ Demande approuvée et email d'activation envoyé", {
@@ -70,6 +73,8 @@ export default function AdminDevTools() {
         toast.error("❌ " + (response.data.error || "Erreur approbation"));
       }
     } catch (e) {
+      toast.dismiss(loadingToast);
+      console.error("Approval error:", e);
       toast.error("❌ Erreur approbation: " + e.message);
     }
   };
