@@ -421,8 +421,8 @@ export default function Settings() {
           </motion.div>
         )}
 
-        {/* Join Team Requests for Admins */}
-        {currentRole === 'admin' && (
+        {/* Join Team Requests */}
+        {(currentRole === 'admin' || currentRole === 'contributor') && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
