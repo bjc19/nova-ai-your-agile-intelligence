@@ -15,10 +15,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'User ID, email and role required' }, { status: 400 });
     }
 
-    // Admins (platform) can update any role
-    if (user.role === 'admin') {
-      // Update User entity
-      await base44.asServiceRole.entities.User.update(userId, { role: newRole });
+    // Only true platform admins can update User entity role
+      if (user.role === 'admin') {
+        // Update User entity (platform-level role)
+        try {
+          await base44.entities.User.update(userId, { role: newRole });
+        } catch (err) {
+          // If user is not platform admin, they can't update User roles
+          return Response.json({ error: 'Seuls les administrateurs platform peuvent modifier les rôles' }, { status: 403 });
+        }
 
       const teamMembers = await base44.asServiceRole.entities.TeamMember.filter({ user_email: userEmail });
       const workspaceMembers = await base44.asServiceRole.entities.WorkspaceMember.filter({ user_email: userEmail });
