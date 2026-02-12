@@ -307,22 +307,27 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
     return score; // Exit early: Daily pattern dominates
   }
 
-  // CRITICAL: If estimation keywords present (story points, capacité, velocity) = PLANNING, not Review
+  // CRITICAL DIFFERENTIATOR: If estimation keywords present (story points, capacité, velocity) + commitment language = PLANNING, not Review
   // This overrides ANY Review signals
   const hasEstimation = matchesAny(text, PLANNING_OBJECTS.estimation);
-  if (hasEstimation) {
+  const hasCommitment = matchesAny(text, PLANNING_DIFFERENTIATORS.commitmentLanguage);
+  const hasScopeBreakdown = matchesAny(text, PLANNING_DIFFERENTIATORS.scopeBreakdown);
+  
+  if (hasEstimation && (hasCommitment || hasScopeBreakdown)) {
     score = Math.max(0, score - 100); // Absolute penalty: Planning dominates
     return score;
   }
 
-  // Object scoring (dominant object)
-  // Review = PRODUCT + DEMO (not just "feedback" which is in Retro too)
+  // REVIEW-SPECIFIC: Must have demo OR stakeholder validation (not just future discussion)
   const hasDemo = matchesAny(text, REVIEW_OBJECTS.demo);
   const hasProduct = matchesAny(text, REVIEW_OBJECTS.product);
+  const hasStakeholderValidation = matchesAny(text, REVIEW_DIFFERENTIATORS.stakeholderValidation);
+  const hasDemoDelivery = matchesAny(text, REVIEW_DIFFERENTIATORS.demoDelivery);
 
   if (hasDemo) score += 35;
   if (hasProduct) score += 30;
-  if (hasDemo && hasProduct) score += 15;
+  if (hasDemoDelivery) score += 25;
+  if (hasStakeholderValidation && (hasDemo || hasProduct)) score += 25;
   
   // Validation only counts if Demo OR Product is present (context-specific)
   if (matchesAny(text, REVIEW_OBJECTS.validation) && (hasDemo || hasProduct)) score += 20;
@@ -335,13 +340,17 @@ function scoreReview(text, hasStructuralPatternDaily = false) {
   if (PATTERNS.review.deliveryFocus.test(text)) score += 20;
   if (PATTERNS.review.stakeholder.test(text)) score += 15;
   
+  // CRITICAL PENALTY: If planning-specific signals are strong → Not Review
+  if (hasEstimation) score -= 60; // Estimation = Planning signal
+  if (hasCommitment) score -= 40; // Commitment language = Planning
+  if (hasScopeBreakdown) score -= 35; // Scope breakdown = Planning
+  
   // Heavy penalty: if team/process/improvement keywords dominate → Retrospective, not Review
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess)) score -= 50;
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score -= 50;
   if (matchesAny(text, RETROSPECTIVE_OBJECTS.teamProcess) && matchesAny(text, RETROSPECTIVE_OBJECTS.improvement)) score -= 30;
   
   // Anti-pattern penalties
-  if (matchesAny(text, PLANNING_OBJECTS.future) && !matchesAny(text, PLANNING_OBJECTS.estimation)) score -= 10;
   if (matchesAny(text, DAILY_OBJECTS.blockers)) score -= 15;
   
   return Math.max(0, score);
