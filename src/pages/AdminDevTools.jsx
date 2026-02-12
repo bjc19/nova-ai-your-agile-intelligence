@@ -88,6 +88,17 @@ export default function AdminDevTools() {
     }
   };
 
+  const deleteRequest = async (requestId, requestEmail) => {
+    if (!window.confirm(`⚠️ Supprimer définitivement la demande de ${requestEmail}? Cette action est irréversible.`)) return;
+    try {
+      await base44.entities.PendingRequest.delete(requestId);
+      toast.success("✅ Demande supprimée");
+      loadData();
+    } catch (e) {
+      toast.error("❌ Erreur suppression");
+    }
+  };
+
   const filteredRequests = requests.filter(req => {
     const matchesSearch = searchQuery === '' || 
       req.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -229,24 +240,33 @@ export default function AdminDevTools() {
                           <Badge variant="outline">{req.users_count} users</Badge>
                         </div>
                       </div>
-                      {req.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button 
-                            onClick={() => approveRequest(req.id)}
-                            className="bg-green-600 hover:bg-green-700"
-                            size="sm"
-                          >
-                            ✅ Approuver
-                          </Button>
-                          <Button 
-                            onClick={() => rejectRequest(req.id, req.email)}
-                            className="bg-red-600 hover:bg-red-700"
-                            size="sm"
-                          >
-                            ❌ Rejeter
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex gap-2">
+                        {req.status === "pending" && (
+                          <>
+                            <Button 
+                              onClick={() => approveRequest(req.id)}
+                              className="bg-green-600 hover:bg-green-700"
+                              size="sm"
+                            >
+                              ✅ Approuver
+                            </Button>
+                            <Button 
+                              onClick={() => rejectRequest(req.id, req.email)}
+                              className="bg-red-600 hover:bg-red-700"
+                              size="sm"
+                            >
+                              ❌ Rejeter
+                            </Button>
+                          </>
+                        )}
+                        <Button 
+                          onClick={() => deleteRequest(req.id, req.email)}
+                          className="bg-slate-600 hover:bg-slate-700"
+                          size="sm"
+                        >
+                          🗑️
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
