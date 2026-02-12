@@ -62,7 +62,6 @@ import Results from './pages/Results';
 import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import acceptInvitation from './pages/accept-invitation';
-import Pricing from './pages/Pricing';
 import __Layout from './Layout.jsx';
 
 
@@ -82,7 +81,6 @@ export const PAGES = {
     "Settings": Settings,
     "TeamManagement": TeamManagement,
     "accept-invitation": acceptInvitation,
-    "Pricing": Pricing,
 }
 
 export const pagesConfig = {

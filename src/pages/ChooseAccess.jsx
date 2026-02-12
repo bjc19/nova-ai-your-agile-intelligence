@@ -52,7 +52,7 @@ export default function ChooseAccess() {
   }, [navigate]);
 
   const handleSubscribe = () => {
-    navigate(createPageUrl("Pricing"));
+    navigate(createPageUrl("Home") + "#pricing");
   };
 
   const handleJoinTeam = async () => {
@@ -67,17 +67,15 @@ export default function ChooseAccess() {
         adminEmail: adminEmail.trim()
       });
 
-      if (response.data?.success) {
+      if (response.data.success) {
         toast.success("Demande envoyée avec succès", { duration: 5000 });
         setRequestStatus("pending");
-        setPendingRequestId(response.data.requestId);
         setAdminEmail("");
       } else {
-        toast.error(response.data?.error || response.data?.message || "Erreur lors de l'envoi");
+        toast.error(response.data.error || "Erreur lors de l'envoi");
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error(error.response?.data?.error || "Erreur lors de l'envoi de la demande");
+      toast.error("Erreur lors de l'envoi de la demande");
     } finally {
       setSubmitting(false);
     }

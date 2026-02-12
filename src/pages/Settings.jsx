@@ -392,7 +392,7 @@ export default function Settings() {
           </p>
         </motion.div>
 
-        {/* Received Invitations */}
+        {/* Workspace Access Management */}
         {(currentRole === 'admin' || currentRole === 'contributor') && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -400,11 +400,11 @@ export default function Settings() {
             transition={{ duration: 0.5, delay: 0.05 }}
             className="mb-8"
           >
-            <ReceivedInvitations />
+            <WorkspaceAccessManagement currentRole={currentRole} />
           </motion.div>
         )}
 
-        {/* Workspace Access Management */}
+        {/* Received Invitations */}
         {(currentRole === 'admin' || currentRole === 'contributor') && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -412,7 +412,7 @@ export default function Settings() {
             transition={{ duration: 0.5, delay: 0.08 }}
             className="mb-8"
           >
-            <WorkspaceAccessManagement currentRole={currentRole} />
+            <ReceivedInvitations />
           </motion.div>
         )}
 
