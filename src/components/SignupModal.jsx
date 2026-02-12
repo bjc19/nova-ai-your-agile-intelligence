@@ -39,16 +39,26 @@ export function SignupModal({ isOpen, onClose }) {
 
     setLoading(true);
     try {
-      await base44.auth.registerViaEmailPassword(email, password, fullName);
-      setEmail("");
-      setFullName("");
-      setPassword("");
-      setConfirmPassword("");
-      onClose();
-      // Redirect to ChooseAccess after successful signup
-      setTimeout(() => {
-        window.location.href = createPageUrl("ChooseAccess");
-      }, 100);
+      const response = await base44.functions.invoke('registerClientAdmin', {
+        email,
+        password,
+        fullName
+      });
+
+      if (response.data.success) {
+        setEmail("");
+        setFullName("");
+        setPassword("");
+        setConfirmPassword("");
+        onClose();
+        // Redirect to ChooseAccess after successful signup
+        setTimeout(() => {
+          window.location.href = createPageUrl("ChooseAccess");
+        }, 100);
+      } else {
+        setError(response.data.message || "Erreur lors de l'inscription.");
+        setLoading(false);
+      }
     } catch (err) {
       console.error("Signup error:", err);
       setError(err.message || "Erreur lors de l'inscription. Cet email est peut-être déjà utilisé.");
