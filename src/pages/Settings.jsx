@@ -59,9 +59,14 @@ export default function Settings() {
       if (slackConns.length > 0) {
         setSlackConnected(true);
         setSlackTeamName(slackConns[0].team_name);
+      } else {
+        setSlackConnected(false);
+        setSlackTeamName(null);
       }
     } catch (error) {
       console.error('Error loading Slack connection:', error);
+      setSlackConnected(false);
+      setSlackTeamName(null);
     }
   };
 
