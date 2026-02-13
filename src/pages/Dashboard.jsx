@@ -20,6 +20,7 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import JiraWorkspacesCard from "@/components/dashboard/JiraWorkspacesCard";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -432,16 +433,13 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column - Sidebar */}
-           <div className="space-y-6">
-             {/* Jira Workspaces */}
-             <JiraWorkspacesCard />
-
-             {/* Recent Analyses */}
-             <RecentAnalyses analyses={analysisHistory} />
-
-             {/* Integration Status */}
-             <IntegrationStatus />
-           </div>
+          <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
+          </div>
         </div>
         }
 
