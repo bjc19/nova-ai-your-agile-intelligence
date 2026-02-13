@@ -1,8 +1,12 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { Base44Client } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    // Use service role directly since this is an OAuth callback (no authenticated user yet)
+    const base44 = new Base44Client({
+      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
+      appId: Deno.env.get('BASE44_APP_ID')
+    });
     
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
@@ -81,7 +85,7 @@ Deno.serve(async (req) => {
     // Store Jira connection using email from state (callback is before auth)
     const userEmail = state; // state contains the user email
 
-    await base44.asServiceRole.entities.JiraConnection.create({
+    await base44.entities.JiraConnection.create({
       user_email: userEmail,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token || 'none',
