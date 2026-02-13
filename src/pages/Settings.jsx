@@ -167,27 +167,34 @@ export default function Settings() {
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
+      const response = await base44.functions.invoke('jiraOAuthStart', { 
+        customer_id: user.email 
+      });
 
+      const authUrl = response.data?.authorizationUrl || response.data;
+
+      // Listen for popup message
       const messageHandler = async (event) => {
         if (event.data?.type === 'jira_success') {
           window.removeEventListener('message', messageHandler);
+
+          // Decode connection data
           const connectionData = JSON.parse(atob(event.data.data));
+
+          // Save connection through authenticated endpoint
           await base44.functions.invoke('jiraSaveConnection', connectionData);
+
+          // Reload connection to get fresh data
           await loadJiraConnection();
           setConnectingJira(false);
         } else if (event.data?.type === 'jira_error') {
+          console.error('Jira connection error:', event.data.error);
           window.removeEventListener('message', messageHandler);
           setConnectingJira(false);
         }
       };
 
       window.addEventListener('message', messageHandler);
-
-      const response = await base44.functions.invoke('jiraOAuthStart', { 
-        customer_id: user.email 
-      });
-
-      const authUrl = response.data?.authorizationUrl || response.data;
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
     } catch (error) {
       console.error('Error starting Jira OAuth:', error);
@@ -197,13 +204,10 @@ export default function Settings() {
 
   const loadJiraConnection = async () => {
     try {
-      console.log('loadJiraConnection: Fetching connections');
       const jiraConns = await base44.entities.JiraConnection.list();
-      console.log('loadJiraConnection: Got connections:', jiraConns);
       setJiraConnected(jiraConns.length > 0);
-      console.log('loadJiraConnection: setJiraConnected to', jiraConns.length > 0);
     } catch (error) {
-      console.error('loadJiraConnection: Error:', error);
+      console.error('Error loading Jira connection:', error);
     }
   };
 
@@ -295,32 +299,44 @@ export default function Settings() {
     }
   ];
 
-  // Charger config équipe et connexions au démarrage
+  // Charger config équipe et statut Slack
   useEffect(() => {
     const loadData = async () => {
       try {
         const user = await base44.auth.me();
         setCurrentRole(user.role || 'contributor');
 
-        // Load team config and all connections in parallel
-        const [configs, slackConns, teamsConns, jiraConns] = await Promise.all([
-          base44.entities.TeamConfiguration.list(),
-          base44.entities.SlackConnection.filter({ is_active: true }),
-          base44.entities.TeamsConnection.filter({ is_active: true }),
-          base44.entities.JiraConnection.filter({ is_active: true })
-        ]);
-
+        // Load team config
+        const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
           setTeamConfig(configs[0]);
         }
 
+        // Check Slack, Teams and Jira connections
+        const [slackConns, teamsConns, jiraConns] = await Promise.all([
+          base44.entities.SlackConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.TeamsConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.JiraConnection.filter({ 
+            is_active: true
+          })
+        ]);
+        
         if (slackConns.length > 0) {
           setSlackConnected(true);
           setSlackTeamName(slackConns[0].team_name);
         }
+        
+        if (teamsConns.length > 0) {
+          setTeamsConnected(true);
+        }
 
-        setTeamsConnected(teamsConns.length > 0);
-        setJiraConnected(jiraConns.length > 0);
+        if (jiraConns.length > 0) {
+          setJiraConnected(true);
+        }
       } catch (error) {
         console.error("Erreur chargement données:", error);
       } finally {
@@ -328,7 +344,7 @@ export default function Settings() {
       }
     };
     loadData();
-  }, []);
+  }, [navigate]);
 
   const handleProjectModeChange = async (newMode) => {
     try {
@@ -806,14 +822,12 @@ export default function Settings() {
           </div>
         </motion.div>
 
-
-
-         {/* Manual Data Import */}
-         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.5, delay: 0.35 }}
-         >
+        {/* Manual Data Import */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+        >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <Upload className="w-5 h-5 text-slate-500" />
             {t('manualDataImport')}

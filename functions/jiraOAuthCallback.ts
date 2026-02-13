@@ -81,31 +81,31 @@ Deno.serve(async (req) => {
 
     // Return connection data to frontend (like Slack OAuth flow)
     const connectionData = btoa(JSON.stringify({
-          user_email: state,
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token || 'none',
-          expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
-          cloud_id: cloudId,
-          scopes: tokenData.scope ? tokenData.scope.split(' ') : ['read:jira-work', 'offline_access'],
-          connected_at: new Date().toISOString(),
-        }));
+      user_email: state,
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token || 'none',
+      expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+      cloud_id: cloudId,
+      scopes: tokenData.scope ? tokenData.scope.split(' ') : ['read:jira-work', 'offline_access'],
+      connected_at: new Date().toISOString(),
+    }));
 
-        return new Response(`
-          <html>
-            <body style="font-family: Arial; text-align: center; padding: 40px;">
-              <h1>✅ Jira Connected Successfully</h1>
-              <p>Your Jira account has been connected to Nova.</p>
-              <p>You can now close this window.</p>
-              <script>
-                window.opener?.postMessage({ 
-                  type: 'jira_success',
-                  data: '${connectionData}'
-                }, '*');
-                setTimeout(() => window.close(), 2000);
-              </script>
-            </body>
-          </html>
-        `, { headers: { 'Content-Type': 'text/html' } });
+    return new Response(`
+      <html>
+        <body style="font-family: Arial; text-align: center; padding: 40px;">
+          <h1>✅ Jira Connected Successfully</h1>
+          <p>Your Jira account has been connected to Nova.</p>
+          <p>You can now close this window.</p>
+          <script>
+            window.opener?.postMessage({ 
+              type: 'jira_success',
+              data: '${connectionData}'
+            }, '*');
+            setTimeout(() => window.close(), 2000);
+          </script>
+        </body>
+      </html>
+    `, { headers: { 'Content-Type': 'text/html' } });
   } catch (error) {
     console.error('Jira OAuth callback error:', error);
     return new Response(`Error: ${error.message}`, { status: 500 });
