@@ -4,14 +4,14 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
+
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const connectionData = await req.json();
-    
-    // Validate that user_email matches current user
+
+    // Verify the connection belongs to this user
     if (connectionData.user_email !== user.email) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
         cloud_id: connectionData.cloud_id,
         is_active: true,
         scopes: connectionData.scopes,
-        connected_at: new Date().toISOString(),
+        connected_at: connectionData.connected_at,
       });
     } else {
       // Create new connection
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
         cloud_id: connectionData.cloud_id,
         is_active: true,
         scopes: connectionData.scopes,
-        connected_at: new Date().toISOString(),
+        connected_at: connectionData.connected_at,
       });
     }
 
