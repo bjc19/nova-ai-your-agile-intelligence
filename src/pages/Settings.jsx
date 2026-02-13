@@ -167,6 +167,22 @@ export default function Settings() {
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
+
+      const messageHandler = async (event) => {
+        if (event.data?.type === 'jira_success') {
+          window.removeEventListener('message', messageHandler);
+          const connectionData = JSON.parse(atob(event.data.data));
+          await base44.functions.invoke('jiraSaveConnection', connectionData);
+          await loadJiraConnection();
+          setConnectingJira(false);
+        } else if (event.data?.type === 'jira_error') {
+          window.removeEventListener('message', messageHandler);
+          setConnectingJira(false);
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
+
       const response = await base44.functions.invoke('jiraOAuthStart', { 
         customer_id: user.email 
       });
@@ -279,7 +295,7 @@ export default function Settings() {
     }
   ];
 
-  // Charger config équipe et connexions
+  // Charger config équipe et connexions au démarrage
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -312,30 +328,6 @@ export default function Settings() {
       }
     };
     loadData();
-  }, []);
-
-  // Écouter les changements de hash pour le callback Jira OAuth
-  useEffect(() => {
-    const handleHashChange = async () => {
-      const hash = window.location.hash;
-      if (hash.includes('jira_connection=')) {
-        try {
-          const encoded = hash.split('jira_connection=')[1];
-          const connectionData = JSON.parse(atob(encoded));
-          await base44.functions.invoke('jiraSaveConnection', connectionData);
-          await loadJiraConnection();
-          window.location.hash = '';
-          setConnectingJira(false);
-        } catch (error) {
-          console.error('Error processing Jira callback:', error);
-          setConnectingJira(false);
-        }
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const handleProjectModeChange = async (newMode) => {
