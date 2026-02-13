@@ -222,10 +222,13 @@ export default function Settings() {
 
   const loadJiraConnection = async () => {
     try {
+      console.log('loadJiraConnection: Fetching connections');
       const jiraConns = await base44.entities.JiraConnection.list();
+      console.log('loadJiraConnection: Got connections:', jiraConns);
       setJiraConnected(jiraConns.length > 0);
+      console.log('loadJiraConnection: setJiraConnected to', jiraConns.length > 0);
     } catch (error) {
-      console.error('Error loading Jira connection:', error);
+      console.error('loadJiraConnection: Error:', error);
     }
   };
 
