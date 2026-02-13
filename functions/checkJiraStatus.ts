@@ -12,8 +12,8 @@ Deno.serve(async (req) => {
     // Get all Jira connections for this user
     const allConns = await base44.asServiceRole.entities.JiraConnection.list();
     
-    // Filter by created_by (user qui a créé la connexion)
-    const userConns = allConns.filter(conn => conn.created_by === user.email);
+    // Filter by user_email (le champ stocké dans la connexion)
+    const userConns = allConns.filter(conn => conn.user_email === user.email);
     
     // Filter active ones
     const activeConns = userConns.filter(conn => conn.is_active === true);
