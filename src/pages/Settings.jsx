@@ -107,11 +107,14 @@ export default function Settings() {
 
   const handleSlackDisconnect = async () => {
     try {
-      await base44.functions.invoke('slackDisconnect');
-      // Reload connection to confirm disconnection
-      await loadSlackConnection();
+      const { data } = await base44.functions.invoke('slackDisconnect');
+      if (data.success) {
+        setSlackConnected(false);
+        setSlackTeamName(null);
+      }
     } catch (error) {
       console.error('Error disconnecting Slack:', error);
+      alert('Erreur lors de la déconnexion Slack');
     }
   };
 
