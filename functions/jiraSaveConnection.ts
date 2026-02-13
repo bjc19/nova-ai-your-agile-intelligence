@@ -16,36 +16,53 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Check if connection already exists (by created_by, since any user can own multiple connections)
-    const allConns = await base44.asServiceRole.entities.JiraConnection.filter({
-      created_by: user.email,
-      is_active: true
-    });
+    // Check if connection already exists
+    let allConns = [];
+    try {
+      allConns = await base44.entities.JiraConnection.list();
+      console.log('Found connections:', allConns.length);
+    } catch (e) {
+      console.error('Error listing connections:', e);
+    }
 
     if (allConns.length > 0) {
       // Update existing connection
-      await base44.entities.JiraConnection.update(allConns[0].id, {
-        user_email: connectionData.user_email,
-        access_token: connectionData.access_token,
-        refresh_token: connectionData.refresh_token,
-        expires_at: connectionData.expires_at,
-        cloud_id: connectionData.cloud_id,
-        is_active: true,
-        scopes: connectionData.scopes,
-        connected_at: connectionData.connected_at,
-      });
+      console.log('Updating existing Jira connection:', allConns[0].id);
+      try {
+        await base44.entities.JiraConnection.update(allConns[0].id, {
+          user_email: connectionData.user_email,
+          access_token: connectionData.access_token,
+          refresh_token: connectionData.refresh_token,
+          expires_at: connectionData.expires_at,
+          cloud_id: connectionData.cloud_id,
+          is_active: true,
+          scopes: connectionData.scopes,
+          connected_at: connectionData.connected_at,
+        });
+        console.log('Connection updated successfully');
+      } catch (updateError) {
+        console.error('Error updating connection:', updateError);
+        throw updateError;
+      }
     } else {
       // Create new connection
-      await base44.entities.JiraConnection.create({
-        user_email: connectionData.user_email,
-        access_token: connectionData.access_token,
-        refresh_token: connectionData.refresh_token,
-        expires_at: connectionData.expires_at,
-        cloud_id: connectionData.cloud_id,
-        is_active: true,
-        scopes: connectionData.scopes,
-        connected_at: connectionData.connected_at,
-      });
+      console.log('Creating new Jira connection');
+      try {
+        const newConn = await base44.entities.JiraConnection.create({
+          user_email: connectionData.user_email,
+          access_token: connectionData.access_token,
+          refresh_token: connectionData.refresh_token,
+          expires_at: connectionData.expires_at,
+          cloud_id: connectionData.cloud_id,
+          is_active: true,
+          scopes: connectionData.scopes,
+          connected_at: connectionData.connected_at,
+        });
+        console.log('Connection created successfully:', newConn.id);
+      } catch (createError) {
+        console.error('Error creating connection:', createError);
+        throw createError;
+      }
     }
 
     return Response.json({ success: true });
