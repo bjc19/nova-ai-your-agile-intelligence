@@ -342,6 +342,14 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Exclusive for Regular Users - NOT visible to admin/contributor */}
+              {user?.role !== 'admin' && user?.role !== 'contributor' && (
+                <>
+                  <MyFocusBoard />
+                  <BlockersAffectingMe />
+                  <ContributionMetrics />
+                </>
+              )}
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -390,8 +398,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine - Contributor Only */}
-              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
