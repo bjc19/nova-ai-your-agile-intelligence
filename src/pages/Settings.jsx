@@ -140,7 +140,7 @@ export default function Settings() {
       const messageHandler = (event) => {
         if (event.data?.type === 'teams-connected') {
           window.removeEventListener('message', messageHandler);
-          loadTeamsConnection();
+          setTeamsConnected(true);
           setConnectingTeams(false);
         }
       };
