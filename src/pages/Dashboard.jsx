@@ -432,13 +432,16 @@ export default function Dashboard() {
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
-          </div>
+           <div className="space-y-6">
+             {/* Jira Workspaces */}
+             <JiraWorkspacesCard />
+
+             {/* Recent Analyses */}
+             <RecentAnalyses analyses={analysisHistory} />
+
+             {/* Integration Status */}
+             <IntegrationStatus />
+           </div>
         </div>
         }
 
