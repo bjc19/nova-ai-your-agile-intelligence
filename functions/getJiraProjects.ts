@@ -46,11 +46,21 @@ Deno.serve(async (req) => {
     console.log('Found projects:', projects.length);
 
     // Get existing workspaces to calculate quota
-    const existingWorkspaces = await base44.entities.JiraWorkspace.list();
+    let existingWorkspaces = [];
+    try {
+      existingWorkspaces = await base44.entities.JiraWorkspace.list();
+    } catch (e) {
+      console.error('Error listing workspaces:', e);
+    }
 
-    // Get user subscription plan
-    const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-    const plan = statusRes.data?.plan || 'starter';
+    // Get user subscription plan with fallback
+    let plan = 'starter';
+    try {
+      const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+      plan = statusRes.data?.plan || 'starter';
+    } catch (e) {
+      console.error('Error getting subscription status, using default:', e);
+    }
     console.log('User plan:', plan);
 
     const quotaLimits = {
