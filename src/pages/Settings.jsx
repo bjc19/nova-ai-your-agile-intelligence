@@ -335,18 +335,12 @@ export default function Settings() {
             setTeamConfig(configs[0]);
           }
 
-          // Check Slack, Teams and Jira connections - filter by user_email to ensure we get the right ones
-          const [slackConns, teamsConns, jiraConns] = await Promise.all([
-            base44.entities.SlackConnection.filter({ 
-              user_email: user.email,
-              is_active: true
-            }),
-            base44.entities.TeamsConnection.filter({ 
-              user_email: user.email,
-              is_active: true
-            }),
-            base44.entities.JiraConnection.list()
-          ]);
+          // Check connections - RLS automatically filters by user
+                  const [slackConns, teamsConns, jiraConns] = await Promise.all([
+                    base44.entities.SlackConnection.list(),
+                    base44.entities.TeamsConnection.list(),
+                    base44.entities.JiraConnection.list()
+                  ]);
 
           if (slackConns.length > 0) {
             setSlackConnected(true);
