@@ -175,20 +175,15 @@ export default function Settings() {
 
       // Listen for popup message
       const messageHandler = async (event) => {
-        console.log('Message received in parent:', event.data);
-
         if (event.data?.type === 'jira_success') {
-          console.log('Jira success message received');
           window.removeEventListener('message', messageHandler);
 
           try {
             // Decode connection data
             const connectionData = JSON.parse(atob(event.data.data));
-            console.log('Decoded connection data:', connectionData);
 
             // Save connection through authenticated endpoint
-            const saveResponse = await base44.functions.invoke('jiraSaveConnection', connectionData);
-            console.log('Save response:', saveResponse);
+            await base44.functions.invoke('jiraSaveConnection', connectionData);
 
             // Reload connection to get fresh data
             await loadJiraConnection();
@@ -201,8 +196,32 @@ export default function Settings() {
       };
 
       window.addEventListener('message', messageHandler);
-      console.log('Opening Jira OAuth popup with URL:', authUrl);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
+
+      // Fallback: Check sessionStorage every 500ms for 10 seconds in case postMessage fails
+      let attempts = 0;
+      const sessionStorageCheck = setInterval(async () => {
+        attempts++;
+        const data = sessionStorage.getItem('jira_connection_data');
+        if (data) {
+          clearInterval(sessionStorageCheck);
+          window.removeEventListener('message', messageHandler);
+          try {
+            const connectionData = JSON.parse(atob(data));
+            await base44.functions.invoke('jiraSaveConnection', connectionData);
+            await loadJiraConnection();
+            sessionStorage.removeItem('jira_connection_data');
+            setConnectingJira(false);
+          } catch (err) {
+            console.error('Error processing Jira connection:', err);
+            setConnectingJira(false);
+          }
+        }
+        if (attempts > 20) {
+          clearInterval(sessionStorageCheck);
+          setConnectingJira(false);
+        }
+      }, 500);
     } catch (error) {
       console.error('Error starting Jira OAuth:', error);
       setConnectingJira(false);
