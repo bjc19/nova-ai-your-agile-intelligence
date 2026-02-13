@@ -174,13 +174,14 @@ export default function Settings() {
 
       const authUrl = response.data?.authorizationUrl || response.data;
 
+      // Helper function for logging
+      const log = (msg) => {
+        console.log(msg);
+        localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\n' + msg);
+      };
+
       // Listen for popup message
       const messageHandler = async (event) => {
-        const log = (msg) => {
-          console.log(msg);
-          localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\n' + msg);
-        };
-        
         log('Settings: Message received: ' + JSON.stringify(event.data));
         if (event.data?.type === 'jira_success') {
           log('Settings: Jira success received');
