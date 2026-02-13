@@ -435,14 +435,15 @@ export default function Dashboard() {
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
             
-            {/* Integration Status */}
-            <IntegrationStatus />
+            {/* Integration Status - Admin/Contributor Only */}
+            {(user?.role === 'admin' || user?.role === 'contributor') && (
+              <IntegrationStatus />
+            )}
           </div>
         </div>
         }
 
-        {/* Quick Actions Footer - Admin/Contributor Only */}
-        {(user?.role === 'admin' || user?.role === 'contributor') && (
+        {/* Quick Actions Footer */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -475,8 +476,7 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
-        )}
       </div>
     </div>);
 
-  }
+}
