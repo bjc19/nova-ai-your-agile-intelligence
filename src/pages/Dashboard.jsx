@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import DynamicDashboard from "@/components/dashboard/DynamicDashboard";
 
 import {
   Mic,
@@ -280,8 +279,9 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Time Period Selector */}
-              <div className="flex justify-end">
+              {/* Workspace & Period Selector */}
+              <div className="flex justify-between items-center gap-4">
+                <WorkspaceSelector />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -289,7 +289,6 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
-
               </div>
             </div>
 
