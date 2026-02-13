@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { analysisRecord, patternDetections } = body || {};
+    const { analysisRecord, patternDetections, workspace_id, workspace_name } = body || {};
 
     if (!analysisRecord) {
       console.error('Missing analysisRecord. Body received:', body);
@@ -36,7 +36,36 @@ Deno.serve(async (req) => {
       analysisRecord.analysis_time = new Date().toISOString();
     }
 
-    // Create analysis record with service role to bypass RLS
+    // If workspace_id provided, use createMultiSourceAnalysis for cross-source fusion
+    if (workspace_id) {
+      const multiSourceResult = await base44.functions.invoke('createMultiSourceAnalysis', {
+        workspace_id,
+        workspace_name: workspace_name || analysisRecord.workspace_name,
+        primary_source: analysisRecord.source,
+        title: analysisRecord.title,
+        analysis_data: analysisRecord.analysis_data,
+        blockers_count: analysisRecord.blockers_count,
+        risks_count: analysisRecord.risks_count,
+        transcript_preview: analysisRecord.transcript_preview
+      });
+
+      // Create pattern detection records
+      if (patternDetections && patternDetections.length > 0) {
+        const limitedPatterns = patternDetections.slice(0, 20);
+        await Promise.all(
+          limitedPatterns.map(pattern =>
+            base44.asServiceRole.entities.PatternDetection.create({
+              ...pattern,
+              analysis_id: multiSourceResult.data.analysis_id
+            })
+          )
+        );
+      }
+
+      return Response.json({ analysis: multiSourceResult.data });
+    }
+
+    // Legacy: Create analysis record without workspace (fallback)
     const createdAnalysis = await base44.asServiceRole.entities.AnalysisHistory.create(analysisRecord);
 
     // Create pattern detection records in parallel (limit to 20 patterns max to avoid CPU timeout)
