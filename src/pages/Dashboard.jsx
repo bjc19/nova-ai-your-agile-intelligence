@@ -19,9 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import MyFocusBoard from "@/components/dashboard/MyFocusBoard";
-import BlockersAffectingMe from "@/components/dashboard/BlockersAffectingMe";
-import ContributionMetrics from "@/components/dashboard/ContributionMetrics";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -345,14 +343,11 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Exclusive for Regular Users - NOT visible to admin/contributor */}
+              {/* GembaWork - Exclusive for Regular Users - NOT visible to admin/contributor */}
               {user?.role !== 'admin' && user?.role !== 'contributor' && (
-                <>
-                  <MyFocusBoard />
-                  <BlockersAffectingMe />
-                  <ContributionMetrics />
-                </>
+                <GembaWork />
               )}
+
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
