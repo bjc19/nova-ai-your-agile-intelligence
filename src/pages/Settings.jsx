@@ -326,6 +326,19 @@ export default function Settings() {
     }
   ];
 
+  // Check for debug logs
+  useEffect(() => {
+    const checkLogs = () => {
+      const logs = localStorage.getItem('jira_debug_log');
+      if (logs) {
+        setDebugLog(logs);
+      }
+    };
+    checkLogs();
+    const interval = setInterval(checkLogs, 500);
+    return () => clearInterval(interval);
+  }, []);
+
   // Charger config équipe et statut Slack
   useEffect(() => {
     const loadData = async () => {
