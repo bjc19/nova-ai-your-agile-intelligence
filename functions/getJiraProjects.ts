@@ -20,6 +20,8 @@ Deno.serve(async (req) => {
     const cloudId = connection.cloud_id;
 
     // Fetch projects from Jira
+    console.log('Fetching Jira projects for cloud:', cloudId);
+    
     const response = await fetch(
       `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/project`,
       {
@@ -31,10 +33,17 @@ Deno.serve(async (req) => {
     );
 
     if (!response.ok) {
-      return Response.json({ error: 'Failed to fetch Jira projects' }, { status: 500 });
+      const errorText = await response.text();
+      console.error('Jira API error:', response.status, errorText);
+      return Response.json({ 
+        error: 'Failed to fetch Jira projects',
+        details: errorText,
+        status: response.status
+      }, { status: 500 });
     }
 
     const projects = await response.json();
+    console.log('Found projects:', projects.length);
 
     // Get existing workspaces to calculate quota
     const existingWorkspaces = await base44.entities.JiraWorkspace.list();
@@ -42,6 +51,7 @@ Deno.serve(async (req) => {
     // Get user subscription plan
     const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
     const plan = statusRes.data?.plan || 'starter';
+    console.log('User plan:', plan);
 
     const quotaLimits = {
       'starter': 1,
