@@ -66,6 +66,7 @@ export default function Analysis() {
   const [workspaces, setWorkspaces] = useState([]);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [selectedWorkspaceName, setSelectedWorkspaceName] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
