@@ -79,9 +79,33 @@ Deno.serve(async (req) => {
 
     const cloudId = instances[0].id; // Use first instance
 
+    // Get the user's email from Jira API
+    const userResponse = await fetch(`https://api.atlassian.com/site/${cloudId}/oauth/token/accessible-resources`, {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+      },
+    });
+
+    let jiraUserEmail = state; // fallback to state
+
+    try {
+      const userEndpoint = await fetch('https://api.atlassian.com/me', {
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+        },
+      });
+
+      if (userEndpoint.ok) {
+        const userData = await userEndpoint.json();
+        jiraUserEmail = userData.email || state;
+      }
+    } catch (e) {
+      console.log('Could not fetch user email, using fallback');
+    }
+
     // Return connection data to frontend (like Slack OAuth flow)
     const connectionData = btoa(JSON.stringify({
-      user_email: state,
+      user_email: jiraUserEmail,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
