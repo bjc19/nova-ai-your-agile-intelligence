@@ -9,11 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all Jira connections for this user
-    const allConns = await base44.asServiceRole.entities.JiraConnection.list();
-    
-    // Filter by user_email (le champ stocké dans la connexion)
-    const userConns = allConns.filter(conn => conn.user_email === user.email);
+    // Get Jira connections for this user using filter
+    const userConns = await base44.asServiceRole.entities.JiraConnection.filter({
+      user_email: user.email
+    });
     
     // Filter active ones
     const activeConns = userConns.filter(conn => conn.is_active === true);
