@@ -862,12 +862,44 @@ export default function Settings() {
           </div>
         </motion.div>
 
-        {/* Manual Data Import */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-        >
+        {/* Debug Logs */}
+         {debugLog && (
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.5 }}
+             className="mb-8"
+           >
+             <Card className="border-orange-200 bg-orange-50">
+               <CardHeader>
+                 <CardTitle className="text-sm text-orange-900">🔧 Jira Connection Debug Logs</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <pre className="text-xs bg-white p-4 rounded border border-orange-200 overflow-auto max-h-48 whitespace-pre-wrap break-words">
+                   {debugLog}
+                 </pre>
+                 <Button 
+                   variant="outline" 
+                   size="sm"
+                   onClick={() => {
+                     localStorage.removeItem('jira_debug_log');
+                     setDebugLog('');
+                   }}
+                   className="mt-2"
+                 >
+                   Clear Logs
+                 </Button>
+               </CardContent>
+             </Card>
+           </motion.div>
+         )}
+
+         {/* Manual Data Import */}
+         <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5, delay: 0.35 }}
+         >
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <Upload className="w-5 h-5 text-slate-500" />
             {t('manualDataImport')}
