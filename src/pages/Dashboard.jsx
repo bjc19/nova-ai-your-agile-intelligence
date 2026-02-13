@@ -295,10 +295,13 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
-            }
-          </motion.div>
+             {(!selectedPeriod || analysisHistory.length > 0) &&
+             <QuickStats analysisHistory={analysisHistory} />
+             }
+
+             {/* Daily Quote */}
+             <DailyQuote />
+            </motion.div>
         </div>
       </div>
 
