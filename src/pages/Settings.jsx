@@ -792,12 +792,11 @@ export default function Settings() {
                          Déconnecter
                        </Button>
                        <Button 
-                         variant="ghost"
                          size="sm"
-                         onClick={checkJiraDebug}
-                         className="text-xs text-slate-400"
+                         onClick={() => navigate(createPageUrl("JiraProjectSelector"))}
+                         className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
                        >
-                         Debug
+                         Sélectionner projets
                        </Button>
                      </>
                    ) : (
