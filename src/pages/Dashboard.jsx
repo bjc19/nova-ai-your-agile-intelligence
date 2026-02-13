@@ -19,6 +19,9 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import MyFocusBoard from "@/components/dashboard/MyFocusBoard";
+import BlockersAffectingMe from "@/components/dashboard/BlockersAffectingMe";
+import ContributionMetrics from "@/components/dashboard/ContributionMetrics";
 
 import {
   Mic,
