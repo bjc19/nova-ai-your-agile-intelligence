@@ -33,8 +33,8 @@ import {
   calculateFrictionIndex,
 } from "./OrganizationalRealityEngine";
 
-export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals, userRole }) {
-   const [expandedWaste, setExpandedWaste] = useState(null);
+export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals }) {
+  const [expandedWaste, setExpandedWaste] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [userResponse, setUserResponse] = useState("");
@@ -438,8 +438,7 @@ Actions recommandées :
           </div>
         </CardHeader>
 
-         {(userRole === 'admin' || userRole === 'contributor') && (
-         <CardContent className="space-y-4">
+        <CardContent className="space-y-4">
           {/* Decision Map */}
           {decisionAnalysis.decisionMap && decisionAnalysis.decisionMap.length > 0 && (
             <div>
@@ -889,9 +888,8 @@ Actions recommandées :
               </div>
             </div>
           )}
-          </CardContent>
-          )}
-          </Card>
-          </motion.div>
-          );
-          }
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
