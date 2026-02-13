@@ -16,14 +16,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Check if connection already exists
-    const existingConns = await base44.entities.JiraConnection.filter({
-      user_email: user.email
+    // Check if connection already exists (by created_by, since any user can own multiple connections)
+    const allConns = await base44.asServiceRole.entities.JiraConnection.filter({
+      created_by: user.email,
+      is_active: true
     });
 
-    if (existingConns.length > 0) {
+    if (allConns.length > 0) {
       // Update existing connection
-      await base44.entities.JiraConnection.update(existingConns[0].id, {
+      await base44.entities.JiraConnection.update(allConns[0].id, {
+        user_email: connectionData.user_email,
         access_token: connectionData.access_token,
         refresh_token: connectionData.refresh_token,
         expires_at: connectionData.expires_at,
@@ -35,7 +37,7 @@ Deno.serve(async (req) => {
     } else {
       // Create new connection
       await base44.entities.JiraConnection.create({
-        user_email: user.email,
+        user_email: connectionData.user_email,
         access_token: connectionData.access_token,
         refresh_token: connectionData.refresh_token,
         expires_at: connectionData.expires_at,
