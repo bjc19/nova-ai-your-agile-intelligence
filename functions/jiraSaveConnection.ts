@@ -11,19 +11,19 @@ Deno.serve(async (req) => {
 
     const connectionData = await req.json();
 
-    // Verify the connection belongs to this user
-    if (connectionData.user_email !== user.email) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    // Check if connection already exists
-    const existingConns = await base44.entities.JiraConnection.filter({
-      user_email: user.email
+    // Check if connection already exists using service role to bypass RLS
+    const existingConns = await base44.asServiceRole.entities.JiraConnection.filter({
+      user_email: connectionData.user_email
     });
+
+    // Verify that if a connection exists, the current user created it
+    if (existingConns.length > 0 && existingConns[0].created_by !== user.email) {
+      return Response.json({ error: 'Forbidden - connection owned by another user' }, { status: 403 });
+    }
 
     if (existingConns.length > 0) {
       // Update existing connection
-      await base44.entities.JiraConnection.update(existingConns[0].id, {
+      await base44.asServiceRole.entities.JiraConnection.update(existingConns[0].id, {
         access_token: connectionData.access_token,
         refresh_token: connectionData.refresh_token,
         expires_at: connectionData.expires_at,
@@ -33,9 +33,9 @@ Deno.serve(async (req) => {
         connected_at: connectionData.connected_at,
       });
     } else {
-      // Create new connection
+      // Create new connection with the Jira email provided
       await base44.entities.JiraConnection.create({
-        user_email: user.email,
+        user_email: connectionData.user_email,
         access_token: connectionData.access_token,
         refresh_token: connectionData.refresh_token,
         expires_at: connectionData.expires_at,
