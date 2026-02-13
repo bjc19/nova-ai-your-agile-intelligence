@@ -204,11 +204,7 @@ export default function Settings() {
 
   const loadJiraConnection = async () => {
     try {
-      const user = await base44.auth.me();
-      const jiraConns = await base44.entities.JiraConnection.filter({ 
-        user_email: user.email,
-        is_active: true
-      });
+      const jiraConns = await base44.entities.JiraConnection.list();
       setJiraConnected(jiraConns.length > 0);
     } catch (error) {
       console.error('Error loading Jira connection:', error);
@@ -217,11 +213,7 @@ export default function Settings() {
 
   const handleJiraDisconnect = async () => {
     try {
-      const user = await base44.auth.me();
-      const jiraConns = await base44.entities.JiraConnection.filter({ 
-        user_email: user.email,
-        is_active: true
-      });
+      const jiraConns = await base44.entities.JiraConnection.list();
       if (jiraConns.length > 0) {
         await base44.entities.JiraConnection.update(jiraConns[0].id, { is_active: false });
         setJiraConnected(false);
