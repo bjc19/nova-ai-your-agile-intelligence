@@ -417,10 +417,10 @@ La citation doit être courte, percutante, et pertinente. Retourne un JSON avec:
       transition={{ duration: 0.6 }}
       className="mb-8"
     >
-      <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm w-fit">
-        <Quote className="w-4 h-4 text-blue-500 flex-shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm italic text-slate-700 font-light">
+      <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm max-w-4xl">
+        <Quote className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <p className="text-sm italic text-slate-700 font-light leading-relaxed">
             "{selectedQuote[lang]}" — <span className="font-semibold text-blue-600">{selectedQuote.author}</span>
           </p>
         </div>
