@@ -64,6 +64,7 @@ import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
+import Privacy from './pages/Privacy';
 import __Layout from './Layout.jsx';
 
 
@@ -85,6 +86,7 @@ export const PAGES = {
     "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
+    "Privacy": Privacy,
 }
 
 export const pagesConfig = {
