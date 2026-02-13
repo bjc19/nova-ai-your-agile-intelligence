@@ -814,7 +814,7 @@ Provide a detailed analysis in the following JSON format:`;
           >
             <Button
               onClick={handleAnalyze}
-              disabled={isAnalyzing || !transcript.trim() || isOutOfContext}
+              disabled={isAnalyzing || !transcript.trim() || isOutOfContext || !selectedWorkspaceId}
               size="lg"
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-6 text-lg rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -832,6 +832,63 @@ Provide a detailed analysis in the following JSON format:`;
             </Button>
           </motion.div>
         </div>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold text-slate-900">
+                Confirmer l'analyse
+              </DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Veuillez vérifier les détails avant de procéder
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 my-6">
+              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Type d'atelier</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {workshopType === 'daily_scrum' && 'Daily Scrum'}
+                  {workshopType === 'retrospective' && 'Rétrospective'}
+                  {workshopType === 'sprint_planning' && 'Sprint Planning'}
+                  {workshopType === 'sprint_review' && 'Sprint Review'}
+                  {workshopType === 'other' && 'Autre atelier'}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">Workspace cible</p>
+                <p className="text-lg font-semibold text-blue-900">{selectedWorkspaceName}</p>
+                <p className="text-sm text-blue-700 mt-1">L'analyse sera fusionnée avec vos données Slack, Teams et Jira</p>
+              </div>
+
+              <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-2">Données à analyser</p>
+                <p className="text-sm text-amber-900">
+                  <span className="font-semibold">{wordCount}</span> mots • <span className="font-semibold">{transcript.length}</span> caractères
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmDialog(false)}
+                className="flex-1"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleConfirmAnalysis}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              >
+                <Wand2 className="w-4 h-4 mr-2" />
+                Lancer l'analyse
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Loading State Overlay */}
         {isAnalyzing && (
