@@ -47,7 +47,6 @@ export default function Settings() {
    const [loadingConfig, setLoadingConfig] = useState(true);
    const [currentRole, setCurrentRole] = useState('contributor');
    const [switchingRole, setSwitchingRole] = useState(false);
-   const [debugLog, setDebugLog] = useState('');
 
   const loadSlackConnection = async () => {
     try {
@@ -280,9 +279,39 @@ export default function Settings() {
     }
   ];
 
-  // Charger les connexions Jira au mount
+  // Charger config équipe et connexions
   useEffect(() => {
-    loadJiraConnection();
+    const loadData = async () => {
+      try {
+        const user = await base44.auth.me();
+        setCurrentRole(user.role || 'contributor');
+
+        // Load team config and all connections in parallel
+        const [configs, slackConns, teamsConns, jiraConns] = await Promise.all([
+          base44.entities.TeamConfiguration.list(),
+          base44.entities.SlackConnection.filter({ is_active: true }),
+          base44.entities.TeamsConnection.filter({ is_active: true }),
+          base44.entities.JiraConnection.filter({ is_active: true })
+        ]);
+
+        if (configs.length > 0) {
+          setTeamConfig(configs[0]);
+        }
+
+        if (slackConns.length > 0) {
+          setSlackConnected(true);
+          setSlackTeamName(slackConns[0].team_name);
+        }
+
+        setTeamsConnected(teamsConns.length > 0);
+        setJiraConnected(jiraConns.length > 0);
+      } catch (error) {
+        console.error("Erreur chargement données:", error);
+      } finally {
+        setLoadingConfig(false);
+      }
+    };
+    loadData();
   }, []);
 
   // Écouter les changements de hash pour le callback Jira OAuth
@@ -293,14 +322,8 @@ export default function Settings() {
         try {
           const encoded = hash.split('jira_connection=')[1];
           const connectionData = JSON.parse(atob(encoded));
-
-          // Sauvegarder la connexion
           await base44.functions.invoke('jiraSaveConnection', connectionData);
-
-          // Recharger et mettre à jour l'état
           await loadJiraConnection();
-
-          // Nettoyer le hash
           window.location.hash = '';
           setConnectingJira(false);
         } catch (error) {
@@ -310,61 +333,10 @@ export default function Settings() {
       }
     };
 
-    // Écouter les changements de hash
     window.addEventListener('hashchange', handleHashChange);
-
-    // Vérifier immédiatement
     handleHashChange();
-
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-
-  // Charger config équipe et statut Slack
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const user = await base44.auth.me();
-        setCurrentRole(user.role || 'contributor');
-
-        // Load team config
-        const configs = await base44.entities.TeamConfiguration.list();
-        if (configs.length > 0) {
-          setTeamConfig(configs[0]);
-        }
-
-        // Check Slack, Teams and Jira connections
-        const [slackConns, teamsConns, jiraConns] = await Promise.all([
-          base44.entities.SlackConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.TeamsConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.JiraConnection.filter({ 
-            is_active: true
-          })
-        ]);
-        
-        if (slackConns.length > 0) {
-          setSlackConnected(true);
-          setSlackTeamName(slackConns[0].team_name);
-        }
-        
-        if (teamsConns.length > 0) {
-          setTeamsConnected(true);
-        }
-
-        if (jiraConns.length > 0) {
-          setJiraConnected(true);
-        }
-      } catch (error) {
-        console.error("Erreur chargement données:", error);
-      } finally {
-        setLoadingConfig(false);
-      }
-    };
-    loadData();
-  }, [navigate]);
 
   const handleProjectModeChange = async (newMode) => {
     try {
@@ -842,37 +814,7 @@ export default function Settings() {
           </div>
         </motion.div>
 
-        {/* Debug Logs */}
-         {debugLog && (
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.5 }}
-             className="mb-8"
-           >
-             <Card className="border-orange-200 bg-orange-50">
-               <CardHeader>
-                 <CardTitle className="text-sm text-orange-900">🔧 Jira Connection Debug Logs</CardTitle>
-               </CardHeader>
-               <CardContent>
-                 <pre className="text-xs bg-white p-4 rounded border border-orange-200 overflow-auto max-h-48 whitespace-pre-wrap break-words">
-                   {debugLog}
-                 </pre>
-                 <Button 
-                   variant="outline" 
-                   size="sm"
-                   onClick={() => {
-                     localStorage.removeItem('jira_debug_log');
-                     setDebugLog('');
-                   }}
-                   className="mt-2"
-                 >
-                   Clear Logs
-                 </Button>
-               </CardContent>
-             </Card>
-           </motion.div>
-         )}
+
 
          {/* Manual Data Import */}
          <motion.div
