@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     });
 
     if (connections.length > 0) {
-      await base44.asServiceRole.entities.SlackConnection.update(connections[0].id, {
+      await base44.entities.SlackConnection.update(connections[0].id, {
         is_active: false
       });
     }
