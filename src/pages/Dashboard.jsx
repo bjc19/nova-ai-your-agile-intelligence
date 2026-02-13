@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DynamicDashboard from "@/components/dashboard/DynamicDashboard";
 
 import {
   Mic,
@@ -35,7 +36,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
-  const [currentRole, setCurrentRole] = useState("user");
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -70,7 +70,6 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        setCurrentRole(currentUser.role || "user");
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -340,19 +339,10 @@ export default function Dashboard() {
         }
 
         {/* Show content only if there are analyses in the period */}
-         {(!selectedPeriod || analysisHistory.length > 0) &&
-         <div className="grid lg:grid-cols-3 gap-6">
-             {/* Left Column - Dynamic Components */}
-             <div className="lg:col-span-2">
-               <DynamicDashboard 
-                 analysisHistory={analysisHistory}
-                 userRole={currentRole}
-                 latestAnalysis={latestAnalysis}
-               />
-             </div>
-
-             {/* Left Column - Main Content - LEGACY */}
-             <div className="lg:col-span-2 space-y-6 hidden">
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -441,11 +431,11 @@ export default function Dashboard() {
 
           </div>
 
-          {/* Right Column - Sidebar - LEGACY */}
-          <div className="space-y-6 hidden">
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
-
+            
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
