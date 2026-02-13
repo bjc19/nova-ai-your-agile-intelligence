@@ -9,17 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
-import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
-import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
-import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
-import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
-import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
+import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import DynamicDashboard from "@/components/dashboard/DynamicDashboard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
-import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
-import RealityMapCard from "@/components/nova/RealityMapCard";
-import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
 import {
   Mic,
@@ -41,7 +34,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -109,26 +101,14 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period and workspace
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    // Filter by period if selected
-    if (selectedPeriod) {
-      const analysisDate = new Date(analysis.created_date);
-      const startDate = new Date(selectedPeriod.start);
-      const endDate = new Date(selectedPeriod.end);
-      endDate.setHours(23, 59, 59, 999);
-      if (!(analysisDate >= startDate && analysisDate <= endDate)) {
-        return false;
-      }
-    }
-    
-    // Filter by workspace if selected
-    if (selectedWorkspace && analysis.jira_project_selection_id !== selectedWorkspace) {
-      return false;
-    }
-    
-    return true;
-  });
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -293,18 +273,16 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Selectors: Workspace and Period */}
-              <div className="flex flex-col md:flex-row items-end justify-between gap-4">
-                <WorkspaceSelector 
-                  onWorkspaceChange={(workspaceId) => setSelectedWorkspace(workspaceId || null)}
-                  activeWorkspaceId={selectedWorkspace}
-                />
+              {/* Time Period Selector */}
+              <div className="flex justify-end">
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
+                    console.log("Period changed:", period);
                   }} />
+
               </div>
             </div>
 
@@ -353,107 +331,22 @@ export default function Dashboard() {
           </div>
         }
 
-        {/* Show content only if there are analyses in the period */}
+        {/* Smart Dynamic Dashboard - Only what matters */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Sprint Health Card - Drift Detection */}
-              {sprintHealth &&
-            <SprintHealthCard
-              sprintHealth={{
-                sprint_name: "Sprint 14",
-                wip_count: 8,
-                wip_historical_avg: 5,
-                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-                sprint_day: 5,
-                historical_sprints_count: 4,
-                drift_acknowledged: false,
-                problematic_tickets: sprintHealth.problematic_tickets,
-                gdprSignals: gdprSignals
-              }}
-              onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
+            {/* Left Column - Dynamic Components */}
+            <div className="lg:col-span-2">
+              <DynamicDashboard 
+                analysisHistory={analysisHistory}
+                userRole={currentRole}
+                latestAnalysis={latestAnalysis}
+              />
+            </div>
 
-            }
-
-              {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
-            <MetricsRadarCard
-              metricsData={{
-                velocity: { current: 45, trend: "up", change: 20 },
-                flow_efficiency: { current: 28, target: 55 },
-                cycle_time: { current: 9, target: 4 },
-                throughput: { current: 6, variance: 0.3 },
-                deployment_frequency: { current: 1, target: 3 },
-                data_days: 14
-              }}
-              historicalData={{
-                sprints_count: 1,
-                data_days: 7,
-                is_audit_phase: false,
-                is_new_team: true
-              }}
-              integrationStatus={{
-                jira_connected: true,
-                slack_connected: false,
-                dora_pipeline: false,
-                flow_metrics_available: true
-              }}
-              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
-
-            }
-
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
-            <RealityMapCard
-              flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
-
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
-
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
-
-                data_days: 30
-              }}
-              flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
-              }}
-              onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
-
-            }
-            
-            {/* Sprint Performance Chart */}
-            <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
-
-          </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
-          </div>
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+              {/* Will be populated by DynamicDashboard for "user" role */}
+            </div>
         </div>
         }
 
