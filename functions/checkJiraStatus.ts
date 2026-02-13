@@ -9,22 +9,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('User:', user.email, 'Role:', user.role);
-
-    // Get Jira connections for this user using filter
-    let userConns = [];
-    try {
-      userConns = await base44.asServiceRole.entities.JiraConnection.filter({
-        user_email: user.email
-      });
-      console.log('Connections found:', userConns.length);
-    } catch (e) {
-      console.error('Error querying connections:', e.message);
-      throw e;
-    }
-    
-    // Filter active ones
-    const activeConns = userConns.filter(conn => conn.is_active === true);
+    // Get Jira connections - RLS will filter by created_by automatically
+    const allConns = await base44.entities.JiraConnection.list();
+    const activeConns = allConns.filter(conn => conn.is_active === true);
 
     return Response.json({
       user_email: user.email,
