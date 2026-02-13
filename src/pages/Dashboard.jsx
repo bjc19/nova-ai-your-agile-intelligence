@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import JiraWorkspacesCard from "@/components/dashboard/JiraWorkspacesCard";
 import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
@@ -294,14 +293,18 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period */}
-             {(!selectedPeriod || analysisHistory.length > 0) &&
-             <QuickStats analysisHistory={analysisHistory} />
-             }
+            {/* Daily Quote */}
+            <DailyQuote 
+              lang="fr"
+              blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+              riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+            />
 
-             {/* Daily Quote */}
-             <DailyQuote />
-            </motion.div>
+            {/* Quick Stats - Only show if data in period */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
+          </motion.div>
         </div>
       </div>
 
