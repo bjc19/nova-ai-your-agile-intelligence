@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       user_email: user.email,
-      total_connections: userConns.length,
+      total_connections: allConns.length,
       active_connections: activeConns.length,
       connections: activeConns.map(c => ({
         id: c.id,
