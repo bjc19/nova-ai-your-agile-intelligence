@@ -168,11 +168,6 @@ export default function Settings() {
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
-      const response = await base44.functions.invoke('jiraOAuthStart', { 
-        customer_id: user.email 
-      });
-
-      const authUrl = response.data?.authorizationUrl || response.data;
 
       // Helper function for logging
       const log = (msg) => {
@@ -180,7 +175,7 @@ export default function Settings() {
         localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\n' + msg);
       };
 
-      // Listen for popup message
+      // SETUP MESSAGE HANDLER FIRST (before opening popup)
       const messageHandler = async (event) => {
         log('Settings: Message received: ' + JSON.stringify(event.data));
         if (event.data?.type === 'jira_success') {
@@ -220,9 +215,18 @@ export default function Settings() {
 
       log('Settings: Adding message listener');
       window.addEventListener('message', messageHandler);
+
+      // NOW get the URL and open the popup
+      const response = await base44.functions.invoke('jiraOAuthStart', { 
+        customer_id: user.email 
+      });
+
+      const authUrl = response.data?.authorizationUrl || response.data;
+      log('Settings: Opening Jira OAuth popup with URL: ' + authUrl);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
     } catch (error) {
       console.error('Error starting Jira OAuth:', error);
+      localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\nError: ' + error.message);
       setConnectingJira(false);
     }
   };
