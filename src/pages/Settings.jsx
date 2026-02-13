@@ -599,6 +599,19 @@ export default function Settings() {
           </Card>
         </motion.div>
 
+        {/* Debug Info */}
+        {jiraDebugInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-slate-100 rounded-lg border border-slate-200"
+          >
+            <pre className="text-xs text-slate-700 overflow-auto">
+              {JSON.stringify(jiraDebugInfo, null, 2)}
+            </pre>
+          </motion.div>
+        )}
+
         {/* Available Integrations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
