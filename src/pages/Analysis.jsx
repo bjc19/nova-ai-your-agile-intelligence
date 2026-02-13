@@ -196,7 +196,7 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
     setTranscript(simulatedSlackMessages);
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (!transcript.trim()) {
       setError("Aucun texte détecté. Collez le contenu de votre atelier Scrum pour analyse.");
       return;
@@ -217,6 +217,17 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
       return;
     }
 
+    if (!selectedWorkspaceId) {
+      setError("Veuillez sélectionner un workspace.");
+      return;
+    }
+
+    // Show confirmation dialog
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmAnalysis = async () => {
+    setShowConfirmDialog(false);
     setIsAnalyzing(true);
     setError(null);
     
