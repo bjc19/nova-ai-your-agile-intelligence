@@ -773,6 +773,14 @@ export default function Settings() {
                        >
                          Déconnecter
                        </Button>
+                       <Button 
+                         variant="ghost"
+                         size="sm"
+                         onClick={checkJiraDebug}
+                         className="text-xs text-slate-400"
+                       >
+                         Debug
+                       </Button>
                      </>
                    ) : (
                      <Button 
