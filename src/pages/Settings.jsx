@@ -168,65 +168,14 @@ export default function Settings() {
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
-
-      // Helper function for logging
-      const log = (msg) => {
-        console.log(msg);
-        localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\n' + msg);
-      };
-
-      // SETUP MESSAGE HANDLER FIRST (before opening popup)
-      const messageHandler = async (event) => {
-        log('Settings: Message received: ' + JSON.stringify(event.data));
-        if (event.data?.type === 'jira_success') {
-          log('Settings: Jira success received');
-          window.removeEventListener('message', messageHandler);
-
-          // Decode connection data
-          const connectionData = JSON.parse(atob(event.data.data));
-          log('Settings: Decoded connection data: ' + JSON.stringify(connectionData));
-
-          // Save connection through authenticated endpoint
-          try {
-            const result = await base44.functions.invoke('jiraSaveConnection', connectionData);
-            log('Settings: Save connection result: ' + JSON.stringify(result));
-          } catch (error) {
-            log('Settings: Error saving connection: ' + error.message);
-            setConnectingJira(false);
-            return;
-          }
-
-          // Reload connection to get fresh data
-          try {
-            await loadJiraConnection();
-            log('Settings: Connection loaded, jiraConnected should now be true');
-          } catch (error) {
-            log('Settings: Error loading connection: ' + error.message);
-          }
-          setConnectingJira(false);
-        } else if (event.data?.type === 'jira_error') {
-          log('Settings: Jira connection error: ' + event.data.error);
-          window.removeEventListener('message', messageHandler);
-          setConnectingJira(false);
-        } else {
-          log('Settings: Unhandled message type: ' + event.data?.type);
-        }
-      };
-
-      log('Settings: Adding message listener');
-      window.addEventListener('message', messageHandler);
-
-      // NOW get the URL and open the popup
       const response = await base44.functions.invoke('jiraOAuthStart', { 
         customer_id: user.email 
       });
 
       const authUrl = response.data?.authorizationUrl || response.data;
-      log('Settings: Opening Jira OAuth popup with URL: ' + authUrl);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
     } catch (error) {
       console.error('Error starting Jira OAuth:', error);
-      localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\nError: ' + error.message);
       setConnectingJira(false);
     }
   };
@@ -331,43 +280,43 @@ export default function Settings() {
     }
   ];
 
-  // Check for debug logs
+  // Charger les connexions Jira au mount
   useEffect(() => {
-    const checkLogs = () => {
-      const logs = localStorage.getItem('jira_debug_log');
-      if (logs) {
-        setDebugLog(logs);
-      }
-    };
-    checkLogs();
-    const interval = setInterval(checkLogs, 500);
-    return () => clearInterval(interval);
+    loadJiraConnection();
   }, []);
 
-  // Handle Jira OAuth callback from hash
+  // Écouter les changements de hash pour le callback Jira OAuth
   useEffect(() => {
-    const handleJiraCallback = async () => {
+    const handleHashChange = async () => {
       const hash = window.location.hash;
       if (hash.includes('jira_connection=')) {
         try {
           const encoded = hash.split('jira_connection=')[1];
           const connectionData = JSON.parse(atob(encoded));
 
-          // Save connection
+          // Sauvegarder la connexion
           await base44.functions.invoke('jiraSaveConnection', connectionData);
 
-          // Reload connection
+          // Recharger et mettre à jour l'état
           await loadJiraConnection();
 
-          // Clear hash
+          // Nettoyer le hash
           window.location.hash = '';
+          setConnectingJira(false);
         } catch (error) {
           console.error('Error processing Jira callback:', error);
+          setConnectingJira(false);
         }
       }
     };
 
-    handleJiraCallback();
+    // Écouter les changements de hash
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Vérifier immédiatement
+    handleHashChange();
+
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   // Charger config équipe et statut Slack
