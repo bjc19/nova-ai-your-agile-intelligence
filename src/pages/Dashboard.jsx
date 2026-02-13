@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import ContextualToolGenerator from "@/components/dashboard/ContextualToolGenerator";
 
 import {
   Mic,
@@ -280,8 +279,9 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Time Period Selector */}
-              <div className="flex justify-end">
+              {/* Workspace & Period Selector */}
+              <div className="flex justify-between items-center gap-4">
+                <WorkspaceSelector />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -289,7 +289,6 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
-
               </div>
             </div>
 
@@ -339,26 +338,10 @@ export default function Dashboard() {
         }
 
         {/* Show content only if there are analyses in the period */}
-         {(!selectedPeriod || analysisHistory.length > 0) &&
-         <div className="grid lg:grid-cols-3 gap-6">
-             {/* Left Column - Main Content */}
-             <div className="lg:col-span-2 space-y-6">
-               {/* Contextual Tool Generator - Intelligent Recommendations */}
-               {analysisHistory.length > 0 && (
-                 <ContextualToolGenerator 
-                   analysisHistory={analysisHistory}
-                   teamContext={{
-                     wip_count: sprintHealth?.wip_count,
-                     wip_historical_avg: sprintHealth?.wip_historical_avg,
-                     throughput_per_week: sprintInfo.throughputPerWeek
-                   }}
-                   detectionData={{
-                     productGoal: {},
-                     metrics: { cycle_time: { trend: analysisHistory.length > 1 ? 'up' : 'stable' } }
-                   }}
-                   userRole={user?.role}
-                 />
-               )}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
