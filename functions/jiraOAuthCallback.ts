@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
           <p>Your Jira account has been connected to Nova.</p>
           <p>You can now close this window.</p>
           <script>
+            sessionStorage.setItem('jira_connection_data', '${connectionData}');
             window.opener?.postMessage({ 
               type: 'jira_success',
               data: '${connectionData}'
