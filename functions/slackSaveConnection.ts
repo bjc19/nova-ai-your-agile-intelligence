@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, team_name });
   } catch (error) {
+    console.error('[slackSaveConnection] Error:', error.message, error.stack);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
