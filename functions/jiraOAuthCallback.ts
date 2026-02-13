@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     const connectionData = btoa(JSON.stringify({
       user_email: state,
       access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
+      refresh_token: tokenData.refresh_token || 'none',
       expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
       cloud_id: cloudId,
       scopes: tokenData.scope ? tokenData.scope.split(' ') : ['read:jira-work', 'offline_access'],
