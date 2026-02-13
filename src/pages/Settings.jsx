@@ -344,6 +344,32 @@ export default function Settings() {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle Jira OAuth callback from hash
+  useEffect(() => {
+    const handleJiraCallback = async () => {
+      const hash = window.location.hash;
+      if (hash.includes('jira_connection=')) {
+        try {
+          const encoded = hash.split('jira_connection=')[1];
+          const connectionData = JSON.parse(atob(encoded));
+
+          // Save connection
+          await base44.functions.invoke('jiraSaveConnection', connectionData);
+
+          // Reload connection
+          await loadJiraConnection();
+
+          // Clear hash
+          window.location.hash = '';
+        } catch (error) {
+          console.error('Error processing Jira callback:', error);
+        }
+      }
+    };
+
+    handleJiraCallback();
+  }, []);
+
   // Charger config équipe et statut Slack
   useEffect(() => {
     const loadData = async () => {
