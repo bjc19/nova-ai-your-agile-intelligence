@@ -79,38 +79,15 @@ Deno.serve(async (req) => {
 
     const cloudId = instances[0].id; // Use first instance
 
-    // Store Jira connection - use asServiceRole for OAuth callback (no user session)
-    const userEmail = state; // state contains the user email
-
-    // Check if connection already exists
-    const existingConns = await base44.asServiceRole.entities.JiraConnection.filter({
-      user_email: userEmail
-    });
-
-    if (existingConns.length > 0) {
-      // Update existing connection
-      await base44.asServiceRole.entities.JiraConnection.update(existingConns[0].id, {
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token || 'none',
-        expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
-        cloud_id: cloudId,
-        is_active: true,
-        scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
-        connected_at: new Date().toISOString(),
-      });
-    } else {
-      // Create new connection
-      await base44.asServiceRole.entities.JiraConnection.create({
-        user_email: userEmail,
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token || 'none',
-        expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
-        cloud_id: cloudId,
-        is_active: true,
-        scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
-        connected_at: new Date().toISOString(),
-      });
-    }
+    // Return connection data to frontend (like Slack OAuth flow)
+    const connectionData = btoa(JSON.stringify({
+      user_email: state,
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token || 'none',
+      expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+      cloud_id: cloudId,
+      scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
+    }));
 
     return new Response(`
       <html>
@@ -119,7 +96,10 @@ Deno.serve(async (req) => {
           <p>Your Jira account has been connected to Nova.</p>
           <p>You can now close this window.</p>
           <script>
-            window.opener?.postMessage({ success: true }, '*');
+            window.opener?.postMessage({ 
+              type: 'jira_success',
+              data: '${connectionData}'
+            }, '*');
             setTimeout(() => window.close(), 2000);
           </script>
         </body>

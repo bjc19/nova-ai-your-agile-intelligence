@@ -57,6 +57,7 @@ import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
 import Plans from './pages/Plans';
+import Privacy from './pages/Privacy';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
@@ -64,7 +65,6 @@ import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import Privacy from './pages/Privacy';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +79,7 @@ export const PAGES = {
     "Details": Details,
     "Home": Home,
     "Plans": Plans,
+    "Privacy": Privacy,
     "Register": Register,
     "ResetPassword": ResetPassword,
     "Results": Results,
@@ -86,7 +87,6 @@ export const PAGES = {
     "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "Privacy": Privacy,
 }
 
 export const pagesConfig = {
