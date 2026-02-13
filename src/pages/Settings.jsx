@@ -175,26 +175,33 @@ export default function Settings() {
 
       // Listen for popup message
       const messageHandler = async (event) => {
+        console.log('Message received in parent:', event.data);
+
         if (event.data?.type === 'jira_success') {
+          console.log('Jira success message received');
           window.removeEventListener('message', messageHandler);
 
-          // Decode connection data
-          const connectionData = JSON.parse(atob(event.data.data));
+          try {
+            // Decode connection data
+            const connectionData = JSON.parse(atob(event.data.data));
+            console.log('Decoded connection data:', connectionData);
 
-          // Save connection through authenticated endpoint
-          await base44.functions.invoke('jiraSaveConnection', connectionData);
+            // Save connection through authenticated endpoint
+            const saveResponse = await base44.functions.invoke('jiraSaveConnection', connectionData);
+            console.log('Save response:', saveResponse);
 
-          // Reload connection to get fresh data
-          await loadJiraConnection();
-          setConnectingJira(false);
-        } else if (event.data?.type === 'jira_error') {
-          console.error('Jira connection error:', event.data.error);
-          window.removeEventListener('message', messageHandler);
-          setConnectingJira(false);
+            // Reload connection to get fresh data
+            await loadJiraConnection();
+            setConnectingJira(false);
+          } catch (err) {
+            console.error('Error in jira_success handler:', err);
+            setConnectingJira(false);
+          }
         }
       };
 
       window.addEventListener('message', messageHandler);
+      console.log('Opening Jira OAuth popup with URL:', authUrl);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
     } catch (error) {
       console.error('Error starting Jira OAuth:', error);
