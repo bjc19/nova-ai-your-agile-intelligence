@@ -65,6 +65,7 @@ import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
+import JiraProjectSelector from './pages/JiraProjectSelector';
 import __Layout from './Layout.jsx';
 
 
@@ -87,6 +88,7 @@ export const PAGES = {
     "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
+    "JiraProjectSelector": JiraProjectSelector,
 }
 
 export const pagesConfig = {
