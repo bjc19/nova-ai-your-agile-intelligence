@@ -82,19 +82,39 @@ Deno.serve(async (req) => {
 
     const cloudId = instances[0].id; // Use first instance
 
-    // Store Jira connection using email from state (callback is before auth)
+    // Store Jira connection using email from state
+    // OAuth callback happens in popup without user session, so we use service role
     const userEmail = state; // state contains the user email
 
-    await base44.entities.JiraConnection.create({
-      user_email: userEmail,
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token || 'none',
-      expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
-      cloud_id: cloudId,
-      is_active: true,
-      scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
-      connected_at: new Date().toISOString(),
+    // Check if connection already exists
+    const existingConns = await base44.entities.JiraConnection.filter({
+      user_email: userEmail
     });
+
+    if (existingConns.length > 0) {
+      // Update existing connection
+      await base44.entities.JiraConnection.update(existingConns[0].id, {
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token || 'none',
+        expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+        cloud_id: cloudId,
+        is_active: true,
+        scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
+        connected_at: new Date().toISOString(),
+      });
+    } else {
+      // Create new connection
+      await base44.entities.JiraConnection.create({
+        user_email: userEmail,
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token || 'none',
+        expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
+        cloud_id: cloudId,
+        is_active: true,
+        scopes: ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'],
+        connected_at: new Date().toISOString(),
+      });
+    }
 
     return new Response(`
       <html>
