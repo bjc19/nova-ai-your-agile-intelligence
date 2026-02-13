@@ -175,25 +175,36 @@ export default function Settings() {
       const authUrl = response.data?.authorizationUrl || response.data;
 
       // Listen for popup message
-              const messageHandler = async (event) => {
-                if (event.data?.type === 'jira_success') {
-                  window.removeEventListener('message', messageHandler);
+                      const messageHandler = async (event) => {
+                        if (event.data?.type === 'jira_success') {
+                          window.removeEventListener('message', messageHandler);
 
-                  // Decode connection data
-                  const connectionData = JSON.parse(atob(event.data.data));
+                          try {
+                            // Decode connection data
+                            const connectionData = JSON.parse(atob(event.data.data));
 
-                  // Save connection through authenticated endpoint
-                  await base44.functions.invoke('jiraSaveConnection', connectionData);
+                            // Save connection through authenticated endpoint
+                            const saveResult = await base44.functions.invoke('jiraSaveConnection', connectionData);
 
-                  // Update UI immediately without reloading
-                  setJiraConnected(true);
-                  setConnectingJira(false);
-                } else if (event.data?.type === 'jira_error') {
-                  console.error('Jira connection error:', event.data.error);
-                  window.removeEventListener('message', messageHandler);
-                  setConnectingJira(false);
-                }
-              };
+                            if (saveResult.data?.success) {
+                              // Only update UI if save was successful
+                              setJiraConnected(true);
+                            } else {
+                              console.error('Failed to save Jira connection:', saveResult.data);
+                              alert('Erreur: Impossible de sauvegarder la connexion Jira');
+                            }
+                          } catch (error) {
+                            console.error('Error saving Jira connection:', error);
+                            alert('Erreur lors de la sauvegarde: ' + error.message);
+                          } finally {
+                            setConnectingJira(false);
+                          }
+                        } else if (event.data?.type === 'jira_error') {
+                          console.error('Jira connection error:', event.data.error);
+                          window.removeEventListener('message', messageHandler);
+                          setConnectingJira(false);
+                        }
+                      };
 
       window.addEventListener('message', messageHandler);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
