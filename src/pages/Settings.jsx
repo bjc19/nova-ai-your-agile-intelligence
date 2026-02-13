@@ -48,6 +48,23 @@ export default function Settings() {
    const [currentRole, setCurrentRole] = useState('contributor');
    const [switchingRole, setSwitchingRole] = useState(false);
 
+  const loadSlackConnection = async () => {
+    try {
+      const user = await base44.auth.me();
+      const slackConns = await base44.entities.SlackConnection.filter({ 
+        user_email: user.email,
+        is_active: true
+      });
+      
+      if (slackConns.length > 0) {
+        setSlackConnected(true);
+        setSlackTeamName(slackConns[0].team_name);
+      }
+    } catch (error) {
+      console.error('Error loading Slack connection:', error);
+    }
+  };
+
   const handleSlackConnect = async () => {
     try {
       setConnectingSlack(true);
@@ -65,8 +82,8 @@ export default function Settings() {
           // Save connection through authenticated endpoint
           await base44.functions.invoke('slackSaveConnection', connectionData);
           
-          setSlackConnected(true);
-          setSlackTeamName(event.data.team);
+          // Reload connection to get fresh data
+          await loadSlackConnection();
           window.removeEventListener('message', handleMessage);
           setConnectingSlack(false);
         } else if (event.data.type === 'slack_error') {
