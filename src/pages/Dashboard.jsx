@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
 import {
   Mic,
@@ -280,9 +279,8 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Workspace & Period Selector */}
-              <div className="flex justify-between items-center gap-4">
-                <WorkspaceSelector />
+              {/* Time Period Selector */}
+              <div className="flex justify-end">
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -290,6 +288,7 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
+
               </div>
             </div>
 
@@ -391,8 +390,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {/* Organizational Reality Engine - Contributor Only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
