@@ -7,11 +7,12 @@ Deno.serve(async (req) => {
     const error = url.searchParams.get('error');
     const state = url.searchParams.get('state');
     
-    // CAS 1: Callback de Slack (avec code)
-    if (code) {
+    // CAS 1: Callback de Slack (avec code ou erreur)
+    if (code || error) {
       console.log('📞 Slack OAuth callback received');
       
       if (error) {
+        console.log('❌ Slack OAuth error:', error);
         return new Response(`
           <html>
             <body>
@@ -155,10 +156,9 @@ Deno.serve(async (req) => {
       `, {
         headers: { 'Content-Type': 'text/html' }
       });
-    }
-    
-    // CAS 2: Début du flux OAuth (sans code)
-    const base44 = createClientFromRequest(req);
+    } else {
+      // CAS 2: Début du flux OAuth (sans code)
+      const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     
     if (!user) {
@@ -184,6 +184,7 @@ Deno.serve(async (req) => {
     const authUrl = `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${stateData}`;
 
     return Response.json({ authUrl });
+    }
   } catch (error) {
     console.error('Error in slackOAuthStart:', error);
     return Response.json({ error: error.message }, { status: 500 });
