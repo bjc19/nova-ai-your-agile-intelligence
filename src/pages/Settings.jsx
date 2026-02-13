@@ -211,7 +211,11 @@ export default function Settings() {
 
   const loadJiraConnection = async () => {
     try {
-      const jiraConns = await base44.entities.JiraConnection.list();
+      const user = await base44.auth.me();
+      const jiraConns = await base44.entities.JiraConnection.filter({ 
+        user_email: user.email,
+        is_active: true
+      });
       setJiraConnected(jiraConns.length > 0);
     } catch (error) {
       console.error('Error loading Jira connection:', error);
