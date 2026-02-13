@@ -224,6 +224,17 @@ export default function Settings() {
     }
   };
 
+  const checkJiraDebug = async () => {
+    try {
+      const result = await base44.functions.invoke('checkJiraStatus', {});
+      setJiraDebugInfo(result.data);
+      console.log('Jira Debug Info:', result.data);
+    } catch (error) {
+      console.error('Debug error:', error);
+      setJiraDebugInfo({ error: error.message });
+    }
+  };
+
   const integrations = [
     {
       id: "slack",
