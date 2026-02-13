@@ -342,6 +342,11 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Visible to all users */}
+              <MyFocusBoard />
+              <BlockersAffectingMe />
+              <ContributionMetrics />
+              
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -362,9 +367,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Actionable Metrics Radar - Admin/Contributor only */}
-              {(user?.role === 'admin' || user?.role === 'contributor') && analysisHistory.length > 0 &&
-              <MetricsRadarCard
+              {/* Actionable Metrics Radar */}
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -390,9 +395,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine - Admin/Contributor only */}
-              {(user?.role === 'admin' || user?.role === 'contributor') && analysisHistory.length > 0 &&
-              <RealityMapCard
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
