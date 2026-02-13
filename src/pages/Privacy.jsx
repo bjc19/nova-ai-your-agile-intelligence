@@ -16,6 +16,14 @@ export default function Privacy() {
             <h1 className="text-4xl font-bold text-slate-900">Politique de confidentialité</h1>
           </div>
           <p className="text-slate-600 text-lg">Dernière mise à jour : 13 février 2026</p>
+          
+          <div className="mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+            <p className="text-sm text-blue-900 font-medium mb-1">📋 Déclaration Jira Personal Data</p>
+            <p className="text-sm text-blue-800">
+              Nova stocke les tokens d'accès OAuth et adresses email au-delà de 24h (conformément aux exigences de connexion persistante). 
+              Cependant, <strong>aucune donnée Jira brute</strong> (issues, commentaires, historique) n'est stockée — seulement les résultats d'analyse anonymisés.
+            </p>
+          </div>
         </div>
 
         {/* Introduction */}
@@ -44,21 +52,39 @@ export default function Privacy() {
                 <li>Rôle dans l'organisation (administrateur, contributeur, utilisateur)</li>
               </ul>
 
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">1.2 Données d'intégration</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">1.2 Données d'intégration (Tokens uniquement)</h3>
               <ul className="list-disc list-inside text-slate-700 space-y-2 mb-4 ml-4">
-                <li>Tokens d'accès chiffrés pour Slack, Jira et Microsoft Teams</li>
-                <li>Identifiants de workspace et d'équipe</li>
+                <li><strong>Tokens OAuth chiffrés</strong> pour Slack, Jira et Microsoft Teams (AES-256)</li>
+                <li>Identifiants de workspace et cloud_id</li>
                 <li>Métadonnées d'intégration (dates de connexion, permissions accordées)</li>
               </ul>
+              <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-4">
+                <p className="text-sm font-semibold text-emerald-900 mb-1">✅ Architecture zéro-rétention des données tierces</p>
+                <p className="text-sm text-emerald-800">
+                  Nova n'extrait ni ne stocke les données brutes de vos outils externes (issues Jira, messages Slack, commentaires Teams). 
+                  Nous accédons à ces données en <strong>lecture seule</strong>, les analysons en mémoire en temps réel, 
+                  puis les supprimons <strong>immédiatement</strong> après génération des insights.
+                </p>
+              </div>
 
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">1.3 Données d'analyse</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">1.3 Résultats d'analyse anonymisés (GDPRMarkers)</h3>
+              <p className="text-slate-700 mb-2">
+                Nous stockons <strong>uniquement les résultats anonymisés</strong> de nos analyses :
+              </p>
               <ul className="list-disc list-inside text-slate-700 space-y-2 mb-4 ml-4">
-                <li>Transcriptions de réunions (anonymisées)</li>
-                <li>Données de projet Jira (issues, sprints, métriques)</li>
-                <li>Messages Slack de canaux connectés</li>
-                <li>Analyses générées et recommandations</li>
-                <li>Marqueurs de risques et anti-patterns détectés</li>
+                <li>Marqueurs de risques et anti-patterns détectés (anonymisés via SHA256)</li>
+                <li>Recommandations contextuelles d'amélioration</li>
+                <li>Métriques de performance d'équipe agrégées</li>
+                <li>Historique d'analyses et tendances</li>
               </ul>
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                <p className="text-sm font-semibold text-blue-900 mb-1">🔒 Anonymisation systématique (RGPD stricte)</p>
+                <p className="text-sm text-blue-800">
+                  Tous les identifiants personnels (AccountID, tenant_id, team_id, session_id) sont <strong>anonymisés via hachage SHA256</strong> 
+                  avant stockage. Les prénoms des membres d'équipe sont stockés uniquement avec <strong>consentement explicite</strong> 
+                  et peuvent être supprimés à tout moment.
+                </p>
+              </div>
 
               <h3 className="text-lg font-semibold text-slate-800 mb-2">1.4 Données de paiement</h3>
               <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
@@ -98,23 +124,48 @@ export default function Privacy() {
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">3. Sécurité et protection</h2>
               
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.1 Mesures de sécurité</h3>
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6 mb-6">
+                <h3 className="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  <span className="text-2xl">🛡️</span>
+                  Architecture Privacy by Design
+                </h3>
+                <div className="space-y-2 text-sm text-blue-900">
+                  <p><strong>✅ Accès lecture seule</strong> : Nova ne peut ni créer, ni modifier, ni supprimer vos données sources</p>
+                  <p><strong>✅ Analyse en mémoire</strong> : Les données brutes sont traitées en temps réel et immédiatement supprimées</p>
+                  <p><strong>✅ Stockage minimal</strong> : Seuls les tokens OAuth + résultats anonymisés (marqueurs, métriques) sont conservés</p>
+                  <p><strong>✅ Anonymisation systématique</strong> : Hachage SHA256 de tous les identifiants personnels avant stockage</p>
+                  <p><strong>✅ Révocation instantanée</strong> : Supprimez les accès OAuth en un clic depuis vos paramètres</p>
+                </div>
+              </div>
+
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.1 Chiffrement de bout en bout</h3>
               <ul className="list-disc list-inside text-slate-700 space-y-2 mb-4 ml-4">
-                <li>Chiffrement des tokens d'accès et données sensibles</li>
-                <li>Connexions HTTPS sécurisées</li>
-                <li>Contrôles d'accès basés sur les rôles (RLS)</li>
-                <li>Authentification sécurisée</li>
-                <li>Surveillance continue et audits de sécurité</li>
+                <li><strong>AES-256</strong> pour tous les tokens OAuth au repos</li>
+                <li><strong>TLS 1.3</strong> pour toutes les communications réseau</li>
+                <li>Aucune donnée sensible stockée en clair</li>
+                <li>Clés de chiffrement rotées régulièrement</li>
               </ul>
 
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.2 Anonymisation</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.2 Conformité RGPD stricte</h3>
               <p className="text-slate-700 mb-2">
-                Conformément au RGPD et aux meilleures pratiques :
+                Nova respecte les 7 principes fondamentaux du RGPD :
               </p>
+              <ul className="list-disc list-inside text-slate-700 space-y-2 mb-4 ml-4">
+                <li><strong>Minimisation</strong> : Collecte strictement limitée (tokens + email)</li>
+                <li><strong>Limitation de finalité</strong> : Données utilisées uniquement pour l'analyse Agile</li>
+                <li><strong>Limitation de conservation</strong> : Pas de stockage des données sources tierces</li>
+                <li><strong>Exactitude</strong> : Vous contrôlez vos données via les paramètres</li>
+                <li><strong>Intégrité et confidentialité</strong> : Chiffrement + accès restreints</li>
+                <li><strong>Transparence</strong> : Cette politique détaille tout ce que nous faisons</li>
+                <li><strong>Responsabilité</strong> : Audits réguliers et droit à l'oubli en 48h</li>
+              </ul>
+
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.3 Anonymisation RGPD-compliant</h3>
               <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
-                <li>Les transcriptions sont anonymisées (prénoms uniquement)</li>
-                <li>Les identifiants d'équipe et tenant sont hashés (SHA256)</li>
-                <li>Les données sensibles sont stockées avec chiffrement</li>
+                <li>Hachage SHA256 irréversible de tous les identifiants (AccountID, tenant_id, team_id, session_id)</li>
+                <li>Prénoms stockés uniquement avec consentement explicite</li>
+                <li>Pas de stockage de numéros de téléphone, adresses postales ou données bancaires</li>
+                <li>Logs système anonymisés après 30 jours</li>
               </ul>
             </div>
           </div>
@@ -127,16 +178,29 @@ export default function Privacy() {
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">4. Partage des données</h2>
               
+              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                <p className="text-sm font-semibold text-green-900 mb-1">✅ Engagement de non-revente</p>
+                <p className="text-sm text-green-800">
+                  Nous ne vendons <strong>jamais</strong> vos données personnelles ni vos résultats d'analyse à des tiers. 
+                  Vos données vous appartiennent entièrement.
+                </p>
+              </div>
+
               <p className="text-slate-700 mb-4">
-                Nous ne vendons jamais vos données personnelles. Nous pouvons partager vos informations avec :
+                Nous partageons vos informations uniquement avec :
               </p>
               
               <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
-                <li><strong>Prestataires de services :</strong> Stripe (paiements), Base44 (infrastructure), OpenAI (analyses IA)</li>
-                <li><strong>Services intégrés :</strong> Slack, Jira, Microsoft Teams (selon vos connexions)</li>
-                <li><strong>Obligations légales :</strong> Autorités compétentes si requis par la loi</li>
-                <li><strong>Membres de votre équipe :</strong> Analyses partagées au sein de votre workspace</li>
+                <li><strong>Prestataires certifiés :</strong> Base44 (hébergement RGPD), Stripe (paiements PCI-DSS), Resend (emails transactionnels)</li>
+                <li><strong>OpenAI (analyses IA) :</strong> Données anonymisées uniquement, sans stockage permanent par OpenAI</li>
+                <li><strong>Aucun partage avec vos outils :</strong> Nova ne transmet JAMAIS vos résultats d'analyse à Slack, Jira ou Teams (flux unidirectionnel lecture seule)</li>
+                <li><strong>Obligations légales :</strong> Autorités compétentes si requis par la loi (dans le respect du RGPD)</li>
+                <li><strong>Membres de votre workspace :</strong> Analyses partagées au sein de votre équipe Nova uniquement</li>
               </ul>
+              
+              <p className="text-slate-700 mt-4 text-sm">
+                Tous les prestataires sont liés par des accords de confidentialité stricts (DPA) et n'ont accès qu'aux données strictement nécessaires.
+              </p>
             </div>
           </div>
         </div>
