@@ -26,7 +26,7 @@ export const translations = {
     aiPoweredScrumMaster: "Scrum Master IA",
     daysLeftInSprint: "jours restants dans le sprint",
     newAnalysis: "Nouvelle analyse",
-    importDataDescription: "Importez des données depuis Slack, téléchargez des transcripts de réunion, ou collez vos notes directement. Nova analysera et fournira des insights actionnables.",
+    importDataDescription: "Téléchargez des transcripts de réunions ou collez vos notes directement. Nova analysera et fournira des insights actionnables.",
     connectSlack: "Connecter Slack",
     startAnalysis: "Démarrer l'analyse",
     keyRecommendations: "Recommandations clés",
