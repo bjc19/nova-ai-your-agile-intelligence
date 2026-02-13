@@ -456,19 +456,19 @@ Provide a detailed analysis in the following JSON format:`;
       return;
     }
 
-    // Call createMultiSourceAnalysis for workspace-aware fusion
-    const response = await base44.functions.invoke('createMultiSourceAnalysis', {
+    // Call createAnalysis with workspace_id for multi-source fusion
+    const response = await base44.functions.invoke('createAnalysis', {
+      analysisRecord: {
+        ...analysisRecord,
+        jira_project_selection_id: selectedWorkspaceId,
+        workspace_name: selectedWorkspaceName
+      },
+      patternDetections,
       workspace_id: selectedWorkspaceId,
-      workspace_name: selectedWorkspaceName,
-      primary_source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
-      title: analysisRecord.title,
-      analysis_data: analysisRecord.analysis_data,
-      blockers_count: analysisRecord.blockers_count,
-      risks_count: analysisRecord.risks_count,
-      transcript_preview: analysisRecord.transcript_preview
+      workspace_name: selectedWorkspaceName
     });
     
-    const createdAnalysis = response.data;
+    const createdAnalysis = response.data.analysis;
     
     // Invalidate query to force refetch from database
     await queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
