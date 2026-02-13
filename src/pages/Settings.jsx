@@ -302,47 +302,54 @@ export default function Settings() {
   // Charger config équipe et statut Slack
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const user = await base44.auth.me();
-        setCurrentRole(user.role || 'contributor');
+        try {
+          const user = await base44.auth.me();
+          setCurrentRole(user.role || 'contributor');
 
-        // Load team config
-        const configs = await base44.entities.TeamConfiguration.list();
-        if (configs.length > 0) {
-          setTeamConfig(configs[0]);
-        }
+          // Load team config
+          const configs = await base44.entities.TeamConfiguration.list();
+          if (configs.length > 0) {
+            setTeamConfig(configs[0]);
+          }
 
-        // Check Slack, Teams and Jira connections
-        const [slackConns, teamsConns, jiraConns] = await Promise.all([
-          base44.entities.SlackConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.TeamsConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.JiraConnection.filter({ 
-            is_active: true
-          })
-        ]);
-        
-        if (slackConns.length > 0) {
-          setSlackConnected(true);
-          setSlackTeamName(slackConns[0].team_name);
-        }
-        
-        if (teamsConns.length > 0) {
-          setTeamsConnected(true);
-        }
+          // Check Slack, Teams and Jira connections - filter by user_email to ensure we get the right ones
+          const [slackConns, teamsConns, jiraConns] = await Promise.all([
+            base44.entities.SlackConnection.filter({ 
+              user_email: user.email,
+              is_active: true
+            }),
+            base44.entities.TeamsConnection.filter({ 
+              user_email: user.email,
+              is_active: true
+            }),
+            base44.entities.JiraConnection.list()
+          ]);
 
-        if (jiraConns.length > 0) {
-          setJiraConnected(true);
+          if (slackConns.length > 0) {
+            setSlackConnected(true);
+            setSlackTeamName(slackConns[0].team_name);
+          } else {
+            setSlackConnected(false);
+            setSlackTeamName(null);
+          }
+
+          if (teamsConns.length > 0) {
+            setTeamsConnected(true);
+          } else {
+            setTeamsConnected(false);
+          }
+
+          if (jiraConns.length > 0) {
+            setJiraConnected(true);
+          } else {
+            setJiraConnected(false);
+          }
+        } catch (error) {
+          console.error("Erreur chargement données:", error);
+        } finally {
+          setLoadingConfig(false);
         }
-      } catch (error) {
-        console.error("Erreur chargement données:", error);
-      } finally {
-        setLoadingConfig(false);
-      }
-    };
+      };
     loadData();
   }, [navigate]);
 
