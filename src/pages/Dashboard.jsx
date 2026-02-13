@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -99,7 +98,7 @@ export default function Dashboard() {
       setIsLoading(false);
     };
     checkAuth();
-  }, [navigate]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
@@ -225,12 +224,6 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}>
-
-            {/* Daily Quote */}
-            <DailyQuote 
-              blockerCount={gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length} 
-              riskCount={gdprSignals.filter(s => s.criticite === 'moyenne').length} 
-            />
 
             {/* Welcome Banner */}
             <div className="flex flex-col gap-6 mb-8">
