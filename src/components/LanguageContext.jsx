@@ -83,7 +83,7 @@ export const translations = {
     
     // Analysis
     analyzeTitle: "Analyser un atelier",
-    analyzeDescription: "Importez des données depuis Slack, téléchargez des fichiers ou collez votre transcript.",
+    analyzeDescription: "Téléchargez des fichiers ou collez votre transcript.",
     analyzeButton: "Analyser avec Nova",
     analyzing: "Nova analyse la réunion...",
     backToDashboard: "Retour au Dashboard",
