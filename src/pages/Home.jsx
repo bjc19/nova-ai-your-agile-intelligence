@@ -20,7 +20,7 @@ import {
   X
 } from "lucide-react";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
-import DailyQuote from "@/components/nova/DailyQuote";
+
 
 const PricingSection = lazy(() => import("@/components/nova/PricingSection").then(m => ({ default: m.PricingSection })));
 
@@ -218,10 +218,8 @@ export default function Home() {
             <Badge variant="outline" className="px-4 py-1.5 text-sm font-medium bg-white/80 backdrop-blur-sm border-slate-300 text-slate-700 mb-6">
               {t("aiPoweredScrum")}
             </Badge>
-
-            <DailyQuote lang={lang} />
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight mb-6 mt-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-tight mb-6">
               {t("heroPart1")}{" "}
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 {t("heroPart2")}
