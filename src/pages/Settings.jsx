@@ -47,6 +47,7 @@ export default function Settings() {
    const [loadingConfig, setLoadingConfig] = useState(true);
    const [currentRole, setCurrentRole] = useState('contributor');
    const [switchingRole, setSwitchingRole] = useState(false);
+   const [debugLog, setDebugLog] = useState('');
 
   const loadSlackConnection = async () => {
     try {
