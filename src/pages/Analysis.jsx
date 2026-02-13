@@ -62,6 +62,9 @@ export default function Analysis() {
     return localStorage.getItem("productGoalValidated") === "true";
   });
   const [hasActiveScopeCreep, setHasActiveScopeCreep] = useState(false);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
+  const [selectedWorkspaceName, setSelectedWorkspaceName] = useState(null);
 
   // Simulated Product Goal & Sprint Goals data (will come from Jira/Confluence)
   const productGoalData = {
@@ -83,7 +86,7 @@ export default function Analysis() {
     { sprint_name: "Sprint 11", goal_statement: "Optimiser les emails de réengagement", alignment_status: "aligned", sprint_number: 11 },
   ];
 
-  // Check user permissions
+  // Check user permissions & load workspaces
   useEffect(() => {
     const checkPermissions = async () => {
       try {
@@ -92,6 +95,18 @@ export default function Analysis() {
         
         const hasPermission = currentUser.role === 'admin' || currentUser.role === 'contributor';
         setCanCreateAnalysis(hasPermission);
+
+        // Load available workspaces (JiraProjectSelection)
+        const userWorkspaces = await base44.entities.JiraProjectSelection.filter({
+          is_active: true
+        });
+        setWorkspaces(userWorkspaces);
+        
+        // Auto-select first workspace if available
+        if (userWorkspaces.length > 0) {
+          setSelectedWorkspaceId(userWorkspaces[0].id);
+          setSelectedWorkspaceName(userWorkspaces[0].workspace_name);
+        }
       } catch (error) {
         console.error('Error checking permissions:', error);
       }
@@ -434,13 +449,26 @@ Provide a detailed analysis in the following JSON format:`;
       }
     }
 
-    // Call backend function to create analysis with proper permissions
-    const response = await base44.functions.invoke('createAnalysis', {
-      analysisRecord: analysisRecord,
-      patternDetections: patternDetections
+    // Check if workspace selected for multi-source fusion
+    if (!selectedWorkspaceId) {
+      setError("Veuillez sélectionner un workspace pour l'analyse cross-source.");
+      setIsAnalyzing(false);
+      return;
+    }
+
+    // Call createMultiSourceAnalysis for workspace-aware fusion
+    const response = await base44.functions.invoke('createMultiSourceAnalysis', {
+      workspace_id: selectedWorkspaceId,
+      workspace_name: selectedWorkspaceName,
+      primary_source: activeTab === "slack" ? "slack" : activeTab === "upload" ? "file_upload" : "transcript",
+      title: analysisRecord.title,
+      analysis_data: analysisRecord.analysis_data,
+      blockers_count: analysisRecord.blockers_count,
+      risks_count: analysisRecord.risks_count,
+      transcript_preview: analysisRecord.transcript_preview
     });
     
-    const createdAnalysis = response.data.analysis;
+    const createdAnalysis = response.data;
     
     // Invalidate query to force refetch from database
     await queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
@@ -560,7 +588,7 @@ Provide a detailed analysis in the following JSON format:`;
             </div>
           )}
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 mb-2">
                 {t('analyzeTitle')}
@@ -576,6 +604,39 @@ Provide a detailed analysis in the following JSON format:`;
               </Button>
             </Link>
           </div>
+
+          {/* Workspace Selector for Multi-Source Analysis */}
+          {workspaces.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
+              className="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-blue-900 mb-2">Workspace pour analyse cross-source</p>
+                  <p className="text-xs text-blue-700">Cette analyse fusionnera avec vos données Slack, Teams et Jira du workspace</p>
+                </div>
+                <Select value={selectedWorkspaceId} onValueChange={(val) => {
+                  setSelectedWorkspaceId(val);
+                  const ws = workspaces.find(w => w.id === val);
+                  setSelectedWorkspaceName(ws?.workspace_name);
+                }}>
+                  <SelectTrigger className="w-64 bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workspaces.map(ws => (
+                      <SelectItem key={ws.id} value={ws.id}>
+                        {ws.workspace_name} ({ws.jira_project_name})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Workshop Type Auto-Detection with Full Details */}
