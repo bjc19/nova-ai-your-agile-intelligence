@@ -175,21 +175,26 @@ export default function Settings() {
 
       // Listen for popup message
       const messageHandler = async (event) => {
-        console.log('Settings: Message received', event.data);
+        const log = (msg) => {
+          console.log(msg);
+          localStorage.setItem('jira_debug_log', (localStorage.getItem('jira_debug_log') || '') + '\n' + msg);
+        };
+        
+        log('Settings: Message received: ' + JSON.stringify(event.data));
         if (event.data?.type === 'jira_success') {
-          console.log('Settings: Jira success received');
+          log('Settings: Jira success received');
           window.removeEventListener('message', messageHandler);
 
           // Decode connection data
           const connectionData = JSON.parse(atob(event.data.data));
-          console.log('Settings: Decoded connection data:', connectionData);
+          log('Settings: Decoded connection data: ' + JSON.stringify(connectionData));
 
           // Save connection through authenticated endpoint
           try {
             const result = await base44.functions.invoke('jiraSaveConnection', connectionData);
-            console.log('Settings: Save connection result:', result);
+            log('Settings: Save connection result: ' + JSON.stringify(result));
           } catch (error) {
-            console.error('Settings: Error saving connection:', error);
+            log('Settings: Error saving connection: ' + error.message);
             setConnectingJira(false);
             return;
           }
@@ -197,21 +202,21 @@ export default function Settings() {
           // Reload connection to get fresh data
           try {
             await loadJiraConnection();
-            console.log('Settings: Connection loaded, setJiraConnected should be true');
+            log('Settings: Connection loaded, jiraConnected should now be true');
           } catch (error) {
-            console.error('Settings: Error loading connection:', error);
+            log('Settings: Error loading connection: ' + error.message);
           }
           setConnectingJira(false);
         } else if (event.data?.type === 'jira_error') {
-          console.error('Jira connection error:', event.data.error);
+          log('Settings: Jira connection error: ' + event.data.error);
           window.removeEventListener('message', messageHandler);
           setConnectingJira(false);
         } else {
-          console.log('Settings: Unhandled message type:', event.data?.type);
+          log('Settings: Unhandled message type: ' + event.data?.type);
         }
       };
 
-      console.log('Settings: Adding message listener');
+      log('Settings: Adding message listener');
       window.addEventListener('message', messageHandler);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
     } catch (error) {
