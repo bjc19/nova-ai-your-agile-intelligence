@@ -39,7 +39,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'APP_URL not configured', status: 'app_url_missing' }, { status: 500 });
     }
 
-    // For unauthenticated users: create checkout with email (no customer profile yet)
     console.log('[Stripe Public] Creating checkout session for unauthenticated user:', email);
     
     const session = await stripe.checkout.sessions.create({
@@ -52,7 +51,6 @@ Deno.serve(async (req) => {
         }
       ],
       mode: 'subscription',
-      // After payment, redirect to registration with session_id
       success_url: `${appUrl}/register?session_id={CHECKOUT_SESSION_ID}&plan=${plan}&email=${encodeURIComponent(email)}`,
       cancel_url: `${appUrl}/home`,
       metadata: {
