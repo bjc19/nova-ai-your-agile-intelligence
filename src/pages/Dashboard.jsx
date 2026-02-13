@@ -340,10 +340,19 @@ export default function Dashboard() {
         }
 
         {/* Show content only if there are analyses in the period */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+         {(!selectedPeriod || analysisHistory.length > 0) &&
+         <div className="grid lg:grid-cols-3 gap-6">
+             {/* Left Column - Dynamic Components */}
+             <div className="lg:col-span-2">
+               <DynamicDashboard 
+                 analysisHistory={analysisHistory}
+                 userRole={currentRole}
+                 latestAnalysis={latestAnalysis}
+               />
+             </div>
+
+             {/* Left Column - Main Content - LEGACY */}
+             <div className="lg:col-span-2 space-y-6 hidden">
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -432,11 +441,11 @@ export default function Dashboard() {
 
           </div>
 
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
+          {/* Right Column - Sidebar - LEGACY */}
+          <div className="space-y-6 hidden">
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
-            
+
             {/* Integration Status */}
             <IntegrationStatus />
           </div>
