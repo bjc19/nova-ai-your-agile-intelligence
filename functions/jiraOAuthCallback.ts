@@ -1,12 +1,9 @@
-import { Base44Client } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
-    // OAuth callback - instantiate with service role key directly (no user session in OAuth popup)
-    const base44 = new Base44Client({
-      serviceRoleKey: Deno.env.get('BASE44_SERVICE_ROLE_KEY'),
-      appId: Deno.env.get('BASE44_APP_ID')
-    });
+    // Initialize Base44 client
+    const base44 = createClientFromRequest(req);
     
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
@@ -82,17 +79,17 @@ Deno.serve(async (req) => {
 
     const cloudId = instances[0].id; // Use first instance
 
-    // Store Jira connection using email from state
+    // Store Jira connection - use asServiceRole for OAuth callback (no user session)
     const userEmail = state; // state contains the user email
 
     // Check if connection already exists
-    const existingConns = await base44.entities.JiraConnection.filter({
+    const existingConns = await base44.asServiceRole.entities.JiraConnection.filter({
       user_email: userEmail
     });
 
     if (existingConns.length > 0) {
       // Update existing connection
-      await base44.entities.JiraConnection.update(existingConns[0].id, {
+      await base44.asServiceRole.entities.JiraConnection.update(existingConns[0].id, {
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token || 'none',
         expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
@@ -103,7 +100,7 @@ Deno.serve(async (req) => {
       });
     } else {
       // Create new connection
-      await base44.entities.JiraConnection.create({
+      await base44.asServiceRole.entities.JiraConnection.create({
         user_email: userEmail,
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token || 'none',
