@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
+import WorkspaceMemberAssignment from "@/components/workspace/WorkspaceMemberAssignment";
 
 import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
 import {
@@ -477,8 +478,20 @@ export default function Settings() {
           </p>
         </motion.div>
 
+        {/* Workspace Member Assignment */}
+         {currentRole === 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.03 }}
+            className="mb-8"
+          >
+            <WorkspaceMemberAssignment />
+          </motion.div>
+        )}
+
         {/* Workspace Access Management */}
-        {(currentRole === 'admin' || currentRole === 'contributor') && (
+         {(currentRole === 'admin' || currentRole === 'contributor') && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
