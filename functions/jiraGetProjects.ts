@@ -108,9 +108,8 @@ Deno.serve(async (req) => {
     const userSelections = await base44.entities.JiraProjectSelection.list();
     const selectedKeys = userSelections.map(s => s.jira_project_key);
 
-    // Get subscription plan
-    const user_doc = await base44.auth.me();
-    const plan = user_doc.current_plan || 'pro';
+    // Get subscription plan (default to Pro)
+    const plan = 'pro';
 
     const quotas = {
       'starter': 1,
@@ -119,7 +118,7 @@ Deno.serve(async (req) => {
       'enterprise': 999
     };
 
-    const quota = quotas[plan.toLowerCase()] || 10;
+    const quota = quotas[plan] || 10;
     const currentCount = userSelections.filter(s => s.is_active).length;
 
     return Response.json({
