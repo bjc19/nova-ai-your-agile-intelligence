@@ -24,6 +24,7 @@ export const translations = {
     recentAnalyses: "Analyses récentes",
     recommendations: "Recommandations",
     aiPoweredScrumMaster: "Scrum Master IA",
+    daysLeftInSprint: "jours restants dans le sprint",
     newAnalysis: "Nouvelle analyse",
     importDataDescription: "Téléchargez des transcripts de réunions ou collez vos notes directement. Nova analysera et fournira des insights actionnables.",
     connectSlack: "Connecter Slack",

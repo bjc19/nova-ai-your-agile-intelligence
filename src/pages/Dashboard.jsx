@@ -19,6 +19,8 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -35,13 +37,12 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
-  const [hasJiraWorkspaces, setHasJiraWorkspaces] = useState(false);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -71,6 +72,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -96,12 +98,6 @@ export default function Dashboard() {
             log_id: latest.id
           });
         }
-
-        // Vérifier workspaces Jira disponibles
-        const jiraWorkspaces = await base44.entities.JiraProjectSelection.filter({
-          is_active: true
-        });
-        setHasJiraWorkspaces(jiraWorkspaces.length > 0);
       }
       setIsLoading(false);
     };
@@ -262,6 +258,7 @@ export default function Dashboard() {
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                     <Clock className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-600">
+                      <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
                     </span>
                   </div>
                   }
@@ -273,7 +270,6 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
                   <Link to={createPageUrl("Analysis")}>
                     <Button
                       size="lg"
@@ -284,23 +280,20 @@ export default function Dashboard() {
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-                  )}
                 </div>
               </div>
               
-              {/* Workspace Selector and Time Period Selector */}
-              <div className="flex justify-between items-center">
-                <WorkspaceSelector 
-                  onWorkspaceChange={(workspaceId) => setSelectedWorkspace(workspaceId)}
-                  activeWorkspaceId={selectedWorkspace}
-                />
-                <TimePeriodSelector
+              {/* Time Period Selector */}
+              <div className="flex justify-end gap-3">
+              <WorkspaceSelector />
+              <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
+
               </div>
             </div>
 
@@ -340,14 +333,12 @@ export default function Dashboard() {
             <p className="text-slate-600 mb-6">
               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
-            {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
                 <Mic className="w-4 h-4 mr-2" />
                 Créer une analyse
               </Button>
             </Link>
-            )}
           </div>
         }
 
@@ -376,8 +367,13 @@ export default function Dashboard() {
 
             }
 
+              {/* GembaWork - Simple Users Only */}
+              {(userRole === 'user' || userRole === null) && (
+                <GembaWork />
+              )}
+
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -405,7 +401,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -455,41 +451,40 @@ export default function Dashboard() {
         </div>
         }
 
-        {/* Quick Actions Footer */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8">
+{(userRole === 'admin' || userRole === 'contributor') && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.5 }}
+    className="mt-8">
 
-          <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                </h3>
-                <p className="text-slate-400 max-w-lg">
-                  {t('importDataDescription')}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                    <Zap className="w-4 h-4 mr-2" />
-                    {t('connectSlack')}
-                  </Button>
-                </Link>
-                {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
+    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+          </h3>
+          <p className="text-slate-400 max-w-lg">
+            {t('importDataDescription')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl("Settings")}>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Zap className="w-4 h-4 mr-2" />
+              {t('connectSlack')}
+            </Button>
+          </Link>
+          <Link to={createPageUrl("Analysis")}>
+            <Button className="bg-white text-slate-900 hover:bg-slate-100">
+              {t('startAnalysis')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+)}
       </div>
     </div>);
 
