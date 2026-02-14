@@ -46,6 +46,8 @@ export default function Settings() {
    const [connectingJira, setConnectingJira] = useState(false);
    const [confluenceConnected, setConfluenceConnected] = useState(false);
    const [connectingConfluence, setConnectingConfluence] = useState(false);
+   const [trelloConnected, setTrelloConnected] = useState(false);
+   const [connectingTrello, setConnectingTrello] = useState(false);
    const { language, setLanguage, t } = useLanguage();
    const [teamConfig, setTeamConfig] = useState(null);
    const [loadingConfig, setLoadingConfig] = useState(true);
@@ -243,6 +245,16 @@ export default function Settings() {
     }
   };
 
+  const loadTrelloConnection = async () => {
+    try {
+      const trelloConns = await base44.entities.TrelloConnection.list();
+      setTrelloConnected(trelloConns.length > 0);
+    } catch (error) {
+      console.error('Error loading Trello connection:', error);
+      setTrelloConnected(false);
+    }
+  };
+
   const handleJiraDisconnect = async () => {
     try {
       const result = await base44.functions.invoke('jiraDisconnect');
@@ -322,6 +334,59 @@ export default function Settings() {
     }
   };
 
+  const handleTrelloConnect = async () => {
+    try {
+      setConnectingTrello(true);
+      const { data } = await base44.functions.invoke('trelloOAuthStart');
+
+      const messageHandler = async (event) => {
+        if (event.data?.type === 'trello_success') {
+          window.removeEventListener('message', messageHandler);
+
+          try {
+            const connectionData = JSON.parse(atob(event.data.data));
+            await base44.functions.invoke('trelloSaveConnection', connectionData);
+
+            setTrelloConnected(true);
+            setTimeout(async () => {
+              const trelloConns = await base44.entities.TrelloConnection.list();
+              if (trelloConns.length > 0) {
+                setTrelloConnected(true);
+              }
+            }, 500);
+          } catch (error) {
+            console.error('Error saving Trello connection:', error);
+            toast.error('Erreur lors de la connexion Trello');
+          } finally {
+            setConnectingTrello(false);
+          }
+        } else if (event.data?.type === 'trello_error') {
+          window.removeEventListener('message', messageHandler);
+          console.error('Trello connection error:', event.data.error);
+          toast.error('Erreur Trello: ' + event.data.error);
+          setConnectingTrello(false);
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
+      window.open(data.authUrl, 'Trello OAuth', 'width=600,height=700');
+    } catch (error) {
+      console.error('Error starting Trello OAuth:', error);
+      toast.error('Erreur lors du démarrage de la connexion Trello');
+      setConnectingTrello(false);
+    }
+  };
+
+  const handleTrelloDisconnect = async () => {
+    try {
+      await base44.functions.invoke('trelloDisconnect');
+      setTrelloConnected(false);
+    } catch (error) {
+      console.error('Error disconnecting Trello:', error);
+      toast.error('Erreur lors de la déconnexion Trello');
+    }
+  };
+
   const checkJiraDebug = async () => {
     try {
       const result = await base44.functions.invoke('checkJiraStatus', {});
@@ -394,8 +459,9 @@ export default function Settings() {
       color: "from-sky-500 to-sky-600",
       bgColor: "bg-sky-100",
       iconColor: "text-sky-600",
-      available: false,
-      comingSoon: true
+      available: true,
+      connected: trelloConnected,
+      onConnect: handleTrelloConnect
     },
     {
       id: "confluence",
@@ -424,11 +490,12 @@ export default function Settings() {
           }
 
           // Check connections
-          const [slackConns, teamsConns, jiraConns, confluenceConns] = await Promise.all([
+          const [slackConns, teamsConns, jiraConns, confluenceConns, trelloConns] = await Promise.all([
             base44.entities.SlackConnection.list(),
             base44.entities.TeamsConnection.list(),
             base44.entities.JiraConnection.list(),
-            base44.entities.ConfluenceConnection.list()
+            base44.entities.ConfluenceConnection.list(),
+            base44.entities.TrelloConnection.list()
           ]);
 
           if (slackConns.length > 0) {
@@ -962,6 +1029,59 @@ export default function Settings() {
                        disabled={connectingConfluence}
                      >
                        {connectingConfluence ? "Connexion..." : "Connecter Confluence"}
+                     </Button>
+                   )}
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+
+           {/* Trello */}
+           <Card className="overflow-hidden border-2 border-sky-200 hover:border-sky-300 transition-colors">
+             <CardContent className="p-6">
+               <div className="flex items-start justify-between gap-4">
+                 <div className="flex items-start gap-4">
+                   <div className={`p-3 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 shadow-lg shadow-sky-500/25`}>
+                     <Layers className="w-6 h-6 text-white" />
+                   </div>
+                   <div>
+                     <div className="flex items-center gap-2 mb-1">
+                       <h3 className="font-semibold text-slate-900">Trello</h3>
+                     </div>
+                     <p className="text-sm text-slate-600 mb-3">
+                       Synchronisez vos tableaux Trello et analyser l'avancement des tâches.
+                     </p>
+                     <div className="flex items-center gap-2 text-xs text-slate-500">
+                       <span className="flex items-center gap-1">
+                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                         Accès aux tableaux et cartes
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+                 <div className="flex flex-col items-end gap-2">
+                   {trelloConnected ? (
+                     <>
+                       <Badge className="bg-emerald-100 text-emerald-700">
+                         <CheckCircle2 className="w-3 h-3 mr-1" />
+                         {t('connected')}
+                       </Badge>
+                       <Button 
+                         variant="outline"
+                         size="sm"
+                         onClick={handleTrelloDisconnect}
+                         className="text-xs"
+                       >
+                         Déconnecter
+                       </Button>
+                     </>
+                   ) : (
+                     <Button 
+                       className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800"
+                       onClick={handleTrelloConnect}
+                       disabled={connectingTrello}
+                     >
+                       {connectingTrello ? "Connexion..." : "Connecter Trello"}
                      </Button>
                    )}
                  </div>
