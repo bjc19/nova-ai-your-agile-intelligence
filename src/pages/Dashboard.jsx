@@ -20,7 +20,6 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -37,7 +36,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -72,7 +70,6 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -270,16 +267,18 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  <Link to={createPageUrl("Analysis")}>
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
+                  {(userRole === 'admin' || userRole === 'contributor') && (
+                    <Link to={createPageUrl("Analysis")}>
+                      <Button
+                        size="lg"
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
 
-                      <Mic className="w-4 h-4 mr-2" />
-                      {t('newAnalysis')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
+                        <Mic className="w-4 h-4 mr-2" />
+                        {t('newAnalysis')}
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
               
@@ -367,13 +366,8 @@ export default function Dashboard() {
 
             }
 
-              {/* GembaWork - Simple Users Only */}
-              {(userRole === 'user' || userRole === null) && (
-                <GembaWork />
-              )}
-
               {/* Actionable Metrics Radar */}
-              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
+              {analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -401,7 +395,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
+              {analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
