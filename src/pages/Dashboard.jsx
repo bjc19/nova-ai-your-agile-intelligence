@@ -341,12 +341,14 @@ export default function Dashboard() {
             <p className="text-slate-600 mb-6">
               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
+            {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
                 <Mic className="w-4 h-4 mr-2" />
                 Créer une analyse
               </Button>
             </Link>
+            )}
           </div>
         }
 
@@ -477,12 +479,14 @@ export default function Dashboard() {
                     {t('connectSlack')}
                   </Button>
                 </Link>
+                {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
                     {t('startAnalysis')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
+                )}
               </div>
             </div>
           </div>
