@@ -187,8 +187,14 @@ export default function Settings() {
                             const saveResult = await base44.functions.invoke('jiraSaveConnection', connectionData);
 
                             if (saveResult.data?.success) {
-                              // Only update UI if save was successful
                               setJiraConnected(true);
+                              // Refetch from DB to ensure persistence
+                              setTimeout(async () => {
+                                const jiraConns = await base44.entities.JiraConnection.list();
+                                if (jiraConns.length > 0) {
+                                  setJiraConnected(true);
+                                }
+                              }, 500);
                             } else {
                               console.error('Failed to save Jira connection:', saveResult.data);
                               alert('Erreur: Impossible de sauvegarder la connexion Jira');
