@@ -17,6 +17,7 @@ import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -210,6 +211,13 @@ export default function DashboardContributors() {
                 />
               </div>
             </div>
+
+            <DailyQuote 
+              lang={t('fr') === 'fr' ? 'fr' : 'en'}
+              blockerCount={gdprSignals.filter(s => s.statut === 'ouvert' && s.criticite !== 'basse').length}
+              riskCount={gdprSignals.filter(s => s.criticite === 'haute' || s.criticite === 'critique').length}
+              patterns={[]}
+            />
 
             {(!selectedPeriod || analysisHistory.length > 0) && (
               <QuickStats analysisHistory={analysisHistory} />
