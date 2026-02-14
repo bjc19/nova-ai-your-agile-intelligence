@@ -121,16 +121,26 @@ export default function Settings() {
   };
 
   const loadTeamsConnection = async () => {
-    try {
-      const user = await base44.auth.me();
-      const teamsConns = await base44.entities.TeamsConnection.filter({ 
-        user_email: user.email,
-        is_active: true
-      });
-      setTeamsConnected(teamsConns.length > 0);
-    } catch (error) {
-      console.error('Error loading Teams connection:', error);
-    }
+   try {
+     const user = await base44.auth.me();
+     if (!user) {
+       console.warn('loadTeamsConnection: User not authenticated');
+       setTeamsConnected(false);
+       return;
+     }
+     console.log('🔍 loadTeamsConnection: Checking for user:', user.email);
+     const teamsConns = await base44.entities.TeamsConnection.filter({ 
+       user_email: user.email,
+       is_active: true
+     });
+     console.log('🔍 loadTeamsConnection: Found', teamsConns.length, 'connection(s)');
+     const newState = teamsConns.length > 0;
+     console.log('🔍 loadTeamsConnection: Setting teamsConnected to', newState);
+     setTeamsConnected(newState);
+   } catch (error) {
+     console.error('❌ Error loading Teams connection:', error);
+     setTeamsConnected(false);
+   }
   };
 
   const handleTeamsConnect = async () => {
