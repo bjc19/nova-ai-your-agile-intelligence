@@ -31,22 +31,19 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   return (
     <div className="flex items-center gap-2">
       <Layers className="w-4 h-4 text-slate-400" />
-      <Select 
-        value={activeWorkspaceId ? String(activeWorkspaceId) : "null"} 
-        onValueChange={(value) => onWorkspaceChange?.(value === "null" ? null : value)}
-      >
+      <Select value={activeWorkspaceId || ""} onValueChange={onWorkspaceChange}>
         <SelectTrigger className="w-[250px] bg-white border-slate-200">
           <SelectValue placeholder="Sélectionner un workspace" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="null">
+          <SelectItem value={null}>
             <div className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Toutes les analyses
             </div>
           </SelectItem>
           {workspaces.map((workspace) => (
-            <SelectItem key={workspace.id} value={String(workspace.id)}>
+            <SelectItem key={workspace.id} value={workspace.id}>
               <div className="flex items-center gap-2">
                 <Database className="w-4 h-4" />
                 {workspace.jira_project_name}
