@@ -157,16 +157,16 @@ export default function JiraProjectSelector() {
           transition={{ delay: 0.05 }}
           className="mb-8"
         >
-          <Card className="border-emerald-200 bg-emerald-50">
+          <Card className="border-blue-200 bg-blue-50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">Plan actuel: <span className="text-emerald-700 font-bold capitalize">{currentPlan}</span></p>
+                  <p className="text-sm font-medium text-slate-900">Plan actuel: <span className="text-blue-700 font-bold capitalize">Pro</span></p>
                   <p className="text-xs text-slate-600 mt-1">
                     Quota: {quota} projet(s) | Actuellement: {currentSelections.length} | Disponible: {availableSlots}
                   </p>
                 </div>
-                <Badge className="bg-emerald-600 text-white">
+                <Badge className="bg-blue-600 text-white">
                   {availableSlots > 0 ? `${availableSlots} slot${availableSlots > 1 ? 's' : ''} libre${availableSlots > 1 ? 's' : ''}` : 'Quota atteint'}
                 </Badge>
               </div>
