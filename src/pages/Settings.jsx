@@ -1097,13 +1097,26 @@ export default function Settings() {
                        </Button>
                      </>
                    ) : (
-                     <Button 
-                       className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800"
-                       onClick={handleTrelloConnect}
-                       disabled={connectingTrello || jiraConnected}
-                     >
-                       {connectingTrello ? "Connexion..." : "Connecter Trello"}
-                     </Button>
+                     <TooltipProvider>
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <div>
+                             <Button 
+                               className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800"
+                               onClick={handleTrelloConnect}
+                               disabled={connectingTrello || jiraConnected}
+                             >
+                               {connectingTrello ? "Connexion..." : "Connecter Trello"}
+                             </Button>
+                           </div>
+                         </TooltipTrigger>
+                         {jiraConnected && (
+                           <TooltipContent className="max-w-xs">
+                             <p>{t('trelloJiraConflictMessage')}</p>
+                           </TooltipContent>
+                         )}
+                       </Tooltip>
+                     </TooltipProvider>
                    )}
                  </div>
                </div>
