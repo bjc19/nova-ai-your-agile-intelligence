@@ -89,7 +89,15 @@ Deno.serve(async (req) => {
     if (!jiraResponse.ok) {
       const errorText = await jiraResponse.text();
       console.error('Jira API error:', jiraResponse.status, errorText);
-      return Response.json({ error: 'Failed to fetch Jira projects' }, { status: 500 });
+      // Return empty projects instead of error so quota still displays
+      return Response.json({
+        projects: [],
+        selectedProjects: selectedKeys,
+        currentPlan: plan,
+        quota: quota,
+        currentCount: currentCount,
+        availableSlots: Math.max(0, quota - currentCount)
+      });
     }
 
     const jiraData = await jiraResponse.json();
