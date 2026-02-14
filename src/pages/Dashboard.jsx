@@ -367,8 +367,13 @@ export default function Dashboard() {
 
             }
 
+              {/* GembaWork - Simple Users Only */}
+              {(userRole === 'user' || userRole === null) && (
+                <GembaWork />
+              )}
+
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
