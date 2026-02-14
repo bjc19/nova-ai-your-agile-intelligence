@@ -32,6 +32,7 @@ import {
   Database,
   AlertTriangle
 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Settings() {
    useAccessControl();
@@ -278,29 +279,26 @@ export default function Settings() {
             const connectionData = JSON.parse(atob(event.data.data));
 
             // Save connection through authenticated endpoint
-            const saveResult = await base44.functions.invoke('confluenceSaveConnection', connectionData);
+            await base44.functions.invoke('confluenceSaveConnection', connectionData);
 
-            if (saveResult.data?.success) {
-              setConfluenceConnected(true);
-              setConfluenceDomain('');
-              // Refetch from DB to ensure persistence
-              setTimeout(async () => {
-                const confluenceConns = await base44.entities.ConfluenceConnection.list();
-                if (confluenceConns.length > 0) {
-                  setConfluenceConnected(true);
-                }
-              }, 500);
-            }
+            setConfluenceConnected(true);
+            // Refetch from DB to ensure persistence
+            setTimeout(async () => {
+              const confluenceConns = await base44.entities.ConfluenceConnection.list();
+              if (confluenceConns.length > 0) {
+                setConfluenceConnected(true);
+              }
+            }, 500);
           } catch (error) {
             console.error('Error saving Confluence connection:', error);
-            alert('Erreur: Impossible de sauvegarder la connexion');
+            toast.error('Erreur lors de la connexion Confluence');
           } finally {
             setConnectingConfluence(false);
           }
         } else if (event.data?.type === 'confluence_error') {
           window.removeEventListener('message', messageHandler);
           console.error('Confluence connection error:', event.data.error);
-          alert('Erreur: ' + event.data.error);
+          toast.error('Erreur Confluence: ' + event.data.error);
           setConnectingConfluence(false);
         }
       };
@@ -309,7 +307,7 @@ export default function Settings() {
       window.open(authUrl, 'Confluence OAuth', 'width=600,height=700');
     } catch (error) {
       console.error('Error starting Confluence OAuth:', error);
-      alert('Erreur: ' + error.message);
+      toast.error('Erreur lors du démarrage de la connexion Confluence');
       setConnectingConfluence(false);
     }
   };
@@ -320,7 +318,7 @@ export default function Settings() {
       setConfluenceConnected(false);
     } catch (error) {
       console.error('Error disconnecting Confluence:', error);
-      alert('Erreur lors de la déconnexion');
+      toast.error('Erreur lors de la déconnexion Confluence');
     }
   };
 
@@ -406,8 +404,9 @@ export default function Settings() {
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-100",
       iconColor: "text-blue-600",
-      available: false,
-      comingSoon: true
+      available: true,
+      connected: confluenceConnected,
+      onConnect: handleConfluenceConnect
     }
   ];
 
