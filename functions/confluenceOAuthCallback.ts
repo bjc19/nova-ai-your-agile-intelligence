@@ -70,21 +70,25 @@ Deno.serve(async (req) => {
     const refreshToken = tokenData.refresh_token;
     const expiresIn = tokenData.expires_in;
 
-    // Get user cloud info
-    const meResponse = await fetch('https://api.atlassian.com/me', {
+    // Get accessible resources to find cloudId
+    const resourcesResponse = await fetch('https://api.atlassian.com/oauth/token/accessible-resources', {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Accept': 'application/json'
       }
     });
 
-    if (!meResponse.ok) {
-      throw new Error('Failed to fetch user info');
+    if (!resourcesResponse.ok) {
+      const errorData = await resourcesResponse.text();
+      throw new Error(`Failed to fetch accessible resources: ${errorData}`);
     }
 
-    const meData = await meResponse.json();
-    const cloudId = meData.extended_profile?.accounts?.[0]?.account_id || meData.account_id;
+    const resources = await resourcesResponse.json();
+    if (!resources || resources.length === 0) {
+      throw new Error('No accessible Atlassian resources found');
+    }
 
+    const cloudId = resources[0].id;
     if (!cloudId) {
       throw new Error('Could not extract cloud ID');
     }
@@ -93,7 +97,7 @@ Deno.serve(async (req) => {
       access_token: accessToken,
       refresh_token: refreshToken,
       cloud_id: cloudId,
-      account_email: meData.email,
+      account_email: null,
       expires_at: new Date(Date.now() + expiresIn * 1000).toISOString()
     };
 
