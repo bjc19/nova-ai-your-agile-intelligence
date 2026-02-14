@@ -225,14 +225,8 @@ export default function Settings() {
 
   const handleJiraDisconnect = async () => {
     try {
-      const user = await base44.auth.me();
-      const jiraConns = await base44.entities.JiraConnection.filter({
-        user_email: user.email,
-        is_active: true
-      });
-
-      if (jiraConns.length > 0) {
-        await base44.entities.JiraConnection.update(jiraConns[0].id, { is_active: false });
+      const { data } = await base44.functions.invoke('jiraDisconnect');
+      if (data.success) {
         setJiraConnected(false);
       }
     } catch (error) {
