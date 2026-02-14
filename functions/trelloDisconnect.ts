@@ -9,57 +9,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all Trello connections and filter client-side
-    let allConns = [];
-    try {
-      allConns = await base44.entities.TrelloConnection.list();
-      console.log('Total Trello connections in DB:', allConns.length);
-    } catch (e) {
-      console.log('Error listing connections:', e.message);
-      allConns = [];
-    }
-
-    // Find user's active connection (client-side filter with RLS protection)
-    const userActiveConns = allConns.filter(c => 
-      c.user_email === user.email && c.is_active === true
-    );
-    
-    if (userActiveConns.length === 0) {
-      console.log('No active Trello connection found for user:', user.email);
-      return Response.json({ 
-        success: true,
-        message: 'Already disconnected'
-      });
-    }
-
-    const connection = userActiveConns[0];
-    
-    // Mark connection as inactive
-    console.log('Disabling Trello connection:', connection.id, 'for user:', user.email);
-    await base44.entities.TrelloConnection.update(connection.id, { 
-      is_active: false 
+    const trelloConns = await base44.entities.TrelloConnection.filter({
+      user_email: user.email
     });
-    
-    // Verification - get all and filter again
-    const verifyAllConns = await base44.entities.TrelloConnection.list();
-    const stillActive = verifyAllConns.filter(c => 
-      c.user_email === user.email && c.is_active === true
-    );
 
-    console.log('Verification: User still has', stillActive.length, 'active connections');
-
-    if (stillActive.length > 0) {
-      console.error('Validation failed: Connection still active after update');
-      throw new Error('Failed to deactivate Trello connection');
+    if (trelloConns.length > 0) {
+      await base44.entities.TrelloConnection.delete(trelloConns[0].id);
     }
 
-    console.log('Validation passed: Trello connection successfully deactivated');
-    return Response.json({ 
-      success: true,
-      message: 'Trello connection disconnected'
-    });
+    return Response.json({ success: true });
   } catch (error) {
-    console.error('Trello disconnect error:', error);
+    console.error('Error disconnecting Trello:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

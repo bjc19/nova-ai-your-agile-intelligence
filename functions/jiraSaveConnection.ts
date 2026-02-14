@@ -16,90 +16,56 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // STEP 1: Disable all active Trello connections for this user (exclusivity)
-    console.log('Step 1: Disabling all active Trello connections for user:', user.email);
-    try {
-      const activeTrelloConns = await base44.entities.TrelloConnection.filter({
-        user_email: user.email,
-        is_active: true
-      });
-      
-      for (const conn of activeTrelloConns) {
-        await base44.entities.TrelloConnection.update(conn.id, { is_active: false });
-        console.log('Disabled Trello connection:', conn.id);
-      }
-    } catch (e) {
-      console.warn('Warning: Could not disable Trello connections:', e.message);
-      // Don't fail the whole operation if Trello disable fails
-    }
-
-    // STEP 2: Get or create Jira connection
-    console.log('Step 2: Saving Jira connection for user:', user.email);
+    // Check if connection already exists
     let allConns = [];
     try {
-      allConns = await base44.entities.JiraConnection.filter({
-        user_email: user.email
-      });
-      console.log('Found existing Jira connections:', allConns.length);
+      allConns = await base44.entities.JiraConnection.list();
+      console.log('Found connections:', allConns.length);
     } catch (e) {
-      console.error('Error listing Jira connections:', e);
+      console.error('Error listing connections:', e);
     }
 
     if (allConns.length > 0) {
-      // Update existing connection and mark as active
+      // Update existing connection
       console.log('Updating existing Jira connection:', allConns[0].id);
-      await base44.entities.JiraConnection.update(allConns[0].id, {
-        user_email: connectionData.user_email,
-        access_token: connectionData.access_token,
-        refresh_token: connectionData.refresh_token,
-        expires_at: connectionData.expires_at,
-        cloud_id: connectionData.cloud_id,
-        is_active: true,
-        scopes: connectionData.scopes,
-        connected_at: new Date().toISOString(),
-      });
-      console.log('Jira connection updated successfully and marked as active');
+      try {
+        await base44.entities.JiraConnection.update(allConns[0].id, {
+          user_email: connectionData.user_email,
+          access_token: connectionData.access_token,
+          refresh_token: connectionData.refresh_token,
+          expires_at: connectionData.expires_at,
+          cloud_id: connectionData.cloud_id,
+          is_active: true,
+          scopes: connectionData.scopes,
+          connected_at: connectionData.connected_at,
+        });
+        console.log('Connection updated successfully');
+      } catch (updateError) {
+        console.error('Error updating connection:', updateError);
+        throw updateError;
+      }
     } else {
       // Create new connection
       console.log('Creating new Jira connection');
-      const newConn = await base44.entities.JiraConnection.create({
-        user_email: connectionData.user_email,
-        access_token: connectionData.access_token,
-        refresh_token: connectionData.refresh_token,
-        expires_at: connectionData.expires_at,
-        cloud_id: connectionData.cloud_id,
-        is_active: true,
-        scopes: connectionData.scopes,
-        connected_at: new Date().toISOString(),
-      });
-      console.log('Jira connection created successfully:', newConn.id);
+      try {
+        const newConn = await base44.entities.JiraConnection.create({
+          user_email: connectionData.user_email,
+          access_token: connectionData.access_token,
+          refresh_token: connectionData.refresh_token,
+          expires_at: connectionData.expires_at,
+          cloud_id: connectionData.cloud_id,
+          is_active: true,
+          scopes: connectionData.scopes,
+          connected_at: connectionData.connected_at,
+        });
+        console.log('Connection created successfully:', newConn.id);
+      } catch (createError) {
+        console.error('Error creating connection:', createError);
+        throw createError;
+      }
     }
 
-    // STEP 3: Validation - verify Jira is now active and Trello is disabled
-    const verifyJira = await base44.entities.JiraConnection.filter({
-      user_email: user.email,
-      is_active: true
-    });
-    
-    const verifyTrello = await base44.entities.TrelloConnection.filter({
-      user_email: user.email,
-      is_active: true
-    });
-
-    console.log('Validation: Active Jira connections:', verifyJira.length, ', Active Trello connections:', verifyTrello.length);
-
-    if (verifyJira.length === 0) {
-      throw new Error('Jira connection failed to activate');
-    }
-
-    if (verifyTrello.length > 0) {
-      console.warn('Warning: Trello connections were not fully disabled');
-    }
-
-    return Response.json({ 
-      success: true,
-      message: 'Jira connection saved and activated. Trello connections disabled.'
-    });
+    return Response.json({ success: true });
   } catch (error) {
     console.error('Error saving Jira connection:', error);
     return Response.json({ error: error.message }, { status: 500 });

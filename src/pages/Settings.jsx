@@ -82,32 +82,30 @@ export default function Settings() {
     try {
       setConnectingSlack(true);
       const { data } = await base44.functions.invoke('slackOAuthStart');
-
+      
       // Open popup for OAuth
       const popup = window.open(data.authUrl, 'Slack OAuth', 'width=600,height=700');
-
+      
       // Listen for callback
       const handleMessage = async (event) => {
         if (event.data.type === 'slack_success') {
           // Decode connection data
           const connectionData = JSON.parse(atob(event.data.data));
-
+          
           // Save connection through authenticated endpoint
           await base44.functions.invoke('slackSaveConnection', connectionData);
-
+          
           // Reload connection to get fresh data
           await loadSlackConnection();
           window.removeEventListener('message', handleMessage);
           setConnectingSlack(false);
-          toast.success('Slack connecté avec succès');
-          setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
         } else if (event.data.type === 'slack_error') {
           console.error('Slack connection error:', event.data.error);
           window.removeEventListener('message', handleMessage);
           setConnectingSlack(false);
         }
       };
-
+      
       window.addEventListener('message', handleMessage);
     } catch (error) {
       console.error('Error starting Slack OAuth:', error);
@@ -121,8 +119,6 @@ export default function Settings() {
       if (data.success) {
         setSlackConnected(false);
         setSlackTeamName(null);
-        toast.success('Slack déconnecté avec succès');
-        setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
       }
     } catch (error) {
       console.error('Error disconnecting Slack:', error);
@@ -153,8 +149,6 @@ export default function Settings() {
           setTimeout(async () => {
             await loadTeamsConnection();
             setConnectingTeams(false);
-            toast.success('Microsoft Teams connecté avec succès');
-            navigate(createPageUrl("Dashboard"));
           }, 500);
         }
       };
@@ -172,8 +166,6 @@ export default function Settings() {
     try {
       await base44.functions.invoke('teamsDisconnect');
       setTeamsConnected(false);
-      toast.success('Microsoft Teams déconnecté avec succès');
-      setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
     } catch (error) {
       console.error('Error disconnecting Teams:', error);
     }
@@ -208,20 +200,18 @@ export default function Settings() {
                                 const jiraConns = await base44.entities.JiraConnection.list();
                                 if (jiraConns.length > 0) {
                                   setJiraConnected(true);
-                                  toast.success('Jira connecté avec succès');
-                                  navigate(createPageUrl("Dashboard"));
                                 }
                               }, 500);
                             } else {
                               console.error('Failed to save Jira connection:', saveResult.data);
                               alert('Erreur: Impossible de sauvegarder la connexion Jira');
                             }
-                            } catch (error) {
+                          } catch (error) {
                             console.error('Error saving Jira connection:', error);
                             alert('Erreur lors de la sauvegarde: ' + error.message);
-                            } finally {
+                          } finally {
                             setConnectingJira(false);
-                            }
+                          }
                         } else if (event.data?.type === 'jira_error') {
                           console.error('Jira connection error:', event.data.error);
                           window.removeEventListener('message', messageHandler);
@@ -239,28 +229,17 @@ export default function Settings() {
 
   const loadJiraConnection = async () => {
     try {
-      const user = await base44.auth.me();
-      const jiraConns = await base44.entities.JiraConnection.filter({
-        user_email: user?.email,
-        is_active: true
-      });
+      const jiraConns = await base44.entities.JiraConnection.list();
       setJiraConnected(jiraConns.length > 0);
-      console.log('Jira active connections:', jiraConns.length);
     } catch (error) {
       console.error('Error loading Jira connection:', error);
-      setJiraConnected(false);
     }
   };
 
   const loadConfluenceConnection = async () => {
     try {
-      const user = await base44.auth.me();
-      const confluenceConns = await base44.entities.ConfluenceConnection.filter({
-        user_email: user?.email,
-        is_active: true
-      });
+      const confluenceConns = await base44.entities.ConfluenceConnection.list();
       setConfluenceConnected(confluenceConns.length > 0);
-      console.log('Confluence active connections:', confluenceConns.length);
     } catch (error) {
       console.error('Error loading Confluence connection:', error);
       setConfluenceConnected(false);
@@ -270,12 +249,8 @@ export default function Settings() {
   const loadTrelloConnection = async () => {
     try {
       const user = await base44.auth.me();
-      const trelloConns = await base44.entities.TrelloConnection.filter({
-        user_email: user?.email,
-        is_active: true
-      });
+      const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
       setTrelloConnected(trelloConns.length > 0);
-      console.log('Trello active connections:', trelloConns.length);
     } catch (error) {
       console.error('Error loading Trello connection:', error);
       setTrelloConnected(false);
@@ -285,22 +260,14 @@ export default function Settings() {
   const handleJiraDisconnect = async () => {
     try {
       const result = await base44.functions.invoke('jiraDisconnect');
-      console.log('Jira disconnect result:', result.status, result.data);
       if (result.data?.success || result.status === 200) {
         setJiraConnected(false);
-        toast.success('Jira déconnecté avec succès');
-        // Navigate to dashboard to refresh
-        setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
       }
     } catch (error) {
       console.error('Error disconnecting Jira:', error);
-      if (error.response?.status === 500) {
-        // Validation failed - retry once
-        console.log('Validation failed, attempting retry...');
-        setTimeout(() => {
-          handleJiraDisconnect();
-        }, 500);
-      } else {
+      console.error('Error response:', error.response?.data);
+      // Still update UI if we get a 400 error (no connection found) since that means it's disconnected
+      if (error.response?.status === 400 && error.response?.data?.error === 'No Jira connection found') {
         setJiraConnected(false);
       }
     }
@@ -334,8 +301,6 @@ export default function Settings() {
               const confluenceConns = await base44.entities.ConfluenceConnection.list();
               if (confluenceConns.length > 0) {
                 setConfluenceConnected(true);
-                toast.success('Confluence connecté avec succès');
-                navigate(createPageUrl("Dashboard"));
               }
             }, 500);
           } catch (error) {
@@ -365,8 +330,6 @@ export default function Settings() {
     try {
       await base44.functions.invoke('confluenceDisconnect');
       setConfluenceConnected(false);
-      toast.success('Confluence déconnecté avec succès');
-      setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
     } catch (error) {
       console.error('Error disconnecting Confluence:', error);
       toast.error('Erreur lors de la déconnexion Confluence');
@@ -384,21 +347,18 @@ export default function Settings() {
 
           try {
             const connectionData = JSON.parse(atob(event.data.data));
-            const saveResult = await base44.functions.invoke('trelloSaveConnection', connectionData);
+            await base44.functions.invoke('trelloSaveConnection', connectionData);
 
-            if (saveResult.data?.success) {
-              // Attendre que la BD se synchronise
-              await new Promise(resolve => setTimeout(resolve, 300));
-              await loadTrelloConnection();
-
-              // Vérifier que le state a été mis à jour
-              setTimeout(() => {
-                toast.success('Trello connecté avec succès');
-                navigate(createPageUrl("Dashboard"));
-              }, 100);
-            } else {
-              throw new Error('Erreur lors de la sauvegarde');
-            }
+            setTrelloConnected(true);
+             setTimeout(async () => {
+               const user = await base44.auth.me();
+               const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
+               if (trelloConns.length > 0) {
+                 setTrelloConnected(true);
+               } else {
+                 setTrelloConnected(false);
+               }
+             }, 500);
           } catch (error) {
             console.error('Error saving Trello connection:', error);
             toast.error('Erreur lors de la connexion Trello');
@@ -424,11 +384,8 @@ export default function Settings() {
 
   const handleTrelloDisconnect = async () => {
     try {
-      const result = await base44.functions.invoke('trelloDisconnect');
-      console.log('Trello disconnect result:', result.status, result.data);
-      await loadTrelloConnection();
-      toast.success('Trello déconnecté avec succès');
-      navigate(createPageUrl("Dashboard"));
+      await base44.functions.invoke('trelloDisconnect');
+      setTrelloConnected(false);
     } catch (error) {
       console.error('Error disconnecting Trello:', error);
       toast.error('Erreur lors de la déconnexion Trello');
@@ -539,60 +496,37 @@ export default function Settings() {
             setTeamConfig(configs[0]);
           }
 
-          // Check connections (filter for active only)
-           const [slackConns, teamsConns, jiraConns, confluenceConns, trelloConns] = await Promise.all([
-             base44.entities.SlackConnection.filter({
-               user_email: user?.email,
-               is_active: true
-             }),
-             base44.entities.TeamsConnection.filter({
-               user_email: user?.email,
-               is_active: true
-             }),
-             base44.entities.JiraConnection.filter({
-               user_email: user?.email,
-               is_active: true
-             }),
-             base44.entities.ConfluenceConnection.filter({
-               user_email: user?.email,
-               is_active: true
-             }),
-             base44.entities.TrelloConnection.filter({
-               user_email: user?.email,
-               is_active: true
-             })
-           ]);
+          // Check connections
+          const [slackConns, teamsConns, jiraConns, confluenceConns, trelloConns] = await Promise.all([
+            base44.entities.SlackConnection.list(),
+            base44.entities.TeamsConnection.list(),
+            base44.entities.JiraConnection.list(),
+            base44.entities.ConfluenceConnection.list(),
+            base44.entities.TrelloConnection.filter({ user_email: user?.email })
+          ]);
 
-           console.log('Loading connections:', { 
-             slack: slackConns.length, 
-             teams: teamsConns.length, 
-             jira: jiraConns.length, 
-             confluence: confluenceConns.length, 
-             trello: trelloConns.length 
-           });
+          if (slackConns.length > 0) {
+            setSlackConnected(true);
+            setSlackTeamName(slackConns[0].team_name);
+          } else {
+            setSlackConnected(false);
+            setSlackTeamName(null);
+          }
 
-           if (slackConns.length > 0) {
-             setSlackConnected(true);
-             setSlackTeamName(slackConns[0].team_name);
-           } else {
-             setSlackConnected(false);
-             setSlackTeamName(null);
-           }
+          if (teamsConns.length > 0) {
+            setTeamsConnected(true);
+          } else {
+            setTeamsConnected(false);
+          }
 
-           if (teamsConns.length > 0) {
-             setTeamsConnected(true);
-           } else {
-             setTeamsConnected(false);
-           }
+          if (jiraConns.length > 0) {
+            setJiraConnected(true);
+          } else {
+            setJiraConnected(false);
+          }
 
-           if (jiraConns.length > 0) {
-             setJiraConnected(true);
-           } else {
-             setJiraConnected(false);
-           }
-
-           setConfluenceConnected(confluenceConns.length > 0);
-           setTrelloConnected(trelloConns.length > 0);
+          setConfluenceConnected(confluenceConns.length > 0);
+          setTrelloConnected(trelloConns.length > 0);
         } catch (error) {
           console.error("Erreur chargement données:", error);
         } finally {
@@ -1160,13 +1094,6 @@ export default function Settings() {
                          className="text-xs"
                        >
                          Déconnecter
-                       </Button>
-                       <Button 
-                         size="sm"
-                         onClick={() => navigate(createPageUrl("TrelloProjectSelector"))}
-                         className="text-xs bg-sky-600 hover:bg-sky-700 text-white"
-                       >
-                         Sélectionner projets
                        </Button>
                      </>
                    ) : (
