@@ -960,9 +960,6 @@ export default function Settings() {
                          <CheckCircle2 className="w-3 h-3 mr-1" />
                          {t('connected')}
                        </Badge>
-                       {confluenceDomain && (
-                         <p className="text-xs text-slate-500">{confluenceDomain}</p>
-                       )}
                        <Button 
                          variant="outline"
                          size="sm"
@@ -973,22 +970,13 @@ export default function Settings() {
                        </Button>
                      </>
                    ) : (
-                     <div className="w-full flex flex-col gap-2">
-                       <input
-                         type="text"
-                         placeholder="my-company.atlassian.net"
-                         value={confluenceDomain}
-                         onChange={(e) => setConfluenceDomain(e.target.value)}
-                         className="px-3 py-2 text-xs border border-slate-200 rounded-md"
-                       />
-                       <Button 
-                         className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 w-full text-xs"
-                         onClick={handleConfluenceConnect}
-                         disabled={connectingConfluence}
-                       >
-                         {connectingConfluence ? "Connexion..." : "Connecter"}
-                       </Button>
-                     </div>
+                     <Button 
+                       className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800"
+                       onClick={handleConfluenceConnect}
+                       disabled={connectingConfluence}
+                     >
+                       {connectingConfluence ? "Connexion..." : "Connecter Confluence"}
+                     </Button>
                    )}
                  </div>
                </div>
