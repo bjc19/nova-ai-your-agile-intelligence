@@ -9,6 +9,7 @@ Deno.serve(async (req) => {
     
     console.log('Teams OAuth Callback - Reçu:', { code: !!code, state, error });
     
+    // Gestion des erreurs OAuth
     if (error) {
       console.error('OAuth error:', error);
       return new Response(`
@@ -37,6 +38,8 @@ Deno.serve(async (req) => {
     const clientSecret = Deno.env.get("TEAMS_CLIENT_SECRET");
     const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI");
 
+    console.log('Config check:', { clientId: !!clientId, clientSecret: !!clientSecret, redirectUri: !!redirectUri });
+
     const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -50,7 +53,7 @@ Deno.serve(async (req) => {
     });
 
     const tokens = await tokenResponse.json();
-    console.log('Token response:', { status: tokenResponse.status, hasToken: !!tokens.access_token });
+    console.log('Token response:', { status: tokenResponse.status, hasToken: !!tokens.access_token, error: tokens.error });
     
     if (!tokens.access_token) {
       console.error('No access token received:', tokens);
@@ -58,8 +61,22 @@ Deno.serve(async (req) => {
     }
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
+    const base44 = createClientFromRequest(req);
     
-    // Envoyer les tokens au frontend pour que le frontend fasse la création avec authentification
+    console.log('Creating TeamsConnection for:', state);
+    await base44.asServiceRole.entities.TeamsConnection.create({
+      user_email: state,
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+      tenant_id: tenantId,
+      scopes: tokens.scope ? tokens.scope.split(' ') : [],
+      is_active: true
+    });
+
+    console.log('Teams connection created successfully');
+
+    // Close popup and refresh parent
     return new Response(`
       <html>
         <head>
@@ -77,20 +94,8 @@ Deno.serve(async (req) => {
             <p style="font-size: 12px; color: #666;">Cette fenêtre va se fermer...</p>
           </div>
           <script>
-            if (window.opener) {
-              window.opener.postMessage({
-                type: 'teams-oauth-success',
-                userEmail: '${state}',
-                accessToken: '${tokens.access_token}',
-                refreshToken: '${tokens.refresh_token}',
-                tenantId: '${tenantId}',
-                expiresIn: ${tokens.expires_in},
-                scopes: ${JSON.stringify(tokens.scope ? tokens.scope.split(' ') : [])}
-              }, '*');
-              setTimeout(() => window.close(), 1500);
-            } else {
-              setTimeout(() => window.close(), 2000);
-            }
+            window.opener?.postMessage({ type: 'teams-connected' }, '*');
+            setTimeout(() => window.close(), 2000);
           </script>
         </body>
       </html>

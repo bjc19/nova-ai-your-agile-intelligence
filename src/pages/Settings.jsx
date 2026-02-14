@@ -121,65 +121,34 @@ export default function Settings() {
   };
 
   const loadTeamsConnection = async () => {
-   try {
-     const user = await base44.auth.me();
-     if (!user) {
-       console.warn('loadTeamsConnection: User not authenticated');
-       setTeamsConnected(false);
-       return;
-     }
-     console.log('🔍 loadTeamsConnection: Checking for user:', user.email);
-     const teamsConns = await base44.entities.TeamsConnection.filter({ 
-       user_email: user.email,
-       is_active: true
-     });
-     console.log('🔍 loadTeamsConnection: Found', teamsConns.length, 'connection(s)');
-     const newState = teamsConns.length > 0;
-     console.log('🔍 loadTeamsConnection: Setting teamsConnected to', newState);
-     setTeamsConnected(newState);
-   } catch (error) {
-     console.error('❌ Error loading Teams connection:', error);
-     setTeamsConnected(false);
-   }
+    try {
+      const user = await base44.auth.me();
+      const teamsConns = await base44.entities.TeamsConnection.filter({ 
+        user_email: user.email,
+        is_active: true
+      });
+      setTeamsConnected(teamsConns.length > 0);
+    } catch (error) {
+      console.error('Error loading Teams connection:', error);
+    }
   };
 
   const handleTeamsConnect = async () => {
     try {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
-
-      let timeoutId;
-      const messageHandler = async (event) => {
-        if (event.data?.type === 'teams-oauth-success') {
-           window.removeEventListener('message', messageHandler);
-           clearTimeout(timeoutId);
-           console.log('✅ OAuth success, saving connection...');
-
-           try {
-             await base44.functions.invoke('teamsCreateConnection', {
-               accessToken: event.data.accessToken,
-               refreshToken: event.data.refreshToken,
-               tenantId: event.data.tenantId,
-               expiresIn: event.data.expiresIn,
-               scopes: event.data.scopes
-             });
-
-             await new Promise(resolve => setTimeout(resolve, 500));
-             await loadTeamsConnection();
-           } catch (err) {
-             console.error('Error saving connection:', err);
-           }
-
-           setConnectingTeams(false);
-         }
+      
+      // Listen for popup message
+      const messageHandler = (event) => {
+        if (event.data?.type === 'teams-connected') {
+          window.removeEventListener('message', messageHandler);
+          setTeamsConnected(true);
+          setConnectingTeams(false);
+        }
       };
       window.addEventListener('message', messageHandler);
-
-      timeoutId = setTimeout(async () => {
-        window.removeEventListener('message', messageHandler);
-        setConnectingTeams(false);
-      }, 8000);
-
+      
+      // Open in popup window
       window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
@@ -364,7 +333,7 @@ export default function Settings() {
     }
   ];
 
-  // Load data once on mount and when returning to the page
+  // Load data once on mount only
   useEffect(() => {
     const loadData = async () => {
         try {
@@ -379,14 +348,8 @@ export default function Settings() {
 
           // Check connections
           const [slackConns, teamsConns, jiraConns] = await Promise.all([
-            base44.entities.SlackConnection.filter({ 
-              user_email: user.email,
-              is_active: true
-            }),
-            base44.entities.TeamsConnection.filter({ 
-              user_email: user.email,
-              is_active: true
-            }),
+            base44.entities.SlackConnection.list(),
+            base44.entities.TeamsConnection.list(),
             base44.entities.JiraConnection.list()
           ]);
 
@@ -416,13 +379,6 @@ export default function Settings() {
         }
       };
     loadData();
-
-    // Reload connections when returning to the page
-    const handlePageFocus = () => {
-      loadData();
-    };
-    window.addEventListener('focus', handlePageFocus);
-    return () => window.removeEventListener('focus', handlePageFocus);
   }, []);
 
   const handleProjectModeChange = async (newMode) => {
