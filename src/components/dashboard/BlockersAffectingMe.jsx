@@ -149,7 +149,7 @@ export default function BlockersAffectingMe() {
               <p className="text-xs text-slate-500">Personne ne dépend de toi en ce moment</p>
             ) : (
               <div className="space-y-2">
-                {dependsOnMe.map((dep) => (
+                {(showAllDependencies ? dependsOnMe : dependsOnMe.slice(0, 2)).map((dep) => (
                   <div key={dep.id} className="p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <p className="text-sm font-medium text-slate-900">{dep.person}</p>
                     <p className="text-xs text-slate-600 mt-1">{dep.title}</p>
@@ -160,6 +160,14 @@ export default function BlockersAffectingMe() {
                   </div>
                 ))}
               </div>
+            )}
+            {dependsOnMe.length > 2 && (
+              <button 
+                onClick={() => setShowAllDependencies(!showAllDependencies)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium mt-2"
+              >
+                {showAllDependencies ? `Masquer (${dependsOnMe.length - 2} autres)` : `Voir tous les ${dependsOnMe.length}`}
+              </button>
             )}
           </div>
 
