@@ -38,6 +38,7 @@ export default function DashboardContributors() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [assignedWorkspaceIds, setAssignedWorkspaceIds] = useState([]);
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -74,6 +75,13 @@ export default function DashboardContributors() {
 
       setUser(currentUser);
 
+      // Load assigned workspaces for this contributor
+      const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+        user_email: currentUser?.email
+      });
+      const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
+      setAssignedWorkspaceIds(workspaceIds);
+
       // Load sprint context
       const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
       if (activeSprints.length > 0) {
@@ -92,11 +100,11 @@ export default function DashboardContributors() {
     enabled: !isLoading
   });
 
-  // Filter analysis history
+  // Filter analysis history (only show assigned workspaces)
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
-    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : true;
+    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : assignedWorkspaceIds.includes(analysis.jira_project_selection_id);
     return matchesPeriod && matchesWorkspace;
   });
 
