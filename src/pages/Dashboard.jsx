@@ -295,7 +295,13 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector />
+              <WorkspaceSelector 
+                activeWorkspaceId={selectedWorkspace}
+                onWorkspaceChange={(workspaceId) => {
+                  setSelectedWorkspace(workspaceId === 'null' || workspaceId === null ? null : workspaceId);
+                  console.log("Workspace changed to:", workspaceId);
+                }}
+              />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
