@@ -62,10 +62,10 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
 import Dashboard from './pages/Dashboard';
+import TeamManagement from './pages/TeamManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -85,10 +85,10 @@ export const PAGES = {
     "ResetPassword": ResetPassword,
     "Results": Results,
     "Settings": Settings,
-    "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
     "Dashboard": Dashboard,
+    "TeamManagement": TeamManagement,
 }
 
 export const pagesConfig = {

@@ -28,14 +28,23 @@ export default function JiraProjectSelector() {
         setLoading(true);
         const res = await base44.functions.invoke('jiraGetProjects', {});
         
-        setProjects(res.data.projects || []);
-        setQuota(res.data.quota);
-        setCurrentPlan(res.data.currentPlan);
-        setAvailableSlots(res.data.availableSlots);
+        const projectsList = res.data.projects || [];
+        const quotaValue = res.data.quota || 10;
+        const planValue = res.data.currentPlan || 'pro';
+        const availableSlotsValue = res.data.availableSlots || quotaValue;
+
+        setProjects(projectsList);
+        setQuota(quotaValue);
+        setCurrentPlan(planValue);
+        setAvailableSlots(availableSlotsValue);
 
         // Load current selections
         const selections = await base44.entities.JiraProjectSelection.list();
-        setCurrentSelections(selections.filter(s => s.is_active));
+        const activeSelections = selections.filter(s => s.is_active);
+        setCurrentSelections(activeSelections);
+        
+        // Recalculate available slots
+        setAvailableSlots(Math.max(0, quotaValue - activeSelections.length));
       } catch (err) {
         console.error('Error loading data:', err);
         setError('Impossible de charger les projets Jira');
