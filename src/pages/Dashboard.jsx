@@ -102,18 +102,10 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history with workspace filter
+  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspace],
-    queryFn: async () => {
-      if (selectedWorkspace) {
-        return await base44.entities.AnalysisHistory.filter({ 
-          jira_project_selection_id: selectedWorkspace 
-        }, '-created_date', 100);
-      } else {
-        return await base44.entities.AnalysisHistory.list('-created_date', 100);
-      }
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -291,10 +283,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                activeWorkspaceId={selectedWorkspace}
-                onWorkspaceChange={setSelectedWorkspace}
-              />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
