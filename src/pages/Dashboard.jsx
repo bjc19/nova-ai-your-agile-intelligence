@@ -41,7 +41,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -102,18 +101,10 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history with workspace filter
+  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspace],
-    queryFn: async () => {
-      if (selectedWorkspace) {
-        return await base44.entities.AnalysisHistory.filter({ 
-          jira_project_selection_id: selectedWorkspace 
-        }, '-created_date', 100);
-      } else {
-        return await base44.entities.AnalysisHistory.list('-created_date', 100);
-      }
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -268,14 +259,6 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek &&
-                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
-                    <Zap className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm text-slate-600">
-                      <span className="font-semibold text-slate-900">{sprintInfo.throughputPerWeek}</span> tickets/semaine
-                    </span>
-                  </div>
-                  }
                   <Link to={createPageUrl("Analysis")}>
                     <Button
                       size="lg"
@@ -291,10 +274,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                activeWorkspaceId={selectedWorkspace}
-                onWorkspaceChange={setSelectedWorkspace}
-              />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -455,7 +435,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(user?.role === 'admin' || user?.role === 'contributor') && (
+{(userRole === 'admin' || userRole === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
