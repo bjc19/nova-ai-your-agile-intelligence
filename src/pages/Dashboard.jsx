@@ -71,6 +71,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
