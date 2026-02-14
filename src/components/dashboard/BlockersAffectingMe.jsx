@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,28 +7,36 @@ import { AlertCircle, Send, Plus, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function BlockersAffectingMe() {
-  const [blockers] = useState([
-    {
-      id: 1,
-      title: "En attente de review API",
-      blockedBy: "Sarah D.",
-      description: "L'endpoint paiement attend ta review depuis 24h",
-      urgency: "high",
-      ticket: "US-123",
-      actions: ["Contacter Sarah", "Voir ticket"]
-    },
-    {
-      id: 2,
-      title: "Dépendance: Design system",
-      blockedBy: "Alex M.",
-      description: "Tu dois avoir les composants UI avant vendredi",
-      urgency: "medium",
-      ticket: "DESIGN-42",
-      actions: ["Voir deadline", "Escalader"]
-    }
-  ]);
-
+  const [blockers, setBlockers] = useState([]);
+  const [dependsOnMe, setDependsOnMe] = useState([]);
   const [sendingEmail, setSendingEmail] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBlockers = async () => {
+      try {
+        setLoading(true);
+        
+        const storedWorkspaceId = sessionStorage.getItem("selectedWorkspaceId");
+        const workspaceId = storedWorkspaceId ? JSON.parse(storedWorkspaceId) : null;
+
+        const response = await base44.functions.invoke('getBlockersAffectingUser', {
+          workspaceId: workspaceId
+        });
+
+        setBlockers(response.data.blockers || []);
+        setDependsOnMe(response.data.dependsOnMe || []);
+      } catch (error) {
+        console.error("Erreur chargement blockers:", error);
+        setBlockers([]);
+        setDependsOnMe([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBlockers();
+  }, []);
 
   const handleContactPerson = async (blocker) => {
     setSendingEmail(blocker.id);
@@ -45,23 +53,6 @@ export default function BlockersAffectingMe() {
       setSendingEmail(null);
     }
   };
-
-  const dependsOnMe = [
-    {
-      id: 1,
-      person: "Tom F.",
-      title: "Attend tes changements API",
-      description: "Pour intégrer sur le frontend",
-      ticket: "FE-234"
-    },
-    {
-      id: 2,
-      person: "Lisa Q.",
-      title: "Attends la doc des endpoints",
-      description: "Besoin pour les tests d'intégration",
-      ticket: "QA-567"
-    }
-  ];
 
   return (
     <motion.div
