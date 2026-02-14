@@ -19,6 +19,8 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -40,6 +42,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -107,14 +110,26 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
-    const analysisDate = new Date(analysis.created_date);
-    const startDate = new Date(selectedPeriod.start);
-    const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
-    return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+  // Filter analysis history based on selected period and workspace
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+    // Filter by period
+    if (selectedPeriod) {
+      const analysisDate = new Date(analysis.created_date);
+      const startDate = new Date(selectedPeriod.start);
+      const endDate = new Date(selectedPeriod.end);
+      endDate.setHours(23, 59, 59, 999); // Include end of day
+      if (!(analysisDate >= startDate && analysisDate <= endDate)) {
+        return false;
+      }
+    }
+    
+    // Filter by workspace
+    if (selectedWorkspace) {
+      return analysis.jira_project_selection_id === selectedWorkspace;
+    }
+    
+    return true;
+  });
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -266,7 +281,6 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  {(user?.role === 'admin' || user?.role === 'contributor') && (
                   <Link to={createPageUrl("Analysis")}>
                     <Button
                       size="lg"
@@ -277,12 +291,17 @@ export default function Dashboard() {
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-                  )}
                 </div>
               </div>
               
-              {/* Time Period Selector */}
-              <div className="flex justify-end">
+              {/* Workspace and Time Period Selectors */}
+              <div className="flex justify-end items-center gap-4">
+                <WorkspaceSelector
+                  activeWorkspaceId={selectedWorkspace}
+                  onWorkspaceChange={(workspaceId) => {
+                    setSelectedWorkspace(workspaceId);
+                    console.log("Workspace changed:", workspaceId);
+                  }} />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -290,7 +309,6 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
-
               </div>
             </div>
 
@@ -392,8 +410,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {/* Organizational Reality Engine - Admin/Contributor Only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -419,6 +437,11 @@ export default function Dashboard() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
+            }
+
+            {/* GembaWork - User Only */}
+            {user?.role === 'user' &&
+              <GembaWork />
             }
             
             {/* Sprint Performance Chart */}
