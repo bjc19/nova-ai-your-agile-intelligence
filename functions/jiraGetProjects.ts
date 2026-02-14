@@ -41,16 +41,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's Jira connection
-    let jiraConns = await base44.asServiceRole.entities.JiraConnection.list();
-    const userJiraConns = jiraConns.filter(c => c.created_by === user.email && c.is_active);
+    // Get user's Jira connection (RLS filters by created_by automatically)
+    let jiraConns = await base44.entities.JiraConnection.list();
     
-    if (userJiraConns.length === 0) {
+    if (jiraConns.length === 0) {
       console.error('No Jira connection found for user');
       return Response.json({ error: 'Jira not connected' }, { status: 400 });
     }
-    
-    jiraConns = userJiraConns;
 
     let connection = jiraConns[0];
     let accessToken = connection.access_token;
