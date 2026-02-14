@@ -36,6 +36,7 @@ export default function DashboardCommonUsers() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
+  const [assignedWorkspaceIds, setAssignedWorkspaceIds] = useState([]);
 
   // Check authentication and role
   useEffect(() => {
@@ -56,6 +57,13 @@ export default function DashboardCommonUsers() {
 
       setUser(currentUser);
 
+      // Load assigned workspaces for this user
+      const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+        user_email: currentUser?.email
+      });
+      const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
+      setAssignedWorkspaceIds(workspaceIds);
+
       // Load sprint context
       const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
       if (activeSprints.length > 0) {
@@ -71,11 +79,11 @@ export default function DashboardCommonUsers() {
     checkAuth();
   }, [navigate]);
 
-  // Filter analysis history based on selected period and workspace
+  // Filter analysis history based on selected period and workspace (only show assigned workspaces)
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
-    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : true;
+    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : assignedWorkspaceIds.includes(analysis.jira_project_selection_id);
     return matchesPeriod && matchesWorkspace;
   });
 
