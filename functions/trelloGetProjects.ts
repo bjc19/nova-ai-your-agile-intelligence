@@ -9,11 +9,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const apiKey = Deno.env.get('TRELLO_API_KEY');
-    const apiToken = Deno.env.get('TRELLO_API_TOKEN');
+    // Fetch the Trello connection for the current user using service role
+    const trelloConnections = await base44.asServiceRole.entities.TrelloConnection.filter({ 
+      user_email: user.email, 
+      is_active: true 
+    });
+
+    if (!trelloConnections || trelloConnections.length === 0) {
+      return Response.json({ error: 'No active Trello connection found' }, { status: 404 });
+    }
+
+    const { api_key: apiKey, access_token: apiToken } = trelloConnections[0];
 
     if (!apiKey || !apiToken) {
-      return Response.json({ error: 'Trello credentials not configured' }, { status: 500 });
+      return Response.json({ error: 'Trello credentials not available' }, { status: 500 });
     }
 
     // Fetch boards from Trello API
