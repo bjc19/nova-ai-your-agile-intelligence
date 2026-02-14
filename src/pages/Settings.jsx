@@ -978,13 +978,26 @@ export default function Settings() {
                        </Button>
                      </>
                    ) : (
-                     <Button 
-                       className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
-                       onClick={handleJiraConnect}
-                       disabled={connectingJira || trelloConnected}
-                     >
-                       {connectingJira ? "Connexion..." : "Connecter Jira"}
-                     </Button>
+                     <TooltipProvider>
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <div>
+                             <Button 
+                               className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+                               onClick={handleJiraConnect}
+                               disabled={connectingJira || trelloConnected}
+                             >
+                               {connectingJira ? "Connexion..." : "Connecter Jira"}
+                             </Button>
+                           </div>
+                         </TooltipTrigger>
+                         {trelloConnected && (
+                           <TooltipContent className="max-w-xs">
+                             <p>{t('jiraTrelloConflictMessage')}</p>
+                           </TooltipContent>
+                         )}
+                       </Tooltip>
+                     </TooltipProvider>
                    )}
                  </div>
                </div>
