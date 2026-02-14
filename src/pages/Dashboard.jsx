@@ -20,6 +20,7 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -36,12 +37,12 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -71,6 +72,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -109,13 +111,14 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period AND workspace
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
-    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : true;
-    return matchesPeriod && matchesWorkspace;
-  });
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -282,12 +285,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              {(user?.role === 'admin' || user?.role === 'contributor') && (
-                <WorkspaceSelector 
-                  activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                />
-              )}
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -369,8 +367,13 @@ export default function Dashboard() {
 
             }
 
+              {/* GembaWork - Simple Users Only */}
+              {(userRole === 'user' || userRole === null) && (
+                <GembaWork />
+              )}
+
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -398,7 +401,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -448,7 +451,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(user?.role === 'admin' || user?.role === 'contributor') && (
+{(userRole === 'admin' || userRole === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
