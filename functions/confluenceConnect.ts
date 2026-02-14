@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     // Create new connection
     await base44.entities.ConfluenceConnection.create({
       user_email: user.email,
-      domain: domain,
+      domain: cleanDomain,
       is_active: true,
       connected_at: new Date().toISOString()
     });
