@@ -349,12 +349,15 @@ export default function Settings() {
             await base44.functions.invoke('trelloSaveConnection', connectionData);
 
             setTrelloConnected(true);
-            setTimeout(async () => {
-              const trelloConns = await base44.entities.TrelloConnection.list();
-              if (trelloConns.length > 0) {
-                setTrelloConnected(true);
-              }
-            }, 500);
+             setTimeout(async () => {
+               const user = await base44.auth.me();
+               const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
+               if (trelloConns.length > 0) {
+                 setTrelloConnected(true);
+               } else {
+                 setTrelloConnected(false);
+               }
+             }, 500);
           } catch (error) {
             console.error('Error saving Trello connection:', error);
             toast.error('Erreur lors de la connexion Trello');
