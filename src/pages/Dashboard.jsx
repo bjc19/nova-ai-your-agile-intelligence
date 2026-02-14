@@ -20,6 +20,7 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -70,6 +72,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -251,14 +254,14 @@ export default function Dashboard() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                
-
-
-
-
-
-
-
+                {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 &&
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600">
+                      <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
+                    </span>
+                  </div>
+                  }
                 {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek &&
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                     <Zap className="w-4 h-4 text-slate-400" />
@@ -364,8 +367,13 @@ export default function Dashboard() {
 
             }
 
+              {/* GembaWork - Simple Users Only */}
+              {(userRole === 'user' || userRole === null) && (
+                <GembaWork />
+              )}
+
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -393,7 +401,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -443,12 +451,12 @@ export default function Dashboard() {
         </div>
         }
 
-        {(userRole === 'admin' || userRole === 'contributor') &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8">
+{(userRole === 'admin' || userRole === 'contributor') && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.5 }}
+    className="mt-8">
 
     <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -476,7 +484,7 @@ export default function Dashboard() {
       </div>
     </div>
   </motion.div>
-        }
+)}
       </div>
     </div>);
 
