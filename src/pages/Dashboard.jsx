@@ -401,7 +401,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
