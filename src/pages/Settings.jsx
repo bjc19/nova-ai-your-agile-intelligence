@@ -171,6 +171,12 @@ export default function Settings() {
   };
 
   const handleJiraConnect = async () => {
+    // Vérification: Trello ne doit pas être connecté
+    if (trelloConnected) {
+      toast.error("Vous ne pouvez pas connecter Jira en même temps que Trello. Veuillez d'abord déconnecter Trello.");
+      return;
+    }
+
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
@@ -336,6 +342,12 @@ export default function Settings() {
   };
 
   const handleTrelloConnect = async () => {
+    // Vérification: Jira ne doit pas être connecté
+    if (jiraConnected) {
+      toast.error("Vous ne pouvez pas connecter Trello en même temps que Jira. Veuillez d'abord déconnecter Jira.");
+      return;
+    }
+
     try {
       setConnectingTrello(true);
       const { data } = await base44.functions.invoke('trelloOAuthStart');
