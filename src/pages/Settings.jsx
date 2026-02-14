@@ -225,13 +225,19 @@ export default function Settings() {
 
   const handleJiraDisconnect = async () => {
     try {
-      const jiraConns = await base44.entities.JiraConnection.list();
+      const user = await base44.auth.me();
+      const jiraConns = await base44.entities.JiraConnection.filter({
+        user_email: user.email,
+        is_active: true
+      });
+
       if (jiraConns.length > 0) {
         await base44.entities.JiraConnection.update(jiraConns[0].id, { is_active: false });
         setJiraConnected(false);
       }
     } catch (error) {
       console.error('Error disconnecting Jira:', error);
+      alert('Erreur lors de la déconnexion Jira');
     }
   };
 

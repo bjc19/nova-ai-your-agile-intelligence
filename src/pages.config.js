@@ -52,6 +52,7 @@ import AdminDevTools from './pages/AdminDevTools';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
 import ChooseAccess from './pages/ChooseAccess';
+import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
@@ -62,10 +63,9 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
+import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import Dashboard from './pages/Dashboard';
-import TeamManagement from './pages/TeamManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +75,7 @@ export const PAGES = {
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
     "ChooseAccess": ChooseAccess,
+    "Dashboard": Dashboard,
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
@@ -85,10 +86,9 @@ export const PAGES = {
     "ResetPassword": ResetPassword,
     "Results": Results,
     "Settings": Settings,
+    "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "Dashboard": Dashboard,
-    "TeamManagement": TeamManagement,
 }
 
 export const pagesConfig = {
