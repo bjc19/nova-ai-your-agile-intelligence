@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import MyFocusBoard from "@/components/dashboard/MyFocusBoard";
 import BlockersAffectingMe from "@/components/dashboard/BlockersAffectingMe";
 import ContributionMetrics from "@/components/dashboard/ContributionMetrics";
+import PrioritizedBacklog from "@/components/dashboard/PrioritizedBacklog";
 
 export default function GembaWork() {
   return (
@@ -12,6 +13,7 @@ export default function GembaWork() {
       className="space-y-6"
     >
       <MyFocusBoard />
+      <PrioritizedBacklog />
       <BlockersAffectingMe />
       <ContributionMetrics />
     </motion.div>
