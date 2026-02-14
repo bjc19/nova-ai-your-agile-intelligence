@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -40,8 +41,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
-  const [hasJiraWorkspaces, setHasJiraWorkspaces] = useState(false);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -96,12 +95,6 @@ export default function Dashboard() {
             log_id: latest.id
           });
         }
-
-        // Vérifier workspaces Jira disponibles
-        const jiraWorkspaces = await base44.entities.JiraProjectSelection.filter({
-          is_active: true
-        });
-        setHasJiraWorkspaces(jiraWorkspaces.length > 0);
       }
       setIsLoading(false);
     };
@@ -274,7 +267,6 @@ export default function Dashboard() {
                     </span>
                   </div>
                   }
-                  {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
                   <Link to={createPageUrl("Analysis")}>
                     <Button
                       size="lg"
@@ -285,16 +277,11 @@ export default function Dashboard() {
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-                  )}
                 </div>
               </div>
               
-              {/* Workspace Selector and Time Period Selector */}
-              <div className="flex justify-between items-center">
-                <WorkspaceSelector 
-                  onWorkspaceChange={(workspaceId) => setSelectedWorkspace(workspaceId)}
-                  activeWorkspaceId={selectedWorkspace}
-                />
+              {/* Time Period Selector */}
+              <div className="flex justify-end">
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -302,6 +289,7 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
+
               </div>
             </div>
 
@@ -341,14 +329,12 @@ export default function Dashboard() {
             <p className="text-slate-600 mb-6">
               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
-            {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
                 <Mic className="w-4 h-4 mr-2" />
                 Créer une analyse
               </Button>
             </Link>
-            )}
           </div>
         }
 
@@ -357,6 +343,11 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* GembaWork - Exclusive for Regular Users */}
+              {user?.role !== 'admin' && user?.role !== 'contributor' && (
+                <GembaWork />
+              )}
+
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -405,8 +396,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {/* Organizational Reality Engine - Admin/Contributor Only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -479,14 +470,12 @@ export default function Dashboard() {
                     {t('connectSlack')}
                   </Button>
                 </Link>
-                {(user?.role === 'admin' || user?.role === 'contributor') && hasJiraWorkspaces && selectedWorkspace && (
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
                     {t('startAnalysis')}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
-                )}
               </div>
             </div>
           </div>
