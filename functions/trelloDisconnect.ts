@@ -9,13 +9,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's active Trello connection (RLS filters to user's records)
-    const trelloConns = await base44.entities.TrelloConnection.filter({
-      user_email: user.email,
-      is_active: true
-    });
+    // Get all Trello connections and filter client-side
+    let allConns = [];
+    try {
+      allConns = await base44.entities.TrelloConnection.list();
+      console.log('Total Trello connections in DB:', allConns.length);
+    } catch (e) {
+      console.log('Error listing connections:', e.message);
+      allConns = [];
+    }
+
+    // Find user's active connection (client-side filter with RLS protection)
+    const userActiveConns = allConns.filter(c => 
+      c.user_email === user.email && c.is_active === true
+    );
     
-    if (trelloConns.length === 0) {
+    if (userActiveConns.length === 0) {
       console.log('No active Trello connection found for user:', user.email);
       return Response.json({ 
         success: true,
@@ -23,25 +32,28 @@ Deno.serve(async (req) => {
       });
     }
 
-    const connection = trelloConns[0];
+    const connection = userActiveConns[0];
     
-    // Mark connection as inactive instead of deleting it
+    // Mark connection as inactive
     console.log('Disabling Trello connection:', connection.id, 'for user:', user.email);
     await base44.entities.TrelloConnection.update(connection.id, { 
       is_active: false 
     });
     
-    // Validation - verify it's now inactive
-    const verifyConns = await base44.entities.TrelloConnection.filter({
-      user_email: user.email,
-      is_active: true
-    });
+    // Verification - get all and filter again
+    const verifyAllConns = await base44.entities.TrelloConnection.list();
+    const stillActive = verifyAllConns.filter(c => 
+      c.user_email === user.email && c.is_active === true
+    );
 
-    if (verifyConns.length > 0) {
+    console.log('Verification: User still has', stillActive.length, 'active connections');
+
+    if (stillActive.length > 0) {
+      console.error('Validation failed: Connection still active after update');
       throw new Error('Failed to deactivate Trello connection');
     }
 
-    console.log('Trello connection successfully deactivated');
+    console.log('Validation passed: Trello connection successfully deactivated');
     return Response.json({ 
       success: true,
       message: 'Trello connection disconnected'
