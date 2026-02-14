@@ -386,18 +386,9 @@ export default function Settings() {
             const connectionData = JSON.parse(atob(event.data.data));
             await base44.functions.invoke('trelloSaveConnection', connectionData);
 
-            setTrelloConnected(true);
-             setTimeout(async () => {
-               const user = await base44.auth.me();
-               const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
-               if (trelloConns.length > 0) {
-                 setTrelloConnected(true);
-                 toast.success('Trello connecté avec succès');
-                 navigate(createPageUrl("Dashboard"));
-               } else {
-                 setTrelloConnected(false);
-               }
-             }, 500);
+            await loadTrelloConnection();
+            toast.success('Trello connecté avec succès');
+            navigate(createPageUrl("Dashboard"));
           } catch (error) {
             console.error('Error saving Trello connection:', error);
             toast.error('Erreur lors de la connexion Trello');
@@ -425,10 +416,9 @@ export default function Settings() {
     try {
       const result = await base44.functions.invoke('trelloDisconnect');
       console.log('Trello disconnect result:', result.status, result.data);
-      setTrelloConnected(false);
+      await loadTrelloConnection();
       toast.success('Trello déconnecté avec succès');
-      // Navigate to dashboard to refresh
-      setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
+      navigate(createPageUrl("Dashboard"));
     } catch (error) {
       console.error('Error disconnecting Trello:', error);
       toast.error('Erreur lors de la déconnexion Trello');
