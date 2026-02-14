@@ -16,6 +16,14 @@ export default function BlockersAffectingMe() {
   const [sendingEmail, setSendingEmail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAllDependencies, setShowAllDependencies] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    title: "",
+    description: "",
+    blockedBy: "",
+    urgency: "medium"
+  });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const loadBlockers = async () => {
