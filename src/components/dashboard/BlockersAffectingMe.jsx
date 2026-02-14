@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Send, Plus } from "lucide-react";
+import { AlertCircle, Send, Plus, Loader2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function BlockersAffectingMe() {
   const [blockers] = useState([
