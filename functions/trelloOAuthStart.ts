@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
     const appName = 'Nova';
     const scope = 'read,write';
     const responseType = 'token';
-    const redirectUrl = `${Deno.env.get('APP_URL')}/callback/trello`;
+    const redirectUrl = `${Deno.env.get('APP_URL')}/functions/trelloOAuthCallback`;
 
     const authUrl = `https://trello.com/1/authorize?expiration=never&name=${encodeURIComponent(appName)}&oauth_token=&permission_level=read&key=${apiKey}&scope=${scope}&response_type=${responseType}&return_url=${encodeURIComponent(redirectUrl)}`;
 

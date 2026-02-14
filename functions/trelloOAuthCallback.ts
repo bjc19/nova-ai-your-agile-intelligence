@@ -1,8 +1,10 @@
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
-    const token = url.searchParams.get('token');
-    const error = url.searchParams.get('error');
+    const fragment = url.hash.substring(1);
+    const params = new URLSearchParams(fragment);
+    const token = params.get('token');
+    const error = params.get('error');
 
     if (error) {
       return new Response(`
