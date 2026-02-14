@@ -235,13 +235,7 @@ export default function Settings() {
   const loadConfluenceConnection = async () => {
     try {
       const confluenceConns = await base44.entities.ConfluenceConnection.list();
-      if (confluenceConns.length > 0) {
-        setConfluenceConnected(true);
-        setConfluenceDomain(confluenceConns[0].domain);
-      } else {
-        setConfluenceConnected(false);
-        setConfluenceDomain('');
-      }
+      setConfluenceConnected(confluenceConns.length > 0);
     } catch (error) {
       console.error('Error loading Confluence connection:', error);
       setConfluenceConnected(false);
