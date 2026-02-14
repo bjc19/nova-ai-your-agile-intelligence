@@ -437,6 +437,7 @@ export default function Settings() {
       iconColor: "text-blue-600",
       available: true,
       connected: jiraConnected,
+      disabled: trelloConnected,
       onConnect: handleJiraConnect
     },
     {
