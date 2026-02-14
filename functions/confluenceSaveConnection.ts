@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { access_token, refresh_token, expires_at, cloud_id, account_email } = await req.json();
+    const { access_token, refresh_token, cloud_id, account_email, expires_at } = await req.json();
 
     if (!access_token || !cloud_id) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     await base44.entities.ConfluenceConnection.create({
       user_email: user.email,
       cloud_id: cloud_id,
-      account_email: account_email,
+      account_email: account_email || user.email,
       access_token: access_token,
       refresh_token: refresh_token,
       expires_at: expires_at,
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error('Error saving Confluence connection:', error);
+    console.error('Error saving connection:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

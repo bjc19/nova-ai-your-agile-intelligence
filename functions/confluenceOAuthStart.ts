@@ -16,20 +16,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'OAuth configuration missing' }, { status: 500 });
     }
 
-    const scopes = 'read:confluence-content.summary read:confluence-user read:space:confluence';
-    const state = crypto.getRandomValues(new Uint8Array(16)).toString();
-    
     const authUrl = new URL('https://auth.atlassian.com/authorize');
     authUrl.searchParams.append('client_id', clientId);
-    authUrl.searchParams.append('scope', scopes);
     authUrl.searchParams.append('response_type', 'code');
     authUrl.searchParams.append('redirect_uri', redirectUri);
-    authUrl.searchParams.append('state', state);
+    authUrl.searchParams.append('scope', 'read:confluence-content.summary read:confluence-space.summary offline_access');
     authUrl.searchParams.append('prompt', 'consent');
 
     return Response.json({ authUrl: authUrl.toString() });
   } catch (error) {
-    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
