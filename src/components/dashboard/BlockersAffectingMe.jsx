@@ -67,6 +67,42 @@ export default function BlockersAffectingMe() {
     }
   };
 
+  const handleSubmitBlocker = async () => {
+    if (!reportForm.title || !reportForm.blockedBy) {
+      alert("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const storedWorkspaceId = sessionStorage.getItem("selectedWorkspaceId");
+      const workspaceId = storedWorkspaceId ? JSON.parse(storedWorkspaceId) : null;
+
+      await base44.functions.invoke('reportBlocker', {
+        workspaceId,
+        title: reportForm.title,
+        description: reportForm.description,
+        blockedBy: reportForm.blockedBy,
+        urgency: reportForm.urgency
+      });
+
+      // Reset form and reload
+      setReportForm({ title: "", description: "", blockedBy: "", urgency: "medium" });
+      setShowReportDialog(false);
+      
+      // Reload blockers
+      const response = await base44.functions.invoke('getBlockersAffectingUser', {
+        workspaceId
+      });
+      setBlockers(response.data.blockers || []);
+    } catch (error) {
+      console.error("Erreur signalement blocker:", error);
+      alert("Erreur lors du signalement du blocage");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <motion.div
