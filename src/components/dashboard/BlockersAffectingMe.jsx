@@ -11,6 +11,7 @@ export default function BlockersAffectingMe() {
   const [dependsOnMe, setDependsOnMe] = useState([]);
   const [sendingEmail, setSendingEmail] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAllDependencies, setShowAllDependencies] = useState(false);
 
   useEffect(() => {
     const loadBlockers = async () => {
