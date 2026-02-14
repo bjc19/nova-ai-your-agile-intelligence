@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -342,6 +343,11 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* GembaWork - Exclusive for Regular Users */}
+              {user?.role !== 'admin' && user?.role !== 'contributor' && (
+                <GembaWork />
+              )}
+
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -390,8 +396,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {/* Organizational Reality Engine - Admin/Contributor Only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -449,10 +455,28 @@ export default function Dashboard() {
           className="mt-8">
 
           <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
-            <div className="flex flex-col items-center justify-center text-center">
-              <p className="text-slate-300 text-lg">
-                Nova AI ©, l'intelligence agile à votre service.
-              </p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                </h3>
+                <p className="text-slate-400 max-w-lg">
+                  {t('importDataDescription')}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link to={createPageUrl("Settings")}>
+                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                    <Zap className="w-4 h-4 mr-2" />
+                    {t('connectSlack')}
+                  </Button>
+                </Link>
+                <Link to={createPageUrl("Analysis")}>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                    {t('startAnalysis')}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>
