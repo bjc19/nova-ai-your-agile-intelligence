@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
-import { WorkspaceMemberManager } from "@/components/workspace/WorkspaceMemberManager";
+import WorkspaceMemberManager from "@/components/workspace/WorkspaceMemberManager";
 
 export default function TeamManagement() {
   const queryClient = useQueryClient();
