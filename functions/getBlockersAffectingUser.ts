@@ -12,81 +12,56 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { workspaceId } = body;
 
-    // Récupérer la connexion Jira
-    const jiraConnections = await base44.entities.JiraConnection.filter({
-      user_email: user.email,
-      is_active: true
-    });
+    // Récupérer les GDPRMarkers où l'utilisateur est assigné ou bloqué
+    let gdprFilter = {
+      statut: { $in: ['ouvert', 'acknowledge', 'en_cours'] }
+    };
 
-    if (jiraConnections.length === 0) {
-      return Response.json({
-        blockers: [],
-        dependsOnMe: []
-      });
-    }
-
-    const jiraConnection = jiraConnections[0];
-    const accessToken = jiraConnection.access_token;
-    const cloudId = jiraConnection.cloud_id;
-
-    // Déterminer le projet
-    let projectKey = null;
+    // Filtrer par workspace si fourni
     if (workspaceId) {
       const workspace = await base44.entities.JiraProjectSelection.get(workspaceId);
       if (workspace) {
-        projectKey = workspace.jira_project_key;
+        gdprFilter.session_id = workspace.id;
       }
     }
 
-    let projectFilter = projectKey ? `project = ${projectKey} AND` : '';
+    const allMarkers = await base44.entities.GDPRMarkers.filter(gdprFilter);
 
-    // Récupérer les tickets bloqués (bloqués par d'autres)
-    const blockedJql = `${projectFilter} assignee = currentUser() AND status = "Blocked"`;
-    
-    // Récupérer les tickets où l'utilisateur bloque d'autres
-    const blockingJql = `${projectFilter} "Blocked By" = currentUser()`;
+    // Filtrer les blockers qui affectent l'utilisateur
+    const blockers = allMarkers
+      .filter(marker => {
+        const firstName = user.full_name?.split(' ')[0] || '';
+        return (
+          marker.assignee_first_name?.toLowerCase() === firstName.toLowerCase() &&
+          (marker.criticite === 'haute' || marker.criticite === 'critique')
+        );
+      })
+      .slice(0, 10)
+      .map((marker, idx) => ({
+        id: marker.id,
+        title: marker.probleme,
+        blockedBy: marker.blocked_by_first_name || "Equipe",
+        description: marker.recos?.[0] || "Pas de recommandation",
+        urgency: marker.criticite === 'critique' ? 'high' : 'medium',
+        ticket: marker.jira_ticket_key || 'N/A'
+      }));
 
-    const [blockedRes, blockingRes] = await Promise.all([
-      fetch(
-        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/search?jql=${encodeURIComponent(blockedJql)}&maxResults=10`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json'
-          }
-        }
-      ),
-      fetch(
-        `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/search?jql=${encodeURIComponent(blockingJql)}&maxResults=10`,
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json'
-          }
-        }
-      )
-    ]);
-
-    const blockedData = blockedRes.ok ? await blockedRes.json() : { issues: [] };
-    const blockingData = blockingRes.ok ? await blockingRes.json() : { issues: [] };
-
-    // Transformer les données Jira
-    const blockers = (blockedData.issues || []).map((issue, idx) => ({
-      id: issue.id,
-      title: issue.fields.summary,
-      blockedBy: issue.fields.assignee?.displayName || "Equipe",
-      description: issue.fields.description?.content?.[0]?.content?.[0]?.text || "Pas de description",
-      urgency: issue.fields.priority?.name === "Highest" || issue.fields.priority?.name === "High" ? "high" : "medium",
-      ticket: issue.key
-    }));
-
-    const dependsOnMe = (blockingData.issues || []).map((issue) => ({
-      id: issue.id,
-      person: issue.fields.assignee?.displayName || "Equipe",
-      title: `Attend: ${issue.fields.summary}`,
-      description: issue.fields.description?.content?.[0]?.content?.[0]?.text || "Pas de description",
-      ticket: issue.key
-    }));
+    // Trouver les tâches où d'autres dépendent de l'utilisateur
+    const dependsOnMe = allMarkers
+      .filter(marker => {
+        const firstName = user.full_name?.split(' ')[0] || '';
+        return (
+          marker.blocked_by_first_name?.toLowerCase() === firstName.toLowerCase()
+        );
+      })
+      .slice(0, 10)
+      .map((marker) => ({
+        id: marker.id,
+        person: marker.assignee_first_name || "Equipe",
+        title: `Attend: ${marker.probleme}`,
+        description: marker.recos?.[0] || "Pas de recommandation",
+        ticket: marker.jira_ticket_key || 'N/A'
+      }));
 
     return Response.json({
       blockers,
