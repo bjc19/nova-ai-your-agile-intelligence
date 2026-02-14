@@ -13,6 +13,10 @@ import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import SprintResetAlert from "@/components/dashboard/SprintResetAlert";
+import UserDailyFocus from "@/components/dashboard/UserDailyFocus";
+import UserBlockages from "@/components/dashboard/UserBlockages";
+import UserContributions from "@/components/dashboard/UserContributions";
 
 import {
   Mic,
@@ -184,16 +188,24 @@ export default function DashboardCommonUsers() {
 
         {/* Content */}
         {(!selectedPeriod || analysisHistory.length > 0) && (
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column */}
-            <div className="lg:col-span-2 space-y-6">
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
-              <KeyRecommendations analysisHistory={analysisHistory} />
-            </div>
+          <div className="space-y-6">
+            {/* Sprint Reset Alert */}
+            <SprintResetAlert />
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              <IntegrationStatus />
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Left Column */}
+              <div className="lg:col-span-2 space-y-6">
+                <UserDailyFocus />
+                <UserBlockages />
+                <SprintPerformanceChart analysisHistory={analysisHistory} />
+                <KeyRecommendations analysisHistory={analysisHistory} />
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-6">
+                <UserContributions />
+                <IntegrationStatus />
+              </div>
             </div>
           </div>
         )}
