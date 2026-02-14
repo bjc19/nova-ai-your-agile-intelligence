@@ -196,14 +196,6 @@ export default function DashboardContributors() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 && (
-                    <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
-                      <Clock className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-600">
-                        <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
-                      </span>
-                    </div>
-                  )}
                   <Link to={createPageUrl("Analysis")}>
                     <Button
                       size="lg"
