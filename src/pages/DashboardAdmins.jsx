@@ -226,18 +226,6 @@ export default function DashboardAdmins() {
                     {t('sprintOverview')}
                   </p>
                 </div>
-                
-                <div className="flex items-center gap-3">
-                  <Link to={createPageUrl("Analysis")}>
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25">
-                      <Mic className="w-4 h-4 mr-2" />
-                      {t('newAnalysis')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
               </div>
               
               <div className="flex justify-end gap-3">
