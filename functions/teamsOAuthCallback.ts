@@ -9,7 +9,6 @@ Deno.serve(async (req) => {
     
     console.log('Teams OAuth Callback - Reçu:', { code: !!code, state, error });
     
-    // Gestion des erreurs OAuth
     if (error) {
       console.error('OAuth error:', error);
       return new Response(`
@@ -38,8 +37,6 @@ Deno.serve(async (req) => {
     const clientSecret = Deno.env.get("TEAMS_CLIENT_SECRET");
     const redirectUri = Deno.env.get("TEAMS_REDIRECT_URI");
 
-    console.log('Config check:', { clientId: !!clientId, clientSecret: !!clientSecret, redirectUri: !!redirectUri });
-
     const tokenResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -53,7 +50,7 @@ Deno.serve(async (req) => {
     });
 
     const tokens = await tokenResponse.json();
-    console.log('Token response:', { status: tokenResponse.status, hasToken: !!tokens.access_token, error: tokens.error });
+    console.log('Token response:', { status: tokenResponse.status, hasToken: !!tokens.access_token });
     
     if (!tokens.access_token) {
       console.error('No access token received:', tokens);
@@ -61,59 +58,8 @@ Deno.serve(async (req) => {
     }
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
-    const base44 = createClientFromRequest(req);
-
-    const userEmail = state;
-    console.log('🔐 Creating TeamsConnection for:', userEmail);
-    console.log('🔐 Access token expires_in:', tokens.expires_in);
-    console.log('🔐 Tenant ID:', tenantId);
-
-    try {
-      console.log('🔐 Attempting to create TeamsConnection...');
-      console.log('🔐 Data to create:', {
-        user_email: userEmail,
-        access_token: tokens.access_token ? '***' : 'MISSING',
-        refresh_token: tokens.refresh_token ? '***' : 'MISSING',
-        expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-        tenant_id: tenantId,
-        scopes: tokens.scope ? tokens.scope.split(' ') : []
-      });
-
-      const createdConn = await base44.asServiceRole.entities.TeamsConnection.create({
-        user_email: userEmail,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-        tenant_id: tenantId,
-        scopes: tokens.scope ? tokens.scope.split(' ') : [],
-        is_active: true
-      });
-      console.log('✅ Teams connection created successfully:', createdConn.id);
-
-      // Check if it exists in database without user_email filter
-      const allConns = await base44.asServiceRole.entities.TeamsConnection.list();
-      console.log('✅ Total TeamsConnections in DB:', allConns.length);
-
-      // Check with user_email filter
-      const userConns = await base44.asServiceRole.entities.TeamsConnection.filter({
-        user_email: userEmail
-      });
-      console.log('✅ Connections for user', userEmail, ':', userConns.length);
-
-      if (userConns.length > 0) {
-        console.log('✅ Found connection in DB:', JSON.stringify(userConns[0], null, 2));
-      } else {
-        console.warn('⚠️  Connection created but not found by user_email filter!');
-        console.log('⚠️  Created conn ID:', createdConn.id);
-        console.log('⚠️  Created conn data:', JSON.stringify(createdConn, null, 2));
-      }
-    } catch (createError) {
-      console.error('❌ Failed to create Teams connection:', createError);
-      console.error('❌ Error details:', { message: createError.message, code: createError.code, stack: createError.stack });
-      throw createError;
-    }
-
-    // Close popup and refresh parent
+    
+    // Envoyer les tokens au frontend pour que le frontend fasse la création avec authentification
     return new Response(`
       <html>
         <head>
@@ -132,7 +78,15 @@ Deno.serve(async (req) => {
           </div>
           <script>
             if (window.opener) {
-              window.opener.postMessage({ type: 'teams-connected' }, '*');
+              window.opener.postMessage({
+                type: 'teams-oauth-success',
+                userEmail: '${state}',
+                accessToken: '${tokens.access_token}',
+                refreshToken: '${tokens.refresh_token}',
+                tenantId: '${tenantId}',
+                expiresIn: ${tokens.expires_in},
+                scopes: ${JSON.stringify(tokens.scope ? tokens.scope.split(' ') : [])}
+              }, '*');
               setTimeout(() => window.close(), 1500);
             } else {
               setTimeout(() => window.close(), 2000);

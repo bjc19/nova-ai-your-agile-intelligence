@@ -147,36 +147,39 @@ export default function Settings() {
     try {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
-      
-      // Listen for popup message with timeout
+
       let timeoutId;
       const messageHandler = async (event) => {
-        if (event.data?.type === 'teams-connected') {
+        if (event.data?.type === 'teams-oauth-success') {
            window.removeEventListener('message', messageHandler);
            clearTimeout(timeoutId);
-           console.log('✅ teams-connected message received');
-           // Reload connection from DB to ensure persistence
-           await new Promise(resolve => setTimeout(resolve, 2000)); // Wait longer for DB write
-           console.log('✅ Calling loadTeamsConnection...');
-           await loadTeamsConnection();
-           console.log('✅ loadTeamsConnection complete, setting connectingTeams to false');
+           console.log('✅ OAuth success, saving connection...');
+
+           try {
+             await base44.functions.invoke('teamsCreateConnection', {
+               accessToken: event.data.accessToken,
+               refreshToken: event.data.refreshToken,
+               tenantId: event.data.tenantId,
+               expiresIn: event.data.expiresIn,
+               scopes: event.data.scopes
+             });
+
+             await new Promise(resolve => setTimeout(resolve, 500));
+             await loadTeamsConnection();
+           } catch (err) {
+             console.error('Error saving connection:', err);
+           }
+
            setConnectingTeams(false);
          }
       };
       window.addEventListener('message', messageHandler);
 
-      // Fallback: if no message received within 8 seconds, reload anyway
       timeoutId = setTimeout(async () => {
         window.removeEventListener('message', messageHandler);
-        console.log('⏱️ Fallback timeout triggered - reloading Teams connection');
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log('⏱️ Calling loadTeamsConnection (fallback)...');
-        await loadTeamsConnection();
-        console.log('⏱️ loadTeamsConnection complete (fallback), setting connectingTeams to false');
         setConnectingTeams(false);
       }, 8000);
-      
-      // Open in popup window
+
       window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
