@@ -55,6 +55,25 @@ export default function MyFocusBoard() {
   const todayTasks = tasks.filter(t => t.dueToday);
   const completionRate = Math.round((tasks.filter(t => t.status === 'done').length / tasks.length) * 100);
 
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="border-0 shadow-sm bg-white">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg">Votre Focus du Jour</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center py-8">
+            <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
