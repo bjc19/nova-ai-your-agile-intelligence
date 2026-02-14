@@ -62,43 +62,52 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication (temporarily disabled for demo)
+  // Check authentication
+  const hasCheckedAuth = useRef(false);
   useEffect(() => {
+    if (hasCheckedAuth.current) return;
+    hasCheckedAuth.current = true;
+
     const checkAuth = async () => {
-      const authenticated = await base44.auth.isAuthenticated();
-      if (authenticated) {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
+      try {
+        const authenticated = await base44.auth.isAuthenticated();
+        if (authenticated) {
+          const currentUser = await base44.auth.me();
+          setUser(currentUser);
 
-        // Charger contexte sprint actif
-        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
+          // Charger contexte sprint actif
+          const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+          if (activeSprints.length > 0) {
+            setSprintContext(activeSprints[0]);
+          }
 
-        // Vérifier onboarding
-        const teamConfigs = await base44.entities.TeamConfiguration.list();
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
+          // Vérifier onboarding
+          const teamConfigs = await base44.entities.TeamConfiguration.list();
+          if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+            setShowOnboarding(true);
+          }
 
-        // Vérifier alertes multi-projets en attente
-        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-          admin_response: "pending"
-        });
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
+          // Vérifier alertes multi-projets en attente
+          const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+            admin_response: "pending"
           });
+          if (pendingAlerts.length > 0) {
+            const latest = pendingAlerts[pendingAlerts.length - 1];
+            setMultiProjectAlert({
+              confidence: latest.detection_score,
+              signals: latest.weighted_signals,
+              log_id: latest.id
+            });
+          }
         }
+      } catch (error) {
+        console.error("Auth check error:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
