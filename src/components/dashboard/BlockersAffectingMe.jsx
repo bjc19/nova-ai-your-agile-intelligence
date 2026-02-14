@@ -98,11 +98,8 @@ export default function BlockersAffectingMe() {
       setReportForm({ title: "", description: "", blockedBy: "", urgency: "medium" });
       setShowReportDialog(false);
       
-      // Reload blockers
-      const response = await base44.functions.invoke('getBlockersAffectingUser', {
-        workspaceId
-      });
-      setBlockers(response.data.blockers || []);
+      // Reload blockers from selected workspace
+      await loadBlockers(workspaceId);
     } catch (error) {
       console.error("Erreur signalement blocker:", error);
       alert("Erreur lors du signalement du blocage");
