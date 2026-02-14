@@ -401,10 +401,11 @@ export default function Settings() {
           }
 
           // Check connections
-          const [slackConns, teamsConns, jiraConns] = await Promise.all([
+          const [slackConns, teamsConns, jiraConns, confluenceConns] = await Promise.all([
             base44.entities.SlackConnection.list(),
             base44.entities.TeamsConnection.list(),
-            base44.entities.JiraConnection.list()
+            base44.entities.JiraConnection.list(),
+            base44.entities.ConfluenceConnection.list()
           ]);
 
           if (slackConns.length > 0) {
@@ -425,6 +426,13 @@ export default function Settings() {
             setJiraConnected(true);
           } else {
             setJiraConnected(false);
+          }
+
+          if (confluenceConns.length > 0) {
+            setConfluenceConnected(true);
+            setConfluenceDomain(confluenceConns[0].domain);
+          } else {
+            setConfluenceConnected(false);
           }
         } catch (error) {
           console.error("Erreur chargement données:", error);
