@@ -392,9 +392,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
-            <RealityMapCard
+              {/* Organizational Reality Engine - Admin/Contributor only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
+              <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
