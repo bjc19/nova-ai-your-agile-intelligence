@@ -266,25 +266,57 @@ export default function Settings() {
   };
 
   const handleConfluenceConnect = async () => {
-    if (!confluenceDomain.trim()) {
-      alert('Veuillez entrer votre domaine Confluence (ex: my-company.atlassian.net)');
-      return;
-    }
-
     try {
       setConnectingConfluence(true);
-      const result = await base44.functions.invoke('confluenceConnect', {
-        domain: confluenceDomain.trim()
-      });
+      const response = await base44.functions.invoke('confluenceOAuthStart');
 
-      if (result.data?.success) {
-        setConfluenceConnected(true);
-        setConfluenceDomain('');
+      const authUrl = response.data?.authUrl;
+      if (!authUrl) {
+        throw new Error('No authorization URL received');
       }
+
+      // Listen for callback message
+      const messageHandler = async (event) => {
+        if (event.data?.type === 'confluence_success') {
+          window.removeEventListener('message', messageHandler);
+
+          try {
+            // Decode connection data
+            const connectionData = JSON.parse(atob(event.data.data));
+
+            // Save connection through authenticated endpoint
+            const saveResult = await base44.functions.invoke('confluenceSaveConnection', connectionData);
+
+            if (saveResult.data?.success) {
+              setConfluenceConnected(true);
+              setConfluenceDomain('');
+              // Refetch from DB to ensure persistence
+              setTimeout(async () => {
+                const confluenceConns = await base44.entities.ConfluenceConnection.list();
+                if (confluenceConns.length > 0) {
+                  setConfluenceConnected(true);
+                }
+              }, 500);
+            }
+          } catch (error) {
+            console.error('Error saving Confluence connection:', error);
+            alert('Erreur: Impossible de sauvegarder la connexion');
+          } finally {
+            setConnectingConfluence(false);
+          }
+        } else if (event.data?.type === 'confluence_error') {
+          window.removeEventListener('message', messageHandler);
+          console.error('Confluence connection error:', event.data.error);
+          alert('Erreur: ' + event.data.error);
+          setConnectingConfluence(false);
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
+      window.open(authUrl, 'Confluence OAuth', 'width=600,height=700');
     } catch (error) {
-      console.error('Error connecting to Confluence:', error);
-      alert('Erreur: ' + (error.response?.data?.error || error.message));
-    } finally {
+      console.error('Error starting Confluence OAuth:', error);
+      alert('Erreur: ' + error.message);
       setConnectingConfluence(false);
     }
   };
