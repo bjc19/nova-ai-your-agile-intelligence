@@ -374,6 +374,12 @@ export const translations = {
     yesExport: "Yes, export",
     noExport: "No",
 
+    // Integration Conflicts
+    jiraTrelloConflict: "Jira is already connected",
+    jiraTrelloConflictMessage: "To avoid data confusion, disconnect Jira before connecting Trello.",
+    trelloJiraConflict: "Trello is already connected",
+    trelloJiraConflictMessage: "To avoid data confusion, disconnect Trello before connecting Jira.",
+
     // RoleBasedRiskDisplay
     technicalView: "Technical View",
     teamView: "Team View",
