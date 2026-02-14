@@ -17,15 +17,15 @@ export default function Dashboard() {
           return;
         }
 
-        const user = await base44.auth.me();
+        const currentUser = await base44.auth.me();
         
-        // Redirect based on role
-        if (user?.role === 'admin') {
-          navigate(createPageUrl("Dashboard/admins"));
-        } else if (user?.role === 'contributor') {
-          navigate(createPageUrl("Dashboard/contributors"));
-        } else if (user?.role === 'user') {
-          navigate(createPageUrl("Dashboard/commonusers"));
+        // Redirect based on role - with optional chaining for safety
+        if (currentUser?.role === 'admin') {
+          navigate(createPageUrl("DashboardAdmins"));
+        } else if (currentUser?.role === 'contributor') {
+          navigate(createPageUrl("DashboardContributors"));
+        } else if (currentUser?.role === 'user') {
+          navigate(createPageUrl("DashboardCommonUsers"));
         } else {
           navigate(createPageUrl("Home"));
         }

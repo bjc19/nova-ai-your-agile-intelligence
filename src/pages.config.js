@@ -52,6 +52,7 @@ import AdminDevTools from './pages/AdminDevTools';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
 import ChooseAccess from './pages/ChooseAccess';
+import Dashboard from './pages/Dashboard';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
@@ -65,7 +66,6 @@ import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import Dashboard from './pages/Dashboard';
 import DashboardCommonUsers from './pages/DashboardCommonUsers';
 import DashboardContributors from './pages/DashboardContributors';
 import DashboardAdmins from './pages/DashboardAdmins';
@@ -78,6 +78,7 @@ export const PAGES = {
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
     "ChooseAccess": ChooseAccess,
+    "Dashboard": Dashboard,
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
@@ -91,7 +92,6 @@ export const PAGES = {
     "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "Dashboard": Dashboard,
     "DashboardCommonUsers": DashboardCommonUsers,
     "DashboardContributors": DashboardContributors,
     "DashboardAdmins": DashboardAdmins,
