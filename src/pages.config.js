@@ -53,6 +53,9 @@ import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
 import ChooseAccess from './pages/ChooseAccess';
 import Dashboard from './pages/Dashboard';
+import DashboardAdmins from './pages/DashboardAdmins';
+import DashboardCommonUsers from './pages/DashboardCommonUsers';
+import DashboardContributors from './pages/DashboardContributors';
 import Demo from './pages/Demo';
 import Details from './pages/Details';
 import Home from './pages/Home';
@@ -62,13 +65,10 @@ import Privacy from './pages/Privacy';
 import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
-import Settings from './pages/Settings';
 import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import DashboardCommonUsers from './pages/DashboardCommonUsers';
-import DashboardAdmins from './pages/DashboardAdmins';
-import DashboardContributors from './pages/DashboardContributors';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +79,9 @@ export const PAGES = {
     "AntiPatterns": AntiPatterns,
     "ChooseAccess": ChooseAccess,
     "Dashboard": Dashboard,
+    "DashboardAdmins": DashboardAdmins,
+    "DashboardCommonUsers": DashboardCommonUsers,
+    "DashboardContributors": DashboardContributors,
     "Demo": Demo,
     "Details": Details,
     "Home": Home,
@@ -88,13 +91,10 @@ export const PAGES = {
     "Register": Register,
     "ResetPassword": ResetPassword,
     "Results": Results,
-    "Settings": Settings,
     "TeamManagement": TeamManagement,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "DashboardCommonUsers": DashboardCommonUsers,
-    "DashboardAdmins": DashboardAdmins,
-    "DashboardContributors": DashboardContributors,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {

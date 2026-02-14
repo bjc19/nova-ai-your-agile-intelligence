@@ -137,17 +137,20 @@ export default function Settings() {
     try {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
-      
+
       // Listen for popup message
-      const messageHandler = (event) => {
+      const messageHandler = async (event) => {
         if (event.data?.type === 'teams-connected') {
           window.removeEventListener('message', messageHandler);
-          setTeamsConnected(true);
-          setConnectingTeams(false);
+          // Refetch from DB to ensure persistence
+          setTimeout(async () => {
+            await loadTeamsConnection();
+            setConnectingTeams(false);
+          }, 500);
         }
       };
       window.addEventListener('message', messageHandler);
-      
+
       // Open in popup window
       window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
     } catch (error) {
