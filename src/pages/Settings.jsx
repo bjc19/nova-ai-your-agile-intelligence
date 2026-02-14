@@ -145,20 +145,20 @@ export default function Settings() {
           window.removeEventListener('message', messageHandler);
           clearTimeout(timeoutId);
           // Reload connection from DB to ensure persistence
-          await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DB write
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait longer for DB write
           await loadTeamsConnection();
           setConnectingTeams(false);
         }
       };
       window.addEventListener('message', messageHandler);
-      
-      // Fallback: if no message received within 5 seconds, reload anyway
+
+      // Fallback: if no message received within 8 seconds, reload anyway
       timeoutId = setTimeout(async () => {
         window.removeEventListener('message', messageHandler);
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         await loadTeamsConnection();
         setConnectingTeams(false);
-      }, 5000);
+      }, 8000);
       
       // Open in popup window
       window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
