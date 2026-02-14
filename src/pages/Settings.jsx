@@ -172,6 +172,13 @@ export default function Settings() {
 
   const handleJiraConnect = async () => {
     try {
+      if (trelloConnected) {
+        toast.error(t('jiraTrelloConflict'), {
+          description: t('jiraTrelloConflictMessage')
+        });
+        return;
+      }
+
       setConnectingJira(true);
       const user = await base44.auth.me();
       const response = await base44.functions.invoke('jiraOAuthStart', { 
