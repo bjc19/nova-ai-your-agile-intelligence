@@ -410,8 +410,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {/* Organizational Reality Engine - Admin/Contributor Only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -437,6 +437,11 @@ export default function Dashboard() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals with stakeholders")} />
 
+            }
+
+            {/* GembaWork - User Only */}
+            {user?.role === 'user' &&
+              <GembaWork />
             }
             
             {/* Sprint Performance Chart */}
