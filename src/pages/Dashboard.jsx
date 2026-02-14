@@ -41,7 +41,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -102,18 +101,10 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history with workspace filter
+  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspace],
-    queryFn: async () => {
-      if (selectedWorkspace) {
-        return await base44.entities.AnalysisHistory.filter({ 
-          jira_project_selection_id: selectedWorkspace 
-        }, '-created_date', 100);
-      } else {
-        return await base44.entities.AnalysisHistory.list('-created_date', 100);
-      }
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -260,14 +251,14 @@ export default function Dashboard() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 &&
-                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
-                    <Clock className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm text-slate-600">
-                      <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
-                    </span>
-                  </div>
-                  }
+                
+
+
+
+
+
+
+
                 {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek &&
                   <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
                     <Zap className="w-4 h-4 text-slate-400" />
@@ -291,10 +282,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                activeWorkspaceId={selectedWorkspace}
-                onWorkspaceChange={setSelectedWorkspace}
-              />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -455,12 +443,12 @@ export default function Dashboard() {
         </div>
         }
 
-{(user?.role === 'admin' || user?.role === 'contributor') && (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.5 }}
-    className="mt-8">
+        {(userRole === 'admin' || userRole === 'contributor') &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-8">
 
     <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -488,7 +476,7 @@ export default function Dashboard() {
       </div>
     </div>
   </motion.div>
-)}
+        }
       </div>
     </div>);
 
