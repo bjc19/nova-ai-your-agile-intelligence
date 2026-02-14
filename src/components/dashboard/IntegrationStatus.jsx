@@ -23,12 +23,14 @@ export default function IntegrationStatus({ integrations = {} }) {
   const [slackConnected, setSlackConnected] = useState(false);
   const [teamsConnected, setTeamsConnected] = useState(false);
   const [jiraConnected, setJiraConnected] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   
   const checkConnections = async () => {
     try {
       const authenticated = await base44.auth.isAuthenticated();
       if (authenticated) {
         const user = await base44.auth.me();
+        setUserRole(user?.role);
         
         const [slackConns, teamsConns, jiraConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
@@ -139,12 +141,14 @@ export default function IntegrationStatus({ integrations = {} }) {
                 {connectedCount} {t('connectedOf')} {Object.keys(displayIntegrations).length} {t('connected').toLowerCase()}
               </p>
             </div>
-            <Link to={createPageUrl("Settings")}>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Settings className="w-4 h-4" />
-                {t('manage')}
-              </Button>
-            </Link>
+            {(userRole === 'admin' || userRole === 'contributor') && (
+              <Link to={createPageUrl("Settings")}>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  {t('manage')}
+                </Button>
+              </Link>
+            )}
           </div>
         </CardHeader>
         <CardContent className="pt-0">
