@@ -265,6 +265,41 @@ export default function Settings() {
     }
   };
 
+  const handleConfluenceConnect = async () => {
+    if (!confluenceDomain.trim()) {
+      alert('Veuillez entrer votre domaine Confluence (ex: my-company.atlassian.net)');
+      return;
+    }
+
+    try {
+      setConnectingConfluence(true);
+      const result = await base44.functions.invoke('confluenceConnect', {
+        domain: confluenceDomain.trim()
+      });
+
+      if (result.data?.success) {
+        setConfluenceConnected(true);
+        setConfluenceDomain('');
+      }
+    } catch (error) {
+      console.error('Error connecting to Confluence:', error);
+      alert('Erreur: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setConnectingConfluence(false);
+    }
+  };
+
+  const handleConfluenceDisconnect = async () => {
+    try {
+      await base44.functions.invoke('confluenceDisconnect');
+      setConfluenceConnected(false);
+      setConfluenceDomain('');
+    } catch (error) {
+      console.error('Error disconnecting Confluence:', error);
+      alert('Erreur lors de la déconnexion');
+    }
+  };
+
   const checkJiraDebug = async () => {
     try {
       const result = await base44.functions.invoke('checkJiraStatus', {});
