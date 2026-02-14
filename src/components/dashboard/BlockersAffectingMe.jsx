@@ -25,30 +25,38 @@ export default function BlockersAffectingMe() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const loadBlockers = async (workspaceId) => {
+    try {
+      setLoading(true);
+      const response = await base44.functions.invoke('getBlockersAffectingUser', {
+        workspaceId: workspaceId
+      });
+
+      setBlockers(response.data.blockers || []);
+      setDependsOnMe(response.data.dependsOnMe || []);
+    } catch (error) {
+      console.error("Erreur chargement blockers:", error);
+      setBlockers([]);
+      setDependsOnMe([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadBlockers = async () => {
-      try {
-        setLoading(true);
-        
-        const storedWorkspaceId = sessionStorage.getItem("selectedWorkspaceId");
-        const workspaceId = storedWorkspaceId ? JSON.parse(storedWorkspaceId) : null;
+    const storedWorkspaceId = sessionStorage.getItem("selectedWorkspaceId");
+    const workspaceId = storedWorkspaceId ? JSON.parse(storedWorkspaceId) : null;
+    loadBlockers(workspaceId);
 
-        const response = await base44.functions.invoke('getBlockersAffectingUser', {
-          workspaceId: workspaceId
-        });
-
-        setBlockers(response.data.blockers || []);
-        setDependsOnMe(response.data.dependsOnMe || []);
-      } catch (error) {
-        console.error("Erreur chargement blockers:", error);
-        setBlockers([]);
-        setDependsOnMe([]);
-      } finally {
-        setLoading(false);
-      }
+    // Listener pour les changements du workspace
+    const handleStorageChange = () => {
+      const newWorkspaceId = sessionStorage.getItem("selectedWorkspaceId");
+      const parsedId = newWorkspaceId ? JSON.parse(newWorkspaceId) : null;
+      loadBlockers(parsedId);
     };
 
-    loadBlockers();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleContactPerson = async (blocker) => {
