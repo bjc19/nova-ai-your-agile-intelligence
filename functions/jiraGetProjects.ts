@@ -42,14 +42,15 @@ Deno.serve(async (req) => {
     }
 
     // Get user's Jira connection
-    let jiraConns = await base44.entities.JiraConnection.filter({
-      created_by: user.email,
-      is_active: true
-    });
-    if (jiraConns.length === 0) {
+    let jiraConns = await base44.asServiceRole.entities.JiraConnection.list();
+    const userJiraConns = jiraConns.filter(c => c.created_by === user.email && c.is_active);
+    
+    if (userJiraConns.length === 0) {
       console.error('No Jira connection found for user');
       return Response.json({ error: 'Jira not connected' }, { status: 400 });
     }
+    
+    jiraConns = userJiraConns;
 
     let connection = jiraConns[0];
     let accessToken = connection.access_token;
