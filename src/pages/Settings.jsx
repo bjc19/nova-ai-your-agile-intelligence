@@ -1095,6 +1095,13 @@ export default function Settings() {
                        >
                          Déconnecter
                        </Button>
+                       <Button 
+                         size="sm"
+                         onClick={() => navigate(createPageUrl("TrelloProjectSelector"))}
+                         className="text-xs bg-sky-600 hover:bg-sky-700 text-white"
+                       >
+                         Sélectionner projets
+                       </Button>
                      </>
                    ) : (
                      <TooltipProvider>
