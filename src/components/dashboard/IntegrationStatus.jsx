@@ -32,17 +32,15 @@ export default function IntegrationStatus({ integrations = {} }) {
         const user = await base44.auth.me();
         setUserRole(user?.role);
         
+        // Show all workspace connections for transparency
         const [slackConns, teamsConns, jiraConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
-            user_email: user.email,
             is_active: true
           }),
           base44.entities.TeamsConnection.filter({ 
-            user_email: user.email,
             is_active: true
           }),
           base44.entities.JiraConnection.filter({ 
-            user_email: user.email,
             is_active: true
           })
         ]);
