@@ -20,6 +20,7 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -366,8 +367,13 @@ export default function Dashboard() {
 
             }
 
+              {/* GembaWork - Simple Users Only */}
+              {(userRole === 'user' || userRole === null) && (
+                <GembaWork />
+              )}
+
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -395,7 +401,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
