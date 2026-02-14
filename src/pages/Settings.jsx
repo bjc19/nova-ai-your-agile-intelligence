@@ -1100,7 +1100,7 @@ export default function Settings() {
                      <Button 
                        className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800"
                        onClick={handleTrelloConnect}
-                       disabled={connectingTrello || jiraConnected}
+                       disabled={connectingTrello}
                      >
                        {connectingTrello ? "Connexion..." : "Connecter Trello"}
                      </Button>
