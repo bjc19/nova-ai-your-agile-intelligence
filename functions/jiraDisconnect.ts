@@ -38,8 +38,11 @@ Deno.serve(async (req) => {
     });
 
     if (verifyConns.length > 0) {
+      console.error('Validation failed: Still have', verifyConns.length, 'active Jira connections');
       throw new Error('Failed to deactivate Jira connection');
     }
+
+    console.log('Validation passed: No active Jira connections remain');
 
     console.log('Jira connection successfully deactivated');
     return Response.json({ 
