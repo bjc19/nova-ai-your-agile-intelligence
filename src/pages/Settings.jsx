@@ -523,6 +523,7 @@ export default function Settings() {
           }
 
           setConfluenceConnected(confluenceConns.length > 0);
+          setTrelloConnected(trelloConns.length > 0);
         } catch (error) {
           console.error("Erreur chargement données:", error);
         } finally {
