@@ -18,21 +18,8 @@ Deno.serve(async (req) => {
 
     const connection = jiraConns[0];
     
-    // Delete and recreate with is_active: false to work around RLS update issue
+    // Delete the connection
     await base44.entities.JiraConnection.delete(connection.id);
-    
-    const newConnection = {
-      user_email: connection.user_email,
-      access_token: connection.access_token,
-      refresh_token: connection.refresh_token,
-      expires_at: connection.expires_at,
-      cloud_id: connection.cloud_id,
-      scopes: connection.scopes,
-      connected_at: connection.connected_at,
-      is_active: false
-    };
-    
-    await base44.entities.JiraConnection.create(newConnection);
     return Response.json({ success: true });
   } catch (error) {
     console.error('Error disconnecting Jira:', error);
