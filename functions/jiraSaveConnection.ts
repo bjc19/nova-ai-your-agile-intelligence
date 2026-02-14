@@ -26,10 +26,10 @@ Deno.serve(async (req) => {
     }
 
     if (allConns.length > 0) {
-      // Update existing connection using service role to bypass RLS
+      // Update existing connection
       console.log('Updating existing Jira connection:', allConns[0].id);
       try {
-        await base44.asServiceRole.entities.JiraConnection.update(allConns[0].id, {
+        await base44.entities.JiraConnection.update(allConns[0].id, {
           user_email: connectionData.user_email,
           access_token: connectionData.access_token,
           refresh_token: connectionData.refresh_token,
@@ -45,10 +45,10 @@ Deno.serve(async (req) => {
         throw updateError;
       }
     } else {
-      // Create new connection using service role to bypass RLS
+      // Create new connection
       console.log('Creating new Jira connection');
       try {
-        const newConn = await base44.asServiceRole.entities.JiraConnection.create({
+        const newConn = await base44.entities.JiraConnection.create({
           user_email: connectionData.user_email,
           access_token: connectionData.access_token,
           refresh_token: connectionData.refresh_token,
