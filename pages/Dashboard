@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
 import {
   Mic,
@@ -281,7 +282,8 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end">
-                <TimePeriodSelector
+              <WorkspaceSelector />
+              <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
