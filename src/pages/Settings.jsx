@@ -247,7 +247,8 @@ export default function Settings() {
 
   const loadTrelloConnection = async () => {
     try {
-      const trelloConns = await base44.entities.TrelloConnection.list();
+      const user = await base44.auth.me();
+      const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
       setTrelloConnected(trelloConns.length > 0);
     } catch (error) {
       console.error('Error loading Trello connection:', error);
@@ -495,7 +496,7 @@ export default function Settings() {
             base44.entities.TeamsConnection.list(),
             base44.entities.JiraConnection.list(),
             base44.entities.ConfluenceConnection.list(),
-            base44.entities.TrelloConnection.list()
+            base44.entities.TrelloConnection.filter({ user_email: user?.email })
           ]);
 
           if (slackConns.length > 0) {
