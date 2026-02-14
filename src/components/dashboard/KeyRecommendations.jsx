@@ -426,6 +426,7 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
             </div>
           </CardHeader>
         )}
+        {(isAdmin || isContributor) && (
         <CardContent className="pt-4">
           <div className="space-y-3">
             {paginatedRecs.map((rec, index) => {
