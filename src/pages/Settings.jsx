@@ -82,30 +82,32 @@ export default function Settings() {
     try {
       setConnectingSlack(true);
       const { data } = await base44.functions.invoke('slackOAuthStart');
-      
+
       // Open popup for OAuth
       const popup = window.open(data.authUrl, 'Slack OAuth', 'width=600,height=700');
-      
+
       // Listen for callback
       const handleMessage = async (event) => {
         if (event.data.type === 'slack_success') {
           // Decode connection data
           const connectionData = JSON.parse(atob(event.data.data));
-          
+
           // Save connection through authenticated endpoint
           await base44.functions.invoke('slackSaveConnection', connectionData);
-          
+
           // Reload connection to get fresh data
           await loadSlackConnection();
           window.removeEventListener('message', handleMessage);
           setConnectingSlack(false);
+          toast.success('Slack connecté avec succès');
+          setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
         } else if (event.data.type === 'slack_error') {
           console.error('Slack connection error:', event.data.error);
           window.removeEventListener('message', handleMessage);
           setConnectingSlack(false);
         }
       };
-      
+
       window.addEventListener('message', handleMessage);
     } catch (error) {
       console.error('Error starting Slack OAuth:', error);
@@ -119,6 +121,8 @@ export default function Settings() {
       if (data.success) {
         setSlackConnected(false);
         setSlackTeamName(null);
+        toast.success('Slack déconnecté avec succès');
+        setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
       }
     } catch (error) {
       console.error('Error disconnecting Slack:', error);
@@ -149,6 +153,8 @@ export default function Settings() {
           setTimeout(async () => {
             await loadTeamsConnection();
             setConnectingTeams(false);
+            toast.success('Microsoft Teams connecté avec succès');
+            navigate(createPageUrl("Dashboard"));
           }, 500);
         }
       };
@@ -166,6 +172,8 @@ export default function Settings() {
     try {
       await base44.functions.invoke('teamsDisconnect');
       setTeamsConnected(false);
+      toast.success('Microsoft Teams déconnecté avec succès');
+      setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
     } catch (error) {
       console.error('Error disconnecting Teams:', error);
     }
@@ -200,18 +208,20 @@ export default function Settings() {
                                 const jiraConns = await base44.entities.JiraConnection.list();
                                 if (jiraConns.length > 0) {
                                   setJiraConnected(true);
+                                  toast.success('Jira connecté avec succès');
+                                  navigate(createPageUrl("Dashboard"));
                                 }
                               }, 500);
                             } else {
                               console.error('Failed to save Jira connection:', saveResult.data);
                               alert('Erreur: Impossible de sauvegarder la connexion Jira');
                             }
-                          } catch (error) {
+                            } catch (error) {
                             console.error('Error saving Jira connection:', error);
                             alert('Erreur lors de la sauvegarde: ' + error.message);
-                          } finally {
+                            } finally {
                             setConnectingJira(false);
-                          }
+                            }
                         } else if (event.data?.type === 'jira_error') {
                           console.error('Jira connection error:', event.data.error);
                           window.removeEventListener('message', messageHandler);
@@ -324,6 +334,8 @@ export default function Settings() {
               const confluenceConns = await base44.entities.ConfluenceConnection.list();
               if (confluenceConns.length > 0) {
                 setConfluenceConnected(true);
+                toast.success('Confluence connecté avec succès');
+                navigate(createPageUrl("Dashboard"));
               }
             }, 500);
           } catch (error) {
@@ -353,6 +365,8 @@ export default function Settings() {
     try {
       await base44.functions.invoke('confluenceDisconnect');
       setConfluenceConnected(false);
+      toast.success('Confluence déconnecté avec succès');
+      setTimeout(() => navigate(createPageUrl("Dashboard")), 1000);
     } catch (error) {
       console.error('Error disconnecting Confluence:', error);
       toast.error('Erreur lors de la déconnexion Confluence');
@@ -378,6 +392,8 @@ export default function Settings() {
                const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
                if (trelloConns.length > 0) {
                  setTrelloConnected(true);
+                 toast.success('Trello connecté avec succès');
+                 navigate(createPageUrl("Dashboard"));
                } else {
                  setTrelloConnected(false);
                }
