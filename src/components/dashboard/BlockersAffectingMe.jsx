@@ -111,9 +111,15 @@ export default function BlockersAffectingMe() {
                         size="sm" 
                         variant="ghost" 
                         className="h-6 px-2 text-xs text-amber-600 hover:bg-amber-100"
+                        onClick={() => handleContactPerson(blocker)}
+                        disabled={sendingEmail === blocker.id}
                       >
-                        <Send className="w-3 h-3 mr-1" />
-                        Contacter
+                        {sendingEmail === blocker.id ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3 mr-1" />
+                        )}
+                        {sendingEmail === blocker.id ? "Envoi..." : "Contacter"}
                       </Button>
                     </div>
                   </div>
