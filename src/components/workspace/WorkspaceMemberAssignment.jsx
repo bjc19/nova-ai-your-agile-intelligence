@@ -18,11 +18,15 @@ export default function WorkspaceMemberAssignment() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState(null);
 
   // Fetch workspaces and team members on mount
   useEffect(() => {
     const loadData = async () => {
       try {
+        const user = await base44.auth.me();
+        setCurrentUserEmail(user?.email);
+
         const [wsData, usersData, wmData] = await Promise.all([
           base44.entities.JiraProjectSelection.filter({ is_active: true }),
           base44.entities.User.list(),
@@ -102,9 +106,10 @@ export default function WorkspaceMemberAssignment() {
     ? workspaceMembers.filter(wm => wm.workspace_id === selectedWorkspace)
     : [];
 
-  // Filter available members (not in workspace)
+  // Filter available members (not in workspace and not current user)
   const availableMembers = selectedWorkspace
     ? teamMembers.filter(user => 
+        user.email !== currentUserEmail &&
         !workspaceMembers.find(wm => wm.workspace_id === selectedWorkspace && wm.user_email === user.email)
       )
     : [];
