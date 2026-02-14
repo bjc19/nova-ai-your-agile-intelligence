@@ -168,8 +168,11 @@ export default function Settings() {
       // Fallback: if no message received within 8 seconds, reload anyway
       timeoutId = setTimeout(async () => {
         window.removeEventListener('message', messageHandler);
+        console.log('⏱️ Fallback timeout triggered - reloading Teams connection');
         await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log('⏱️ Calling loadTeamsConnection (fallback)...');
         await loadTeamsConnection();
+        console.log('⏱️ loadTeamsConnection complete (fallback), setting connectingTeams to false');
         setConnectingTeams(false);
       }, 8000);
       
