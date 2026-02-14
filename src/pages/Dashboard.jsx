@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -443,7 +444,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(user?.role === 'admin' || user?.role === 'contributor') && (
+{(userRole === 'admin' || userRole === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
