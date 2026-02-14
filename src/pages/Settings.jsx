@@ -897,8 +897,73 @@ export default function Settings() {
                </div>
              </CardContent>
            </Card>
+
+           {/* Confluence */}
+           <Card className="overflow-hidden border-2 border-slate-200 hover:border-slate-300 transition-colors">
+             <CardContent className="p-6">
+               <div className="flex items-start justify-between gap-4">
+                 <div className="flex items-start gap-4">
+                   <div className={`p-3 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 shadow-lg shadow-slate-500/25`}>
+                     <MessageSquare className="w-6 h-6 text-white" />
+                   </div>
+                   <div>
+                     <div className="flex items-center gap-2 mb-1">
+                       <h3 className="font-semibold text-slate-900">Confluence</h3>
+                     </div>
+                     <p className="text-sm text-slate-600 mb-3">
+                       Importez la documentation d'équipe et détectez les écarts avec la réalité.
+                     </p>
+                     <div className="flex items-center gap-2 text-xs text-slate-500">
+                       <span className="flex items-center gap-1">
+                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                         Lire pages et espaces
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+                 <div className="flex flex-col items-end gap-2">
+                   {confluenceConnected ? (
+                     <>
+                       <Badge className="bg-emerald-100 text-emerald-700">
+                         <CheckCircle2 className="w-3 h-3 mr-1" />
+                         {t('connected')}
+                       </Badge>
+                       {confluenceDomain && (
+                         <p className="text-xs text-slate-500">{confluenceDomain}</p>
+                       )}
+                       <Button 
+                         variant="outline"
+                         size="sm"
+                         onClick={handleConfluenceDisconnect}
+                         className="text-xs"
+                       >
+                         Déconnecter
+                       </Button>
+                     </>
+                   ) : (
+                     <div className="w-full flex flex-col gap-2">
+                       <input
+                         type="text"
+                         placeholder="my-company.atlassian.net"
+                         value={confluenceDomain}
+                         onChange={(e) => setConfluenceDomain(e.target.value)}
+                         className="px-3 py-2 text-xs border border-slate-200 rounded-md"
+                       />
+                       <Button 
+                         className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 w-full text-xs"
+                         onClick={handleConfluenceConnect}
+                         disabled={connectingConfluence}
+                       >
+                         {connectingConfluence ? "Connexion..." : "Connecter"}
+                       </Button>
+                     </div>
+                   )}
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
            </div>
-          </motion.div>
+           </motion.div>
 
         {/* Coming Soon Integrations */}
         <motion.div
