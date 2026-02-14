@@ -46,14 +46,36 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals from last 7 days
+  // Sync workspace selection from sessionStorage
+  useEffect(() => {
+    const checkWorkspace = () => {
+      const stored = sessionStorage.getItem("selectedWorkspaceId");
+      const workspaceId = stored ? JSON.parse(stored) : null;
+      setSelectedWorkspaceId(workspaceId);
+    };
+
+    checkWorkspace();
+    window.addEventListener('storage', checkWorkspace);
+    return () => window.removeEventListener('storage', checkWorkspace);
+  }, []);
+
+  // Fetch GDPR signals from last 7 days for selected workspace
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        let markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        
+        // Filter by selected workspace if available
+        if (selectedWorkspaceId) {
+          const workspace = await base44.entities.JiraProjectSelection.get(selectedWorkspaceId);
+          if (workspace) {
+            markers = markers.filter((m) => m.workspace_name === workspace.workspace_name);
+          }
+        }
+        
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
@@ -62,7 +84,7 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, []);
+  }, [selectedWorkspaceId]);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
