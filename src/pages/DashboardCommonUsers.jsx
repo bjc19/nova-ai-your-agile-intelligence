@@ -141,6 +141,7 @@ export default function DashboardCommonUsers() {
                 <WorkspaceSelector 
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
+                  userRole={user?.role}
                 />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
