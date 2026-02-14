@@ -1,41 +1,41 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus, GitPullRequest, CheckCircle2, MessageSquare } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, GitPullRequest, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function ContributionMetrics() {
-  const metrics = [
-    {
-      label: "PRs Créées",
-      value: 5,
-      change: "+20%",
-      trend: "up",
-      icon: GitPullRequest,
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
-      textColor: "text-purple-700"
-    },
-    {
-      label: "PRs Reviewées",
-      value: 8,
-      change: "+10%",
-      trend: "up",
-      icon: MessageSquare,
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
-      textColor: "text-blue-700"
-    },
-    {
-      label: "Tickets Fermés",
-      value: 12,
-      change: "+35%",
-      trend: "up",
-      icon: CheckCircle2,
-      bgColor: "bg-emerald-50",
-      borderColor: "border-emerald-200",
-      textColor: "text-emerald-700"
-    }
-  ];
+  const [metrics, setMetrics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState(null);
+  const [monthlyComparison, setMonthlyComparison] = useState(null);
+
+  useEffect(() => {
+    const loadMetrics = async () => {
+      try {
+        setLoading(true);
+
+        const storedWorkspaceId = sessionStorage.getItem("selectedWorkspaceId");
+        const workspaceId = storedWorkspaceId ? JSON.parse(storedWorkspaceId) : null;
+
+        const response = await base44.functions.invoke('getUserContributionMetrics', {
+          workspaceId: workspaceId
+        });
+
+        setMetrics(response.data.metrics || []);
+        setSummary(response.data.summary || null);
+        setMonthlyComparison(response.data.monthlyComparison || null);
+      } catch (error) {
+        console.error("Erreur chargement métriques:", error);
+        setMetrics([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMetrics();
+  }, []);
 
   const getTrendIcon = (trend) => {
     if (trend === "up") return TrendingUp;
