@@ -102,10 +102,18 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history
+  // Fetch analysis history with workspace filter
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    queryKey: ['analysisHistory', selectedWorkspace],
+    queryFn: async () => {
+      if (selectedWorkspace) {
+        return await base44.entities.AnalysisHistory.filter({ 
+          jira_project_selection_id: selectedWorkspace 
+        }, '-created_date', 100);
+      } else {
+        return await base44.entities.AnalysisHistory.list('-created_date', 100);
+      }
+    },
     enabled: !isLoading
   });
 
