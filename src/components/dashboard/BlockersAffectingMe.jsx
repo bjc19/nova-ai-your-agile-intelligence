@@ -224,6 +224,7 @@ export default function BlockersAffectingMe() {
             <Button 
               size="sm" 
               className="flex-1 h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => setShowReportDialog(true)}
             >
               <Plus className="w-3 h-3 mr-1" />
               Signaler un Blocage
@@ -237,8 +238,91 @@ export default function BlockersAffectingMe() {
               Voir Dépendances ({dependsOnMe.length})
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
+          </CardContent>
+          </Card>
+
+          {/* Report Blocker Dialog */}
+          <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+           <DialogTitle>Signaler un Blocage</DialogTitle>
+           <DialogDescription>
+             Décris le blocage qui t'empêche de progresser
+           </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+           <div>
+             <label className="text-sm font-medium text-slate-900 mb-2 block">
+               Titre du Blocage *
+             </label>
+             <Input
+               placeholder="ex: En attente de review API"
+               value={reportForm.title}
+               onChange={(e) => setReportForm({ ...reportForm, title: e.target.value })}
+             />
+           </div>
+           <div>
+             <label className="text-sm font-medium text-slate-900 mb-2 block">
+               Qui te bloque? *
+             </label>
+             <Input
+               placeholder="ex: Sarah D."
+               value={reportForm.blockedBy}
+               onChange={(e) => setReportForm({ ...reportForm, blockedBy: e.target.value })}
+             />
+           </div>
+           <div>
+             <label className="text-sm font-medium text-slate-900 mb-2 block">
+               Description
+             </label>
+             <Textarea
+               placeholder="Détails du blocage..."
+               value={reportForm.description}
+               onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
+               className="h-24"
+             />
+           </div>
+           <div>
+             <label className="text-sm font-medium text-slate-900 mb-2 block">
+               Urgence
+             </label>
+             <Select value={reportForm.urgency} onValueChange={(value) => setReportForm({ ...reportForm, urgency: value })}>
+               <SelectTrigger>
+                 <SelectValue />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="low">Basse</SelectItem>
+                 <SelectItem value="medium">Moyenne</SelectItem>
+                 <SelectItem value="high">Haute</SelectItem>
+               </SelectContent>
+             </Select>
+           </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+           <Button 
+             variant="outline" 
+             onClick={() => setShowReportDialog(false)}
+             disabled={submitting}
+           >
+             Annuler
+           </Button>
+           <Button 
+             onClick={handleSubmitBlocker}
+             disabled={submitting}
+             className="bg-blue-600 hover:bg-blue-700 text-white"
+           >
+             {submitting ? (
+               <>
+                 <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                 Envoi...
+               </>
+             ) : (
+               "Signaler"
+             )}
+           </Button>
+          </div>
+          </DialogContent>
+          </Dialog>
+          </motion.div>
+          );
+          }
