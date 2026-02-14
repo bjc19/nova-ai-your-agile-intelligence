@@ -28,6 +28,24 @@ export default function BlockersAffectingMe() {
     }
   ]);
 
+  const [sendingEmail, setSendingEmail] = useState(null);
+
+  const handleContactPerson = async (blocker) => {
+    setSendingEmail(blocker.id);
+    try {
+      const user = await base44.auth.me();
+      await base44.integrations.Core.SendEmail({
+        to: "support@nova-agile.com",
+        subject: `[Blocker] ${blocker.title} - Contact request from ${user?.full_name}`,
+        body: `Une personne de votre équipe souhaite contacter ${blocker.blockedBy} pour : ${blocker.title}\n\nDétails: ${blocker.description}\nTicket: ${blocker.ticket}`
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+    } finally {
+      setSendingEmail(null);
+    }
+  };
+
   const dependsOnMe = [
     {
       id: 1,
