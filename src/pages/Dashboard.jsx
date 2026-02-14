@@ -364,9 +364,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Actionable Metrics Radar - Admin/Contributor only */}
-              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
-              <MetricsRadarCard
+              {/* Actionable Metrics Radar */}
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -392,9 +392,9 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine - Admin/Contributor only */}
-              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
-              <RealityMapCard
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -443,7 +443,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(userRole === 'admin' || userRole === 'contributor') && (
+{(user?.role === 'admin' || user?.role === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
