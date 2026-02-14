@@ -69,8 +69,16 @@ Deno.serve(async (req) => {
     console.log('🔐 Tenant ID:', tenantId);
 
     try {
-      // Verify entity can be created
       console.log('🔐 Attempting to create TeamsConnection...');
+      console.log('🔐 Data to create:', {
+        user_email: userEmail,
+        access_token: tokens.access_token ? '***' : 'MISSING',
+        refresh_token: tokens.refresh_token ? '***' : 'MISSING',
+        expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+        tenant_id: tenantId,
+        scopes: tokens.scope ? tokens.scope.split(' ') : []
+      });
+
       const createdConn = await base44.asServiceRole.entities.TeamsConnection.create({
         user_email: userEmail,
         access_token: tokens.access_token,
@@ -81,15 +89,27 @@ Deno.serve(async (req) => {
         is_active: true
       });
       console.log('✅ Teams connection created successfully:', createdConn.id);
-      
-      // Verify it was saved
-      const verify = await base44.asServiceRole.entities.TeamsConnection.filter({
+
+      // Check if it exists in database without user_email filter
+      const allConns = await base44.asServiceRole.entities.TeamsConnection.list();
+      console.log('✅ Total TeamsConnections in DB:', allConns.length);
+
+      // Check with user_email filter
+      const userConns = await base44.asServiceRole.entities.TeamsConnection.filter({
         user_email: userEmail
       });
-      console.log('✅ Verification - connections found after create:', verify.length);
+      console.log('✅ Connections for user', userEmail, ':', userConns.length);
+
+      if (userConns.length > 0) {
+        console.log('✅ Found connection in DB:', JSON.stringify(userConns[0], null, 2));
+      } else {
+        console.warn('⚠️  Connection created but not found by user_email filter!');
+        console.log('⚠️  Created conn ID:', createdConn.id);
+        console.log('⚠️  Created conn data:', JSON.stringify(createdConn, null, 2));
+      }
     } catch (createError) {
       console.error('❌ Failed to create Teams connection:', createError);
-      console.error('❌ Error details:', { message: createError.message, code: createError.code });
+      console.error('❌ Error details:', { message: createError.message, code: createError.code, stack: createError.stack });
       throw createError;
     }
 
