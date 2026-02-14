@@ -456,11 +456,11 @@ export default function Dashboard() {
         }
 
 {(user?.role === 'admin' || user?.role === 'contributor') && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.5 }}
+    className="mt-8">
 
     <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -487,8 +487,8 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-        </motion.div>
-        )}
+  </motion.div>
+)}
       </div>
     </div>);
 
