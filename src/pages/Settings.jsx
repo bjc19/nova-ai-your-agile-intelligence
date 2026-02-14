@@ -139,10 +139,11 @@ export default function Settings() {
       const { data } = await base44.functions.invoke('teamsOAuthStart');
       
       // Listen for popup message
-      const messageHandler = (event) => {
+      const messageHandler = async (event) => {
         if (event.data?.type === 'teams-connected') {
           window.removeEventListener('message', messageHandler);
-          setTeamsConnected(true);
+          // Reload connection from DB to ensure persistence
+          await loadTeamsConnection();
           setConnectingTeams(false);
         }
       };
@@ -333,7 +334,7 @@ export default function Settings() {
     }
   ];
 
-  // Load data once on mount only
+  // Load data once on mount and when returning to the page
   useEffect(() => {
     const loadData = async () => {
         try {
@@ -379,6 +380,13 @@ export default function Settings() {
         }
       };
     loadData();
+
+    // Reload connections when returning to the page
+    const handlePageFocus = () => {
+      loadData();
+    };
+    window.addEventListener('focus', handlePageFocus);
+    return () => window.removeEventListener('focus', handlePageFocus);
   }, []);
 
   const handleProjectModeChange = async (newMode) => {
