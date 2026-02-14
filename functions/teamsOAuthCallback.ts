@@ -94,8 +94,12 @@ Deno.serve(async (req) => {
             <p style="font-size: 12px; color: #666;">Cette fenêtre va se fermer...</p>
           </div>
           <script>
-            window.opener?.postMessage({ type: 'teams-connected' }, '*');
-            setTimeout(() => window.close(), 2000);
+            if (window.opener) {
+              window.opener.postMessage({ type: 'teams-connected' }, '*');
+              setTimeout(() => window.close(), 1500);
+            } else {
+              setTimeout(() => window.close(), 2000);
+            }
           </script>
         </body>
       </html>

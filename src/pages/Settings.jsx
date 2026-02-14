@@ -138,16 +138,27 @@ export default function Settings() {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
       
-      // Listen for popup message
+      // Listen for popup message with timeout
+      let timeoutId;
       const messageHandler = async (event) => {
         if (event.data?.type === 'teams-connected') {
           window.removeEventListener('message', messageHandler);
+          clearTimeout(timeoutId);
           // Reload connection from DB to ensure persistence
+          await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DB write
           await loadTeamsConnection();
           setConnectingTeams(false);
         }
       };
       window.addEventListener('message', messageHandler);
+      
+      // Fallback: if no message received within 5 seconds, reload anyway
+      timeoutId = setTimeout(async () => {
+        window.removeEventListener('message', messageHandler);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await loadTeamsConnection();
+        setConnectingTeams(false);
+      }, 5000);
       
       // Open in popup window
       window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
