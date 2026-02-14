@@ -3,8 +3,12 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Send, Plus, Loader2 } from "lucide-react";
+import { AlertCircle, Send, Plus, Loader2, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function BlockersAffectingMe() {
   const [blockers, setBlockers] = useState([]);
