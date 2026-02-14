@@ -318,7 +318,6 @@ export default function Settings() {
     try {
       await base44.functions.invoke('confluenceDisconnect');
       setConfluenceConnected(false);
-      setConfluenceDomain('');
     } catch (error) {
       console.error('Error disconnecting Confluence:', error);
       alert('Erreur lors de la déconnexion');
