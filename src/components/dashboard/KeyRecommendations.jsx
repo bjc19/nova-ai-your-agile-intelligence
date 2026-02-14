@@ -411,19 +411,21 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
       transition={{ duration: 0.5, delay: 0.25 }}
     >
       <Card className="overflow-hidden">
-        <CardHeader className="pb-3 bg-gradient-to-br from-amber-50/50 to-orange-50/30">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-100">
-              <Lightbulb className="w-5 h-5 text-amber-600" />
+        {(isAdmin || isContributor) && (
+          <CardHeader className="pb-3 bg-gradient-to-br from-amber-50/50 to-orange-50/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-amber-100">
+                <Lightbulb className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-semibold text-slate-900">
+                  {t('keyRecommendations')}
+                </CardTitle>
+                <p className="text-sm text-slate-500">{t('basedOnLatestAnalysis')}</p>
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-lg font-semibold text-slate-900">
-                {t('keyRecommendations')}
-              </CardTitle>
-              <p className="text-sm text-slate-500">{t('basedOnLatestAnalysis')}</p>
-            </div>
-          </div>
-        </CardHeader>
+          </CardHeader>
+        )}
         <CardContent className="pt-4">
           <div className="space-y-3">
             {paginatedRecs.map((rec, index) => {
