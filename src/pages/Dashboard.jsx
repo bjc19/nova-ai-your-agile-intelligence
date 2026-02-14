@@ -20,6 +20,7 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -36,46 +37,24 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Sync workspace selection from sessionStorage
-  useEffect(() => {
-    const checkWorkspace = () => {
-      const stored = sessionStorage.getItem("selectedWorkspaceId");
-      const workspaceId = stored ? JSON.parse(stored) : null;
-      setSelectedWorkspaceId(workspaceId);
-    };
-
-    checkWorkspace();
-    window.addEventListener('storage', checkWorkspace);
-    return () => window.removeEventListener('storage', checkWorkspace);
-  }, []);
-
-  // Fetch GDPR signals from last 7 days for selected workspace
+  // Fetch GDPR signals from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-        let markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        
-        // Filter by selected workspace if available
-        if (selectedWorkspaceId) {
-          const workspace = await base44.entities.JiraProjectSelection.get(selectedWorkspaceId);
-          if (workspace) {
-            markers = markers.filter((m) => m.workspace_name === workspace.workspace_name);
-          }
-        }
-        
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
@@ -84,7 +63,7 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, [selectedWorkspaceId]);
+  }, []);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
@@ -93,6 +72,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -124,19 +104,10 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history for selected workspace
+  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspaceId],
-    queryFn: async () => {
-      let analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
-      
-      // Filter by selected workspace if available
-      if (selectedWorkspaceId) {
-        analyses = analyses.filter((a) => a.jira_project_selection_id === selectedWorkspaceId);
-      }
-      
-      return analyses;
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -396,8 +367,13 @@ export default function Dashboard() {
 
             }
 
+              {/* GembaWork - Simple Users Only */}
+              {(userRole === 'user' || userRole === null) && (
+                <GembaWork />
+              )}
+
               {/* Actionable Metrics Radar */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -425,7 +401,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
