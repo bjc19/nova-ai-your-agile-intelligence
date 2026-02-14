@@ -326,7 +326,7 @@ export default function Settings() {
     }
   ];
 
-  // Charger config équipe et statut Slack
+  // Load data once on mount only
   useEffect(() => {
     const loadData = async () => {
         try {
@@ -339,12 +339,12 @@ export default function Settings() {
             setTeamConfig(configs[0]);
           }
 
-          // Check connections - RLS automatically filters by user
-                  const [slackConns, teamsConns, jiraConns] = await Promise.all([
-                    base44.entities.SlackConnection.list(),
-                    base44.entities.TeamsConnection.list(),
-                    base44.entities.JiraConnection.list()
-                  ]);
+          // Check connections
+          const [slackConns, teamsConns, jiraConns] = await Promise.all([
+            base44.entities.SlackConnection.list(),
+            base44.entities.TeamsConnection.list(),
+            base44.entities.JiraConnection.list()
+          ]);
 
           if (slackConns.length > 0) {
             setSlackConnected(true);
@@ -372,7 +372,7 @@ export default function Settings() {
         }
       };
     loadData();
-  }, [navigate]);
+  }, []);
 
   const handleProjectModeChange = async (newMode) => {
     try {
