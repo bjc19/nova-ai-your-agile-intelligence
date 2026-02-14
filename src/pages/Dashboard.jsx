@@ -20,7 +20,6 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -37,6 +36,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -365,13 +365,8 @@ export default function Dashboard() {
 
             }
 
-              {/* GembaWork - Simple Users Only */}
-              {(userRole === 'user' || userRole === null) && (
-                <GembaWork />
-              )}
-
               {/* Actionable Metrics Radar */}
-              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
+              {analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
@@ -399,7 +394,7 @@ export default function Dashboard() {
             }
 
               {/* Organizational Reality Engine */}
-              {(userRole === 'admin' || userRole === 'contributor') && analysisHistory.length > 0 &&
+              {analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
