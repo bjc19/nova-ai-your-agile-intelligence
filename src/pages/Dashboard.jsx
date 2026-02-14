@@ -19,7 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
-import GembaWork from "@/components/dashboard/GembaWork";
+import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
 import {
   Mic,
@@ -36,6 +36,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -70,6 +71,7 @@ export default function Dashboard() {
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+        setUserRole(currentUser?.role);
 
         // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
@@ -282,7 +284,8 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end">
-                <TimePeriodSelector
+              <WorkspaceSelector />
+              <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
@@ -343,11 +346,6 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* GembaWork - Exclusive for Regular Users */}
-              {user?.role !== 'admin' && user?.role !== 'contributor' && (
-                <GembaWork />
-              )}
-
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -396,8 +394,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine - Admin/Contributor Only */}
-              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
+              {/* Organizational Reality Engine */}
+              {analysisHistory.length > 0 &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
@@ -447,39 +445,40 @@ export default function Dashboard() {
         </div>
         }
 
-        {/* Quick Actions Footer */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8">
+{(userRole === 'admin' || userRole === 'contributor') && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.5 }}
+    className="mt-8">
 
-          <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                </h3>
-                <p className="text-slate-400 max-w-lg">
-                  {t('importDataDescription')}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                    <Zap className="w-4 h-4 mr-2" />
-                    {t('connectSlack')}
-                  </Button>
-                </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+          </h3>
+          <p className="text-slate-400 max-w-lg">
+            {t('importDataDescription')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl("Settings")}>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Zap className="w-4 h-4 mr-2" />
+              {t('connectSlack')}
+            </Button>
+          </Link>
+          <Link to={createPageUrl("Analysis")}>
+            <Button className="bg-white text-slate-900 hover:bg-slate-100">
+              {t('startAnalysis')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+)}
       </div>
     </div>);
 
