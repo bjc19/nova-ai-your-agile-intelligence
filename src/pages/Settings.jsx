@@ -453,12 +453,7 @@ export default function Settings() {
             setJiraConnected(false);
           }
 
-          if (confluenceConns.length > 0) {
-            setConfluenceConnected(true);
-            setConfluenceDomain(confluenceConns[0].domain);
-          } else {
-            setConfluenceConnected(false);
-          }
+          setConfluenceConnected(confluenceConns.length > 0);
         } catch (error) {
           console.error("Erreur chargement données:", error);
         } finally {
