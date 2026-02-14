@@ -1,53 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, AlertCircle, Plus } from "lucide-react";
+import { CheckCircle2, Circle, AlertCircle, Plus, Loader2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function MyFocusBoard() {
-  const [tasks] = useState([
-    {
-      id: 1,
-      title: "Intégrer API paiement Stripe",
-      ticket: "US-123",
-      status: "in_progress",
-      priority: "high",
-      dueToday: true
-    },
-    {
-      id: 2,
-      title: "Review PR #487 - Auth module",
-      ticket: "US-118",
-      status: "todo",
-      priority: "medium",
-      dueToday: true
-    },
-    {
-      id: 3,
-      title: "Fix timeout bug database",
-      ticket: "BUG-456",
-      status: "blocked",
-      priority: "high",
-      dueToday: true
-    },
-    {
-      id: 4,
-      title: "Documentation API endpoints",
-      ticket: "TASK-892",
-      status: "todo",
-      priority: "low",
-      dueToday: false
-    },
-    {
-      id: 5,
-      title: "Deploy staging environment",
-      ticket: "OPS-101",
-      status: "todo",
-      priority: "medium",
-      dueToday: true
-    }
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
+
+  // Récupérer le workspace sélectionné et charger les tâches
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        setLoading(true);
+        
+        // Récupérer le workspace sélectionné depuis sessionStorage
+        const storedPeriod = sessionStorage.getItem("selectedWorkspaceId");
+        const workspaceId = storedPeriod ? JSON.parse(storedPeriod) : null;
+        setSelectedWorkspaceId(workspaceId);
+
+        // Appeler la fonction backend pour récupérer les tâches
+        const response = await base44.functions.invoke('getUserJiraTasks', {
+          workspaceId: workspaceId
+        });
+
+        setTasks(response.data.tasks || []);
+      } catch (error) {
+        console.error("Erreur chargement tâches Jira:", error);
+        setTasks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTasks();
+  }, []);
 
   const statusConfig = {
     todo: { icon: Circle, color: "text-slate-400", bg: "bg-slate-50" },
