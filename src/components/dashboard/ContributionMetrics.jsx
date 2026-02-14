@@ -115,25 +115,29 @@ export default function ContributionMetrics() {
           </div>
 
           {/* Weekly Summary */}
-          <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
-            <p className="text-xs text-slate-600 mb-2">
-              <span className="font-semibold text-slate-900">Bonne semaine!</span> Tu as fermé 12 tickets, c'est <span className="text-emerald-600 font-semibold">+35% vs la semaine dernière</span>. Continue comme ça! 🚀
-            </p>
-          </div>
+          {summary && (
+            <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <p className="text-xs text-slate-600 mb-2">
+                <span className="font-semibold text-slate-900">Bonne semaine!</span> {summary.message}
+              </p>
+            </div>
+          )}
 
           {/* Monthly Comparison */}
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-            <div className="p-2 rounded bg-blue-50 text-center">
-              <p className="text-slate-600">Ce mois</p>
-              <p className="text-lg font-bold text-blue-700 mt-1">47</p>
-              <p className="text-slate-500">contributions</p>
+          {monthlyComparison && (
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2 rounded bg-blue-50 text-center">
+                <p className="text-slate-600">Ce mois</p>
+                <p className="text-lg font-bold text-blue-700 mt-1">{monthlyComparison.thisMonth}</p>
+                <p className="text-slate-500">contributions</p>
+              </div>
+              <div className="p-2 rounded bg-slate-100 text-center">
+                <p className="text-slate-600">Le mois dernier</p>
+                <p className="text-lg font-bold text-slate-700 mt-1">{monthlyComparison.lastMonth}</p>
+                <p className="text-slate-500">contributions</p>
+              </div>
             </div>
-            <div className="p-2 rounded bg-slate-100 text-center">
-              <p className="text-slate-600">Le mois dernier</p>
-              <p className="text-lg font-bold text-slate-700 mt-1">34</p>
-              <p className="text-slate-500">contributions</p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </motion.div>
