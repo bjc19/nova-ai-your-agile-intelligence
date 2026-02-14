@@ -87,15 +87,7 @@ Deno.serve(async (req) => {
     if (!jiraResponse.ok) {
       const errorText = await jiraResponse.text();
       console.error('Jira API error:', jiraResponse.status, errorText);
-      // Return empty projects instead of error so quota still displays
-      return Response.json({
-        projects: [],
-        selectedProjects: selectedKeys,
-        currentPlan: plan,
-        quota: quota,
-        currentCount: currentCount,
-        availableSlots: Math.max(0, quota - currentCount)
-      });
+      throw new Error(`Jira API error: ${jiraResponse.status} - ${errorText}`);
     }
 
     const jiraData = await jiraResponse.json();
