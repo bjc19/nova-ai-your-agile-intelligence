@@ -66,6 +66,9 @@ import TeamManagement from './pages/TeamManagement';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
 import Dashboard from './pages/Dashboard';
+import DashboardCommonUsers from './pages/DashboardCommonUsers';
+import DashboardContributors from './pages/DashboardContributors';
+import DashboardAdmins from './pages/DashboardAdmins';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +92,9 @@ export const PAGES = {
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
     "Dashboard": Dashboard,
+    "DashboardCommonUsers": DashboardCommonUsers,
+    "DashboardContributors": DashboardContributors,
+    "DashboardAdmins": DashboardAdmins,
 }
 
 export const pagesConfig = {
