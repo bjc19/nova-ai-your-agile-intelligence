@@ -64,19 +64,25 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     const userEmail = state;
-    console.log('Creating TeamsConnection for:', userEmail);
+    console.log('🔐 Creating TeamsConnection for:', userEmail);
+    console.log('🔐 Access token expires_in:', tokens.expires_in);
+    console.log('🔐 Tenant ID:', tenantId);
 
-    await base44.asServiceRole.entities.TeamsConnection.create({
-      user_email: userEmail,
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-      tenant_id: tenantId,
-      scopes: tokens.scope ? tokens.scope.split(' ') : [],
-      is_active: true
-    });
-
-    console.log('Teams connection created successfully for user:', userEmail);
+    try {
+      const createdConn = await base44.asServiceRole.entities.TeamsConnection.create({
+        user_email: userEmail,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+        tenant_id: tenantId,
+        scopes: tokens.scope ? tokens.scope.split(' ') : [],
+        is_active: true
+      });
+      console.log('✅ Teams connection created successfully:', createdConn.id);
+    } catch (createError) {
+      console.error('❌ Failed to create Teams connection:', createError.message);
+      throw createError;
+    }
 
     // Close popup and refresh parent
     return new Response(`
