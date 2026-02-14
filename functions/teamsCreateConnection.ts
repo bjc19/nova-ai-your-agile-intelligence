@@ -4,35 +4,37 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
+
     if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+      console.error('❌ Not authenticated');
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { accessToken, refreshToken, tenantId, expiresIn, scopes } = body;
 
     if (!accessToken || !refreshToken || !tenantId) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
+      console.error('❌ Missing required fields:', { accessToken: !!accessToken, refreshToken: !!refreshToken, tenantId });
+      return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const teamsConn = await base44.entities.TeamsConnection.create({
+    const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+    console.log('📝 Creating Teams connection for:', user.email);
+    const connection = await base44.entities.TeamsConnection.create({
       user_email: user.email,
       access_token: accessToken,
       refresh_token: refreshToken,
-      expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
+      expires_at: expiresAt,
       tenant_id: tenantId,
-      scopes: scopes || [],
-      is_active: true
+      is_active: true,
+      scopes: scopes || []
     });
 
-    console.log('✅ Teams connection created for user:', user.email, 'with ID:', teamsConn.id);
-    
-    return new Response(JSON.stringify({ success: true, id: teamsConn.id }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.log('✅ Teams connection created:', connection.id);
+    return Response.json({ success: true, connection });
   } catch (error) {
-    console.error('Error creating Teams connection:', error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    console.error('❌ Error creating Teams connection:', error.message);
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });
