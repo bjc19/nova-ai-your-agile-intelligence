@@ -184,8 +184,9 @@ export default function BlockersAffectingMe() {
               size="sm" 
               variant="outline"
               className="flex-1 h-8 text-xs"
+              onClick={() => setShowAllDependencies(!showAllDependencies)}
             >
-              Voir Dépendances
+              Voir Dépendances ({dependsOnMe.length})
             </Button>
           </div>
         </CardContent>
