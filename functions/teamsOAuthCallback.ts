@@ -69,6 +69,8 @@ Deno.serve(async (req) => {
     console.log('🔐 Tenant ID:', tenantId);
 
     try {
+      // Verify entity can be created
+      console.log('🔐 Attempting to create TeamsConnection...');
       const createdConn = await base44.asServiceRole.entities.TeamsConnection.create({
         user_email: userEmail,
         access_token: tokens.access_token,
@@ -79,8 +81,15 @@ Deno.serve(async (req) => {
         is_active: true
       });
       console.log('✅ Teams connection created successfully:', createdConn.id);
+      
+      // Verify it was saved
+      const verify = await base44.asServiceRole.entities.TeamsConnection.filter({
+        user_email: userEmail
+      });
+      console.log('✅ Verification - connections found after create:', verify.length);
     } catch (createError) {
-      console.error('❌ Failed to create Teams connection:', createError.message);
+      console.error('❌ Failed to create Teams connection:', createError);
+      console.error('❌ Error details:', { message: createError.message, code: createError.code });
       throw createError;
     }
 
