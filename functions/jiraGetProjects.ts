@@ -54,22 +54,33 @@ Deno.serve(async (req) => {
 
     // Check if token is expired and refresh if needed
     if (new Date(connection.expires_at) <= new Date()) {
-      console.log('Token expired, refreshing...');
+      console.log('Token expired, attempting refresh...');
+
+      // If no refresh token, user must reconnect
+      if (!connection.refresh_token || connection.refresh_token === 'none') {
+        console.log('No refresh token available - user must reconnect');
+        return Response.json({ 
+          error: 'Your Jira session has expired. Please reconnect to Jira.' 
+        }, { status: 401 });
+      }
+
       try {
         const newTokenData = await refreshJiraToken(connection);
-        
+
         // Update connection with new token
         await base44.entities.JiraConnection.update(connection.id, {
           access_token: newTokenData.access_token,
           refresh_token: newTokenData.refresh_token,
           expires_at: newTokenData.expires_at
         });
-        
+
         accessToken = newTokenData.access_token;
         console.log('Token refreshed successfully');
       } catch (refreshError) {
         console.error('Error refreshing token:', refreshError);
-        return Response.json({ error: 'Failed to refresh Jira token' }, { status: 401 });
+        return Response.json({ 
+          error: 'Your Jira session has expired. Please reconnect to Jira.' 
+        }, { status: 401 });
       }
     }
 
