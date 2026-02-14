@@ -20,8 +20,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'API token not configured' }, { status: 500 });
     }
 
+    // Clean domain (remove https:// if present)
+    const cleanDomain = domain.replace(/^https?:\/\//, '');
+    
     // Test connection
-    const testUrl = `https://${domain}/rest/api/3/myself`;
+    const testUrl = `https://${cleanDomain}/rest/api/3/myself`;
     const testResponse = await fetch(testUrl, {
       headers: {
         'Authorization': `Bearer ${apiToken}`,
