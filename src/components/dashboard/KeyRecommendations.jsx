@@ -583,8 +583,9 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
+          </CardContent>
+          )}
+          </Card>
+          </motion.div>
+          );
+          }
