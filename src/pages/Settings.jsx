@@ -384,11 +384,21 @@ export default function Settings() {
 
           try {
             const connectionData = JSON.parse(atob(event.data.data));
-            await base44.functions.invoke('trelloSaveConnection', connectionData);
+            const saveResult = await base44.functions.invoke('trelloSaveConnection', connectionData);
 
-            await loadTrelloConnection();
-            toast.success('Trello connecté avec succès');
-            navigate(createPageUrl("Dashboard"));
+            if (saveResult.data?.success) {
+              // Attendre que la BD se synchronise
+              await new Promise(resolve => setTimeout(resolve, 300));
+              await loadTrelloConnection();
+
+              // Vérifier que le state a été mis à jour
+              setTimeout(() => {
+                toast.success('Trello connecté avec succès');
+                navigate(createPageUrl("Dashboard"));
+              }, 100);
+            } else {
+              throw new Error('Erreur lors de la sauvegarde');
+            }
           } catch (error) {
             console.error('Error saving Trello connection:', error);
             toast.error('Erreur lors de la connexion Trello');
