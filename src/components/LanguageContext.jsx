@@ -177,9 +177,9 @@ export const translations = {
 
     // Integration Conflicts
     jiraTrelloConflict: "Jira est déjà connecté",
-    jiraTrelloConflictMessage: "Pour éviter la confusion des données, déconnectez Jira avant de connecter Trello.",
+    jiraTrelloConflictMessage: "Pour éviter la confusion des données, déconnectez Trello avant de connecter Jira.",
     trelloJiraConflict: "Trello est déjà connecté",
-    trelloJiraConflictMessage: "Pour éviter la confusion des données, déconnectez Trello avant de connecter Jira.",
+    trelloJiraConflictMessage: "Pour éviter la confusion des données, déconnectez Jira avant de connecter Trello.",
 
     // RoleBasedRiskDisplay
     technicalView: "Vue Technique",
@@ -376,9 +376,9 @@ export const translations = {
 
     // Integration Conflicts
     jiraTrelloConflict: "Jira is already connected",
-    jiraTrelloConflictMessage: "To avoid data confusion, disconnect Jira before connecting Trello.",
+    jiraTrelloConflictMessage: "To avoid data confusion, disconnect Trello before connecting Jira.",
     trelloJiraConflict: "Trello is already connected",
-    trelloJiraConflictMessage: "To avoid data confusion, disconnect Trello before connecting Jira.",
+    trelloJiraConflictMessage: "To avoid data confusion, disconnect Jira before connecting Trello.",
 
     // RoleBasedRiskDisplay
     technicalView: "Technical View",
