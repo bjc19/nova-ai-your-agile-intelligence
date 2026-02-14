@@ -82,11 +82,16 @@ export default function JiraProjectSelector() {
 
       // Save new selections
       for (const project of projectsToAdd) {
+        // Normalize project type to valid enum values
+        let projectType = 'software';
+        if (project.type === 'service_desk') projectType = 'service_desk';
+        if (project.type === 'business') projectType = 'business';
+        
         await base44.entities.JiraProjectSelection.create({
           jira_project_key: project.key,
           jira_project_id: project.id,
           jira_project_name: project.name,
-          jira_project_type: project.type,
+          jira_project_type: projectType,
           workspace_name: `${project.name} Workspace`,
           selected_date: new Date().toISOString()
         });
