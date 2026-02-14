@@ -45,7 +45,6 @@ export default function Settings() {
    const [connectingJira, setConnectingJira] = useState(false);
    const [confluenceConnected, setConfluenceConnected] = useState(false);
    const [connectingConfluence, setConnectingConfluence] = useState(false);
-   const [confluenceDomain, setConfluenceDomain] = useState('');
    const { language, setLanguage, t } = useLanguage();
    const [teamConfig, setTeamConfig] = useState(null);
    const [loadingConfig, setLoadingConfig] = useState(true);
