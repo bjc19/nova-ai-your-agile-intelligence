@@ -24,7 +24,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
     loadWorkspaces();
   }, []);
 
-  if (loading || workspaces.length === 0) {
+  if (loading) {
     return null;
   }
 
