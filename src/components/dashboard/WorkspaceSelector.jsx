@@ -3,16 +3,27 @@ import { base44 } from "@/api/base44Client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Database, Layers } from "lucide-react";
 
-export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId }) {
+export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId, userRole }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadWorkspaces = async () => {
       try {
-        const selections = await base44.entities.JiraProjectSelection.filter({
+        let selections = await base44.entities.JiraProjectSelection.filter({
           is_active: true
         });
+
+        // For regular users, only show workspaces they're assigned to
+        if (userRole === 'user') {
+          const user = await base44.auth.me();
+          const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+            user_email: user?.email
+          });
+          const assignedWorkspaceIds = workspaceMembers.map(wm => wm.workspace_id);
+          selections = selections.filter(ws => assignedWorkspaceIds.includes(ws.id));
+        }
+
         setWorkspaces(selections);
       } catch (error) {
         console.error("Error loading workspaces:", error);
@@ -22,7 +33,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
     };
 
     loadWorkspaces();
-  }, []);
+  }, [userRole]);
 
   if (loading) {
     return null;
