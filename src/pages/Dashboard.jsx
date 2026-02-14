@@ -109,14 +109,13 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history based on selected period AND workspace
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const startDate = new Date(selectedPeriod.start);
-    const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
-    return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+    const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
+    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : true;
+    return matchesPeriod && matchesWorkspace;
+  });
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
