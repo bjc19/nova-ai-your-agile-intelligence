@@ -152,13 +152,16 @@ export default function Settings() {
       let timeoutId;
       const messageHandler = async (event) => {
         if (event.data?.type === 'teams-connected') {
-          window.removeEventListener('message', messageHandler);
-          clearTimeout(timeoutId);
-          // Reload connection from DB to ensure persistence
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait longer for DB write
-          await loadTeamsConnection();
-          setConnectingTeams(false);
-        }
+           window.removeEventListener('message', messageHandler);
+           clearTimeout(timeoutId);
+           console.log('✅ teams-connected message received');
+           // Reload connection from DB to ensure persistence
+           await new Promise(resolve => setTimeout(resolve, 2000)); // Wait longer for DB write
+           console.log('✅ Calling loadTeamsConnection...');
+           await loadTeamsConnection();
+           console.log('✅ loadTeamsConnection complete, setting connectingTeams to false');
+           setConnectingTeams(false);
+         }
       };
       window.addEventListener('message', messageHandler);
 
