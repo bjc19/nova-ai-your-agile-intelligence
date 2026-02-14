@@ -41,7 +41,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -102,22 +101,10 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history (filtered by workspace if selected)
+  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspace],
-    queryFn: async () => {
-      if (selectedWorkspace) {
-        // Filter by selected workspace
-        return await base44.entities.AnalysisHistory.filter(
-          { jira_project_selection_id: selectedWorkspace },
-          '-created_date',
-          100
-        );
-      } else {
-        // Get all analyses
-        return await base44.entities.AnalysisHistory.list('-created_date', 100);
-      }
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -295,13 +282,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                activeWorkspaceId={selectedWorkspace}
-                onWorkspaceChange={(workspaceId) => {
-                  setSelectedWorkspace(workspaceId === 'null' || workspaceId === null ? null : workspaceId);
-                  console.log("Workspace changed to:", workspaceId);
-                }}
-              />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -462,7 +443,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(userRole === 'admin' || userRole === 'contributor') && (
+{(user?.role === 'admin' || user?.role === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
