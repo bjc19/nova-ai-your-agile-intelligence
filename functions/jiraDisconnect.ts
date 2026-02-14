@@ -9,15 +9,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's Jira connection
-    const jiraConns = await base44.entities.JiraConnection.list();
-    
-    if (jiraConns.length > 0) {
-      await base44.entities.JiraConnection.update(jiraConns[0].id, { is_active: false });
-      return Response.json({ success: true });
+    // Verify user is admin for this operation
+    if (user.role !== 'admin') {
+      return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
+
+    // Get all Jira connections with service role to check which one belongs to this user
+    const jiraConns = await base44.asServiceRole.entities.JiraConnection.list();
+    const userConnection = jiraConns.find(conn => conn.user_email === user.email || conn.created_by === user.email);
     
-    return Response.json({ error: 'No Jira connection found' }, { status: 400 });
+    if (!userConnection) {
+      return Response.json({ error: 'No Jira connection found for this user' }, { status: 400 });
+    }
+
+    // Update with service role to bypass RLS (user is admin, so this is authorized)
+    await base44.asServiceRole.entities.JiraConnection.update(userConnection.id, { is_active: false });
+    return Response.json({ success: true });
   } catch (error) {
     console.error('Error disconnecting Jira:', error);
     return Response.json({ error: error.message }, { status: 500 });
