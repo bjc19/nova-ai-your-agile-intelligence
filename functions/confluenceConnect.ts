@@ -15,48 +15,45 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Domain is required' }, { status: 400 });
     }
 
-    // Test connection to Confluence
-    const token = Deno.env.get('CONFLUENCE_API_TOKEN');
-    if (!token) {
-      return Response.json({ error: 'Confluence API token not configured' }, { status: 500 });
+    const apiToken = Deno.env.get('CONFLUENCE_API_TOKEN');
+    if (!apiToken) {
+      return Response.json({ error: 'API token not configured' }, { status: 500 });
     }
 
-    // Test API call
-    const testResponse = await fetch(`https://${domain}/rest/api/3/myself`, {
+    // Test connection
+    const testUrl = `https://${domain}/rest/api/3/myself`;
+    const testResponse = await fetch(testUrl, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${apiToken}`,
         'Accept': 'application/json'
       }
     });
 
     if (!testResponse.ok) {
+      const errorData = await testResponse.text();
       return Response.json({ 
         error: 'Failed to connect to Confluence. Check domain and token.' 
       }, { status: 400 });
     }
 
     // Delete existing connection if any
-    const existing = await base44.entities.ConfluenceConnection.filter({
+    const existingConns = await base44.entities.ConfluenceConnection.filter({
       user_email: user.email
     });
 
-    if (existing.length > 0) {
-      await base44.entities.ConfluenceConnection.delete(existing[0].id);
+    if (existingConns.length > 0) {
+      await base44.entities.ConfluenceConnection.delete(existingConns[0].id);
     }
 
     // Create new connection
-    const connection = await base44.entities.ConfluenceConnection.create({
+    await base44.entities.ConfluenceConnection.create({
       user_email: user.email,
       domain: domain,
       is_active: true,
       connected_at: new Date().toISOString()
     });
 
-    return Response.json({ 
-      success: true, 
-      message: 'Connected to Confluence',
-      connection 
-    });
+    return Response.json({ success: true });
   } catch (error) {
     console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
