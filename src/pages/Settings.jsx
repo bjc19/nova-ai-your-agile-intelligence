@@ -360,8 +360,14 @@ export default function Settings() {
 
           // Check connections
           const [slackConns, teamsConns, jiraConns] = await Promise.all([
-            base44.entities.SlackConnection.list(),
-            base44.entities.TeamsConnection.list(),
+            base44.entities.SlackConnection.filter({ 
+              user_email: user.email,
+              is_active: true
+            }),
+            base44.entities.TeamsConnection.filter({ 
+              user_email: user.email,
+              is_active: true
+            }),
             base44.entities.JiraConnection.list()
           ]);
 
