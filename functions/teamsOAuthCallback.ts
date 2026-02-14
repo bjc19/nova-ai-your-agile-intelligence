@@ -63,16 +63,11 @@ Deno.serve(async (req) => {
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
     const base44 = createClientFromRequest(req);
 
-    const user = await base44.auth.me();
-    console.log('Current user:', user?.email);
+    const userEmail = state;
+    console.log('Creating TeamsConnection for:', userEmail);
 
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
-
-    console.log('Creating TeamsConnection for:', user.email);
-    await base44.entities.TeamsConnection.create({
-      user_email: user.email,
+    await base44.asServiceRole.entities.TeamsConnection.create({
+      user_email: userEmail,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
@@ -81,7 +76,7 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    console.log('Teams connection created successfully for user:', user.email);
+    console.log('Teams connection created successfully for user:', userEmail);
 
     // Close popup and refresh parent
     return new Response(`
