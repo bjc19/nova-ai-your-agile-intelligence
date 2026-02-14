@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
+import GembaWork from "@/components/dashboard/GembaWork";
 
 import {
   Mic,
@@ -62,52 +63,43 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication
-  const hasCheckedAuth = useRef(false);
+  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
-    if (hasCheckedAuth.current) return;
-    hasCheckedAuth.current = true;
-
     const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        if (authenticated) {
-          const currentUser = await base44.auth.me();
-          setUser(currentUser);
+      const authenticated = await base44.auth.isAuthenticated();
+      if (authenticated) {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
 
-          // Charger contexte sprint actif
-          const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-          if (activeSprints.length > 0) {
-            setSprintContext(activeSprints[0]);
-          }
-
-          // Vérifier onboarding
-          const teamConfigs = await base44.entities.TeamConfiguration.list();
-          if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-            setShowOnboarding(true);
-          }
-
-          // Vérifier alertes multi-projets en attente
-          const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-            admin_response: "pending"
-          });
-          if (pendingAlerts.length > 0) {
-            const latest = pendingAlerts[pendingAlerts.length - 1];
-            setMultiProjectAlert({
-              confidence: latest.detection_score,
-              signals: latest.weighted_signals,
-              log_id: latest.id
-            });
-          }
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
         }
-      } catch (error) {
-        console.error("Auth check error:", error);
-      } finally {
-        setIsLoading(false);
+
+        // Vérifier onboarding
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
       }
+      setIsLoading(false);
     };
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
@@ -351,6 +343,11 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* GembaWork - Exclusive for Regular Users */}
+              {user?.role !== 'admin' && user?.role !== 'contributor' && (
+                <GembaWork />
+              )}
+
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
@@ -399,8 +396,8 @@ export default function Dashboard() {
 
             }
 
-              {/* Organizational Reality Engine */}
-              {analysisHistory.length > 0 &&
+              {/* Organizational Reality Engine - Admin/Contributor Only */}
+              {analysisHistory.length > 0 && (user?.role === 'admin' || user?.role === 'contributor') &&
             <RealityMapCard
               flowData={{
                 assignee_changes: [
