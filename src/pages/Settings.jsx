@@ -480,6 +480,7 @@ export default function Settings() {
       iconColor: "text-sky-600",
       available: true,
       connected: trelloConnected,
+      disabled: jiraConnected,
       onConnect: handleTrelloConnect
     },
     {
