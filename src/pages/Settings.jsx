@@ -225,13 +225,17 @@ export default function Settings() {
 
   const handleJiraDisconnect = async () => {
     try {
-      const { data } = await base44.functions.invoke('jiraDisconnect');
-      if (data.success) {
+      const result = await base44.functions.invoke('jiraDisconnect');
+      if (result.data?.success || result.status === 200) {
         setJiraConnected(false);
       }
     } catch (error) {
       console.error('Error disconnecting Jira:', error);
-      alert('Erreur lors de la déconnexion Jira');
+      console.error('Error response:', error.response?.data);
+      // Still update UI if we get a 400 error (no connection found) since that means it's disconnected
+      if (error.response?.status === 400 && error.response?.data?.error === 'No Jira connection found') {
+        setJiraConnected(false);
+      }
     }
   };
 
