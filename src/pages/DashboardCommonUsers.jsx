@@ -48,12 +48,12 @@ export default function DashboardCommonUsers() {
       }
 
       const currentUser = await base44.auth.me();
-
-       // Role verification - only 'user' can access
-       if (currentUser?.app_role !== 'user') {
-         navigate(createPageUrl("Dashboard"));
-         return;
-       }
+      
+      // Role verification - only 'user' can access
+      if (currentUser?.role !== 'user') {
+        navigate(createPageUrl("Home"));
+        return;
+      }
 
       setUser(currentUser);
 
@@ -147,10 +147,10 @@ export default function DashboardCommonUsers() {
               {/* Workspace and Period Selectors */}
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector 
-                   activeWorkspaceId={selectedWorkspaceId}
-                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                   userRole={user?.app_role || user?.role}
-                 />
+                  activeWorkspaceId={selectedWorkspaceId}
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
+                  userRole={user?.role}
+                />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {

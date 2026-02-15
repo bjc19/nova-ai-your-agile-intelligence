@@ -488,7 +488,7 @@ export default function Settings() {
     const loadData = async () => {
       try {
         const user = await base44.auth.me();
-        setCurrentRole(user?.app_role || user?.role || 'user');
+        setCurrentRole(user.role || 'contributor');
 
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
@@ -564,16 +564,14 @@ export default function Settings() {
     try {
       const user = await base44.auth.me();
 
-      // Update the user's app_role (custom role) without bypassing RLS
-      await base44.auth.updateMe({ app_role: newRole });
+      // Update the user's role using asServiceRole for admin privileges
+      await base44.asServiceRole.entities.User.update(user.id, { role: newRole });
 
-      // Update local state and refresh
-      setCurrentRole(newRole);
-      toast.success('Rôle mis à jour avec succès');
+      // Force logout and login to refresh session
+      await base44.auth.logout();
     } catch (error) {
       console.error('Error switching role:', error);
-      toast.error('Erreur lors du changement de rôle: ' + error.message);
-    } finally {
+      alert('Erreur lors du changement de rôle: ' + error.message);
       setSwitchingRole(false);
     }
   };
@@ -589,7 +587,7 @@ export default function Settings() {
 
   }
 
-  const canManageSettings = (currentRole === 'admin' || currentRole === 'contributor');
+  const canManageSettings = currentRole === 'admin' || currentRole === 'contributor';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
