@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { Resend } from 'npm:resend@3.2.0';
+import { Resend } from 'npm:resend@4.0.5';
 
 Deno.serve(async (req) => {
   try {
@@ -16,10 +16,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Vous n\'avez pas la permission d\'inviter des membres' }, { status: 403 });
     }
 
-    const { email, role, workspaceId } = await req.json();
+    const { email, role } = await req.json();
 
-    if (!email || !role || !workspaceId) {
-      return Response.json({ error: 'Email, rôle et ID de l\'espace de travail requis' }, { status: 400 });
+    if (!email || !role) {
+      return Response.json({ error: 'Email et rôle requis' }, { status: 400 });
     }
 
     // Vérifier la limite d'utilisateurs
@@ -34,24 +34,12 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Vérifier si l'utilisateur est déjà membre actif de cet espace de travail
-    const existingMember = await base44.asServiceRole.entities.WorkspaceMember.filter({
-      user_email: email,
-      workspace_id: workspaceId
-    });
-
-    if (existingMember.length > 0) {
-      return Response.json({ 
-        error: 'Cet utilisateur est déjà membre de cet espace de travail.' 
-      }, { status: 400 });
-    }
-
     // Créer l'invitation avec InvitationToken (pas de TeamMember encore)
     const invitationToken = await base44.asServiceRole.entities.InvitationToken.create({
       invitee_email: email,
       invited_by: user.email,
       role: role,
-      workspace_id: workspaceId,
+      workspace_id: 'default',
       status: 'pending',
       token: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -97,7 +85,7 @@ Deno.serve(async (req) => {
             <div style="text-align: center; margin: 30px 0;">
               <a href="${appUrl}/Dashboard" 
                  style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                 🚀 Accéder à Nova AI
+                🚀 Accéder à Nova AI
               </a>
             </div>
 

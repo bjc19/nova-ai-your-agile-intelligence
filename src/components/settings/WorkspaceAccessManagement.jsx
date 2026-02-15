@@ -31,11 +31,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [hiddenEmails, setHiddenEmails] = useState(new Set());
-  const [editingUser, setEditingUser] = useState(null);
-  const [newRole, setNewRole] = useState(null);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [changingPlan, setChangingPlan] = useState(false);
-  const [currentWorkspaceId, setCurrentWorkspaceId] = useState('default');
+   const [editingUser, setEditingUser] = useState(null);
+   const [newRole, setNewRole] = useState(null);
+   const [userToDelete, setUserToDelete] = useState(null);
+   const [changingPlan, setChangingPlan] = useState(false);
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
@@ -103,18 +102,16 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     setInviting(true);
     try {
       // Generate invitation token and send email
-      await base44.functions.invoke('sendTeamInvitation', {
-        email: inviteEmail,
-        role: inviteRole,
-        workspaceId: currentWorkspaceId
+      await base44.functions.invoke('generateInvitationToken', {
+        inviteeEmail: inviteEmail,
+        inviteRole: inviteRole
       });
       
       setMessage({ type: 'success', text: `Invitation envoyée à ${inviteEmail}` });
       setInviteEmail('');
       setInviteRole('user');
     } catch (error) {
-      const errorMsg = error.response?.data?.error || error.data?.error || error.message || 'Erreur lors de l\'invitation';
-      setMessage({ type: 'error', text: errorMsg });
+      setMessage({ type: 'error', text: error.message || 'Erreur lors de l\'invitation' });
     } finally {
       setInviting(false);
     }
