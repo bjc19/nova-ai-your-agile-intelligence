@@ -18,10 +18,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { inviteeEmail, inviteRole } = await req.json();
+    const { inviteeEmail, inviteRole, workspaceId } = await req.json();
 
     if (!inviteeEmail) {
       return Response.json({ error: 'Missing inviteeEmail' }, { status: 400 });
+    }
+
+    const workspace = workspaceId || 'default';
+
+    // Vérifier si l'utilisateur est déjà membre de l'espace de travail
+    const existingMember = await base44.entities.WorkspaceMember.filter({
+      user_email: inviteeEmail,
+      workspace_id: workspace
+    });
+
+    if (existingMember.length > 0) {
+      return Response.json({ 
+        error: `L'utilisateur avec l'email ${inviteeEmail} est déjà membre de votre équipe !` 
+      }, { status: 400 });
     }
 
     // Generate token
@@ -29,7 +43,7 @@ Deno.serve(async (req) => {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Create invitation record
-    await base44.asServiceRole.entities.InvitationToken.create({
+    await base44.entities.InvitationToken.create({
       token,
       invitee_email: inviteeEmail,
       invited_by: user.email,
