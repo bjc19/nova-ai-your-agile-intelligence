@@ -164,57 +164,111 @@ function LayoutContent({ children, currentPageName }) {
             </div>
 
             {/* Mobile Menu */}
-            {!isAuthenticated && (
-              <div className="md:hidden">
-                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu className="w-5 h-5" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-[280px]">
-                    <SheetHeader className="mb-6">
-                      <SheetTitle className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-                          <Sparkles className="w-4 h-4 text-white" />
+            <div className="md:hidden">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px]">
+                  <SheetHeader className="mb-6">
+                    <SheetTitle className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                      Nova
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-4">
+                    {isAuthenticated ? (
+                      <>
+                        <Link 
+                          to={createPageUrl("Dashboard")}
+                          className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {t('dashboard')}
+                        </Link>
+                        {(userRole === 'admin' || userRole === 'contributor' || canInvite) && (
+                          <Link 
+                            to={createPageUrl("Analysis")}
+                            className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            {t('analyze')}
+                          </Link>
+                        )}
+                        <Link 
+                          to={createPageUrl("Settings")}
+                          className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {t('settings')}
+                        </Link>
+                        {canInvite && (
+                          <Link 
+                            to={createPageUrl("TeamManagement")}
+                            className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2 flex items-center gap-2"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <Users className="w-4 h-4" />
+                            Équipe
+                          </Link>
+                        )}
+                        <div className="pt-4 border-t border-slate-200">
+                          <Button 
+                            onClick={async () => {
+                              setIsAuthenticated(false);
+                              setUserRole(null);
+                              await base44.auth.logout();
+                              window.location.href = createPageUrl("Home");
+                              setMobileMenuOpen(false);
+                            }}
+                            className="w-full text-slate-600 hover:text-slate-700"
+                            variant="outline"
+                          >
+                            <LogOut className="w-4 h-4 mr-2" />
+                            Déconnexion
+                          </Button>
                         </div>
-                        Nova
-                      </SheetTitle>
-                    </SheetHeader>
-                    <div className="flex flex-col gap-4">
-                      <button 
-                        onClick={() => {
-                          setShowDemoSimulator(true);
-                          setMobileMenuOpen(false);
-                        }}
-                        className="text-left text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                      >
-                        {t('tryDemo')}
-                      </button>
-                      <Link 
-                        to={createPageUrl("Privacy")}
-                        className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Confidentialité
-                      </Link>
-                      <div className="pt-4 border-t border-slate-200">
-                        <Button 
+                      </>
+                    ) : (
+                      <>
+                        <button 
                           onClick={() => {
-                            setShowLoginDialog(true);
+                            setShowDemoSimulator(true);
                             setMobileMenuOpen(false);
                           }}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                          className="text-left text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
                         >
-                          <LogIn className="w-4 h-4 mr-2" />
-                          {t('signIn')}
-                        </Button>
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
-            )}
+                          {t('tryDemo')}
+                        </button>
+                        <Link 
+                          to={createPageUrl("Privacy")}
+                          className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Confidentialité
+                        </Link>
+                        <div className="pt-4 border-t border-slate-200">
+                          <Button 
+                            onClick={() => {
+                              setShowLoginDialog(true);
+                              setMobileMenuOpen(false);
+                            }}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                          >
+                            <LogIn className="w-4 h-4 mr-2" />
+                            {t('signIn')}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
         </div>
       </nav>
 
