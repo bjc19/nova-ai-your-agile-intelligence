@@ -69,7 +69,7 @@ const commandAnimationStyles = `
 
 const translations = {
   en: {
-    aiPoweredScrum: "Your AI Agile Expert",
+    aiPoweredScrum: "Your Agile Intelligence",
     heroPart1: "Transform Your Routine into",
     heroPart2: "Actionable Insights",
     heroSubtitle: "Multi-source synchronization, intelligent risk management, adaptive project mode detection, personalized recommendations, smart anonymization with zero retention — measurable value creation in every sprint.",
