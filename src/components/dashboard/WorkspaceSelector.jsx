@@ -10,13 +10,31 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   useEffect(() => {
     const loadWorkspaces = async () => {
       try {
-        let selections = await base44.entities.JiraProjectSelection.filter({
-          is_active: true
-        });
+        const user = await base44.auth.me();
+        
+        // Check which connection is active (Jira OR Trello, never both)
+        const [jiraConns, trelloConns] = await Promise.all([
+          base44.entities.JiraConnection.filter({ user_email: user?.email, is_active: true }),
+          base44.entities.TrelloConnection.filter({ user_email: user?.email, is_active: true })
+        ]);
+
+        let selections = [];
+        
+        // Load ONLY Jira projects if Jira is connected
+        if (jiraConns.length > 0) {
+          selections = await base44.entities.JiraProjectSelection.filter({ is_active: true });
+        } 
+        // Otherwise, load ONLY Trello boards if Trello is connected
+        else if (trelloConns.length > 0) {
+          const trelloData = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+          selections = trelloData.map(ws => ({
+            ...ws,
+            jira_project_name: ws.board_name // Map board_name to jira_project_name for display
+          }));
+        }
 
         // For regular users, only show workspaces they're assigned to
         if (userRole === 'user') {
-          const user = await base44.auth.me();
           const workspaceMembers = await base44.entities.WorkspaceMember.filter({
             user_email: user?.email
           });
