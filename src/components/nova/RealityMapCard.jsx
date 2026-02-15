@@ -817,7 +817,7 @@ Actions recommandées :
                             <div className="flex-1">
                               <div className="flex items-start justify-between gap-3">
                                 <p className="text-sm text-slate-900 flex-1">{suggestion.text}</p>
-                                {!isApplied && (
+                                {!isApplied && userRole !== 'admin' && (
                                   <Button
                                     size="sm"
                                     variant="outline"
