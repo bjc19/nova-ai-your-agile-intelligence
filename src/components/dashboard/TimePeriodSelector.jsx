@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, ChevronDown, AlertCircle } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { base44 } from "@/api/base44Client";
 
 export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
   const [selectedPeriod, setSelectedPeriod] = useState("default");
@@ -30,11 +31,12 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
   const [customEnd, setCustomEnd] = useState(null);
   const [showCustom, setShowCustom] = useState(false);
   const [periodLabel, setPeriodLabel] = useState("Sélectionner une période");
+  const [detectedMode, setDetectedMode] = useState(null);
 
   // Options communes
   const commonOptions = [
     { value: "current_month", label: "Mois en cours" },
-    { value: "last_quarter", label: "Trimestre écoulé (13 sem.)" },
+    { value: "last_quarter", label: "Trimestre écoulé" },
   ];
 
   // Options Scrum
@@ -43,28 +45,62 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
     { value: "last_3_sprints", label: "3 derniers sprints" },
     { value: "previous_sprint", label: "Sprint précédent" },
     ...commonOptions,
-    { value: "custom", label: "Personnalisé..." },
+    { value: "custom", label: "Personnalisée" },
   ];
 
-  // Options Kanban
-  const kanbanOptions = [
-    { value: "last_4_weeks", label: "4 dernières semaines" },
-    { value: "since_retro", label: "Depuis le dernier rétro" },
-    { value: "current_week", label: "Semaine en cours" },
+  // Options Kanban et Autre
+  const kanbanAndOtherOptions = [
+    { value: "current_week", label: "En cours (semaine active)" },
+    { value: "last_3_weeks", label: "3 dernières semaines" },
+    { value: "previous_week", label: "Semaine précédente" },
     ...commonOptions,
-    { value: "custom", label: "Personnalisé..." },
+    { value: "custom", label: "Personnalisée" },
   ];
 
-  // Déterminer les options selon la méthodologie
-  const options = deliveryMode === "scrum" ? scrumOptions : kanbanOptions;
-
-  // Définir la période par défaut
-  const defaultPeriod = deliveryMode === "scrum" ? "current_sprint" : "last_4_weeks";
-
+  // Détection du mode de livraison
   useEffect(() => {
-    setSelectedPeriod(defaultPeriod);
-    calculatePeriod(defaultPeriod);
-  }, [deliveryMode]);
+    const detectMode = async () => {
+      try {
+        let detected = "Autre";
+        const jiraSelections = await base44.entities.JiraProjectSelection.filter({ is_active: true });
+        const trelloSelections = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+
+        if (jiraSelections.length > 0) {
+          const boardName = jiraSelections[0].board_name?.toLowerCase() || "";
+          if (boardName.includes("scrum") || boardName.includes("sprint")) {
+            detected = "Scrum";
+          } else if (boardName.includes("kanban") || boardName.includes("flow")) {
+            detected = "Kanban";
+          }
+        } else if (trelloSelections.length > 0) {
+          const boardName = trelloSelections[0].board_name?.toLowerCase() || "";
+          if (boardName.includes("scrum") || boardName.includes("sprint")) {
+            detected = "Scrum";
+          } else if (boardName.includes("kanban") || boardName.includes("flow")) {
+            detected = "Kanban";
+          }
+        }
+        setDetectedMode(detected);
+      } catch (error) {
+        console.error("Error detecting delivery mode:", error);
+        setDetectedMode("Autre");
+      }
+    };
+
+    detectMode();
+  }, []);
+
+  // Initialiser la période par défaut une fois le mode détecté
+  useEffect(() => {
+    if (detectedMode) {
+      const defaultPeriodForMode = detectedMode === "Scrum" ? "current_sprint" : "current_week";
+      setSelectedPeriod(defaultPeriodForMode);
+      calculatePeriod(defaultPeriodForMode);
+    }
+  }, [detectedMode]);
+
+  // Déterminer les options selon la méthodologie détectée
+  const options = detectedMode === "Scrum" ? scrumOptions : kanbanAndOtherOptions;
 
   const calculateCompleteness = (start, end) => {
     const now = new Date();
@@ -85,14 +121,12 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
 
     switch (periodType) {
       case "current_sprint":
-        // Approximation: 2 semaines
         start = subWeeks(now, 1);
         end = now;
         label = "Sprint en cours";
         break;
 
       case "last_3_sprints":
-        // Approximation: 6 semaines (3 sprints de 2 semaines)
         start = subWeeks(now, 6);
         end = now;
         label = "3 derniers sprints";
@@ -104,37 +138,36 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
         label = "Sprint précédent";
         break;
 
-      case "last_4_weeks":
-        start = subWeeks(now, 4);
+      case "last_3_weeks":
+        start = subWeeks(now, 3);
         end = now;
-        label = "4 dernières semaines";
+        label = "3 dernières semaines";
+        break;
+
+      case "previous_week":
+        start = subWeeks(startOfWeek(now, { weekStartsOn: 1 }), 1);
+        end = subWeeks(endOfWeek(now, { weekStartsOn: 1 }), 1);
+        label = "Semaine précédente";
         break;
 
       case "current_week":
         start = startOfWeek(now, { weekStartsOn: 1 });
         end = endOfWeek(now, { weekStartsOn: 1 });
-        label = "Semaine en cours";
+        label = "En cours (semaine active)";
         break;
 
       case "current_month":
         start = startOfMonth(now);
-        end = now; // Until today, not end of month
+        end = now;
         const { dayOfMonth, daysInMonth } = calculateCompleteness(start, end);
         const monthName = format(now, "MMMM", { locale: require("date-fns/locale/fr") });
         label = `${monthName} (1-${dayOfMonth}) - ${dayOfMonth}/${daysInMonth} jours`;
         break;
 
       case "last_quarter":
-        start = subWeeks(now, 13);
+        start = subMonths(now, 3);
         end = now;
         label = "Trimestre écoulé";
-        break;
-
-      case "since_retro":
-        // Approximation: 2 semaines
-        start = subWeeks(now, 2);
-        end = now;
-        label = "Depuis le dernier rétro";
         break;
 
       default:
@@ -159,7 +192,6 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
 
   const applyCustomPeriod = () => {
     if (customStart && customEnd) {
-      // Vérifier que la période ne dépasse pas 6 mois
       const diffMonths = (customEnd - customStart) / (1000 * 60 * 60 * 24 * 30);
       if (diffMonths > 6) {
         alert("La période ne peut pas dépasser 6 mois");
@@ -186,7 +218,7 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
     <TooltipProvider>
       <div className="flex items-center gap-3">
         <Badge variant="outline" className="text-xs">
-          {deliveryMode === "scrum" ? "Scrum" : "Kanban"}
+          #{detectedMode || "..."}
         </Badge>
 
         <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
@@ -203,7 +235,6 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
           </SelectContent>
         </Select>
 
-        {/* Completeness Indicator for Current Month */}
         {isCurrentMonth && (
           <Tooltip>
             <TooltipTrigger asChild>
