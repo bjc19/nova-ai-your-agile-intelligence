@@ -100,7 +100,7 @@ function LayoutContent({ children, currentPageName }) {
                    >
                      {t('dashboard')}
                    </Link>
-                   {(userRole === 'admin' || userRole === 'contributor' || canInvite) && (
+                   {((userRole === 'admin' || userRole === 'contributor') || canInvite) && (
                      <Link 
                        to={createPageUrl("Analysis")}
                        className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
@@ -184,15 +184,15 @@ function LayoutContent({ children, currentPageName }) {
                     {isAuthenticated ? (
                       <>
                         <Link 
-                          to={createPageUrl("Dashboard")}
-                          className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {t('dashboard')}
-                        </Link>
-                        {(userRole === 'admin' || userRole === 'contributor' || canInvite) && (
-                          <Link 
-                            to={createPageUrl("Analysis")}
+                           to={createPageUrl("Dashboard")}
+                           className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                           onClick={() => setMobileMenuOpen(false)}
+                         >
+                           {t('dashboard')}
+                         </Link>
+                         {((userRole === 'admin' || userRole === 'contributor') || canInvite) && (
+                           <Link 
+                             to={createPageUrl("Analysis")}
                             className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
                             onClick={() => setMobileMenuOpen(false)}
                           >
