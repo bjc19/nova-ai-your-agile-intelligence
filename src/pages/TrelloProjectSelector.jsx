@@ -626,7 +626,7 @@ export default function TrelloProjectSelector() {
                 <p className="text-sm font-medium text-slate-700 mb-3">Membres assignés :</p>
                 {memberAssignments[project.id]?.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {memberAssignments[project.id].map(memberEmail => {
+                    {[...new Set(memberAssignments[project.id])].map(memberEmail => {
                       const member = teamMembers.find(m => m.user_email === memberEmail);
                       return (
                         <Badge key={memberEmail} variant="secondary" className="text-sm">
