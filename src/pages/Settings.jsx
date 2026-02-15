@@ -13,7 +13,7 @@ import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
 import WorkspaceMemberAssignment from "@/components/workspace/WorkspaceMemberAssignment";
-
+import AccountDeletionSection from "@/components/settings/AccountDeletionSection";
 import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
 import {
   ArrowLeft,
@@ -1183,12 +1183,15 @@ export default function Settings() {
           </div>
         </motion.div>
 
-        {/* Manual Data Import */}
-        
-
-
-
-
+        {/* Account Deletion */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+          className="mb-8"
+        >
+          <AccountDeletionSection />
+        </motion.div>
 
 
 
