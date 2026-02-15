@@ -34,17 +34,16 @@ export default function TrelloProjectSelector() {
         // Get current user
         const user = await base44.auth.me();
 
-        // Fetch available Trello projects
+        // Fetch available Trello projects (includes isSelected flag from backend)
         const projectsRes = await base44.functions.invoke('trelloGetProjects', {});
         setProjects(projectsRes.data.boards || []);
 
-        // Fetch existing selections
-        const selections = await base44.entities.TrelloProjectSelection.filter({
-          user_email: user.email,
-          is_active: true
-        });
-
-        const selectedIds = new Set(selections.map(s => s.board_id));
+        // Extract selected IDs from boards marked as selected
+        const selectedIds = new Set(
+          (projectsRes.data.boards || [])
+            .filter(b => b.isSelected)
+            .map(b => b.id)
+        );
         setSelectedProjects(selectedIds);
 
         // Fetch user's subscription status for quota info
@@ -97,30 +96,35 @@ export default function TrelloProjectSelector() {
       if (response.data.success) {
         setSelectedProjectsData(selectedBoards);
         
-        // Charger les membres de l'équipe et les utilisateurs
+        // Charger les membres de l'équipe et les utilisateurs (exclure l'utilisateur actuel)
         try {
+          const currentUserEmail = user.email;
           const [teamMembers, allUsers] = await Promise.all([
             base44.entities.TeamMember.list(),
             base44.entities.User.list()
           ]);
-          
-          // Combiner TeamMember et User, en priorité TeamMember
+
+          // Combiner TeamMember et User, en priorité TeamMember, exclure l'utilisateur actuel
           const memberMap = new Map();
-          
-          // D'abord ajouter tous les utilisateurs
-          allUsers.forEach(user => {
-            memberMap.set(user.email, {
-              user_email: user.email,
-              user_name: user.full_name || user.email,
-              role: user.role || 'user'
-            });
+
+          // D'abord ajouter tous les utilisateurs (sauf l'utilisateur actuel)
+          allUsers.forEach(u => {
+            if (u.email !== currentUserEmail) {
+              memberMap.set(u.email, {
+                user_email: u.email,
+                user_name: u.full_name || u.email,
+                role: u.role || 'user'
+              });
+            }
           });
-          
-          // Puis écraser avec les TeamMember qui ont plus d'infos
+
+          // Puis écraser avec les TeamMember qui ont plus d'infos (sauf l'utilisateur actuel)
           teamMembers.forEach(tm => {
-            memberMap.set(tm.user_email, tm);
+            if (tm.user_email !== currentUserEmail) {
+              memberMap.set(tm.user_email, tm);
+            }
           });
-          
+
           setTeamMembers(Array.from(memberMap.values()));
         } catch (error) {
           console.error('Error loading members:', error);

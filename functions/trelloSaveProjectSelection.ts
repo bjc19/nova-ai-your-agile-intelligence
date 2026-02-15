@@ -30,10 +30,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get existing selections for this user
-    const existingSelections = await base44.entities.TrelloProjectSelection.filter({
-      user_email: user.email
-    });
+    // Get existing selections for this user (RLS filters by created_by automatically)
+    const existingSelections = await base44.entities.TrelloProjectSelection.filter({});
 
     // Deactivate selections that are no longer in the new selection
     const toDeactivate = existingSelections.filter(
@@ -47,7 +45,7 @@ Deno.serve(async (req) => {
     }
 
     // Create or reactivate selections for new/existing boards
-    const selectedBoardsMap = new Map(boards.map(b => [b.id, b.name]));
+    const boardsMap = new Map(boards.map(b => [b.id, b]));
 
     for (const boardId of selected_board_ids) {
       const existing = existingSelections.find(sel => sel.board_id === boardId);
@@ -61,11 +59,15 @@ Deno.serve(async (req) => {
         }
       } else {
         // Create new selection
-        const boardName = selectedBoardsMap.get(boardId) || `Board ${boardId}`;
+        const board = boardsMap.get(boardId);
+        const boardName = board?.name || `Board ${boardId}`;
+        const idOrganization = board?.idOrganization || null;
+        
         await base44.entities.TrelloProjectSelection.create({
           user_email: user.email,
           board_id: boardId,
           board_name: boardName,
+          idOrganization: idOrganization,
           is_active: true,
           connected_at: new Date().toISOString()
         });

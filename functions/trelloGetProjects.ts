@@ -9,9 +9,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch the Trello connection for the current user using service role
-    const trelloConnections = await base44.asServiceRole.entities.TrelloConnection.filter({ 
-      user_email: user.email, 
+    // Fetch the Trello connection for the current user (RLS filters by created_by automatically)
+    const trelloConnections = await base44.entities.TrelloConnection.filter({ 
       is_active: true 
     });
 
@@ -21,13 +20,19 @@ Deno.serve(async (req) => {
 
     const { api_key: apiKey, access_token: apiToken } = trelloConnections[0];
 
+    // Récupérer les sélections actives (RLS filters by created_by automatically)
+    const userSelections = await base44.entities.TrelloProjectSelection.filter({
+      is_active: true
+    });
+    const selectedBoardIds = new Set(userSelections.map(s => s.board_id));
+
     if (!apiKey || !apiToken) {
       return Response.json({ error: 'Trello credentials not available' }, { status: 500 });
     }
 
     // Fetch boards from Trello API
     const response = await fetch(
-      `https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${apiToken}&fields=id,name,idOrganization`,
+      `https://api.trello.com/1/members/me/boards?key=${apiKey}&token=${apiToken}&fields=id,name,idOrganization,url`,
       {
         method: 'GET'
       }
@@ -48,10 +53,19 @@ Deno.serve(async (req) => {
     const formattedBoards = boards.map(board => ({
       id: board.id,
       name: board.name,
-      idOrganization: board.idOrganization
+      idOrganization: board.idOrganization,
+      url: board.url,
+      isSelected: selectedBoardIds.has(board.id)
     }));
 
-    return Response.json({ boards: formattedBoards });
+    return Response.json({ 
+      boards: formattedBoards,
+      activeSelections: userSelections.map(s => ({ 
+        id: s.board_id, 
+        name: s.board_name, 
+        idOrganization: s.idOrganization 
+      }))
+    });
   } catch (error) {
     console.error('Error fetching Trello projects:', error);
     return Response.json({ error: error.message }, { status: 500 });
