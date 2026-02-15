@@ -37,7 +37,6 @@ Deno.serve(async (req) => {
     }
 
     // Get existing selections for this user
-    console.log('User email used for filtering existing selections:', user.email);
     const existingSelections = await base44.entities.TrelloProjectSelection.filter({
       user_email: user.email
     });
@@ -86,7 +85,8 @@ Deno.serve(async (req) => {
           connected_at: new Date().toISOString()
         });
         console.log('Created new selection:', newSelection.id, newSelection.board_name);
-        console.log('User email stored in new selection:', newSelection.user_email);
+        const verifiedSelection = await base44.entities.TrelloProjectSelection.get(newSelection.id);
+        console.log('Verified newly created selection by ID:', verifiedSelection);
       }
     }
 
