@@ -101,7 +101,7 @@ const translations = {
     recommendationsDesc: "Get AI-powered suggestions to unblock your team and accelerate delivery"
   },
   fr: {
-    aiPoweredScrum: "Votre Expert Agile IA",
+    aiPoweredScrum: "Votre Intelligence Agile",
     heroPart1: "Transformez votre routine en",
     heroPart2: "Insights Actionnables",
     heroSubtitle: "Conçu pour vos équipes agiles de projets et de produits. Synchronisation multi-sources, gestion intelligente des risques, recommandations personnalisées, anonymisation intelligente sans rétention — création de valeur mesurable dans chaque sprint ou cycle de développement.",
