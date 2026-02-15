@@ -24,6 +24,7 @@ export default function TrelloProjectSelector() {
   const [savingSelection, setSavingSelection] = useState(false);
   const [userPlan, setUserPlan] = useState(null);
   const [maxProjects, setMaxProjects] = useState(10);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Load available projects and existing selections
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function TrelloProjectSelector() {
 
         // Get current user
         const user = await base44.auth.me();
+        setCurrentUser(user);
 
         // Fetch available Trello projects (includes isSelected flag from backend)
         const projectsRes = await base44.functions.invoke('trelloGetProjects', {});
@@ -98,7 +100,7 @@ export default function TrelloProjectSelector() {
         
         // Charger les membres de l'équipe et les utilisateurs (exclure l'utilisateur actuel)
         try {
-          const currentUserEmail = user.email;
+          const currentUserEmail = currentUser?.email;
           const [teamMembers, allUsers] = await Promise.all([
             base44.entities.TeamMember.list(),
             base44.entities.User.list()
@@ -179,7 +181,7 @@ export default function TrelloProjectSelector() {
             user_name: member?.user_name || memberEmail,
             role: member?.role || 'user',
             workspace_id: boardId,
-            invited_by: (await base44.auth.me()).email,
+            invited_by: currentUser?.email,
             invitation_status: 'accepted'
           });
         }
