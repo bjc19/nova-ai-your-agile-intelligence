@@ -53,11 +53,20 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         const allUsers = await base44.entities.User.list();
         setUsers(allUsers || []);
 
-        // Load pending invitations
+        // Load pending invitations and deduplicate by email
         const invitations = await base44.entities.InvitationToken.filter({
           status: 'pending'
         });
-        setPendingInvitations(invitations || []);
+        // Keep only the most recent invitation per email
+        const uniqueInvitations = [];
+        const seenEmails = new Set();
+        (invitations || []).sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).forEach(inv => {
+          if (!seenEmails.has(inv.invitee_email)) {
+            uniqueInvitations.push(inv);
+            seenEmails.add(inv.invitee_email);
+          }
+        });
+        setPendingInvitations(uniqueInvitations);
 
          // Initialize emails as visible by default
          setHiddenEmails(new Set());
