@@ -20,7 +20,7 @@ export const translations = {
     // Dashboard
     welcomeBack: "Bon retour",
     welcomeBackTitle: "Bienvenue",
-    sprintOverview: "Voici votre vue d'ensemble du sprint et vos dernières analyses.",
+    sprintOverview: "Voici votre vue d'ensemble et vos dernières analyses.",
     recentAnalyses: "Analyses récentes",
     recommendations: "Recommandations",
     aiPoweredScrumMaster: "Scrum Master IA",
