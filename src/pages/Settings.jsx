@@ -646,7 +646,7 @@ export default function Settings() {
         }
 
         {/* Workspace Access Management */}
-         {(currentRole === 'admin' || currentRole === 'contributor') &&
+         {currentRole === 'admin' &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -658,7 +658,7 @@ export default function Settings() {
         }
 
         {/* Join Team Requests */}
-        {(currentRole === 'admin' || currentRole === 'contributor') &&
+        {currentRole === 'admin' &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -669,8 +669,8 @@ export default function Settings() {
           </motion.div>
         }
 
-        {/* Team & Projects Configuration - Hide for simple users */}
-        {(currentRole === 'admin' || currentRole === 'contributor') &&
+        {/* Team & Projects Configuration - Admin only */}
+        {currentRole === 'admin' &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -797,8 +797,8 @@ export default function Settings() {
           </motion.div>
         }
 
-        {/* Available Integrations - Hide for simple users */}
-        {(currentRole === 'admin' || currentRole === 'contributor') &&
+        {/* Available Integrations - Admin only */}
+        {currentRole === 'admin' &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1136,8 +1136,8 @@ export default function Settings() {
            </motion.div>
         }
 
-        {/* Coming Soon Integrations - Hide for simple users */}
-        {(currentRole === 'admin' || currentRole === 'contributor') &&
+        {/* Coming Soon Integrations - Admin only */}
+        {currentRole === 'admin' &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
