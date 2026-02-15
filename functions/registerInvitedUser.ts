@@ -56,18 +56,8 @@ Deno.serve(async (req) => {
 
         if (newUsers && newUsers.length > 0) {
           const newUser = newUsers[0];
-          // Create a verified email verification code to bypass email verification screen
-            try {
-              await base44.asServiceRole.entities.EmailVerificationCode.create({
-                email: email,
-                code: '000000', // Dummy code for invited users
-                verified: true,
-                verified_at: new Date().toISOString()
-              });
-              console.log('Verification code created for invited user:', email);
-            } catch (codeErr) {
-              console.log('Could not create verification code, user might need manual verification:', codeErr.message);
-            }
+          // Invited users skip email verification - they can log in directly
+            console.log('Invited user registered - email verification bypassed:', email);
         }
     } catch (regErr) {
       console.error('Registration error:', regErr);
