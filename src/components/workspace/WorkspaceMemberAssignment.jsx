@@ -27,13 +27,26 @@ export default function WorkspaceMemberAssignment() {
         const user = await base44.auth.me();
         setCurrentUserEmail(user?.email);
 
-        const [wsData, usersData, wmData] = await Promise.all([
+        // Load both Jira and Trello projects
+        const [jiraData, trelloData, usersData, wmData] = await Promise.all([
           base44.entities.JiraProjectSelection.filter({ is_active: true }),
+          base44.entities.TrelloProjectSelection.filter({ is_active: true }),
           base44.entities.User.list(),
           base44.entities.WorkspaceMember.list()
         ]);
         
-        setWorkspaces(wsData);
+        // Combine Jira and Trello workspaces
+        const combinedWorkspaces = [
+          ...jiraData.map(ws => ({ ...ws, source: 'jira' })),
+          ...trelloData.map(ws => ({ 
+            ...ws, 
+            source: 'trello',
+            workspace_name: ws.board_name,
+            jira_project_name: ws.board_name 
+          }))
+        ];
+        
+        setWorkspaces(combinedWorkspaces);
         setTeamMembers(usersData);
         setWorkspaceMembers(wmData);
       } catch (error) {
