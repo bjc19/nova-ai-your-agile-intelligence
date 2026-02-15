@@ -56,11 +56,12 @@ Deno.serve(async (req) => {
 
         if (newUsers && newUsers.length > 0) {
           const newUser = newUsers[0];
-          // Update the user to mark as verified using is_verified field (Base44 standard)
+          // Update the user to mark as verified with invitation details
           await base44.asServiceRole.entities.User.update(newUser.id, {
-            is_verified: true
+            verified_at: new Date().toISOString(),
+            invitation_token_id: inv.id
           });
-          console.log('User marked as verified:', email);
+          console.log('User marked as verified with invitation:', email);
         }
     } catch (regErr) {
       console.error('Registration error:', regErr);
