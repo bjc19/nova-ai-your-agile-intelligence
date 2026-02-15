@@ -795,7 +795,8 @@ export default function Settings() {
           </motion.div>
         }
 
-        {/* Available Integrations */}
+        {/* Available Integrations - Hide for simple users */}
+        {(currentRole === 'admin' || currentRole === 'contributor') &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1131,8 +1132,10 @@ export default function Settings() {
            </Card>
            </div>
            </motion.div>
+        }
 
-        {/* Coming Soon Integrations */}
+        {/* Coming Soon Integrations - Hide for simple users */}
+        {(currentRole === 'admin' || currentRole === 'contributor') &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
