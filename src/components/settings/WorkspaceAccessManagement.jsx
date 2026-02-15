@@ -49,10 +49,15 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         const user = await base44.auth.me();
         setCurrentUser(user);
 
-        // Load users from User entity (has correct full_name and email fields)
+        // Load active users from User entity
         const allUsers = await base44.entities.User.list();
-        console.log('Users loaded:', allUsers);
         setUsers(allUsers || []);
+
+        // Load pending invitations
+        const invitations = await base44.entities.InvitationToken.filter({
+          status: 'pending'
+        });
+        setPendingInvitations(invitations || []);
 
          // Initialize emails as visible by default
          setHiddenEmails(new Set());
@@ -60,10 +65,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         // Load plan from team config or assume pro for testing
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
-          // Extract plan from config if stored, otherwise default to pro
           setCurrentPlan(configs[0].plan || 'pro');
         } else {
-          // Default to pro for testing
           setCurrentPlan('pro');
         }
       } catch (error) {
