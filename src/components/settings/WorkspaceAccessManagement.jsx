@@ -38,7 +38,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
-  const currentUsers = users.length;
+  const currentUsers = users.length + pendingInvitations.length;
   const canAddMore = currentUsers < maxUsers;
 
   // Load users and plan info
