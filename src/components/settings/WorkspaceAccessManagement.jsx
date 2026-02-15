@@ -449,9 +449,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                          </Button>
                        )}
                      </div>
-                  </div>
-                ))
-              )}
+                     </div>
+                     ))
+                     );
+                     })()}
             </div>
           </CardContent>
         </Card>
