@@ -85,8 +85,7 @@ Deno.serve(async (req) => {
           connected_at: new Date().toISOString()
         });
         console.log('Created new selection:', newSelection.id, newSelection.board_name);
-        const verifiedSelection = await base44.entities.TrelloProjectSelection.get(newSelection.id);
-        console.log('Verified newly created selection by ID:', verifiedSelection);
+        // Removed the problematic line: console.log('Verified newly created selection by ID:', verifiedSelection);
       }
     }
 
