@@ -47,6 +47,21 @@ Deno.serve(async (req) => {
         full_name: fullName
       });
       console.log('User registered successfully');
+
+      // Mark the user as verified immediately (bypass the 6-digit code requirement)
+      // This prevents the verification email from becoming mandatory for invited users
+      const newUsers = await base44.asServiceRole.entities.User.filter({
+        email: email
+      });
+
+      if (newUsers && newUsers.length > 0) {
+        const newUser = newUsers[0];
+        // Update the user to mark as verified by setting verified_at timestamp
+        await base44.asServiceRole.entities.User.update(newUser.id, {
+          verified_at: new Date().toISOString()
+        });
+        console.log('User marked as verified:', email);
+      }
     } catch (regErr) {
       console.error('Registration error:', regErr);
       if (regErr.message?.includes('already exists') || regErr.message?.includes('déjà')) {
