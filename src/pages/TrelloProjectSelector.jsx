@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Layers, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, Layers, AlertCircle, CheckCircle2, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 export default function TrelloProjectSelector() {
@@ -171,6 +171,32 @@ export default function TrelloProjectSelector() {
           : [...current, memberEmail]
       };
     });
+  };
+
+  const handleRemoveAssignedMember = async (boardId, memberEmail) => {
+    try {
+      const existingAssignment = await base44.entities.WorkspaceMember.filter({
+        workspace_id: boardId,
+        user_email: memberEmail
+      });
+      
+      if (existingAssignment.length > 0) {
+        await base44.entities.WorkspaceMember.delete(existingAssignment[0].id);
+        
+        setMemberAssignments(prev => {
+          const current = prev[boardId] || [];
+          return {
+            ...prev,
+            [boardId]: current.filter(email => email !== memberEmail)
+          };
+        });
+        
+        toast.success('Membre retiré avec succès');
+      }
+    } catch (error) {
+      console.error('Error removing member:', error);
+      toast.error('Erreur lors du retrait du membre');
+    }
   };
 
   const handleFinishAssignment = async () => {
@@ -504,10 +530,12 @@ export default function TrelloProjectSelector() {
                           <Badge 
                             key={member.user_email} 
                             variant="secondary"
-                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2"
+                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-emerald-200 transition-colors"
+                            onClick={() => handleRemoveAssignedMember(project.id, member.user_email)}
                           >
                             <CheckCircle2 className="w-3 h-3" />
                             {member.user_name || member.user_email}
+                            <X className="w-3 h-3 ml-1 hover:text-emerald-900" />
                           </Badge>
                         ))}
                       </div>
