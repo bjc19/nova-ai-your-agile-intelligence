@@ -392,12 +392,17 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                 )}
 
                 {/* Membres actifs */}
-                {users.length === 0 && pendingInvitations.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">
-                    Aucun membre pour le moment
-                  </p>
-                ) : (
-                  users.map((user) => (
+                {(() => {
+                  // Filter out users who have pending invitations
+                  const pendingEmails = new Set(pendingInvitations.map(inv => inv.invitee_email));
+                  const activeUsers = users.filter(u => !pendingEmails.has(u.email));
+
+                  return activeUsers.length === 0 && pendingInvitations.length === 0 ? (
+                    <p className="text-sm text-slate-500 text-center py-4">
+                      Aucun membre pour le moment
+                    </p>
+                  ) : (
+                    activeUsers.map((user) => (
                   <div 
                     key={user.id}
                     className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
