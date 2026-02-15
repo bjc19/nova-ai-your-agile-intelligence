@@ -172,16 +172,16 @@ export default function TeamManagement() {
               ) : (
                 <div className="space-y-3">
                   {teamMembers.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between border rounded-lg p-4">
-                      <div>
-                        <p className="font-semibold text-slate-900">{member.user_name}</p>
-                        <p className="text-sm text-slate-600">{member.user_email}</p>
-                      </div>
-                      <Badge variant="outline">
-                        {member.role === 'contributor' ? 'Contributeur' : 'Utilisateur'}
-                      </Badge>
-                    </div>
-                  ))}
+                     <div key={member.id} className="flex items-center justify-between border rounded-lg p-4">
+                       <div>
+                         <p className="font-semibold text-slate-900">{member.user_name}</p>
+                         <p className="text-sm text-slate-600">{member.user_email}</p>
+                       </div>
+                       <Badge variant="outline">
+                         {member.app_role === 'contributor' ? 'Contributeur' : member.app_role === 'admin' ? 'Admin' : 'Utilisateur'}
+                       </Badge>
+                     </div>
+                   ))}
                 </div>
               )}
             </CardContent>
