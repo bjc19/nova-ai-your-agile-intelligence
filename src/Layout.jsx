@@ -34,7 +34,7 @@ function LayoutContent({ children, currentPageName }) {
         setIsAuthenticated(auth);
         if (auth) {
           const user = await base44.auth.me();
-          setUserRole(user?.role);
+          setUserRole(user?.app_role || user?.role);
 
           try {
             const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
