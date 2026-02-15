@@ -7,6 +7,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     const loadWorkspaces = async () => {
       try {
@@ -15,7 +16,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         
         // Check which connection is active (Jira OR Trello, never both)
         const [jiraConns, trelloConns] = await Promise.all([
-          base44.entities.JiraConnection.filter({ user_email: user?.email, is_active: true }),
+          base44.entities.JiraProjectSelection.filter({ created_by: user?.email, is_active: true }),
           base44.entities.TrelloConnection.filter({ user_email: user?.email, is_active: true })
         ]);
         console.log("🔍 [WorkspaceSelector] Jira connections:", jiraConns.length);
