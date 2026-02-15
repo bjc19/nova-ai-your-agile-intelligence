@@ -16,6 +16,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    // CRITICAL: Disable any Trello connections first (mutual exclusivity)
+    const trelloConns = await base44.asServiceRole.entities.TrelloConnection.list();
+    if (trelloConns.length > 0) {
+      for (const trelloConn of trelloConns) {
+        await base44.asServiceRole.entities.TrelloConnection.update(trelloConn.id, {
+          is_active: false
+        });
+      }
+      console.log('Disabled Trello connections due to Jira connection');
+    }
+
     // Check if connection already exists
     let allConns = [];
     try {
