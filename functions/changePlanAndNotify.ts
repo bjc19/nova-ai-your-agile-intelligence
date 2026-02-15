@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       <p>Des questions ? Contactez-nous à <a href="mailto:support@novagile.ca">support@novagile.ca</a></p>
 
       <div class="footer">
-        <p>Nova - Votre expert IA Agile</p>
+        <p>Nova - Votre Intelligence Agile</p>
         <p>© 2026 Nova. Tous droits réservés.</p>
       </div>
     </div>
