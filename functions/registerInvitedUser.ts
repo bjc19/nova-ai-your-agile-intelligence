@@ -61,13 +61,16 @@ Deno.serve(async (req) => {
       status: 'pending_email_verification'
     });
 
-    console.log('Invitation updated to pending_email_verification for:', email);
+    // Store role and workspace info in sessionStorage for later use after email verification
+    console.log('Invitation updated to pending_email_verification for:', email, 'with role:', inv.role, 'workspace:', inv.workspace_id);
 
     return Response.json({
       success: true,
       message: 'Registration initiated. Please verify your email.',
       email: email,
-      requires_verification: true
+      requires_verification: true,
+      role: inv.role,
+      workspace_id: inv.workspace_id
     });
   } catch (error) {
     console.error('Error:', error);
