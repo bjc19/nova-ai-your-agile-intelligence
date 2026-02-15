@@ -1187,6 +1187,7 @@ export default function Settings() {
             )}
           </div>
         </motion.div>
+        }
 
         {/* Account Deletion */}
         <motion.div
