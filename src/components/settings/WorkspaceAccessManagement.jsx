@@ -6,17 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Mail, Trash2, Copy, CheckCircle2, AlertCircle, Eye, EyeOff, Edit2 } from "lucide-react";
+import { Users, Mail, Trash2, Copy, CheckCircle2, AlertCircle, Eye, EyeOff, Edit2, TrendingUp, TrendingDown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 const PLANS = {
-  starter: { name: "Starter", maxUsers: 5, color: "from-blue-500 to-blue-600", bgColor: "bg-blue-100", icon: "🚀" },
-  growth: { name: "Growth", maxUsers: 10, color: "from-emerald-500 to-emerald-600", bgColor: "bg-emerald-100", icon: "📈" },
-  pro: { name: "Pro", maxUsers: 25, color: "from-purple-500 to-purple-600", bgColor: "bg-purple-100", icon: "⭐" },
-  custom: { name: "Custom", maxUsers: 50, color: "from-pink-500 to-rose-600", bgColor: "bg-pink-100", icon: "🎯" }
+  starter: { name: "Starter", maxUsers: 5, color: "from-blue-500 to-blue-600", bgColor: "bg-blue-100", icon: "🚀", price: "$49/mois" },
+  growth: { name: "Growth", maxUsers: 10, color: "from-emerald-500 to-emerald-600", bgColor: "bg-emerald-100", icon: "📈", price: "$99/mois" },
+  pro: { name: "Pro", maxUsers: 25, color: "from-purple-500 to-purple-600", bgColor: "bg-purple-100", icon: "⭐", price: "$199/mois" },
+  custom: { name: "Custom", maxUsers: 50, color: "from-pink-500 to-rose-600", bgColor: "bg-pink-100", icon: "🎯", price: "Sur mesure" }
 };
+
+const PLAN_ORDER = ['starter', 'growth', 'pro', 'custom'];
 
 export default function WorkspaceAccessManagement({ currentRole }) {
   const [users, setUsers] = useState([]);
@@ -31,6 +33,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
    const [editingUser, setEditingUser] = useState(null);
    const [newRole, setNewRole] = useState(null);
    const [userToDelete, setUserToDelete] = useState(null);
+   const [changingPlan, setChangingPlan] = useState(false);
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
@@ -166,6 +169,40 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     } catch (error) {
       console.error('Update role error:', error);
       toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour du rôle');
+    }
+  };
+
+  const handleChangePlan = async (newPlan) => {
+    if (currentRole !== 'admin') {
+      toast.error('Seuls les admins peuvent changer de plan');
+      return;
+    }
+
+    if (newPlan === currentPlan) return;
+
+    setChangingPlan(true);
+    try {
+      const response = await base44.functions.invoke('changePlanCheckout', { newPlan });
+      
+      if (response.data.requiresPayment) {
+        // Redirect to Stripe checkout
+        window.location.href = response.data.checkoutUrl;
+      } else {
+        // Plan changed immediately
+        toast.success(response.data.message);
+        setCurrentPlan(newPlan);
+        
+        // Reload data to reflect changes
+        const configs = await base44.entities.TeamConfiguration.list();
+        if (configs.length > 0) {
+          setCurrentPlan(configs[0].plan || 'pro');
+        }
+      }
+    } catch (error) {
+      console.error('Change plan error:', error);
+      toast.error('Erreur lors du changement de plan');
+    } finally {
+      setChangingPlan(false);
     }
   };
 
@@ -380,23 +417,64 @@ export default function WorkspaceAccessManagement({ currentRole }) {
             <CardTitle className="text-base">À propos des plans</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {Object.entries(PLANS).map(([key, plan]) => (
-              <div key={key} className="flex items-start justify-between p-2">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">{plan.icon} {plan.name}</p>
-                  <p className="text-xs text-slate-500">Jusqu'à {plan.maxUsers} utilisateurs</p>
+            {Object.entries(PLANS).map(([key, plan]) => {
+              const currentIndex = PLAN_ORDER.indexOf(currentPlan);
+              const planIndex = PLAN_ORDER.indexOf(key);
+              const isUpgrade = planIndex > currentIndex;
+              const isDowngrade = planIndex < currentIndex;
+              const isCurrent = currentPlan === key;
+              const isCustom = key === 'custom';
+
+              return (
+                <div key={key} className="flex items-start justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-sm font-medium text-slate-900">{plan.icon} {plan.name}</p>
+                      {isCurrent && (
+                        <Badge className="bg-emerald-100 text-emerald-700">
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Actuel
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">Jusqu'à {plan.maxUsers} utilisateurs</p>
+                    <p className="text-xs font-semibold text-slate-700 mt-1">{plan.price}</p>
+                  </div>
+                  {currentRole === 'admin' && !isCurrent && !isCustom && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleChangePlan(key)}
+                      disabled={changingPlan}
+                      variant={isUpgrade ? "default" : "outline"}
+                      className={isUpgrade ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white" : ""}
+                    >
+                      {changingPlan ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          {isUpgrade ? (
+                            <>
+                              <TrendingUp className="w-4 h-4 mr-1" />
+                              Upgrade
+                            </>
+                          ) : (
+                            <>
+                              <TrendingDown className="w-4 h-4 mr-1" />
+                              Downgrade
+                            </>
+                          )}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  {isCustom && (
+                    <Badge variant="outline" className="text-xs">
+                      Nous contacter
+                    </Badge>
+                  )}
                 </div>
-                {currentPlan === key && (
-                  <Badge className="bg-emerald-100 text-emerald-700">
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Actuel
-                  </Badge>
-                )}
-              </div>
-            ))}
-            <div className="pt-3 border-t border-slate-200 text-xs text-slate-600">
-              <p>💡 <strong>Pour augmenter votre limite :</strong> Contactez le service client Nova AI</p>
-            </div>
+              );
+            })}
             </CardContent>
             </Card>
             </motion.div>

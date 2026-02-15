@@ -22,9 +22,23 @@ Deno.serve(async (req) => {
       const session = event.data.object;
       const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
+      // Update TeamConfiguration with new plan
+      const configs = await base44.asServiceRole.entities.TeamConfiguration.filter({});
+      const planValue = session.metadata.plan;
+      
+      if (configs.length > 0) {
+        await base44.asServiceRole.entities.TeamConfiguration.update(configs[0].id, {
+          plan: planValue
+        });
+      } else {
+        await base44.asServiceRole.entities.TeamConfiguration.create({
+          plan: planValue
+        });
+      }
+
       await base44.asServiceRole.entities.Subscription.create({
         user_email: session.metadata.user_email,
-        plan: session.metadata.plan,
+        plan: planValue,
         status: 'active',
         stripe_customer_id: session.customer,
         stripe_subscription_id: session.subscription,
@@ -69,11 +83,29 @@ Deno.serve(async (req) => {
       });
 
       if (subs.length > 0) {
-        await base44.asServiceRole.entities.Subscription.update(subs[0].id, {
+        const newPlan = subscription.metadata?.plan;
+        const maxUsers = subscription.metadata?.max_users;
+        
+        const updateData = {
           status: subscription.status,
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
           cancel_at_period_end: subscription.cancel_at_period_end
-        });
+        };
+
+        if (newPlan) {
+          updateData.plan = newPlan;
+          updateData.max_users = parseInt(maxUsers);
+
+          // Update TeamConfiguration
+          const configs = await base44.asServiceRole.entities.TeamConfiguration.filter({});
+          if (configs.length > 0) {
+            await base44.asServiceRole.entities.TeamConfiguration.update(configs[0].id, {
+              plan: newPlan
+            });
+          }
+        }
+
+        await base44.asServiceRole.entities.Subscription.update(subs[0].id, updateData);
       }
     }
 
