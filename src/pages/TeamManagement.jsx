@@ -9,6 +9,7 @@ import { Users, UserPlus, Mail, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
+import { PendingInvitationsManager } from "@/components/subscription/PendingInvitationsManager";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import WorkspaceMemberManager from "@/components/workspace/WorkspaceMemberManager";
 
@@ -100,6 +101,8 @@ export default function TeamManagement() {
               {subscriptionStatus?.subscription?.plan?.toUpperCase() || 'N/A'}
             </Badge>
           </div>
+
+          <PendingInvitationsManager />
 
           <JoinRequestsManager />
 
