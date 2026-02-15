@@ -99,49 +99,19 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       return;
     }
 
-    // Vérifier si l'utilisateur est déjà membre
-    const pendingEmails = new Set(pendingInvitations.map(inv => inv.invitee_email));
-    const userEmails = new Set(users.map(u => u.email));
-
-    if (pendingEmails.has(inviteEmail)) {
-      setMessage({ type: 'error', text: `L'utilisateur avec l'email ${inviteEmail} est déjà en attente d'activation !` });
-      return;
-    }
-
-    if (userEmails.has(inviteEmail)) {
-      setMessage({ type: 'error', text: `L'utilisateur avec l'email ${inviteEmail} est déjà membre de votre équipe !` });
-      return;
-    }
-
     setInviting(true);
     try {
-      const activeWorkspace = 'default'; // À adapter selon votre logique
       // Generate invitation token and send email
       await base44.functions.invoke('generateInvitationToken', {
         inviteeEmail: inviteEmail,
-        inviteRole: inviteRole,
-        workspaceId: activeWorkspace
+        inviteRole: inviteRole
       });
-
+      
       setMessage({ type: 'success', text: `Invitation envoyée à ${inviteEmail}` });
       setInviteEmail('');
       setInviteRole('user');
-
-      // Refresh pending invitations
-      const invitations = await base44.entities.InvitationToken.filter({
-        status: 'pending'
-      });
-      const uniqueInvitations = [];
-      const seenEmails = new Set();
-      (invitations || []).sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).forEach(inv => {
-        if (!seenEmails.has(inv.invitee_email)) {
-          uniqueInvitations.push(inv);
-          seenEmails.add(inv.invitee_email);
-        }
-      });
-      setPendingInvitations(uniqueInvitations);
     } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.error || error.message || 'Erreur lors de l\'invitation' });
+      setMessage({ type: 'error', text: error.message || 'Erreur lors de l\'invitation' });
     } finally {
       setInviting(false);
     }
