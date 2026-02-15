@@ -393,66 +393,66 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
                 {/* Membres actifs */}
                 {(() => {
-                  // Filter out users who have pending invitations
-                  const pendingEmails = new Set(pendingInvitations.map(inv => inv.invitee_email));
-                  const activeUsers = users.filter(u => !pendingEmails.has(u.email));
+                   // Filter out users who have pending invitations
+                   const pendingEmails = new Set(pendingInvitations.map(inv => inv.invitee_email));
+                   const activeUsers = users.filter(u => !pendingEmails.has(u.email));
 
-                  return activeUsers.length === 0 && pendingInvitations.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-4">
-                      Aucun membre pour le moment
-                    </p>
-                  ) : (
-                    activeUsers.map((user) => (
-                  <div 
-                    key={user.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
-                  >
-                    <div 
-                      className="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => {
-                        if (canToggleEmail) {
-                          setHiddenEmails(prev => {
-                            const newSet = new Set(prev);
-                            if (newSet.has(user.id)) {
-                              newSet.delete(user.id);
-                            } else {
-                              newSet.add(user.id);
-                            }
-                            return newSet;
-                          });
-                        }
-                      }}
-                    >
-                       <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700">
-                         {user.email?.charAt(0).toUpperCase() || '?'}
-                       </div>
-                       <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
-                          <p className="text-xs text-slate-500">{user.email}</p>
-                          <p className="text-xs text-slate-600 mt-1">
-                            {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                          </p>
-                        </div>
-                     </div>
-                    <div className="flex items-center gap-2">
-                       <Badge variant="outline" className="text-xs">
-                         {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                       </Badge>
-                       {canManage && user.email !== currentUser?.email && (
-                         <Button 
-                           variant="ghost" 
-                           size="icon"
-                           onClick={() => handleRemoveUser(user.id)}
-                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                   return activeUsers.length === 0 && pendingInvitations.length === 0 ? (
+                     <p className="text-sm text-slate-500 text-center py-4">
+                       Aucun membre pour le moment
+                     </p>
+                   ) : (
+                     activeUsers.map((user) => (
+                       <div 
+                         key={user.id}
+                         className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                       >
+                         <div 
+                           className="flex items-center gap-3 flex-1 cursor-pointer hover:opacity-80 transition-opacity"
+                           onClick={() => {
+                             if (canToggleEmail) {
+                               setHiddenEmails(prev => {
+                                 const newSet = new Set(prev);
+                                 if (newSet.has(user.id)) {
+                                   newSet.delete(user.id);
+                                 } else {
+                                   newSet.add(user.id);
+                                 }
+                                 return newSet;
+                               });
+                             }
+                           }}
                          >
-                           <Trash2 className="w-4 h-4" />
-                         </Button>
-                       )}
-                     </div>
-                     </div>
+                           <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-xs font-semibold text-slate-700">
+                             {user.email?.charAt(0).toUpperCase() || '?'}
+                           </div>
+                           <div className="flex-1">
+                             <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
+                             <p className="text-xs text-slate-500">{user.email}</p>
+                             <p className="text-xs text-slate-600 mt-1">
+                               {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                             </p>
+                           </div>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <Badge variant="outline" className="text-xs">
+                             {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                           </Badge>
+                           {canManage && user.email !== currentUser?.email && (
+                             <Button 
+                               variant="ghost" 
+                               size="icon"
+                               onClick={() => handleRemoveUser(user.id)}
+                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                             >
+                               <Trash2 className="w-4 h-4" />
+                             </Button>
+                           )}
+                         </div>
+                       </div>
                      ))
-                     );
-                     })()}
+                   );
+                })()}
             </div>
           </CardContent>
         </Card>
