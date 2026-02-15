@@ -342,20 +342,53 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         transition={{ duration: 0.5, delay: 0.1 }}
       >
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Membres de l'équipe ({users.length})</CardTitle>
-            <CardDescription className="text-xs">
-              Gérez les accès et les rôles des membres
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {users.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-4">
-                  Aucun membre pour le moment
-                </p>
-              ) : (
-                users.map((user) => (
+            <CardHeader>
+              <CardTitle className="text-base">Membres de l'équipe ({users.length + pendingInvitations.length})</CardTitle>
+              <CardDescription className="text-xs">
+                Gérez les accès et les rôles des membres
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {/* Invitations en attente */}
+                {pendingInvitations.length > 0 && (
+                  <div className="border-b border-slate-200 pb-4 mb-4">
+                    <p className="text-xs font-semibold text-slate-600 mb-3 flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                      EN ATTENTE D'ACTIVATION
+                    </p>
+                    {pendingInvitations.map((invitation) => (
+                      <div 
+                        key={invitation.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors mb-2"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-xs font-semibold text-amber-700">
+                            {invitation.invitee_email?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-slate-900">{invitation.invitee_email}</p>
+                            <p className="text-xs text-amber-600 mt-1">
+                              {invitation.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className="bg-amber-100 text-amber-700 border-amber-300 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          En attente
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Membres actifs */}
+                {users.length === 0 && pendingInvitations.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">
+                    Aucun membre pour le moment
+                  </p>
+                ) : (
+                  users.map((user) => (
                   <div 
                     key={user.id}
                     className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
