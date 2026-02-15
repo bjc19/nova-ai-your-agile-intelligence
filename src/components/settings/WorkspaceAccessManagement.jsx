@@ -22,6 +22,7 @@ const PLAN_ORDER = ['starter', 'growth', 'pro', 'custom'];
 
 export default function WorkspaceAccessManagement({ currentRole }) {
   const [users, setUsers] = useState([]);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPlan, setCurrentPlan] = useState('pro');
   const [inviteEmail, setInviteEmail] = useState('');
