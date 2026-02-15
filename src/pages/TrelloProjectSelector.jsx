@@ -14,7 +14,7 @@ import { toast } from "sonner";
 export default function TrelloProjectSelector() {
   useAccessControl();
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Sélection projets, 2: Assignation membres
+  const [step, setStep] = useState(1); // 1: Sélection projets, 2: Assignation membres, 3: Récapitulatif
   const [projects, setProjects] = useState([]);
   const [selectedProjects, setSelectedProjects] = useState(new Set());
   const [selectedProjectsData, setSelectedProjectsData] = useState([]);
@@ -187,10 +187,28 @@ export default function TrelloProjectSelector() {
         }
       }
       
+      // Envoi des emails de notification
+      for (const [boardId, memberEmails] of Object.entries(memberAssignments)) {
+        const board = selectedProjectsData.find(b => b.id === boardId);
+        if (board && memberEmails.length > 0) {
+          for (const memberEmail of memberEmails) {
+            const member = teamMembers.find(m => m.user_email === memberEmail);
+            try {
+              await base44.integrations.Core.SendEmail({
+                to: memberEmail,
+                subject: `Vous avez été ajouté au workspace Trello "${board.name}"`,
+                body: `Bonjour ${member?.user_name || memberEmail},\n\nVous avez été ajouté au workspace Trello "${board.name}" par ${currentUser?.full_name || currentUser?.email}.\n\nVous pouvez maintenant accéder aux analyses et insights de ce projet.\n\nCordialement,\nL'équipe Nova`,
+                from_name: 'Nova'
+              });
+            } catch (emailError) {
+              console.error(`Erreur lors de l'envoi de l'email à ${memberEmail}:`, emailError);
+            }
+          }
+        }
+      }
+      
       toast.success('Membres assignés avec succès !');
-      setTimeout(() => {
-        navigate(createPageUrl("Settings"));
-      }, 1000);
+      setStep(3);
     } catch (error) {
       console.error('Error assigning members:', error);
       toast.error('Erreur lors de l\'assignation des membres');
@@ -224,34 +242,49 @@ export default function TrelloProjectSelector() {
           className="mb-8"
         >
           <button
-            onClick={() => step === 1 ? navigate(createPageUrl("Settings")) : setStep(1)}
+            onClick={() => {
+              if (step === 1) navigate(createPageUrl("Settings"));
+              else if (step === 2) setStep(1);
+              else setStep(2);
+            }}
             className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            {step === 1 ? 'Retour aux paramètres' : 'Retour à la sélection des projets'}
+            {step === 1 ? 'Retour aux paramètres' : (step === 2 ? 'Retour à la sélection des projets' : 'Retour aux assignations')}
           </button>
 
           {/* Stepper */}
           <div className="flex items-center gap-4 mb-8">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                step === 1 ? 'bg-sky-600 text-white' : 'bg-emerald-500 text-white'
+                step >= 1 ? 'bg-sky-600 text-white' : 'bg-slate-300 text-slate-500'
               }`}>
-                {step === 1 ? '1' : '✓'}
+                {step > 1 ? '✓' : '1'}
               </div>
-              <span className={`text-sm font-medium ${step === 1 ? 'text-slate-900' : 'text-slate-500'}`}>
+              <span className={`text-sm font-medium ${step >= 1 ? 'text-slate-900' : 'text-slate-500'}`}>
                 Sélection des projets
               </span>
             </div>
-            <div className={`h-0.5 w-16 ${step === 2 ? 'bg-sky-600' : 'bg-slate-300'}`} />
+            <div className={`h-0.5 w-16 ${step >= 2 ? 'bg-sky-600' : 'bg-slate-300'}`} />
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                step === 2 ? 'bg-sky-600 text-white' : 'bg-slate-300 text-slate-500'
+                step === 2 ? 'bg-sky-600 text-white' : (step > 2 ? 'bg-emerald-500 text-white' : 'bg-slate-300 text-slate-500')
               }`}>
-                2
+                {step > 2 ? '✓' : '2'}
               </div>
-              <span className={`text-sm font-medium ${step === 2 ? 'text-slate-900' : 'text-slate-500'}`}>
+              <span className={`text-sm font-medium ${step >= 2 ? 'text-slate-900' : 'text-slate-500'}`}>
                 Assignation des membres
+              </span>
+            </div>
+            <div className={`h-0.5 w-16 ${step >= 3 ? 'bg-sky-600' : 'bg-slate-300'}`} />
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                step === 3 ? 'bg-sky-600 text-white' : 'bg-slate-300 text-slate-500'
+              }`}>
+                3
+              </div>
+              <span className={`text-sm font-medium ${step === 3 ? 'text-slate-900' : 'text-slate-500'}`}>
+                Récapitulatif
               </span>
             </div>
           </div>
@@ -261,13 +294,15 @@ export default function TrelloProjectSelector() {
               <Layers className="w-5 h-5 text-sky-600" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900">
-              {step === 1 ? 'Sélectionner vos projets Trello' : 'Assigner les membres'}
+              {step === 1 ? 'Sélectionner vos projets Trello' : (step === 2 ? 'Assigner les membres' : 'Récapitulatif des assignations')}
             </h1>
           </div>
           <p className="text-slate-600">
             {step === 1 
               ? 'Choisissez les tableaux Trello à analyser avec Nova.'
-              : 'Assignez les membres de votre équipe aux tableaux sélectionnés.'
+              : (step === 2 
+                ? 'Assignez les membres de votre équipe aux tableaux sélectionnés.'
+                : 'Vos assignations ont été enregistrées et les membres ont été notifiés par email.')
             }
           </p>
         </motion.div>
@@ -474,6 +509,61 @@ export default function TrelloProjectSelector() {
         </motion.div>
         )}
 
+        {/* Step 3: Assignment Summary */}
+        {step === 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 space-y-6"
+        >
+          <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+            <CardContent className="p-8 text-center">
+              <CheckCircle2 className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                Assignations terminées !
+              </h3>
+              <p className="text-slate-700">
+                Les membres ont été assignés aux tableaux Trello et notifiés par email.
+              </p>
+            </CardContent>
+          </Card>
+
+          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <Layers className="w-5 h-5 text-sky-600" />
+            Récapitulatif des assignations
+          </h2>
+
+          {selectedProjectsData.map((project) => (
+            <Card key={project.id} className="border-2 border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-sky-600" />
+                  {project.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm font-medium text-slate-700 mb-3">Membres assignés :</p>
+                {memberAssignments[project.id]?.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {memberAssignments[project.id].map(memberEmail => {
+                      const member = teamMembers.find(m => m.user_email === memberEmail);
+                      return (
+                        <Badge key={memberEmail} variant="secondary" className="text-sm">
+                          {member?.user_name || memberEmail}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">Aucun membre assigné à ce tableau</p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </motion.div>
+        )}
+
         {/* Action Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -481,7 +571,7 @@ export default function TrelloProjectSelector() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex gap-4 justify-end"
         >
-          {step === 1 ? (
+          {step === 1 && (
             <>
               <Button
                 variant="outline"
@@ -508,7 +598,9 @@ export default function TrelloProjectSelector() {
                 )}
               </Button>
             </>
-          ) : (
+          )}
+
+          {step === 2 && (
             <>
               <Button
                 variant="outline"
@@ -533,6 +625,24 @@ export default function TrelloProjectSelector() {
                     Terminer l'assignation
                   </>
                 )}
+              </Button>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setStep(2)}
+                className="px-6"
+              >
+                Modifier les assignations
+              </Button>
+              <Button
+                onClick={() => navigate(createPageUrl("Settings"))}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8"
+              >
+                Retour aux paramètres
               </Button>
             </>
           )}
