@@ -23,6 +23,8 @@ export default function IntegrationStatus({ integrations = {} }) {
   const [slackConnected, setSlackConnected] = useState(false);
   const [teamsConnected, setTeamsConnected] = useState(false);
   const [jiraConnected, setJiraConnected] = useState(false);
+  const [trelloConnected, setTrelloConnected] = useState(false);
+  const [confluenceConnected, setConfluenceConnected] = useState(false);
   const [userRole, setUserRole] = useState(null);
   
   const checkConnections = async () => {
@@ -33,7 +35,7 @@ export default function IntegrationStatus({ integrations = {} }) {
         setUserRole(user?.role);
         
         // Show all workspace connections for transparency
-        const [slackConns, teamsConns, jiraConns] = await Promise.all([
+        const [slackConns, teamsConns, jiraConns, trelloConns, confluenceConns] = await Promise.all([
           base44.entities.SlackConnection.filter({ 
             is_active: true
           }),
@@ -42,12 +44,20 @@ export default function IntegrationStatus({ integrations = {} }) {
           }),
           base44.entities.JiraConnection.filter({ 
             is_active: true
+          }),
+          base44.entities.TrelloConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.ConfluenceConnection.filter({ 
+            is_active: true
           })
         ]);
         
         setSlackConnected(slackConns.length > 0);
         setTeamsConnected(teamsConns.length > 0);
         setJiraConnected(jiraConns.length > 0);
+        setTrelloConnected(trelloConns.length > 0);
+        setConfluenceConnected(confluenceConns.length > 0);
       }
     } catch (error) {
       console.error("Error checking connections:", error);
@@ -81,9 +91,17 @@ export default function IntegrationStatus({ integrations = {} }) {
       label: "Jira", 
       status: jiraConnected ? "connected" : "disconnected" 
     },
+    trello: { 
+      connected: trelloConnected, 
+      label: "Trello", 
+      status: trelloConnected ? "connected" : "disconnected" 
+    },
+    confluence: { 
+      connected: confluenceConnected, 
+      label: "Confluence", 
+      status: confluenceConnected ? "connected" : "disconnected" 
+    },
     azure: { connected: false, label: "Azure DevOps", status: "coming_soon" },
-    trello: { connected: false, label: "Trello", status: "coming_soon" },
-    confluence: { connected: false, label: "Confluence", status: "coming_soon" },
     zoom: { connected: false, label: "Zoom", status: "coming_soon" },
   };
 
@@ -184,7 +202,10 @@ export default function IntegrationStatus({ integrations = {} }) {
           <div className="mt-4 pt-4 border-t border-slate-100">
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-500">{t('lastSyncCheck')}</span>
-              <button className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors">
+              <button 
+                onClick={checkConnections}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors"
+              >
                 <RefreshCw className="w-3.5 h-3.5" />
                 {t('refresh')}
               </button>
