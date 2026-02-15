@@ -34,12 +34,11 @@ Deno.serve(async (req) => {
 
     // Deactivate all previous Jira project selections for this user
     const existingSelections = await base44.entities.JiraProjectSelection.filter({
-      user_email: user.email,
       is_active: true
     });
 
     for (const selection of existingSelections) {
-      if (!selected_project_ids.includes(selection.project_id)) {
+      if (!selected_project_ids.includes(selection.jira_project_id)) {
         await base44.entities.JiraProjectSelection.update(selection.id, {
           is_active: false
         });
@@ -52,8 +51,7 @@ Deno.serve(async (req) => {
       if (!project) continue;
 
       const existing = await base44.entities.JiraProjectSelection.filter({
-        user_email: user.email,
-        project_id: projectId
+        jira_project_id: projectId
       });
 
       if (existing.length > 0) {
@@ -64,12 +62,12 @@ Deno.serve(async (req) => {
       } else {
         // Create new selection
         await base44.entities.JiraProjectSelection.create({
-          user_email: user.email,
-          project_id: projectId,
-          project_key: project.key,
-          project_name: project.name,
+          jira_project_id: projectId,
+          jira_project_key: project.key,
+          jira_project_name: project.name,
+          workspace_name: project.name,
           is_active: true,
-          connected_at: new Date().toISOString()
+          selected_date: new Date().toISOString()
         });
       }
     }
