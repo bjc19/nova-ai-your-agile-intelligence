@@ -113,7 +113,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setInviteEmail('');
       setInviteRole('user');
     } catch (error) {
-      setMessage({ type: 'error', text: error.data?.error || error.message || 'Erreur lors de l\'invitation' });
+      const errorMsg = error.response?.data?.error || error.data?.error || error.message || 'Erreur lors de l\'invitation';
+      setMessage({ type: 'error', text: errorMsg });
     } finally {
       setInviting(false);
     }
