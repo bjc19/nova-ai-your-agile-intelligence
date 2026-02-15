@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const existingSelections = await base44.entities.TrelloProjectSelection.filter({
       user_email: user.email
     });
-    console.log('Existing selections from DB:', existingSelections.length, existingSelections);
+    console.log('Existing selections from DB (user scope):', existingSelections.length, existingSelections);
 
     // Deactivate selections that are no longer in the new selection
     const toDeactivate = existingSelections.filter(
@@ -85,9 +85,13 @@ Deno.serve(async (req) => {
           connected_at: new Date().toISOString()
         });
         console.log('Created new selection:', newSelection.id, newSelection.board_name);
-        // Removed the problematic line: console.log('Verified newly created selection by ID:', verifiedSelection);
       }
     }
+
+    // VERIFICATION: List all TrelloProjectSelection entries using service role to bypass RLS
+    const allSelectionsServiceRole = await base44.asServiceRole.entities.TrelloProjectSelection.list();
+    console.log('All TrelloProjectSelection entries (service role):', allSelectionsServiceRole.length, allSelectionsServiceRole);
+
 
     console.log('=== DEBUG trelloSaveProjectSelection END ===');
 
