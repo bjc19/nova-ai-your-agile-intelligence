@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +24,7 @@ export default function TrelloProjectSelector() {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [savingSelection, setSavingSelection] = useState(false);
   const [userPlan, setUserPlan] = useState(null);
-  const [maxProjects, setMaxProjects] = useState(10);
+  const [maxProjects, setMaxProjects] = useState(5); // Changed from 10 to 5
   const [currentUser, setCurrentUser] = useState(null);
 
   // Load available projects and existing selections
@@ -52,9 +53,9 @@ export default function TrelloProjectSelector() {
         try {
           const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
           setUserPlan(statusRes.data.plan || 'starter');
-          setMaxProjects(statusRes.data.maxProjectsAllowed || 10);
+          setMaxProjects(statusRes.data.maxProjectsAllowed || 5); // Changed fallback from 10 to 5
         } catch (e) {
-          setMaxProjects(10);
+          setMaxProjects(5); // Changed fallback from 10 to 5
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -178,7 +179,9 @@ export default function TrelloProjectSelector() {
     });
   };
 
-  const handleRemoveAssignedMember = async (boardId, memberEmail) => {
+  const handleRemoveAssignedMember = async (event, boardId, memberEmail) => { // Added event param
+    event.stopPropagation(); // Stop event propagation to prevent parent onClick
+    
     try {
       const existingAssignment = await base44.entities.WorkspaceMember.filter({
         workspace_id: boardId,
@@ -535,12 +538,16 @@ export default function TrelloProjectSelector() {
                           <Badge 
                             key={member.user_email} 
                             variant="secondary"
-                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-emerald-200 transition-colors"
-                            onClick={() => handleRemoveAssignedMember(project.id, member.user_email)}
+                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2" // Removed onClick from Badge
                           >
                             <CheckCircle2 className="w-3 h-3" />
                             {member.user_name || member.user_email}
-                            <X className="w-3 h-3 ml-1 hover:text-emerald-900" />
+                            <button
+                              onClick={(e) => handleRemoveAssignedMember(e, project.id, member.user_email)} // Added event parameter
+                              className="ml-1 hover:text-emerald-900 transition-colors"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
                           </Badge>
                         ))}
                       </div>

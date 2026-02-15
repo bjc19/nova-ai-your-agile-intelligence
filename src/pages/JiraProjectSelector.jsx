@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +24,7 @@ export default function JiraProjectSelector() {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [savingSelection, setSavingSelection] = useState(false);
   const [userPlan, setUserPlan] = useState(null);
-  const [maxProjects, setMaxProjects] = useState(10);
+  const [maxProjects, setMaxProjects] = useState(5); // Changed default maxProjects to 5
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -49,10 +50,10 @@ export default function JiraProjectSelector() {
 
         try {
           const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-          setUserPlan(statusRes.data.plan || 'starter');
-          setMaxProjects(statusRes.data.maxProjectsAllowed || 10);
+          setUserPlan(statusRes.data.plan); // Removed default 'starter'
+          setMaxProjects(statusRes.data.maxProjectsAllowed); // Removed default 10
         } catch (e) {
-          setMaxProjects(10);
+          setMaxProjects(5); // Changed fallback maxProjects to 5
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -171,7 +172,9 @@ export default function JiraProjectSelector() {
     });
   };
 
-  const handleRemoveAssignedMember = async (projectId, memberEmail) => {
+  const handleRemoveAssignedMember = async (event, projectId, memberEmail) => {
+    event.stopPropagation(); // Stop propagation to prevent parent onClick from firing
+    
     try {
       const existingAssignment = await base44.entities.WorkspaceMember.filter({
         workspace_id: projectId,
@@ -345,6 +348,7 @@ export default function JiraProjectSelector() {
         </motion.div>
 
         {step === 1 && (
+        <>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -405,9 +409,7 @@ export default function JiraProjectSelector() {
             </CardContent>
           </Card>
         </motion.div>
-        )}
 
-        {step === 1 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -464,6 +466,7 @@ export default function JiraProjectSelector() {
             </div>
           )}
         </motion.div>
+        </>
         )}
 
         {step === 2 && (
@@ -515,12 +518,16 @@ export default function JiraProjectSelector() {
                           <Badge 
                             key={member.user_email} 
                             variant="secondary"
-                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2 cursor-pointer hover:bg-emerald-200 transition-colors"
-                            onClick={() => handleRemoveAssignedMember(project.id, member.user_email)}
+                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2" // Removed cursor-pointer
                           >
                             <CheckCircle2 className="w-3 h-3" />
                             {member.user_name || member.user_email}
-                            <X className="w-3 h-3 ml-1 hover:text-emerald-900" />
+                            <button // Wrapped X icon in a button
+                              onClick={(e) => handleRemoveAssignedMember(e, project.id, member.user_email)} // Passed event to stop propagation
+                              className="ml-1 hover:text-emerald-900 transition-colors"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
                           </Badge>
                         ))}
                       </div>
