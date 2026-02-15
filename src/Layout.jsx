@@ -3,11 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LogOut, LogIn, Users } from "lucide-react";
+import { Sparkles, LogOut, LogIn, Users, Menu, X } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { LoginDialog } from "@/components/LoginDialog";
 import { DemoSimulator } from "@/components/nova/DemoSimulator";
 import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 function LayoutContent({ children, currentPageName }) {
     const navigate = useNavigate();
@@ -18,6 +25,7 @@ function LayoutContent({ children, currentPageName }) {
     const [showDemoSimulator, setShowDemoSimulator] = useState(false);
     const [userRole, setUserRole] = useState(null);
     const [canInvite, setCanInvite] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -78,81 +86,135 @@ function LayoutContent({ children, currentPageName }) {
                 Nova
               </span>
             </Link>
-          )}
-          
-          <div className="flex items-center gap-6">
-            {isLoading ? (
-              <div className="w-6 h-6 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" />
-            ) : isAuthenticated ? (
-              <>
-                <Link 
-                   to={createPageUrl("Dashboard")}
-                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                 >
-                   {t('dashboard')}
-                 </Link>
-                 {(userRole === 'admin' || userRole === 'contributor' || canInvite) && (
-                   <Link 
-                     to={createPageUrl("Analysis")}
+            )}
+
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center gap-6">
+              {isLoading ? (
+                <div className="w-6 h-6 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" />
+              ) : isAuthenticated ? (
+                <>
+                  <Link 
+                     to={createPageUrl("Dashboard")}
                      className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                    >
-                     {t('analyze')}
+                     {t('dashboard')}
                    </Link>
-                 )}
-                 <Link 
-                  to={createPageUrl("Settings")}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                 >
-                  {t('settings')}
-                 </Link>
-                 {canInvite && (
-                  <Link 
-                    to={createPageUrl("TeamManagement")}
-                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1"
+                   {(userRole === 'admin' || userRole === 'contributor' || canInvite) && (
+                     <Link 
+                       to={createPageUrl("Analysis")}
+                       className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                     >
+                       {t('analyze')}
+                     </Link>
+                   )}
+                   <Link 
+                    to={createPageUrl("Settings")}
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                   >
+                    {t('settings')}
+                   </Link>
+                   {canInvite && (
+                    <Link 
+                      to={createPageUrl("TeamManagement")}
+                      className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors flex items-center gap-1"
+                    >
+                      <Users className="w-4 h-4" />
+                      Équipe
+                    </Link>
+                   )}
+                  <Button 
+                     variant="ghost" 
+                     size="sm"
+                     onClick={async () => {
+                       setIsAuthenticated(false);
+                       setUserRole(null);
+                       await base44.auth.logout();
+                       window.location.href = createPageUrl("Home");
+                     }}
+                     className="text-slate-500 hover:text-slate-700"
+                   >
+                     <LogOut className="w-4 h-4" />
+                   </Button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setShowDemoSimulator(true)}
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                   >
-                    <Users className="w-4 h-4" />
-                    Équipe
+                    {t('tryDemo')}
+                  </button>
+                  <Link 
+                    to={createPageUrl("Privacy")}
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                  >
+                    Confidentialité
                   </Link>
-                 )}
-                <Button 
-                   variant="ghost" 
-                   size="sm"
-                   onClick={async () => {
-                     setIsAuthenticated(false);
-                     setUserRole(null);
-                     await base44.auth.logout();
-                     window.location.href = createPageUrl("Home");
-                   }}
-                   className="text-slate-500 hover:text-slate-700"
-                 >
-                   <LogOut className="w-4 h-4" />
-                 </Button>
-              </>
-            ) : (
-              <>
-                <button 
-                  onClick={() => setShowDemoSimulator(true)}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                >
-                  {t('tryDemo')}
-                </button>
-                <Link 
-                  to={createPageUrl("Privacy")}
-                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                >
-                  Confidentialité
-                </Link>
-                <Button 
-                  size="sm"
-                  onClick={() => setShowLoginDialog(true)}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  {t('signIn')}
-                </Button>
-              </>
+                  <Button 
+                    size="sm"
+                    onClick={() => setShowLoginDialog(true)}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    {t('signIn')}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Mobile Menu */}
+            {!isAuthenticated && (
+              <div className="md:hidden">
+                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[280px]">
+                    <SheetHeader className="mb-6">
+                      <SheetTitle className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-white" />
+                        </div>
+                        Nova
+                      </SheetTitle>
+                    </SheetHeader>
+                    <div className="flex flex-col gap-4">
+                      <button 
+                        onClick={() => {
+                          setShowDemoSimulator(true);
+                          setMobileMenuOpen(false);
+                        }}
+                        className="text-left text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                      >
+                        {t('tryDemo')}
+                      </button>
+                      <Link 
+                        to={createPageUrl("Privacy")}
+                        className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Confidentialité
+                      </Link>
+                      <div className="pt-4 border-t border-slate-200">
+                        <Button 
+                          onClick={() => {
+                            setShowLoginDialog(true);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                        >
+                          <LogIn className="w-4 h-4 mr-2" />
+                          {t('signIn')}
+                        </Button>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
             )}
-          </div>
         </div>
       </nav>
 
