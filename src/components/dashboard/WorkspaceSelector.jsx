@@ -22,11 +22,17 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         
         // Load ONLY Jira projects if Jira is connected
         if (jiraConns.length > 0) {
-          selections = await base44.entities.JiraProjectSelection.filter({ is_active: true });
+          selections = await base44.entities.JiraProjectSelection.filter({ 
+            user_email: user?.email,
+            is_active: true 
+          });
         } 
         // Otherwise, load ONLY Trello boards if Trello is connected
         else if (trelloConns.length > 0) {
-          const trelloData = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+          const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
+            user_email: user?.email,
+            is_active: true 
+          });
           selections = trelloData.map(ws => ({
             ...ws,
             jira_project_name: ws.board_name // Map board_name to jira_project_name for display

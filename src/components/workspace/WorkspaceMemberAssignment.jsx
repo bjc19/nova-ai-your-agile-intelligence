@@ -39,12 +39,18 @@ export default function WorkspaceMemberAssignment() {
         
         // Load ONLY Jira projects if Jira is connected
         if (jiraConns.length > 0) {
-          const jiraData = await base44.entities.JiraProjectSelection.filter({ is_active: true });
+          const jiraData = await base44.entities.JiraProjectSelection.filter({ 
+            user_email: user?.email,
+            is_active: true 
+          });
           workspacesData = jiraData.map(ws => ({ ...ws, source: 'jira' }));
         } 
         // Otherwise, load ONLY Trello boards if Trello is connected
         else if (trelloConns.length > 0) {
-          const trelloData = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+          const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
+            user_email: user?.email,
+            is_active: true 
+          });
           workspacesData = trelloData.map(ws => ({ 
             ...ws, 
             source: 'trello',
