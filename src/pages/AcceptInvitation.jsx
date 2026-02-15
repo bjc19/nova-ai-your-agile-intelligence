@@ -100,10 +100,10 @@ export default function AcceptInvitation() {
 
       if (registerResponse.data.success) {
         setSuccess(true);
-        // Invited users bypass email verification - redirect directly to login
+        // Redirect to email verification page
         setTimeout(() => {
-          navigate(createPageUrl('Home'));
-        }, 2000);
+          navigate(createPageUrl('VerifyEmail') + `?email=${encodeURIComponent(formData.email)}`);
+        }, 1500);
       } else {
         setError(registerResponse.data.error || 'Erreur lors de l\'inscription');
       }
