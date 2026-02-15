@@ -25,6 +25,21 @@ export default function ChooseAccess() {
         const u = await base44.auth.me();
         setUser(u);
 
+        // Check if user has been invited (has workspace member record)
+        try {
+          const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+            user_email: u.email
+          });
+          
+          if (workspaceMembers && workspaceMembers.length > 0) {
+            // User has been invited - redirect to Dashboard directly
+            navigate(createPageUrl("Dashboard"));
+            return;
+          }
+        } catch (e) {
+          console.log('No workspace members found');
+        }
+
         const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
         if (statusRes.data.hasAccess) {
           navigate(createPageUrl("Dashboard"));
