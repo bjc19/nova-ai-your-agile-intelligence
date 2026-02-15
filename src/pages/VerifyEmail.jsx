@@ -41,7 +41,7 @@ export default function VerifyEmail() {
       if (response.data?.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate(createPageUrl('Home'));
+          navigate(createPageUrl('Dashboard'));
         }, 2000);
       } else {
         setError(response.data?.error || 'Erreur de vérification');
