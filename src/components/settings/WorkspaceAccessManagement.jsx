@@ -34,7 +34,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
    const [editingUser, setEditingUser] = useState(null);
    const [newRole, setNewRole] = useState(null);
    const [userToDelete, setUserToDelete] = useState(null);
-   const [changingPlan, setChangingPlan] = useState(false);
+    const [changingPlan, setChangingPlan] = useState(false);
+    const [invitationToDelete, setInvitationToDelete] = useState(null);
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
