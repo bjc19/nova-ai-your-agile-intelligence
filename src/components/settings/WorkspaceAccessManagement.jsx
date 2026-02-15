@@ -158,6 +158,25 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     setUserToDelete(userToRemove);
   };
 
+  const handleDeleteInvitation = (invitationId) => {
+    if (!canManage) return;
+    setInvitationToDelete(pendingInvitations.find(inv => inv.id === invitationId));
+  };
+
+  const confirmDeleteInvitation = async () => {
+    if (!invitationToDelete) return;
+
+    try {
+      await base44.entities.InvitationToken.delete(invitationToDelete.id);
+      setPendingInvitations(pendingInvitations.filter(inv => inv.id !== invitationToDelete.id));
+      toast.success('Invitation supprimée');
+      setInvitationToDelete(null);
+    } catch (error) {
+      console.error('Delete invitation error:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
 
