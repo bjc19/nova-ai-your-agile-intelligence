@@ -14,8 +14,12 @@ import { toast } from "sonner";
 export default function TrelloProjectSelector() {
   useAccessControl();
   const navigate = useNavigate();
+  const [step, setStep] = useState(1); // 1: Sélection projets, 2: Assignation membres
   const [projects, setProjects] = useState([]);
   const [selectedProjects, setSelectedProjects] = useState(new Set());
+  const [selectedProjectsData, setSelectedProjectsData] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [memberAssignments, setMemberAssignments] = useState({});
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [savingSelection, setSavingSelection] = useState(false);
   const [userPlan, setUserPlan] = useState(null);
@@ -91,14 +95,72 @@ export default function TrelloProjectSelector() {
       });
 
       if (response.data.success) {
-        toast.success('Sélection sauvegardée avec succès');
-        setTimeout(() => {
-          navigate(createPageUrl("Settings"));
-        }, 1000);
+        setSelectedProjectsData(selectedBoards);
+        // Charger les membres de l'équipe
+        const members = await base44.entities.TeamMember.list();
+        setTeamMembers(members);
+        
+        // Initialiser les assignations vides
+        const initialAssignments = {};
+        selectedBoards.forEach(board => {
+          initialAssignments[board.id] = [];
+        });
+        setMemberAssignments(initialAssignments);
+        
+        toast.success('Projets sauvegardés ! Assignez maintenant les membres.');
+        setStep(2);
       }
     } catch (error) {
       console.error('Error saving selection:', error);
       toast.error('Erreur lors de la sauvegarde de la sélection');
+    } finally {
+      setSavingSelection(false);
+    }
+  };
+
+  const toggleMemberAssignment = (boardId, memberEmail) => {
+    setMemberAssignments(prev => {
+      const current = prev[boardId] || [];
+      const isAssigned = current.includes(memberEmail);
+      
+      return {
+        ...prev,
+        [boardId]: isAssigned
+          ? current.filter(email => email !== memberEmail)
+          : [...current, memberEmail]
+      };
+    });
+  };
+
+  const handleFinishAssignment = async () => {
+    try {
+      setSavingSelection(true);
+      
+      // Créer les assignations pour chaque tableau et membre
+      for (const [boardId, memberEmails] of Object.entries(memberAssignments)) {
+        const board = selectedProjectsData.find(b => b.id === boardId);
+        
+        for (const memberEmail of memberEmails) {
+          const member = teamMembers.find(m => m.user_email === memberEmail);
+          
+          await base44.entities.WorkspaceMember.create({
+            user_email: memberEmail,
+            user_name: member?.user_name || memberEmail,
+            role: member?.role || 'user',
+            workspace_id: boardId,
+            invited_by: (await base44.auth.me()).email,
+            invitation_status: 'accepted'
+          });
+        }
+      }
+      
+      toast.success('Membres assignés avec succès !');
+      setTimeout(() => {
+        navigate(createPageUrl("Settings"));
+      }, 1000);
+    } catch (error) {
+      console.error('Error assigning members:', error);
+      toast.error('Erreur lors de l\'assignation des membres');
     } finally {
       setSavingSelection(false);
     }
@@ -120,7 +182,7 @@ export default function TrelloProjectSelector() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="max-w-4xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -129,27 +191,56 @@ export default function TrelloProjectSelector() {
           className="mb-8"
         >
           <button
-            onClick={() => navigate(createPageUrl("Settings"))}
+            onClick={() => step === 1 ? navigate(createPageUrl("Settings")) : setStep(1)}
             className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Retour aux paramètres
+            {step === 1 ? 'Retour aux paramètres' : 'Retour à la sélection des projets'}
           </button>
+
+          {/* Stepper */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                step === 1 ? 'bg-sky-600 text-white' : 'bg-emerald-500 text-white'
+              }`}>
+                {step === 1 ? '1' : '✓'}
+              </div>
+              <span className={`text-sm font-medium ${step === 1 ? 'text-slate-900' : 'text-slate-500'}`}>
+                Sélection des projets
+              </span>
+            </div>
+            <div className={`h-0.5 w-16 ${step === 2 ? 'bg-sky-600' : 'bg-slate-300'}`} />
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                step === 2 ? 'bg-sky-600 text-white' : 'bg-slate-300 text-slate-500'
+              }`}>
+                2
+              </div>
+              <span className={`text-sm font-medium ${step === 2 ? 'text-slate-900' : 'text-slate-500'}`}>
+                Assignation des membres
+              </span>
+            </div>
+          </div>
 
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2.5 rounded-xl bg-sky-100">
               <Layers className="w-5 h-5 text-sky-600" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900">
-              Sélectionner vos projets Trello
+              {step === 1 ? 'Sélectionner vos projets Trello' : 'Assigner les membres'}
             </h1>
           </div>
           <p className="text-slate-600">
-            Choisissez les tableaux Trello à analyser avec Nova.
+            {step === 1 
+              ? 'Choisissez les tableaux Trello à analyser avec Nova.'
+              : 'Assignez les membres de votre équipe aux tableaux sélectionnés.'
+            }
           </p>
         </motion.div>
 
-        {/* Plan & Quota Card */}
+        {/* Step 1: Plan & Quota Card */}
+        {step === 1 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -211,8 +302,10 @@ export default function TrelloProjectSelector() {
             </CardContent>
           </Card>
         </motion.div>
+        )}
 
-        {/* Projects List */}
+        {/* Step 1: Projects List */}
+        {step === 1 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -269,6 +362,84 @@ export default function TrelloProjectSelector() {
             </div>
           )}
         </motion.div>
+        )}
+
+        {/* Step 2: Member Assignment */}
+        {step === 2 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 space-y-6"
+        >
+          {/* Selected Projects Summary */}
+          <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+            <CardContent className="p-6">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">
+                Projets sélectionnés ({selectedProjectsData.length})
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {selectedProjectsData.map(project => (
+                  <Badge key={project.id} className="bg-emerald-600 text-white">
+                    {project.name}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Member Assignment per Project */}
+          {selectedProjectsData.map((project) => (
+            <Card key={project.id} className="border-2 border-slate-200">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Layers className="w-5 h-5 text-sky-600" />
+                  {project.name}
+                </CardTitle>
+                <CardDescription>
+                  Sélectionnez les membres à assigner à ce tableau
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {teamMembers.length === 0 ? (
+                  <p className="text-sm text-slate-500 text-center py-4">
+                    Aucun membre d'équipe disponible
+                  </p>
+                ) : (
+                  teamMembers.map((member) => (
+                    <Card
+                      key={member.id}
+                      className={`cursor-pointer transition-all border ${
+                        memberAssignments[project.id]?.includes(member.user_email)
+                          ? 'border-sky-500 bg-sky-50'
+                          : 'border-slate-200 hover:border-sky-200'
+                      }`}
+                      onClick={() => toggleMemberAssignment(project.id, member.user_email)}
+                    >
+                      <CardContent className="p-3 flex items-center gap-3">
+                        <Checkbox
+                          checked={memberAssignments[project.id]?.includes(member.user_email)}
+                          onCheckedChange={() => toggleMemberAssignment(project.id, member.user_email)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-slate-900">
+                            {member.user_name || member.user_email}
+                          </p>
+                          <p className="text-xs text-slate-500">{member.user_email}</p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {member.role}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </motion.div>
+        )}
 
         {/* Action Buttons */}
         <motion.div
@@ -277,30 +448,61 @@ export default function TrelloProjectSelector() {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="flex gap-4 justify-end"
         >
-          <Button
-            variant="outline"
-            onClick={() => navigate(createPageUrl("Settings"))}
-            className="px-6"
-          >
-            Annuler
-          </Button>
-          <Button
-            onClick={handleConfirmSelection}
-            disabled={savingSelection || selectedProjects.size === 0}
-            className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white px-8"
-          >
-            {savingSelection ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Sauvegarde...
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Confirmer la sélection ({selectedProjects.size})
-              </>
-            )}
-          </Button>
+          {step === 1 ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => navigate(createPageUrl("Settings"))}
+                className="px-6"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleConfirmSelection}
+                disabled={savingSelection || selectedProjects.size === 0}
+                className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800 text-white px-8"
+              >
+                {savingSelection ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sauvegarde...
+                  </>
+                ) : (
+                  <>
+                    Continuer
+                    <CheckCircle2 className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => navigate(createPageUrl("Settings"))}
+                className="px-6"
+              >
+                Terminer plus tard
+              </Button>
+              <Button
+                onClick={handleFinishAssignment}
+                disabled={savingSelection}
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-8"
+              >
+                {savingSelection ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Assignation...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Terminer l'assignation
+                  </>
+                )}
+              </Button>
+            </>
+          )}
         </motion.div>
       </div>
     </div>
