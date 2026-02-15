@@ -669,7 +669,8 @@ export default function Settings() {
           </motion.div>
         }
 
-        {/* Team & Projects Configuration */}
+        {/* Team & Projects Configuration - Hide for simple users */}
+        {(currentRole === 'admin' || currentRole === 'contributor') &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -739,6 +740,7 @@ export default function Settings() {
 
           </Card>
         </motion.div>
+        }
 
         {/* Language Settings */}
         <motion.div
