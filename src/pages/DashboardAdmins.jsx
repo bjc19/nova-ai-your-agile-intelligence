@@ -29,8 +29,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2
-} from "lucide-react";
+  Loader2 } from
+"lucide-react";
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ export default function DashboardAdmins() {
       }
 
       const currentUser = await base44.auth.me();
-      
+
       // Role verification - only 'admin' can access
       if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
@@ -120,8 +120,8 @@ export default function DashboardAdmins() {
   // Filter analysis history
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
-    const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : true;
+    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
     return matchesPeriod && matchesWorkspace;
   });
 
@@ -183,8 +183,8 @@ export default function DashboardAdmins() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -192,8 +192,8 @@ export default function DashboardAdmins() {
       {/* Onboarding Modal */}
       <TeamConfigOnboarding
         isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)}
-      />
+        onComplete={() => setShowOnboarding(false)} />
+
 
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
@@ -230,52 +230,52 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
-                <WorkspaceSelector 
+                <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                />
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
-                  }}
-                />
+                  }} />
+
               </div>
             </div>
 
-            {(!selectedPeriod || analysisHistory.length > 0) && (
-              <>
-                <DailyQuote 
-                  lang={t('language') === 'English' ? 'en' : 'fr'}
-                  blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-                  riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                  patterns={[]}
-                />
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <>
+                <DailyQuote
+                lang={t('language') === 'English' ? 'en' : 'fr'}
+                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+                patterns={[]} />
+
                 <QuickStats analysisHistory={analysisHistory} />
               </>
-            )}
+            }
           </motion.div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {multiProjectAlert && (
-          <div className="mb-6">
+        {multiProjectAlert &&
+        <div className="mb-6">
             <MultiProjectAlert
-              detectionData={multiProjectAlert}
-              onConfirm={() => {
-                setMultiProjectAlert(null);
-                window.location.reload();
-              }}
-              onDismiss={() => setMultiProjectAlert(null)}
-            />
-          </div>
-        )}
+            detectionData={multiProjectAlert}
+            onConfirm={() => {
+              setMultiProjectAlert(null);
+              window.location.reload();
+            }}
+            onDismiss={() => setMultiProjectAlert(null)} />
 
-        {selectedPeriod && analysisHistory.length === 0 && (
-          <div className="text-center py-16">
+          </div>
+        }
+
+        {selectedPeriod && analysisHistory.length === 0 &&
+        <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
@@ -292,80 +292,80 @@ export default function DashboardAdmins() {
               </Button>
             </Link>
           </div>
-        )}
+        }
 
-        {(!selectedPeriod || analysisHistory.length > 0) && (
-          <div className="grid lg:grid-cols-3 gap-6">
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {sprintHealth && (
-                <SprintHealthCard
-                  sprintHealth={sprintHealth}
-                  onAcknowledge={() => console.log("Drift acknowledged")}
-                  onReviewSprint={() => console.log("Review sprint")}
-                />
-              )}
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={sprintHealth}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
 
-              {analysisHistory.length > 0 && (
-                <MetricsRadarCard
-                  metricsData={{
-                    velocity: { current: 45, trend: "up", change: 20 },
-                    flow_efficiency: { current: 28, target: 55 },
-                    cycle_time: { current: 9, target: 4 },
-                    throughput: { current: 6, variance: 0.3 },
-                    deployment_frequency: { current: 1, target: 3 },
-                    data_days: 14
-                  }}
-                  historicalData={{
-                    sprints_count: 1,
-                    data_days: 7,
-                    is_audit_phase: false,
-                    is_new_team: true
-                  }}
-                  integrationStatus={{
-                    jira_connected: true,
-                    slack_connected: false,
-                    dora_pipeline: false,
-                    flow_metrics_available: true
-                  }}
-                  onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-                  onApplyLever={(lever) => console.log("Apply lever:", lever)}
-                />
-              )}
+            }
 
-              {analysisHistory.length > 0 && (
-                <RealityMapCard
-                  flowData={{
-                    assignee_changes: [
-                      { person: "Mary", count: 42 },
-                      { person: "John", count: 12 }
-                    ],
-                    mention_patterns: [
-                      { person: "Mary", type: "prioritization", count: 35 },
-                      { person: "Dave", type: "unblocking", count: 19 }
-                    ],
-                    blocked_resolutions: [
-                      { person: "Dave", count: 19 }
-                    ],
-                    data_days: 30
-                  }}
-                  flowMetrics={{
-                    blocked_tickets_over_5d: 12,
-                    avg_cycle_time: 8.2,
-                    avg_wait_time_percent: 65,
-                    reopened_tickets: 8,
-                    total_tickets: 100,
-                    data_days: 30
-                  }}
-                  onDiscussSignals={() => console.log("Discuss systemic signals")}
-                />
-              )}
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
+              metricsData={{
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
+              }}
+              historicalData={{
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
+              }}
+              integrationStatus={{
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
+              }}
+              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
+              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
+
+            }
+
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
+              flowData={{
+                assignee_changes: [
+                { person: "Mary", count: 42 },
+                { person: "John", count: 12 }],
+
+                mention_patterns: [
+                { person: "Mary", type: "prioritization", count: 35 },
+                { person: "Dave", type: "unblocking", count: 19 }],
+
+                blocked_resolutions: [
+                { person: "Dave", count: 19 }],
+
+                data_days: 30
+              }}
+              flowMetrics={{
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30
+              }}
+              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+
+            }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
-                latestAnalysis={latestAnalysis}
-                sourceUrl={latestAnalysis?.sourceUrl}
-                sourceName={latestAnalysis?.sourceName}
-              />
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
+
             </div>
 
             <div className="space-y-6">
@@ -373,7 +373,7 @@ export default function DashboardAdmins() {
               <IntegrationStatus />
             </div>
           </div>
-        )}
+        }
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -389,10 +389,10 @@ export default function DashboardAdmins() {
               </div>
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                    <Zap className="w-4 h-4 mr-2" />
-                    {t('connectSlack')}
-                  </Button>
+                  
+
+
+
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
@@ -405,6 +405,6 @@ export default function DashboardAdmins() {
           </div>
         </motion.div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
