@@ -56,13 +56,20 @@ Deno.serve(async (req) => {
 
         if (newUsers && newUsers.length > 0) {
           const newUser = newUsers[0];
-          // Update the user to mark as verified with invitation details
-          await base44.asServiceRole.entities.User.update(newUser.id, {
-            is_verified: true,
-            verified_at: new Date().toISOString(),
-            invitation_token_id: inv.id
+          // Mark OTP as already verified to bypass email verification screen
+          const verificationCode = await base44.asServiceRole.entities.EmailVerificationCode.filter({
+            email: email,
+            verified: false
           });
-          console.log('User marked as verified with invitation:', email);
+          
+          if (verificationCode && verificationCode.length > 0) {
+            await base44.asServiceRole.entities.EmailVerificationCode.update(verificationCode[0].id, {
+              verified: true,
+              verified_at: new Date().toISOString()
+            });
+          }
+          
+          console.log('User verification bypassed for invited user:', email);
         }
     } catch (regErr) {
       console.error('Registration error:', regErr);
