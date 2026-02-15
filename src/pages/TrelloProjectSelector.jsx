@@ -133,12 +133,20 @@ export default function TrelloProjectSelector() {
           toast.error('Erreur lors du chargement des membres');
         }
         
-        // Initialiser les assignations vides
-        const initialAssignments = {};
-        selectedBoards.forEach(board => {
-          initialAssignments[board.id] = [];
-        });
-        setMemberAssignments(initialAssignments);
+        // Charger les assignations existantes depuis la base de données
+        const existingAssignments = {};
+        for (const board of selectedBoards) {
+          try {
+            const existingMembers = await base44.entities.WorkspaceMember.filter({
+              workspace_id: board.id
+            });
+            existingAssignments[board.id] = existingMembers.map(m => m.user_email);
+          } catch (error) {
+            console.error(`Error loading existing assignments for board ${board.id}:`, error);
+            existingAssignments[board.id] = [];
+          }
+        }
+        setMemberAssignments(existingAssignments);
         
         toast.success('Projets sauvegardés ! Assignez maintenant les membres.');
         setStep(2);
