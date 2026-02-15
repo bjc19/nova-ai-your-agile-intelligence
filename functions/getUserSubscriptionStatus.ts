@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     if (teamMembership.length > 0) {
       const membership = teamMembership[0];
       const adminSub = await base44.asServiceRole.entities.Subscription.filter({ 
-        user_email: membership.admin_email 
+        user_email: membership.manager_email 
       });
 
       const planQuotas = {
