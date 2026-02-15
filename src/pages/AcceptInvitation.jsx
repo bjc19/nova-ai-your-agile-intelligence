@@ -163,7 +163,7 @@ export default function AcceptInvitation() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-slate-600">
-              Votre compte Nova a été créé.
+              Votre compte Nova a été créé avec succès.
             </p>
             <p className="text-xs text-slate-500">
               Redirection vers la vérification d'email...
