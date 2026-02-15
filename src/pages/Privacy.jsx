@@ -15,13 +15,14 @@ export default function Privacy() {
             </div>
             <h1 className="text-4xl font-bold text-slate-900">Politique de confidentialité</h1>
           </div>
-          <p className="text-slate-600 text-lg">Dernière mise à jour : 13 février 2026</p>
+          <p className="text-slate-600 text-lg">Dernière mise à jour : 15 février 2026</p>
           
           <div className="mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-            <p className="text-sm text-blue-900 font-medium mb-1">📋 Déclaration Jira Personal Data</p>
+            <p className="text-sm text-blue-900 font-medium mb-1">📋 Déclaration de Protection des Données</p>
             <p className="text-sm text-blue-800">
               Nova stocke les tokens d'accès OAuth et adresses email au-delà de 24h (conformément aux exigences de connexion persistante). 
-              Cependant, <strong>aucune donnée Jira brute</strong> (issues, commentaires, historique) n'est stockée — seulement les résultats d'analyse anonymisés.
+              Cependant, <strong>aucune donnée brute de vos outils</strong> (Jira, Trello, Slack, Teams) n'est stockée — 
+              seulement les résultats d'analyse anonymisés après traitement backend sécurisé.
             </p>
           </div>
         </div>
@@ -54,16 +55,17 @@ export default function Privacy() {
 
               <h3 className="text-lg font-semibold text-slate-800 mb-2">1.2 Données d'intégration (Tokens uniquement)</h3>
               <ul className="list-disc list-inside text-slate-700 space-y-2 mb-4 ml-4">
-                <li><strong>Tokens OAuth chiffrés</strong> pour Slack, Jira et Microsoft Teams (AES-256)</li>
-                <li>Identifiants de workspace et cloud_id</li>
+                <li><strong>Tokens OAuth chiffrés</strong> pour Slack, Jira, Trello et Microsoft Teams (AES-256)</li>
+                <li>Identifiants de workspace, cloud_id et board_id</li>
                 <li>Métadonnées d'intégration (dates de connexion, permissions accordées)</li>
               </ul>
               <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-4">
                 <p className="text-sm font-semibold text-emerald-900 mb-1">✅ Architecture zéro-rétention des données tierces</p>
                 <p className="text-sm text-emerald-800">
-                  Nova n'extrait ni ne stocke les données brutes de vos outils externes (issues Jira, messages Slack, commentaires Teams). 
-                  Nous accédons à ces données en <strong>lecture seule</strong>, les analysons en mémoire en temps réel, 
-                  puis les supprimons <strong>immédiatement</strong> après génération des insights.
+                  Nova n'extrait ni ne stocke les données brutes de vos outils externes (issues Jira, tableaux Trello, messages Slack, conversations Teams). 
+                  Nous accédons à ces données en <strong>lecture seule uniquement</strong>, les analysons via notre moteur backend sécurisé, 
+                  puis les supprimons <strong>immédiatement</strong> après génération des insights. L'anonymisation des données sensibles 
+                  est effectuée en amont, côté backend, avant toute analyse.
                 </p>
               </div>
 
@@ -78,11 +80,12 @@ export default function Privacy() {
                 <li>Historique d'analyses et tendances</li>
               </ul>
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-                <p className="text-sm font-semibold text-blue-900 mb-1">🔒 Anonymisation systématique (RGPD stricte)</p>
+                <p className="text-sm font-semibold text-blue-900 mb-1">🔒 Anonymisation systématique backend (RGPD stricte)</p>
                 <p className="text-sm text-blue-800">
-                  Tous les identifiants personnels (AccountID, tenant_id, team_id, session_id) sont <strong>anonymisés via hachage SHA256</strong> 
-                  avant stockage. Les prénoms des membres d'équipe sont stockés uniquement avec <strong>consentement explicite</strong> 
-                  et peuvent être supprimés à tout moment.
+                  Toutes les données sensibles provenant de Jira, Trello, Slack et Teams sont <strong>anonymisées côté backend</strong> 
+                  avant toute persistance. Nos fonctions d'analyse appliquent des transformations de sécurité propriétaires 
+                  pour garantir qu'aucun identifiant personnel direct n'est jamais stocké. Les prénoms des membres d'équipe 
+                  sont conservés uniquement avec <strong>consentement explicite</strong> et peuvent être supprimés à tout moment.
                 </p>
               </div>
 
@@ -160,11 +163,16 @@ export default function Privacy() {
                 <li><strong>Responsabilité</strong> : Audits réguliers et droit à l'oubli en 48h</li>
               </ul>
 
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.3 Anonymisation RGPD-compliant</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">3.3 Anonymisation backend RGPD-compliant</h3>
+              <p className="text-slate-700 mb-2">
+                Nova applique une politique d'anonymisation stricte <strong>avant</strong> la persistance de toute donnée d'analyse :
+              </p>
               <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
-                <li>Hachage SHA256 irréversible de tous les identifiants (AccountID, tenant_id, team_id, session_id)</li>
-                <li>Prénoms stockés uniquement avec consentement explicite</li>
+                <li>Traitement sécurisé côté backend de toutes les données sources (Jira, Trello, Slack, Teams)</li>
+                <li>Transformation automatique des identifiants sensibles avant stockage</li>
+                <li>Prénoms conservés uniquement avec consentement explicite de l'équipe</li>
                 <li>Pas de stockage de numéros de téléphone, adresses postales ou données bancaires</li>
+                <li>Accès en lecture seule aux plateformes externes (aucune modification possible)</li>
                 <li>Logs système anonymisés après 30 jours</li>
               </ul>
             </div>
@@ -193,7 +201,7 @@ export default function Privacy() {
               <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
                 <li><strong>Prestataires certifiés :</strong> Base44 (hébergement RGPD), Stripe (paiements PCI-DSS), Resend (emails transactionnels)</li>
                 <li><strong>OpenAI (analyses IA) :</strong> Données anonymisées uniquement, sans stockage permanent par OpenAI</li>
-                <li><strong>Aucun partage avec vos outils :</strong> Nova ne transmet JAMAIS vos résultats d'analyse à Slack, Jira ou Teams (flux unidirectionnel lecture seule)</li>
+                <li><strong>Aucun partage avec vos outils :</strong> Nova ne transmet JAMAIS vos résultats d'analyse à Slack, Jira, Trello ou Teams (flux unidirectionnel lecture seule)</li>
                 <li><strong>Obligations légales :</strong> Autorités compétentes si requis par la loi (dans le respect du RGPD)</li>
                 <li><strong>Membres de votre workspace :</strong> Analyses partagées au sein de votre équipe Nova uniquement</li>
               </ul>
