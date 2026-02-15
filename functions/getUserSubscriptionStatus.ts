@@ -13,11 +13,20 @@ Deno.serve(async (req) => {
     
     if (ownSubscription.length > 0) {
       const sub = ownSubscription[0];
+      const planQuotas = {
+        'starter': 5,
+        'growth': 15,
+        'pro': 25
+      };
+      const maxProjectsAllowed = planQuotas[sub.plan?.toLowerCase()] || 5;
+      
       return Response.json({
         hasAccess: true,
         type: 'owner',
         subscription: sub,
-        canInvite: sub.is_admin
+        canInvite: sub.is_admin,
+        plan: sub.plan,
+        maxProjectsAllowed
       });
     }
 
@@ -29,12 +38,22 @@ Deno.serve(async (req) => {
         user_email: membership.admin_email 
       });
 
+      const planQuotas = {
+        'starter': 5,
+        'growth': 15,
+        'pro': 25
+      };
+      const adminPlan = adminSub[0]?.plan?.toLowerCase() || 'starter';
+      const maxProjectsAllowed = planQuotas[adminPlan] || 5;
+
       return Response.json({
         hasAccess: true,
         type: 'member',
         membership: membership,
         subscription: adminSub[0] || null,
-        canInvite: membership.role === 'contributor'
+        canInvite: membership.role === 'contributor',
+        plan: adminSub[0]?.plan,
+        maxProjectsAllowed
       });
     }
 
