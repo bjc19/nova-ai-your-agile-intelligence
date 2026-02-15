@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
           const newUser = newUsers[0];
           // Update the user to mark as verified with invitation details
           await base44.asServiceRole.entities.User.update(newUser.id, {
+            is_verified: true,
             verified_at: new Date().toISOString(),
             invitation_token_id: inv.id
           });
