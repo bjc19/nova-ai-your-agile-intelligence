@@ -6,10 +6,10 @@ Deno.serve(async (req) => {
     const { email, fullName, password, invitationId, token } = await req.json();
 
     if (!email || !fullName || !password || !token) {
-      return Response.json({ error: 'Missing required fields', received: { email, fullName, password: !!password, token: !!token, invitationId } }, { status: 400 });
+      return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Find the invitation by token (more reliable than ID)
+    // Find the invitation by token
     const invitationRecord = await base44.asServiceRole.entities.InvitationToken.filter({
       token: token
     });
@@ -38,27 +38,15 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Lien expiré' }, { status: 400 });
     }
 
-    // Register user using Base44's registration
+    // Register user using Base44's NATIVE registration (this triggers email verification code)
     try {
-      console.log('Attempting to register user:', email);
+      console.log('Registering user via Base44 native auth:', email);
       await base44.auth.register({
         email: email,
         password: password,
         full_name: fullName
       });
-      console.log('User registered successfully');
-
-      // Mark the user as verified immediately (bypass the 6-digit code requirement)
-        // This prevents the verification email from becoming mandatory for invited users
-        const newUsers = await base44.asServiceRole.entities.User.filter({
-          email: email
-        });
-
-        if (newUsers && newUsers.length > 0) {
-          const newUser = newUsers[0];
-          // Invited users skip email verification - they can log in directly
-            console.log('Invited user registered - email verification bypassed:', email);
-        }
+      console.log('User registered - verification code sent to:', email);
     } catch (regErr) {
       console.error('Registration error:', regErr);
       if (regErr.message?.includes('already exists') || regErr.message?.includes('déjà')) {
@@ -68,43 +56,18 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Erreur lors de l\'enregistrement: ' + errorMsg }, { status: 400 });
     }
 
-    // Get subscription of the inviter
-    const subscription = await base44.asServiceRole.entities.Subscription.filter({
-     user_email: inv.invited_by
-    });
-
-    // Create WorkspaceMember record
-    await base44.asServiceRole.entities.WorkspaceMember.create({
-     user_email: email,
-     user_name: fullName,
-     role: inv.role,
-     workspace_id: inv.workspace_id,
-     invited_by: inv.invited_by,
-     invitation_status: 'accepted'
-    });
-
-    // Create TeamMember record
-    if (subscription && subscription.length > 0) {
-     await base44.asServiceRole.entities.TeamMember.create({
-       user_email: email,
-       user_name: fullName,
-       subscription_id: subscription[0].id,
-       manager_email: inv.invited_by,
-       role: inv.role,
-       joined_at: new Date().toISOString()
-     });
-    }
-
-    // Mark invitation as accepted
+    // Mark invitation as pending_email_verification (will complete after email verification)
     await base44.asServiceRole.entities.InvitationToken.update(inv.id, {
-      status: 'accepted',
-      accepted_at: new Date().toISOString()
+      status: 'pending_email_verification'
     });
 
-    return Response.json({ 
-      success: true, 
-      message: 'Account created successfully',
-      email: email
+    console.log('Invitation updated to pending_email_verification for:', email);
+
+    return Response.json({
+      success: true,
+      message: 'Registration initiated. Please verify your email.',
+      email: email,
+      requires_verification: true
     });
   } catch (error) {
     console.error('Error:', error);
