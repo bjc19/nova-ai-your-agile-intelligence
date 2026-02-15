@@ -71,51 +71,16 @@ Deno.serve(async (req) => {
       expires_at: expiresAt
     });
 
-    // 4. ✅ ENVOYER UN SEUL EMAIL AVEC LE LIEN D'INVITATION
-    const invitationUrl = `https://www.novagile.ca/AcceptInvitation?token=${token}`;
-
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'noreply@novagile.ca',
+    // 4. ✅ ENVOYER L'EMAIL VIA L'INTÉGRATION BASE44 NATIVE
+    try {
+      await base44.integrations.Core.SendEmail({
         to: inviteeEmail,
         subject: '🎉 Vous avez été invité à rejoindre Nova AI - Agile Intelligence',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <h1 style="color: white; margin: 0;">✨ Bienvenue sur Nova AI</h1>
-            </div>
-            <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px;">
-              <p style="font-size: 16px; color: #334155; line-height: 1.6;">Bonjour,</p>
-              <p style="font-size: 16px; color: #334155; line-height: 1.6;">
-                <strong>${user.full_name || user.email}</strong> vous a invité à rejoindre <strong>Nova AI</strong>, votre expert Agile propulsé par l'intelligence artificielle.
-              </p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${invitationUrl}" 
-                   style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-                  🚀 Accepter l'invitation
-                </a>
-              </div>
-              <p style="font-size: 14px; color: #64748b; line-height: 1.6;">
-                Ce lien d'invitation expire dans 7 jours.
-              </p>
-              <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
-              <p style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
-                Si vous n'avez pas demandé cette invitation, ignorez cet email.
-              </p>
-            </div>
-          </div>
-        `
-      })
-    });
-
-    if (!emailResponse.ok) {
-      const errorData = await emailResponse.json();
-      throw new Error(`Email delivery failed: ${errorData.message || emailResponse.statusText}`);
+        body: `Bonjour,\n\n${user.full_name || user.email} vous a invité à rejoindre Nova AI, votre expert Agile propulsé par l'intelligence artificielle.\n\nAcceptez l'invitation : https://www.novagile.ca/AcceptInvitation?token=${token}\n\nCe lien d'invitation expire dans 7 jours.\n\nSi vous n'avez pas demandé cette invitation, ignorez cet email.`
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      throw new Error(`Erreur lors de l'envoi de l'email: ${emailError.message}`);
     }
 
     return Response.json({ 
