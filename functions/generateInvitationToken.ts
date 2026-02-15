@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'noreply@novagile.ca',
+          from: 'onboarding@resend.dev',
           to: inviteeEmail,
           subject: 'Vous avez été ajouté à Nova AI',
           html: `<p>Bonjour,</p><p>${user.full_name || user.email} vous a ajouté à son équipe Nova AI.</p><p>Connectez-vous à votre compte pour accéder à Nova.</p>`
