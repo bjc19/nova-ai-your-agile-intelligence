@@ -46,6 +46,21 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
    const [persistentIssues, setPersistentIssues] = useState([]); // Recommendations with persistent issues
    const [notificationId, setNotificationId] = useState(null); // Track if notifications already sent
    const [isCardDismissed, setIsCardDismissed] = useState(false);
+   const [userRole, setUserRole] = useState(null);
+
+  // Fetch user role
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user = await base44.auth.me();
+        setUserRole(user?.role || null);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        setUserRole(null);
+      }
+    };
+    fetchUserRole();
+  }, []);
 
   // Demo data if none provided
   const data = flowData || {
@@ -846,46 +861,48 @@ Actions recommandées :
               </AnimatePresence>
 
               {/* CTA - Alert Manager */}
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSendManagerAlert}
-                  disabled={isSendingNotifications || notificationsSent}
-                  className={notificationsSent 
-                    ? "flex-1 bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
-                    : "flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-                  }
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  {isSendingNotifications ? "Envoi en cours..." : notificationsSent ? "✓ Alerte envoyée – Carte fermée" : "Alerter le manager"}
-                </Button>
+              {userRole === 'contributor' && (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSendManagerAlert}
+                    disabled={isSendingNotifications || notificationsSent}
+                    className={notificationsSent 
+                      ? "flex-1 bg-emerald-100 border-emerald-600 text-emerald-800 cursor-not-allowed" 
+                      : "flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+                    }
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    {isSendingNotifications ? "Envoi en cours..." : notificationsSent ? "✓ Alerte envoyée – Carte fermée" : "Alerter le manager"}
+                  </Button>
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={handleApplyRecommendations}
-                        disabled={isApplyingRecos || suggestions.length === 0 || suggestions.every(s => appliedRecos[s.id])}
-                        variant="outline"
-                        className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
-                      >
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                        {isApplyingRecos 
-                          ? "Application..." 
-                          : "APPLY ALL RECOS"
-                        }
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">
-                        {suggestions.every(s => appliedRecos[s.id])
-                          ? "Toutes les recommandations sont déjà appliquées"
-                          : `Appliquer toutes les recommandations.\nNova vérifiera l'impact via les données réelles.`
-                        }
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={handleApplyRecommendations}
+                          disabled={isApplyingRecos || suggestions.length === 0 || suggestions.every(s => appliedRecos[s.id])}
+                          variant="outline"
+                          className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          {isApplyingRecos 
+                            ? "Application..." 
+                            : "APPLY ALL RECOS"
+                          }
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">
+                          {suggestions.every(s => appliedRecos[s.id])
+                            ? "Toutes les recommandations sont déjà appliquées"
+                            : `Appliquer toutes les recommandations.\nNova vérifiera l'impact via les données réelles.`
+                          }
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
