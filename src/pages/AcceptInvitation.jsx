@@ -100,8 +100,9 @@ export default function AcceptInvitation() {
 
       if (registerResponse.data.success) {
         setSuccess(true);
+        // Invited users bypass email verification - redirect directly to login
         setTimeout(() => {
-          navigate(createPageUrl('Dashboard'));
+          navigate(createPageUrl('Home'));
         }, 2000);
       } else {
         setError(registerResponse.data.error || 'Erreur lors de l\'inscription');
