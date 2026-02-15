@@ -246,6 +246,25 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     }
   };
 
+  const handleDeleteInvitation = (invitation) => {
+    if (!canManage) return;
+    setInvitationToDelete(invitation);
+  };
+
+  const confirmDeleteInvitation = async () => {
+    if (!invitationToDelete) return;
+
+    try {
+      await base44.entities.InvitationToken.delete(invitationToDelete.id);
+      setPendingInvitations(pendingInvitations.filter(i => i.id !== invitationToDelete.id));
+      toast.success('Invitation supprimée avec succès');
+      setInvitationToDelete(null);
+    } catch (error) {
+      console.error('Delete invitation error:', error);
+      toast.error('Erreur lors de la suppression de l\'invitation');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
