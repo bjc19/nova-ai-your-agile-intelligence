@@ -28,33 +28,31 @@ function LayoutContent({ children, currentPageName }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-  const checkAuth = async () => {
-  try {
-    const auth = await base44.auth.isAuthenticated();
-    setIsAuthenticated(auth);
-    if (auth) {
-      const user = await base44.auth.me();
-      setUserRole(user?.role);
+    const checkAuth = async () => {
+      try {
+        const auth = await base44.auth.isAuthenticated();
+        setIsAuthenticated(auth);
+        if (auth) {
+          const user = await base44.auth.me();
+          setUserRole(user?.role);
 
-      if (auth) {
-        try {
-          const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-          setCanInvite(statusRes.data.canInvite || false);
-        } catch (e) {
+          try {
+            const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+            setCanInvite(statusRes.data.canInvite || false);
+          } catch (e) {
+            setCanInvite(false);
+          }
+        } else {
+          setUserRole(null);
           setCanInvite(false);
         }
+      } catch (err) {
+        setIsAuthenticated(false);
+        setUserRole(null);
       }
-    } else {
-      setUserRole(null);
-      setCanInvite(false);
-    }
-  } catch (err) {
-    setIsAuthenticated(false);
-    setUserRole(null);
-  }
-  setIsLoading(false);
-  };
-  checkAuth();
+      setIsLoading(false);
+    };
+    checkAuth();
   }, []);
 
   const isPublicPage = currentPageName === "Home" || currentPageName === "Demo" || currentPageName === "AcceptInvitation";

@@ -45,9 +45,9 @@ export default function TeamManagement() {
 
     setSendingInvite(true);
     try {
-      const response = await base44.functions.invoke('generateInvitationToken', {
-       inviteeEmail: inviteEmail,
-       inviteRole: inviteRole
+      const response = await base44.functions.invoke('sendTeamInvitation', {
+        email: inviteEmail,
+        role: inviteRole
       });
 
       if (response.data.success) {
