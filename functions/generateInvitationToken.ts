@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       token,
       invitee_email: inviteeEmail,
       invited_by: user.email,
-      workspace_id: 'default',
+      workspace_id: workspace,
       role: inviteRole || 'user',
       status: 'pending',
       expires_at: expiresAt

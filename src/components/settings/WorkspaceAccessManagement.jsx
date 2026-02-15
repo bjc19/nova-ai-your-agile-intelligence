@@ -116,10 +116,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     setInviting(true);
     try {
       const activeWorkspace = 'default'; // À adapter selon votre logique
-      // Send invitation
-      await base44.functions.invoke('sendTeamInvitation', {
-        email: inviteEmail,
-        role: inviteRole,
+      // Generate invitation token and send email
+      await base44.functions.invoke('generateInvitationToken', {
+        inviteeEmail: inviteEmail,
+        inviteRole: inviteRole,
         workspaceId: activeWorkspace
       });
 
