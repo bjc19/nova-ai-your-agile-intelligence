@@ -15,15 +15,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // CRITICAL: Disable any Jira connections first (mutual exclusivity)
-    const jiraConns = await base44.asServiceRole.entities.JiraConnection.list();
+    // CRITICAL: Delete any Jira connections first (mutual exclusivity)
+    const jiraConns = await base44.asServiceRole.entities.JiraConnection.filter({ user_email: user.email });
     if (jiraConns.length > 0) {
       for (const jiraConn of jiraConns) {
-        await base44.asServiceRole.entities.JiraConnection.update(jiraConn.id, {
-          is_active: false
-        });
+        await base44.asServiceRole.entities.JiraConnection.delete(jiraConn.id);
       }
-      console.log('Disabled Jira connections due to Trello connection');
+      console.log('Deleted Jira connections due to Trello connection');
     }
 
     // Delete existing Trello connection if any
