@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { Resend } from 'npm:resend@4.0.5';
 
 Deno.serve(async (req) => {
   try {
@@ -45,13 +46,16 @@ Deno.serve(async (req) => {
     });
 
     // Email personnalisé
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const resend = new Resend(resendApiKey);
+
     const appUrl = Deno.env.get('APP_URL') || req.headers.get('origin') || 'https://novagile.ca';
 
-    await base44.integrations.Core.SendEmail({
+    await resend.emails.send({
+      from: 'Nova AI <noreply@novagile.ca>',
       to: email,
-      from_name: 'Nova AI',
       subject: `🎉 Vous avez été invité à rejoindre Nova AI`,
-      body: `
+      html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
             <h1 style="color: white; margin: 0;">✨ Bienvenue sur Nova AI</h1>
