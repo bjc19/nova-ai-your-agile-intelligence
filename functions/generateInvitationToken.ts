@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'onboarding@resend.dev',
+          from: 'noreply@novagile.ca',
           to: inviteeEmail,
           subject: 'Vous avez été ajouté à Nova AI',
           html: `<p>Bonjour,</p><p>${user.full_name || user.email} vous a ajouté à son équipe Nova AI.</p><p>Connectez-vous à votre compte pour accéder à Nova.</p>`
@@ -71,25 +71,19 @@ Deno.serve(async (req) => {
       expires_at: expiresAt
     });
 
-    // 4. ✅ VÉRIFIER LA CLÉ API RESEND
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      throw new Error('RESEND_API_KEY not configured in environment');
-    }
-
-    // 5. ✅ ENVOYER L'EMAIL VIA RESEND
+    // 4. ✅ ENVOYER UN SEUL EMAIL AVEC LE LIEN D'INVITATION
     const invitationUrl = `https://www.novagile.ca/AcceptInvitation?token=${token}`;
-    
+
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
+        'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev',
+        from: 'noreply@novagile.ca',
         to: inviteeEmail,
-        subject: '🎉 Vous avez été invité à rejoindre Nova AI',
+        subject: '🎉 Vous avez été invité à rejoindre Nova AI - Agile Intelligence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -121,7 +115,6 @@ Deno.serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json();
-      console.error('Resend API error:', errorData);
       throw new Error(`Email delivery failed: ${errorData.message || emailResponse.statusText}`);
     }
 

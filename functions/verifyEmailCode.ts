@@ -25,31 +25,15 @@ Deno.serve(async (req) => {
     }
 
     // Mark user as verified in the User entity
-    let userRole = 'user';
-    let workspaceId = null;
-
     try {
-      // Get the invitation to retrieve role and workspace_id
-      const invitations = await base44.asServiceRole.entities.InvitationToken.filter({
-        invitee_email: email,
-        status: 'pending_email_verification'
-      });
-
-      if (invitations && invitations.length > 0) {
-        userRole = invitations[0].role || 'user';
-        workspaceId = invitations[0].workspace_id;
-      }
-
       const users = await base44.asServiceRole.entities.User.filter({
         email: email
       });
       if (users && users.length > 0) {
         await base44.asServiceRole.entities.User.update(users[0].id, {
-          verified_at: new Date().toISOString(),
-          app_role: userRole,
-          workspace_id: workspaceId
+          verified_at: new Date().toISOString()
         });
-        console.log(`User ${email} marked as verified with role: ${userRole}`);
+        console.log(`User ${email} marked as verified in User entity`);
       }
     } catch (updateError) {
       console.error('Error updating user verified_at:', updateError.message);

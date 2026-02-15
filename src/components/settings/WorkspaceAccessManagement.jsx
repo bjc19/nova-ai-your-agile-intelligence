@@ -35,7 +35,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
    const [newRole, setNewRole] = useState(null);
    const [userToDelete, setUserToDelete] = useState(null);
    const [changingPlan, setChangingPlan] = useState(false);
-   const [invitationToDelete, setInvitationToDelete] = useState(null);
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
@@ -116,15 +115,11 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
     setInviting(true);
     try {
-      // Generate invitation token and send email via Resend
-      const response = await base44.functions.invoke('generateInvitationToken', {
+      // Generate invitation token and send email
+      await base44.functions.invoke('generateInvitationToken', {
         inviteeEmail: inviteEmail,
         inviteRole: inviteRole
       });
-
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'Erreur lors de l\'envoi de l\'invitation');
-      }
 
       setMessage({ type: 'success', text: `Invitation envoyée à ${inviteEmail}` });
       setInviteEmail('');
@@ -160,25 +155,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     }
 
     setUserToDelete(userToRemove);
-  };
-
-  const handleDeleteInvitation = (invitationId) => {
-    if (!canManage) return;
-    setInvitationToDelete(pendingInvitations.find(inv => inv.id === invitationId));
-  };
-
-  const confirmDeleteInvitation = async () => {
-    if (!invitationToDelete) return;
-
-    try {
-      await base44.entities.InvitationToken.delete(invitationToDelete.id);
-      setPendingInvitations(pendingInvitations.filter(inv => inv.id !== invitationToDelete.id));
-      toast.success('Invitation supprimée');
-      setInvitationToDelete(null);
-    } catch (error) {
-      console.error('Delete invitation error:', error);
-      toast.error('Erreur lors de la suppression');
-    }
   };
 
   const confirmDeleteUser = async () => {
@@ -417,39 +393,27 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                       EN ATTENTE D'ACTIVATION
                     </p>
                     {pendingInvitations.map((invitation) => (
-                       <div 
-                         key={invitation.id}
-                         className="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors mb-2"
-                       >
-                         <div className="flex items-center gap-3 flex-1">
-                           <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-xs font-semibold text-amber-700">
-                             {invitation.invitee_email?.charAt(0).toUpperCase() || '?'}
-                           </div>
-                           <div className="flex-1">
-                             <p className="text-sm font-medium text-slate-900">{invitation.invitee_email}</p>
-                             <p className="text-xs text-amber-600 mt-1">
-                               {invitation.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                             </p>
-                           </div>
-                         </div>
-                         <div className="flex items-center gap-2">
-                           <Badge className="bg-amber-100 text-amber-700 border-amber-300 flex items-center gap-1">
-                             <Clock className="w-3 h-3" />
-                             En attente
-                           </Badge>
-                           {canManage && (
-                             <Button 
-                               variant="ghost" 
-                               size="icon"
-                               onClick={() => handleDeleteInvitation(invitation.id)}
-                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                             >
-                               <Trash2 className="w-4 h-4" />
-                             </Button>
-                           )}
-                         </div>
-                       </div>
-                     ))}
+                      <div 
+                        key={invitation.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors mb-2"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-xs font-semibold text-amber-700">
+                            {invitation.invitee_email?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-slate-900">{invitation.invitee_email}</p>
+                            <p className="text-xs text-amber-600 mt-1">
+                              {invitation.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className="bg-amber-100 text-amber-700 border-amber-300 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          En attente
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
                 )}
 
@@ -647,24 +611,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                 <div className="flex justify-end gap-2">
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
                   <AlertDialogAction onClick={confirmDeleteUser} className="bg-red-600 hover:bg-red-700">
-                    Supprimer
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Delete Invitation Alert Dialog */}
-            <AlertDialog open={!!invitationToDelete} onOpenChange={(open) => !open && setInvitationToDelete(null)}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Supprimer l'invitation</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir supprimer l'invitation de <strong>{invitationToDelete?.invitee_email}</strong> ? Un nouveau lien d'invitation devra être envoyé.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="flex justify-end gap-2">
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmDeleteInvitation} className="bg-red-600 hover:bg-red-700">
                     Supprimer
                   </AlertDialogAction>
                 </div>
