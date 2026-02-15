@@ -41,43 +41,40 @@ export default function DashboardCommonUsers() {
   // Check authentication and role
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        if (!currentUser) {
-          navigate(createPageUrl("Home"));
-          return;
-        }
-
-        // Role verification - only 'user' can access
-        if (currentUser?.app_role !== 'user') {
-          navigate(createPageUrl("Dashboard"));
-          return;
-        }
-
-        setUser(currentUser);
-
-        // Parallel load of all data
-        const [workspaceMembers, activeSprints, analyses] = await Promise.all([
-          base44.entities.WorkspaceMember.filter({
-            user_email: currentUser?.email
-          }),
-          base44.entities.SprintContext.filter({ is_active: true }),
-          base44.entities.AnalysisHistory.list('-created_date', 100)
-        ]);
-
-        const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
-        setAssignedWorkspaceIds(workspaceIds);
-
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
-
-        setAllAnalysisHistory(analyses);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Auth error:', error);
+      const authenticated = await base44.auth.isAuthenticated();
+      if (!authenticated) {
         navigate(createPageUrl("Home"));
+        return;
       }
+
+      const currentUser = await base44.auth.me();
+      
+      // Role verification - only 'user' can access
+      if (currentUser?.role !== 'user') {
+        navigate(createPageUrl("Home"));
+        return;
+      }
+
+      setUser(currentUser);
+
+      // Load assigned workspaces for this user
+      const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+        user_email: currentUser?.email
+      });
+      const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
+      setAssignedWorkspaceIds(workspaceIds);
+
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
+      }
+
+      // Load analysis history
+      const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
+      setAllAnalysisHistory(analyses);
+      
+      setIsLoading(false);
     };
     checkAuth();
   }, [navigate]);
@@ -150,10 +147,10 @@ export default function DashboardCommonUsers() {
               {/* Workspace and Period Selectors */}
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector 
-                   activeWorkspaceId={selectedWorkspaceId}
-                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                   userRole={user?.app_role || user?.role}
-                 />
+                  activeWorkspaceId={selectedWorkspaceId}
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
+                  userRole={user?.role}
+                />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {

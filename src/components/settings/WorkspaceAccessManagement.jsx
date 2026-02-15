@@ -211,17 +211,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     }
   };
 
-  const handleRemoveInvitation = async (invitationId) => {
-    try {
-      await base44.entities.InvitationToken.delete(invitationId);
-      setPendingInvitations(pendingInvitations.filter(inv => inv.id !== invitationId));
-      toast.success('Invitation supprimée');
-    } catch (error) {
-      console.error('Delete invitation error:', error);
-      toast.error('Erreur lors de la suppression');
-    }
-  };
-
   const handleChangePlan = async (newPlan) => {
     if (currentRole !== 'admin') {
       toast.error('Seuls les admins peuvent changer de plan');
@@ -404,39 +393,27 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                       EN ATTENTE D'ACTIVATION
                     </p>
                     {pendingInvitations.map((invitation) => (
-                       <div 
-                         key={invitation.id}
-                         className="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors mb-2"
-                       >
-                         <div className="flex items-center gap-3 flex-1">
-                           <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-xs font-semibold text-amber-700">
-                             {invitation.invitee_email?.charAt(0).toUpperCase() || '?'}
-                           </div>
-                           <div className="flex-1">
-                             <p className="text-sm font-medium text-slate-900">{invitation.invitee_email}</p>
-                             <p className="text-xs text-amber-600 mt-1">
-                               {invitation.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-                             </p>
-                           </div>
-                         </div>
-                         <div className="flex items-center gap-2">
-                           <Badge className="bg-amber-100 text-amber-700 border-amber-300 flex items-center gap-1">
-                             <Clock className="w-3 h-3" />
-                             En attente
-                           </Badge>
-                           {canManage && (
-                             <Button 
-                               variant="ghost" 
-                               size="icon"
-                               onClick={() => handleRemoveInvitation(invitation.id)}
-                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                             >
-                               <Trash2 className="w-4 h-4" />
-                             </Button>
-                           )}
-                         </div>
-                       </div>
-                     ))}
+                      <div 
+                        key={invitation.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors mb-2"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-amber-200 flex items-center justify-center text-xs font-semibold text-amber-700">
+                            {invitation.invitee_email?.charAt(0).toUpperCase() || '?'}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-slate-900">{invitation.invitee_email}</p>
+                            <p className="text-xs text-amber-600 mt-1">
+                              {invitation.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className="bg-amber-100 text-amber-700 border-amber-300 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          En attente
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
                 )}
 
