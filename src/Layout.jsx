@@ -136,6 +136,12 @@ function LayoutContent({ children, currentPageName }) {
                 >
                   {t('tryDemo')}
                 </button>
+                <Link 
+                  to={createPageUrl("Privacy")}
+                  className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  Confidentialité
+                </Link>
                 <Button 
                   size="sm"
                   onClick={() => setShowLoginDialog(true)}
