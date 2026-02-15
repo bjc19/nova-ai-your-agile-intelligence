@@ -34,17 +34,15 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Utiliser l'invitation Base44
-    await base44.users.inviteUser(email, role === 'contributor' ? 'contributor' : 'user');
-
-    // Créer le membre d'équipe
-    await base44.asServiceRole.entities.TeamMember.create({
-      user_email: email,
-      user_name: email.split('@')[0],
-      subscription_id: subscription.id,
-      admin_email: user.email,
+    // Créer l'invitation avec InvitationToken (pas de TeamMember encore)
+    const invitationToken = await base44.asServiceRole.entities.InvitationToken.create({
+      invitee_email: email,
+      invited_by: user.email,
       role: role,
-      joined_at: new Date().toISOString()
+      workspace_id: 'default',
+      status: 'pending',
+      token: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     });
 
     // Email personnalisé
