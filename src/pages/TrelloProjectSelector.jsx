@@ -177,30 +177,36 @@ export default function TrelloProjectSelector() {
     try {
       setSavingSelection(true);
       
-      // Créer les assignations pour chaque tableau et membre
-      for (const [boardId, memberEmails] of Object.entries(memberAssignments)) {
-        const board = selectedProjectsData.find(b => b.id === boardId);
-        
-        for (const memberEmail of memberEmails) {
-          const member = teamMembers.find(m => m.user_email === memberEmail);
-          
-          await base44.entities.WorkspaceMember.create({
-            user_email: memberEmail,
-            user_name: member?.user_name || memberEmail,
-            role: member?.role || 'user',
-            workspace_id: boardId,
-            invited_by: currentUser?.email,
-            invitation_status: 'accepted'
-          });
-        }
+      // Récupérer les assignations existantes pour identifier les nouveaux membres
+      const existingAssignmentsMap = {};
+      for (const [boardId] of Object.entries(memberAssignments)) {
+        const existing = await base44.entities.WorkspaceMember.filter({
+          workspace_id: boardId
+        });
+        existingAssignmentsMap[boardId] = existing.map(m => m.user_email);
       }
       
-      // Envoi des emails de notification
+      // Créer les assignations UNIQUEMENT pour les nouveaux membres
+      let newAssignmentsCount = 0;
       for (const [boardId, memberEmails] of Object.entries(memberAssignments)) {
         const board = selectedProjectsData.find(b => b.id === boardId);
-        if (board && memberEmails.length > 0) {
-          for (const memberEmail of memberEmails) {
+        const existingEmails = existingAssignmentsMap[boardId] || [];
+        
+        for (const memberEmail of memberEmails) {
+          // Ne créer que si pas déjà assigné
+          if (!existingEmails.includes(memberEmail)) {
             const member = teamMembers.find(m => m.user_email === memberEmail);
+            
+            await base44.entities.WorkspaceMember.create({
+              user_email: memberEmail,
+              user_name: member?.user_name || memberEmail,
+              role: member?.role || 'user',
+              workspace_id: boardId,
+              invited_by: currentUser?.email,
+              invitation_status: 'accepted'
+            });
+            
+            // Envoyer l'email UNIQUEMENT aux nouveaux membres
             try {
               await base44.integrations.Core.SendEmail({
                 to: memberEmail,
@@ -208,6 +214,7 @@ export default function TrelloProjectSelector() {
                 body: `Bonjour ${member?.user_name || memberEmail},\n\nVous avez été ajouté au workspace Trello "${board.name}" par ${currentUser?.full_name || currentUser?.email}.\n\nVous pouvez maintenant accéder aux analyses et insights de ce projet.\n\nCordialement,\nL'équipe Nova`,
                 from_name: 'Nova'
               });
+              newAssignmentsCount++;
             } catch (emailError) {
               console.error(`Erreur lors de l'envoi de l'email à ${memberEmail}:`, emailError);
             }
@@ -215,7 +222,11 @@ export default function TrelloProjectSelector() {
         }
       }
       
-      toast.success('Membres assignés avec succès !');
+      if (newAssignmentsCount > 0) {
+        toast.success(`${newAssignmentsCount} nouveau(x) membre(s) assigné(s) avec succès !`);
+      } else {
+        toast.success('Assignations mises à jour !');
+      }
       setStep(3);
     } catch (error) {
       console.error('Error assigning members:', error);
@@ -465,55 +476,88 @@ export default function TrelloProjectSelector() {
           </Card>
 
           {/* Member Assignment per Project */}
-          {selectedProjectsData.map((project) => (
-            <Card key={project.id} className="border-2 border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-sky-600" />
-                  {project.name}
-                </CardTitle>
-                <CardDescription>
-                  Sélectionnez les membres à assigner à ce tableau
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {teamMembers.length === 0 ? (
-                  <p className="text-sm text-slate-500 text-center py-4">
-                    Aucun membre d'équipe disponible
-                  </p>
-                ) : (
-                  teamMembers.map((member) => (
-                    <Card
-                      key={member.id}
-                      className={`cursor-pointer transition-all border ${
-                        memberAssignments[project.id]?.includes(member.user_email)
-                          ? 'border-sky-500 bg-sky-50'
-                          : 'border-slate-200 hover:border-sky-200'
-                      }`}
-                      onClick={() => toggleMemberAssignment(project.id, member.user_email)}
-                    >
-                      <CardContent className="p-3 flex items-center gap-3">
-                        <Checkbox
-                          checked={memberAssignments[project.id]?.includes(member.user_email)}
-                          onCheckedChange={() => toggleMemberAssignment(project.id, member.user_email)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium text-sm text-slate-900">
+          {selectedProjectsData.map((project) => {
+            const alreadyAssigned = memberAssignments[project.id] || [];
+            const assignedMembers = teamMembers.filter(m => alreadyAssigned.includes(m.user_email));
+            const availableMembers = teamMembers.filter(m => !alreadyAssigned.includes(m.user_email));
+            
+            return (
+              <Card key={project.id} className="border-2 border-slate-200">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Layers className="w-5 h-5 text-sky-600" />
+                    {project.name}
+                  </CardTitle>
+                  <CardDescription>
+                    Gérez les membres assignés à ce tableau
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Membres déjà assignés */}
+                  {assignedMembers.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-slate-700 mb-2">
+                        Membres déjà assignés :
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {assignedMembers.map(member => (
+                          <Badge 
+                            key={member.user_email} 
+                            variant="secondary"
+                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2"
+                          >
+                            <CheckCircle2 className="w-3 h-3" />
                             {member.user_name || member.user_email}
-                          </p>
-                          <p className="text-xs text-slate-500">{member.user_email}</p>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {member.role}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Membres disponibles à ajouter */}
+                  {availableMembers.length > 0 ? (
+                    <div>
+                      <p className="text-sm font-medium text-slate-700 mb-2">
+                        Ajouter des membres :
+                      </p>
+                      <div className="space-y-2">
+                        {availableMembers.map((member) => (
+                          <Card
+                            key={member.id}
+                            className="cursor-pointer transition-all border border-slate-200 hover:border-sky-200"
+                            onClick={() => toggleMemberAssignment(project.id, member.user_email)}
+                          >
+                            <CardContent className="p-3 flex items-center gap-3">
+                              <Checkbox
+                                checked={false}
+                                onCheckedChange={() => toggleMemberAssignment(project.id, member.user_email)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <div className="flex-1">
+                                <p className="font-medium text-sm text-slate-900">
+                                  {member.user_name || member.user_email}
+                                </p>
+                                <p className="text-xs text-slate-500">{member.user_email}</p>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {member.role}
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    assignedMembers.length === 0 && (
+                      <p className="text-sm text-slate-500 text-center py-4">
+                        Aucun membre d'équipe disponible
+                      </p>
+                    )
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </motion.div>
         )}
 
