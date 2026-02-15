@@ -629,7 +629,7 @@ Provide a detailed analysis in the following JSON format:`;
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium text-blue-900 mb-2">Workspace pour analyse cross-source</p>
-                  <p className="text-xs text-blue-700">Cette analyse fusionnera avec vos données Slack, Teams et Jira du workspace</p>
+                  <p className="text-xs text-blue-700">Cette analyse fusionnera avec vos données Slack, Teams , Jira/ Trello du workspace</p>
                 </div>
                 <Select value={selectedWorkspaceId} onValueChange={(val) => {
                   setSelectedWorkspaceId(val);
