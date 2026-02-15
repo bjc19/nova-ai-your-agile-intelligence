@@ -153,15 +153,15 @@ export default function Home() {
 
     // Rediriger utilisateurs authenticated
     const checkAuth = async () => {
-      const isAuth = await base44.auth.isAuthenticated();
-      if (isAuth) {
-        const user = await base44.auth.me();
-        setUserRole(user?.role || null);
-        // Rediriger vers Dashboard si admin/contributor, sinon vers ChooseAccess
-        setTimeout(() => {
-          navigate(createPageUrl(user?.role ? "Dashboard" : "ChooseAccess"));
-        }, 0);
-      }
+     const isAuth = await base44.auth.isAuthenticated();
+     if (isAuth) {
+       const user = await base44.auth.me();
+       setUserRole(user?.app_role || user?.role || null);
+       // Rediriger vers Dashboard si app_role existe, sinon vers ChooseAccess
+       setTimeout(() => {
+         navigate(createPageUrl(user?.app_role ? "Dashboard" : "ChooseAccess"));
+       }, 0);
+     }
     };
     checkAuth();
   }, [navigate]);
