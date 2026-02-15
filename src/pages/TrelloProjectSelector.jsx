@@ -32,7 +32,6 @@ export default function TrelloProjectSelector() {
 
         // Fetch available Trello projects
         const projectsRes = await base44.functions.invoke('trelloGetProjects', {});
-        console.log('Fetched projects:', projectsRes.data.boards?.length, projectsRes.data.boards);
         setProjects(projectsRes.data.boards || []);
 
         // Fetch existing selections
@@ -40,10 +39,8 @@ export default function TrelloProjectSelector() {
           user_email: user.email,
           is_active: true
         });
-        console.log('Existing selections:', selections.length, selections);
 
         const selectedIds = new Set(selections.map(s => s.board_id));
-        console.log('Selected IDs:', Array.from(selectedIds));
         setSelectedProjects(selectedIds);
 
         // Fetch user's subscription status for quota info
@@ -52,7 +49,6 @@ export default function TrelloProjectSelector() {
           setUserPlan(statusRes.data.plan || 'starter');
           setMaxProjects(statusRes.data.maxProjectsAllowed || 10);
         } catch (e) {
-          console.log('Could not fetch plan info, using defaults');
           setMaxProjects(10);
         }
       } catch (error) {
