@@ -27,26 +27,33 @@ export default function WorkspaceMemberAssignment() {
         const user = await base44.auth.me();
         setCurrentUserEmail(user?.email);
 
-        // Load both Jira and Trello projects
-        const [jiraData, trelloData, usersData, wmData] = await Promise.all([
-          base44.entities.JiraProjectSelection.filter({ is_active: true }),
-          base44.entities.TrelloProjectSelection.filter({ is_active: true }),
+        // Check which connection is active (Jira OR Trello, never both)
+        const [jiraConns, trelloConns, usersData, wmData] = await Promise.all([
+          base44.entities.JiraConnection.filter({ user_email: user?.email, is_active: true }),
+          base44.entities.TrelloConnection.filter({ user_email: user?.email, is_active: true }),
           base44.entities.User.list(),
           base44.entities.WorkspaceMember.list()
         ]);
+
+        let workspacesData = [];
         
-        // Combine Jira and Trello workspaces
-        const combinedWorkspaces = [
-          ...jiraData.map(ws => ({ ...ws, source: 'jira' })),
-          ...trelloData.map(ws => ({ 
+        // Load ONLY Jira projects if Jira is connected
+        if (jiraConns.length > 0) {
+          const jiraData = await base44.entities.JiraProjectSelection.filter({ is_active: true });
+          workspacesData = jiraData.map(ws => ({ ...ws, source: 'jira' }));
+        } 
+        // Otherwise, load ONLY Trello boards if Trello is connected
+        else if (trelloConns.length > 0) {
+          const trelloData = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+          workspacesData = trelloData.map(ws => ({ 
             ...ws, 
             source: 'trello',
             workspace_name: ws.board_name,
             jira_project_name: ws.board_name 
-          }))
-        ];
+          }));
+        }
         
-        setWorkspaces(combinedWorkspaces);
+        setWorkspaces(workspacesData);
         setTeamMembers(usersData);
         setWorkspaceMembers(wmData);
       } catch (error) {
