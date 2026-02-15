@@ -66,12 +66,12 @@ export default function DashboardContributors() {
       }
 
       const currentUser = await base44.auth.me();
-      
-      // Role verification - only 'contributor' can access
-      if (currentUser?.role !== 'contributor') {
-        navigate(createPageUrl("Home"));
-        return;
-      }
+
+       // Role verification - only 'contributor' can access
+       if (currentUser?.app_role !== 'contributor') {
+         navigate(createPageUrl("Dashboard"));
+         return;
+       }
 
       setUser(currentUser);
 
@@ -206,10 +206,10 @@ export default function DashboardContributors() {
               
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector 
-                  activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                  userRole={user?.role}
-                />
+                   activeWorkspaceId={selectedWorkspaceId}
+                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
+                   userRole={user?.app_role || user?.role}
+                 />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
