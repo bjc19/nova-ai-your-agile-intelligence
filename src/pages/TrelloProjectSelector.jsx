@@ -96,9 +96,36 @@ export default function TrelloProjectSelector() {
 
       if (response.data.success) {
         setSelectedProjectsData(selectedBoards);
-        // Charger les membres de l'équipe
-        const members = await base44.entities.TeamMember.list();
-        setTeamMembers(members);
+        
+        // Charger les membres de l'équipe et les utilisateurs
+        try {
+          const [teamMembers, allUsers] = await Promise.all([
+            base44.entities.TeamMember.list(),
+            base44.entities.User.list()
+          ]);
+          
+          // Combiner TeamMember et User, en priorité TeamMember
+          const memberMap = new Map();
+          
+          // D'abord ajouter tous les utilisateurs
+          allUsers.forEach(user => {
+            memberMap.set(user.email, {
+              user_email: user.email,
+              user_name: user.full_name || user.email,
+              role: user.role || 'user'
+            });
+          });
+          
+          // Puis écraser avec les TeamMember qui ont plus d'infos
+          teamMembers.forEach(tm => {
+            memberMap.set(tm.user_email, tm);
+          });
+          
+          setTeamMembers(Array.from(memberMap.values()));
+        } catch (error) {
+          console.error('Error loading members:', error);
+          toast.error('Erreur lors du chargement des membres');
+        }
         
         // Initialiser les assignations vides
         const initialAssignments = {};
