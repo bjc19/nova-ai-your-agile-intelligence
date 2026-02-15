@@ -31,39 +31,39 @@ import {
   Target,
   Layers,
   Database,
-  AlertTriangle
-} from "lucide-react";
+  AlertTriangle } from
+"lucide-react";
 import { toast } from "sonner";
 
 export default function Settings() {
-   useAccessControl();
-   const navigate = useNavigate();
-   const [slackConnected, setSlackConnected] = useState(false);
-   const [slackTeamName, setSlackTeamName] = useState(null);
-   const [connectingSlack, setConnectingSlack] = useState(false);
-   const [teamsConnected, setTeamsConnected] = useState(false);
-   const [connectingTeams, setConnectingTeams] = useState(false);
-   const [jiraConnected, setJiraConnected] = useState(false);
-   const [connectingJira, setConnectingJira] = useState(false);
-   const [confluenceConnected, setConfluenceConnected] = useState(false);
-   const [connectingConfluence, setConnectingConfluence] = useState(false);
-   const [trelloConnected, setTrelloConnected] = useState(false);
-   const [connectingTrello, setConnectingTrello] = useState(false);
-   const { language, setLanguage, t } = useLanguage();
-   const [teamConfig, setTeamConfig] = useState(null);
-   const [loadingConfig, setLoadingConfig] = useState(true);
-   const [currentRole, setCurrentRole] = useState('contributor');
-   const [switchingRole, setSwitchingRole] = useState(false);
-   const [jiraDebugInfo, setJiraDebugInfo] = useState(null);
+  useAccessControl();
+  const navigate = useNavigate();
+  const [slackConnected, setSlackConnected] = useState(false);
+  const [slackTeamName, setSlackTeamName] = useState(null);
+  const [connectingSlack, setConnectingSlack] = useState(false);
+  const [teamsConnected, setTeamsConnected] = useState(false);
+  const [connectingTeams, setConnectingTeams] = useState(false);
+  const [jiraConnected, setJiraConnected] = useState(false);
+  const [connectingJira, setConnectingJira] = useState(false);
+  const [confluenceConnected, setConfluenceConnected] = useState(false);
+  const [connectingConfluence, setConnectingConfluence] = useState(false);
+  const [trelloConnected, setTrelloConnected] = useState(false);
+  const [connectingTrello, setConnectingTrello] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
+  const [teamConfig, setTeamConfig] = useState(null);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [currentRole, setCurrentRole] = useState('contributor');
+  const [switchingRole, setSwitchingRole] = useState(false);
+  const [jiraDebugInfo, setJiraDebugInfo] = useState(null);
 
   const loadSlackConnection = async () => {
     try {
       const user = await base44.auth.me();
-      const slackConns = await base44.entities.SlackConnection.filter({ 
+      const slackConns = await base44.entities.SlackConnection.filter({
         user_email: user.email,
         is_active: true
       });
-      
+
       if (slackConns.length > 0) {
         setSlackConnected(true);
         setSlackTeamName(slackConns[0].team_name);
@@ -82,19 +82,19 @@ export default function Settings() {
     try {
       setConnectingSlack(true);
       const { data } = await base44.functions.invoke('slackOAuthStart');
-      
+
       // Open popup for OAuth
       const popup = window.open(data.authUrl, 'Slack OAuth', 'width=600,height=700');
-      
+
       // Listen for callback
       const handleMessage = async (event) => {
         if (event.data.type === 'slack_success') {
           // Decode connection data
           const connectionData = JSON.parse(atob(event.data.data));
-          
+
           // Save connection through authenticated endpoint
           await base44.functions.invoke('slackSaveConnection', connectionData);
-          
+
           // Reload connection to get fresh data
           await loadSlackConnection();
           window.removeEventListener('message', handleMessage);
@@ -105,7 +105,7 @@ export default function Settings() {
           setConnectingSlack(false);
         }
       };
-      
+
       window.addEventListener('message', handleMessage);
     } catch (error) {
       console.error('Error starting Slack OAuth:', error);
@@ -175,49 +175,49 @@ export default function Settings() {
     try {
       setConnectingJira(true);
       const user = await base44.auth.me();
-      const response = await base44.functions.invoke('jiraOAuthStart', { 
-        customer_id: user.email 
+      const response = await base44.functions.invoke('jiraOAuthStart', {
+        customer_id: user.email
       });
 
       const authUrl = response.data?.authorizationUrl || response.data;
 
       // Listen for popup message
-                      const messageHandler = async (event) => {
-                        if (event.data?.type === 'jira_success') {
-                          window.removeEventListener('message', messageHandler);
+      const messageHandler = async (event) => {
+        if (event.data?.type === 'jira_success') {
+          window.removeEventListener('message', messageHandler);
 
-                          try {
-                            // Decode connection data
-                            const connectionData = JSON.parse(atob(event.data.data));
+          try {
+            // Decode connection data
+            const connectionData = JSON.parse(atob(event.data.data));
 
-                            // Save connection through authenticated endpoint
-                            const saveResult = await base44.functions.invoke('jiraSaveConnection', connectionData);
+            // Save connection through authenticated endpoint
+            const saveResult = await base44.functions.invoke('jiraSaveConnection', connectionData);
 
-                            if (saveResult.data?.success) {
-                              setJiraConnected(true);
-                              // Refetch from DB to ensure persistence
-                              setTimeout(async () => {
-                                const jiraConns = await base44.entities.JiraConnection.list();
-                                if (jiraConns.length > 0) {
-                                  setJiraConnected(true);
-                                }
-                              }, 500);
-                            } else {
-                              console.error('Failed to save Jira connection:', saveResult.data);
-                              alert('Erreur: Impossible de sauvegarder la connexion Jira');
-                            }
-                          } catch (error) {
-                            console.error('Error saving Jira connection:', error);
-                            alert('Erreur lors de la sauvegarde: ' + error.message);
-                          } finally {
-                            setConnectingJira(false);
-                          }
-                        } else if (event.data?.type === 'jira_error') {
-                          console.error('Jira connection error:', event.data.error);
-                          window.removeEventListener('message', messageHandler);
-                          setConnectingJira(false);
-                        }
-                      };
+            if (saveResult.data?.success) {
+              setJiraConnected(true);
+              // Refetch from DB to ensure persistence
+              setTimeout(async () => {
+                const jiraConns = await base44.entities.JiraConnection.list();
+                if (jiraConns.length > 0) {
+                  setJiraConnected(true);
+                }
+              }, 500);
+            } else {
+              console.error('Failed to save Jira connection:', saveResult.data);
+              alert('Erreur: Impossible de sauvegarder la connexion Jira');
+            }
+          } catch (error) {
+            console.error('Error saving Jira connection:', error);
+            alert('Erreur lors de la sauvegarde: ' + error.message);
+          } finally {
+            setConnectingJira(false);
+          }
+        } else if (event.data?.type === 'jira_error') {
+          console.error('Jira connection error:', event.data.error);
+          window.removeEventListener('message', messageHandler);
+          setConnectingJira(false);
+        }
+      };
 
       window.addEventListener('message', messageHandler);
       window.open(authUrl, 'Jira OAuth', 'width=600,height=700');
@@ -350,15 +350,15 @@ export default function Settings() {
             await base44.functions.invoke('trelloSaveConnection', connectionData);
 
             setTrelloConnected(true);
-             setTimeout(async () => {
-               const user = await base44.auth.me();
-               const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
-               if (trelloConns.length > 0) {
-                 setTrelloConnected(true);
-               } else {
-                 setTrelloConnected(false);
-               }
-             }, 500);
+            setTimeout(async () => {
+              const user = await base44.auth.me();
+              const trelloConns = await base44.entities.TrelloConnection.filter({ user_email: user?.email });
+              if (trelloConns.length > 0) {
+                setTrelloConnected(true);
+              } else {
+                setTrelloConnected(false);
+              }
+            }, 500);
           } catch (error) {
             console.error('Error saving Trello connection:', error);
             toast.error('Erreur lors de la connexion Trello');
@@ -404,135 +404,135 @@ export default function Settings() {
   };
 
   const integrations = [
-    {
-      id: "slack",
-      name: "Slack",
-      icon: MessageSquare,
-      color: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-100",
-      iconColor: "text-purple-600",
-      available: true,
-      connected: slackConnected,
-      onConnect: handleSlackConnect
-    },
-    {
-      id: "jira",
-      name: "Jira",
-      icon: Database,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-100",
-      iconColor: "text-blue-600",
-      available: true,
-      connected: jiraConnected,
-      disabled: trelloConnected,
-      onConnect: handleJiraConnect
-    },
-    {
-      id: "azure",
-      name: "Azure DevOps",
-      icon: Zap,
-      color: "from-cyan-500 to-cyan-600",
-      bgColor: "bg-cyan-100",
-      iconColor: "text-cyan-600",
-      available: false,
-      requiresBackend: true
-    },
-    {
-      id: "teams",
-      name: "Microsoft Teams",
-      icon: MessageSquare,
-      color: "from-indigo-500 to-indigo-600",
-      bgColor: "bg-indigo-100",
-      iconColor: "text-indigo-600",
-      available: true,
-      connected: teamsConnected,
-      onConnect: handleTeamsConnect
-    },
-    {
-      id: "zoom",
-      name: "Zoom",
-      icon: MessageSquare,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-100",
-      iconColor: "text-blue-600",
-      available: false,
-      comingSoon: true
-    },
-    {
-      id: "trello",
-      name: "Trello",
-      icon: Layers,
-      color: "from-sky-500 to-sky-600",
-      bgColor: "bg-sky-100",
-      iconColor: "text-sky-600",
-      available: true,
-      connected: trelloConnected,
-      disabled: jiraConnected,
-      onConnect: handleTrelloConnect
-    },
-    {
-      id: "confluence",
-      name: "Confluence",
-      icon: FileSpreadsheet,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-100",
-      iconColor: "text-blue-600",
-      available: true,
-      connected: confluenceConnected,
-      onConnect: handleConfluenceConnect
-    }
-  ];
+  {
+    id: "slack",
+    name: "Slack",
+    icon: MessageSquare,
+    color: "from-purple-500 to-purple-600",
+    bgColor: "bg-purple-100",
+    iconColor: "text-purple-600",
+    available: true,
+    connected: slackConnected,
+    onConnect: handleSlackConnect
+  },
+  {
+    id: "jira",
+    name: "Jira",
+    icon: Database,
+    color: "from-blue-500 to-blue-600",
+    bgColor: "bg-blue-100",
+    iconColor: "text-blue-600",
+    available: true,
+    connected: jiraConnected,
+    disabled: trelloConnected,
+    onConnect: handleJiraConnect
+  },
+  {
+    id: "azure",
+    name: "Azure DevOps",
+    icon: Zap,
+    color: "from-cyan-500 to-cyan-600",
+    bgColor: "bg-cyan-100",
+    iconColor: "text-cyan-600",
+    available: false,
+    requiresBackend: true
+  },
+  {
+    id: "teams",
+    name: "Microsoft Teams",
+    icon: MessageSquare,
+    color: "from-indigo-500 to-indigo-600",
+    bgColor: "bg-indigo-100",
+    iconColor: "text-indigo-600",
+    available: true,
+    connected: teamsConnected,
+    onConnect: handleTeamsConnect
+  },
+  {
+    id: "zoom",
+    name: "Zoom",
+    icon: MessageSquare,
+    color: "from-blue-500 to-blue-600",
+    bgColor: "bg-blue-100",
+    iconColor: "text-blue-600",
+    available: false,
+    comingSoon: true
+  },
+  {
+    id: "trello",
+    name: "Trello",
+    icon: Layers,
+    color: "from-sky-500 to-sky-600",
+    bgColor: "bg-sky-100",
+    iconColor: "text-sky-600",
+    available: true,
+    connected: trelloConnected,
+    disabled: jiraConnected,
+    onConnect: handleTrelloConnect
+  },
+  {
+    id: "confluence",
+    name: "Confluence",
+    icon: FileSpreadsheet,
+    color: "from-blue-500 to-blue-600",
+    bgColor: "bg-blue-100",
+    iconColor: "text-blue-600",
+    available: true,
+    connected: confluenceConnected,
+    onConnect: handleConfluenceConnect
+  }];
+
 
   // Load data once on mount only
   useEffect(() => {
     const loadData = async () => {
-        try {
-          const user = await base44.auth.me();
-          setCurrentRole(user.role || 'contributor');
+      try {
+        const user = await base44.auth.me();
+        setCurrentRole(user.role || 'contributor');
 
-          // Load team config
-          const configs = await base44.entities.TeamConfiguration.list();
-          if (configs.length > 0) {
-            setTeamConfig(configs[0]);
-          }
-
-          // Check connections
-          const [slackConns, teamsConns, jiraConns, confluenceConns, trelloConns] = await Promise.all([
-            base44.entities.SlackConnection.list(),
-            base44.entities.TeamsConnection.list(),
-            base44.entities.JiraConnection.list(),
-            base44.entities.ConfluenceConnection.list(),
-            base44.entities.TrelloConnection.filter({ user_email: user?.email })
-          ]);
-
-          if (slackConns.length > 0) {
-            setSlackConnected(true);
-            setSlackTeamName(slackConns[0].team_name);
-          } else {
-            setSlackConnected(false);
-            setSlackTeamName(null);
-          }
-
-          if (teamsConns.length > 0) {
-            setTeamsConnected(true);
-          } else {
-            setTeamsConnected(false);
-          }
-
-          if (jiraConns.length > 0) {
-            setJiraConnected(true);
-          } else {
-            setJiraConnected(false);
-          }
-
-          setConfluenceConnected(confluenceConns.length > 0);
-          setTrelloConnected(trelloConns.length > 0);
-        } catch (error) {
-          console.error("Erreur chargement données:", error);
-        } finally {
-          setLoadingConfig(false);
+        // Load team config
+        const configs = await base44.entities.TeamConfiguration.list();
+        if (configs.length > 0) {
+          setTeamConfig(configs[0]);
         }
-      };
+
+        // Check connections
+        const [slackConns, teamsConns, jiraConns, confluenceConns, trelloConns] = await Promise.all([
+        base44.entities.SlackConnection.list(),
+        base44.entities.TeamsConnection.list(),
+        base44.entities.JiraConnection.list(),
+        base44.entities.ConfluenceConnection.list(),
+        base44.entities.TrelloConnection.filter({ user_email: user?.email })]
+        );
+
+        if (slackConns.length > 0) {
+          setSlackConnected(true);
+          setSlackTeamName(slackConns[0].team_name);
+        } else {
+          setSlackConnected(false);
+          setSlackTeamName(null);
+        }
+
+        if (teamsConns.length > 0) {
+          setTeamsConnected(true);
+        } else {
+          setTeamsConnected(false);
+        }
+
+        if (jiraConns.length > 0) {
+          setJiraConnected(true);
+        } else {
+          setJiraConnected(false);
+        }
+
+        setConfluenceConnected(confluenceConns.length > 0);
+        setTrelloConnected(trelloConns.length > 0);
+      } catch (error) {
+        console.error("Erreur chargement données:", error);
+      } finally {
+        setLoadingConfig(false);
+      }
+    };
     loadData();
   }, []);
 
@@ -559,14 +559,14 @@ export default function Settings() {
 
   const handleRoleSwitch = async (newRole) => {
     if (newRole === currentRole) return;
-    
+
     setSwitchingRole(true);
     try {
       const user = await base44.auth.me();
-      
+
       // Update the user's role using asServiceRole for admin privileges
       await base44.asServiceRole.entities.User.update(user.id, { role: newRole });
-      
+
       // Force logout and login to refresh session
       await base44.auth.logout();
     } catch (error) {
@@ -583,8 +583,8 @@ export default function Settings() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-slate-600">{language === 'fr' ? 'Chargement...' : 'Loading...'}</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   const canManageSettings = currentRole === 'admin' || currentRole === 'contributor';
@@ -597,12 +597,12 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
+          className="mb-8">
+
           <Link
             to={createPageUrl("Dashboard")}
-            className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6"
-          >
+            className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 transition-colors mb-6">
+
             <ArrowLeft className="w-4 h-4 mr-1.5" />
             {t('backToDashboard')}
           </Link>
@@ -618,12 +618,12 @@ export default function Settings() {
             </div>
             <div className="text-right">
               <Badge className={`text-sm px-3 py-1 ${
-                currentRole === 'admin' 
-                  ? 'bg-red-100 text-red-700' 
-                  : currentRole === 'contributor'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-slate-100 text-slate-700'
-              }`}>
+              currentRole === 'admin' ?
+              'bg-red-100 text-red-700' :
+              currentRole === 'contributor' ?
+              'bg-blue-100 text-blue-700' :
+              'bg-slate-100 text-slate-700'}`
+              }>
                 {currentRole === 'admin' ? '🔑 Admin' : currentRole === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
               </Badge>
             </div>
@@ -634,109 +634,109 @@ export default function Settings() {
         </motion.div>
 
         {/* Workspace Member Assignment */}
-         {currentRole === 'admin' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.03 }}
-            className="mb-8"
-          >
+         {currentRole === 'admin' &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.03 }}
+          className="mb-8">
+
             <WorkspaceMemberAssignment />
           </motion.div>
-        )}
+        }
 
         {/* Workspace Access Management */}
-         {(currentRole === 'admin' || currentRole === 'contributor') && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className="mb-8"
-          >
+         {(currentRole === 'admin' || currentRole === 'contributor') &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="mb-8">
+
             <WorkspaceAccessManagement currentRole={currentRole} />
           </motion.div>
-        )}
+        }
 
         {/* Join Team Requests */}
-        {(currentRole === 'admin' || currentRole === 'contributor') && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.09 }}
-            className="mb-8"
-          >
+        {(currentRole === 'admin' || currentRole === 'contributor') &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.09 }}
+          className="mb-8">
+
             <JoinTeamRequestsAdmin />
           </motion.div>
-        )}
+        }
 
         {/* Team & Projects Configuration */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
+          className="mb-8">
+
           <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-100">
-                  <Layers className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">Équipe & Projets</CardTitle>
-                  <CardDescription className="text-xs">
-                    Configuration de votre mode de gestion pour analyses adaptées
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-900 mb-1">Mode de gestion de projets</p>
-                  <p className="text-xs text-slate-500">Analyses et métriques adaptées</p>
-                </div>
-                <Select 
-                  value={teamConfig?.project_mode || "auto_detect"}
-                  onValueChange={handleProjectModeChange}
-                  disabled={loadingConfig}
-                >
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mono_project">
-                      <div className="flex items-center gap-2">
-                        <Target className="w-4 h-4" />
-                        Un seul projet
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="multi_projects">
-                      <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4" />
-                        Plusieurs projets
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="auto_detect">Détection auto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            
 
-              {teamConfig?.detection_confidence > 0 && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-900">
-                    <strong>Dernière détection :</strong> {(teamConfig.detection_confidence * 100).toFixed(0)}% de confiance
-                    {teamConfig.project_count > 1 && ` • ${teamConfig.project_count} projets détectés`}
-                  </p>
-                </div>
-              )}
 
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
-                <p><strong>Mono-projet :</strong> Métriques standards</p>
-                <p><strong>Multi-projets :</strong> Ajustements capacité, alertes dispersion</p>
-                <p><strong>Détection auto :</strong> Nova notifie en cas de détection</p>
-              </div>
-            </CardContent>
+
+
+
+
+
+
+
+
+
+
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           </Card>
         </motion.div>
 
@@ -745,8 +745,8 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="mb-8"
-        >
+          className="mb-8">
+
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
@@ -783,25 +783,25 @@ export default function Settings() {
         </motion.div>
 
         {/* Debug Info */}
-        {jiraDebugInfo && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8 p-4 bg-slate-100 rounded-lg border border-slate-200"
-          >
+        {jiraDebugInfo &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 p-4 bg-slate-100 rounded-lg border border-slate-200">
+
             <pre className="text-xs text-slate-700 overflow-auto">
               {JSON.stringify(jiraDebugInfo, null, 2)}
             </pre>
           </motion.div>
-        )}
+        }
 
         {/* Available Integrations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="mb-6"
-        >
+          className="mb-6">
+
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-500" />
             {t('availableIntegration')}
@@ -839,33 +839,33 @@ export default function Settings() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  {slackConnected ? (
+                  {slackConnected ?
                     <>
                       <Badge className="bg-emerald-100 text-emerald-700">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
                         {t('connected')}
                       </Badge>
-                      {slackTeamName && (
-                        <p className="text-xs text-slate-500">{slackTeamName}</p>
-                      )}
-                      <Button 
+                      {slackTeamName &&
+                      <p className="text-xs text-slate-500">{slackTeamName}</p>
+                      }
+                      <Button
                         variant="outline"
                         size="sm"
                         onClick={handleSlackDisconnect}
-                        className="text-xs"
-                      >
+                        className="text-xs">
+
                         Déconnecter
                       </Button>
-                    </>
-                  ) : (
-                    <Button 
+                    </> :
+
+                    <Button
                       className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
                       onClick={handleSlackConnect}
-                      disabled={connectingSlack}
-                    >
+                      disabled={connectingSlack}>
+
                       {connectingSlack ? "Connexion..." : t('connectSlack')}
                     </Button>
-                  )}
+                    }
                 </div>
               </div>
             </CardContent>
@@ -895,30 +895,30 @@ export default function Settings() {
                    </div>
                  </div>
                  <div className="flex flex-col items-end gap-2">
-                   {teamsConnected ? (
-                     <>
+                   {teamsConnected ?
+                    <>
                        <Badge className="bg-emerald-100 text-emerald-700">
                          <CheckCircle2 className="w-3 h-3 mr-1" />
                          {t('connected')}
                        </Badge>
-                       <Button 
-                         variant="outline"
-                         size="sm"
-                         onClick={handleTeamsDisconnect}
-                         className="text-xs"
-                       >
+                       <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTeamsDisconnect}
+                        className="text-xs">
+
                          Déconnecter
                        </Button>
-                     </>
-                   ) : (
-                     <Button 
-                       className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
-                       onClick={handleTeamsConnect}
-                       disabled={connectingTeams}
-                     >
+                     </> :
+
+                    <Button
+                      className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
+                      onClick={handleTeamsConnect}
+                      disabled={connectingTeams}>
+
                        {connectingTeams ? "Connexion..." : "Connecter Teams"}
                      </Button>
-                   )}
+                    }
                  </div>
                </div>
              </CardContent>
@@ -955,50 +955,50 @@ export default function Settings() {
                    </div>
                  </div>
                  <div className="flex flex-col items-end gap-2">
-                   {jiraConnected ? (
-                     <>
+                   {jiraConnected ?
+                    <>
                        <Badge className="bg-emerald-100 text-emerald-700">
                          <CheckCircle2 className="w-3 h-3 mr-1" />
                          {t('connected')}
                        </Badge>
-                       <Button 
-                         variant="outline"
-                         size="sm"
-                         onClick={handleJiraDisconnect}
-                         className="text-xs"
-                       >
+                       <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleJiraDisconnect}
+                        className="text-xs">
+
                          Déconnecter
                        </Button>
-                       <Button 
-                         size="sm"
-                         onClick={() => navigate(createPageUrl("JiraProjectSelector"))}
-                         className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                       >
+                       <Button
+                        size="sm"
+                        onClick={() => navigate(createPageUrl("JiraProjectSelector"))}
+                        className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+
                          Sélectionner projets
                        </Button>
-                     </>
-                   ) : (
-                     <TooltipProvider>
+                     </> :
+
+                    <TooltipProvider>
                        <Tooltip>
                          <TooltipTrigger asChild>
                            <div>
-                             <Button 
-                               className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
-                               onClick={handleJiraConnect}
-                               disabled={connectingJira || trelloConnected}
-                             >
+                             <Button
+                              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
+                              onClick={handleJiraConnect}
+                              disabled={connectingJira || trelloConnected}>
+
                                {connectingJira ? "Connexion..." : "Connecter Jira"}
                              </Button>
                            </div>
                          </TooltipTrigger>
-                         {trelloConnected && (
-                           <TooltipContent className="max-w-xs">
+                         {trelloConnected &&
+                        <TooltipContent className="max-w-xs">
                              <p>{t('jiraTrelloConflictMessage')}</p>
                            </TooltipContent>
-                         )}
+                        }
                        </Tooltip>
                      </TooltipProvider>
-                   )}
+                    }
                  </div>
                </div>
              </CardContent>
@@ -1028,30 +1028,30 @@ export default function Settings() {
                    </div>
                  </div>
                  <div className="flex flex-col items-end gap-2">
-                   {confluenceConnected ? (
-                     <>
+                   {confluenceConnected ?
+                    <>
                        <Badge className="bg-emerald-100 text-emerald-700">
                          <CheckCircle2 className="w-3 h-3 mr-1" />
                          {t('connected')}
                        </Badge>
-                       <Button 
-                         variant="outline"
-                         size="sm"
-                         onClick={handleConfluenceDisconnect}
-                         className="text-xs"
-                       >
+                       <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleConfluenceDisconnect}
+                        className="text-xs">
+
                          Déconnecter
                        </Button>
-                     </>
-                   ) : (
-                     <Button 
-                       className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800"
-                       onClick={handleConfluenceConnect}
-                       disabled={connectingConfluence}
-                     >
+                     </> :
+
+                    <Button
+                      className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800"
+                      onClick={handleConfluenceConnect}
+                      disabled={connectingConfluence}>
+
                        {connectingConfluence ? "Connexion..." : "Connecter Confluence"}
                      </Button>
-                   )}
+                    }
                  </div>
                </div>
              </CardContent>
@@ -1081,50 +1081,50 @@ export default function Settings() {
                    </div>
                  </div>
                  <div className="flex flex-col items-end gap-2">
-                   {trelloConnected ? (
-                     <>
+                   {trelloConnected ?
+                    <>
                        <Badge className="bg-emerald-100 text-emerald-700">
                          <CheckCircle2 className="w-3 h-3 mr-1" />
                          {t('connected')}
                        </Badge>
-                       <Button 
-                         variant="outline"
-                         size="sm"
-                         onClick={handleTrelloDisconnect}
-                         className="text-xs"
-                       >
+                       <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTrelloDisconnect}
+                        className="text-xs">
+
                          Déconnecter
                        </Button>
-                       <Button 
-                         size="sm"
-                         onClick={() => navigate(createPageUrl("TrelloProjectSelector"))}
-                         className="text-xs bg-sky-600 hover:bg-sky-700 text-white"
-                       >
+                       <Button
+                        size="sm"
+                        onClick={() => navigate(createPageUrl("TrelloProjectSelector"))}
+                        className="text-xs bg-sky-600 hover:bg-sky-700 text-white">
+
                          Sélectionner projets
                        </Button>
-                     </>
-                   ) : (
-                     <TooltipProvider>
+                     </> :
+
+                    <TooltipProvider>
                        <Tooltip>
                          <TooltipTrigger asChild>
                            <div>
-                             <Button 
-                               className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800"
-                               onClick={handleTrelloConnect}
-                               disabled={connectingTrello || jiraConnected}
-                             >
+                             <Button
+                              className="bg-gradient-to-r from-sky-600 to-sky-700 hover:from-sky-700 hover:to-sky-800"
+                              onClick={handleTrelloConnect}
+                              disabled={connectingTrello || jiraConnected}>
+
                                {connectingTrello ? "Connexion..." : "Connecter Trello"}
                              </Button>
                            </div>
                          </TooltipTrigger>
-                         {jiraConnected && (
-                           <TooltipContent className="max-w-xs">
+                         {jiraConnected &&
+                        <TooltipContent className="max-w-xs">
                              <p>{t('trelloJiraConflictMessage')}</p>
                            </TooltipContent>
-                         )}
+                        }
                        </Tooltip>
                      </TooltipProvider>
-                   )}
+                    }
                  </div>
                </div>
              </CardContent>
@@ -1137,16 +1137,16 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mb-6"
-        >
+          className="mb-6">
+
           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-slate-400" />
             {t('comingSoon')}
           </h2>
           
           <div className="grid gap-4">
-            {integrations.filter(i => !i.available).map((integration, index) => (
-              <Card key={integration.id} className="opacity-60">
+            {integrations.filter((i) => !i.available).map((integration, index) =>
+            <Card key={integration.id} className="opacity-60">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
@@ -1156,16 +1156,16 @@ export default function Settings() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-slate-900">{integration.name}</h3>
-                          {integration.requiresBackend && (
-                            <Badge variant="outline" className="text-xs">
+                          {integration.requiresBackend &&
+                        <Badge variant="outline" className="text-xs">
                               Prochainement
                             </Badge>
-                          )}
-                          {integration.comingSoon && (
-                            <Badge variant="outline" className="text-xs bg-slate-100">
+                        }
+                          {integration.comingSoon &&
+                        <Badge variant="outline" className="text-xs bg-slate-100">
                               Prochainement
                             </Badge>
-                          )}
+                        }
                         </div>
                         <p className="text-sm text-slate-600">
                           {t(`${integration.id}Description`)}
@@ -1179,58 +1179,58 @@ export default function Settings() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </motion.div>
 
         {/* Manual Data Import */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-        >
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <Upload className="w-5 h-5 text-slate-500" />
-            {t('manualDataImport')}
-          </h2>
-          
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-sm text-slate-600 mb-4">
-                {t('manualDataImportDescription')}
-              </p>
-              <div className="grid md:grid-cols-2 gap-4">
-                <Link to={createPageUrl("Analysis")}>
-                  <div className="p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-slate-100">
-                        <MessageSquare className="w-5 h-5 text-slate-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900">{t('pasteTranscript')}</p>
-                        <p className="text-xs text-slate-500">{t('pasteTranscriptDescription')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <div className="p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-slate-100">
-                        <FileSpreadsheet className="w-5 h-5 text-slate-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-slate-900">{t('uploadFile')}</p>
-                        <p className="text-xs text-slate-500">{t('uploadFileDescription')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
-    </div>
-  );
+    </div>);
+
 }
