@@ -116,11 +116,15 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
     setInviting(true);
     try {
-      // Generate invitation token and send email
-      await base44.functions.invoke('generateInvitationToken', {
+      // Generate invitation token and send email via Resend
+      const response = await base44.functions.invoke('generateInvitationToken', {
         inviteeEmail: inviteEmail,
         inviteRole: inviteRole
       });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Erreur lors de l\'envoi de l\'invitation');
+      }
 
       setMessage({ type: 'success', text: `Invitation envoyée à ${inviteEmail}` });
       setInviteEmail('');
