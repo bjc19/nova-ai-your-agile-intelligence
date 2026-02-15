@@ -180,7 +180,7 @@ function LayoutContent({ children, currentPageName }) {
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
               <span className="text-sm font-semibold text-slate-900">Nova</span>
-              <span className="text-xs text-slate-400 ml-2">{t('AI Agile Expert')}</span>
+              <span className="text-xs text-slate-400 ml-2">{t('Your Agile Intelligence')}</span>
               <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
             </div>
           </div>
