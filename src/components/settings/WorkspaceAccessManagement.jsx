@@ -648,6 +648,24 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                 </div>
               </AlertDialogContent>
             </AlertDialog>
+
+            {/* Delete Invitation Alert Dialog */}
+            <AlertDialog open={!!invitationToDelete} onOpenChange={(open) => !open && setInvitationToDelete(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Annuler l'invitation</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Êtes-vous sûr de vouloir supprimer l'invitation pour <strong>{invitationToDelete?.invitee_email}</strong> ? Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="flex justify-end gap-2">
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDeleteInvitation} className="bg-red-600 hover:bg-red-700">
+                    Supprimer
+                  </AlertDialogAction>
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
             </div>
             );
             }
