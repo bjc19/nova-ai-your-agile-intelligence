@@ -44,7 +44,7 @@ export default function JiraProjectSelector() {
           is_active: true
         });
         
-        const selectedIds = new Set(existingSelections.map(s => s.project_id));
+        const selectedIds = new Set(existingSelections.map(s => s.jira_project_id));
         setSelectedProjects(selectedIds);
 
         try {
@@ -82,6 +82,11 @@ export default function JiraProjectSelector() {
   };
 
   const handleConfirmSelection = async () => {
+    if (selectedProjects.size === 0) {
+      toast.error('Veuillez sélectionner au moins un projet avant de continuer');
+      return;
+    }
+
     try {
       setSavingSelection(true);
       

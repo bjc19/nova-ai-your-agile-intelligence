@@ -84,6 +84,11 @@ export default function TrelloProjectSelector() {
   };
 
   const handleConfirmSelection = async () => {
+    if (selectedProjects.size === 0) {
+      toast.error('Veuillez sélectionner au moins un projet avant de continuer');
+      return;
+    }
+
     try {
       setSavingSelection(true);
       
