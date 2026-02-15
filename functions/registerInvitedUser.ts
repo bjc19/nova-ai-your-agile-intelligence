@@ -56,20 +56,18 @@ Deno.serve(async (req) => {
 
         if (newUsers && newUsers.length > 0) {
           const newUser = newUsers[0];
-          // Mark OTP as already verified to bypass email verification screen
-          const verificationCode = await base44.asServiceRole.entities.EmailVerificationCode.filter({
-            email: email,
-            verified: false
-          });
-          
-          if (verificationCode && verificationCode.length > 0) {
-            await base44.asServiceRole.entities.EmailVerificationCode.update(verificationCode[0].id, {
-              verified: true,
-              verified_at: new Date().toISOString()
-            });
-          }
-          
-          console.log('User verification bypassed for invited user:', email);
+          // Create a verified email verification code to bypass email verification screen
+            try {
+              await base44.asServiceRole.entities.EmailVerificationCode.create({
+                email: email,
+                code: '000000', // Dummy code for invited users
+                verified: true,
+                verified_at: new Date().toISOString()
+              });
+              console.log('Verification code created for invited user:', email);
+            } catch (codeErr) {
+              console.log('Could not create verification code, user might need manual verification:', codeErr.message);
+            }
         }
     } catch (regErr) {
       console.error('Registration error:', regErr);
