@@ -29,9 +29,12 @@ export default function TrelloProjectSelector() {
 
         // Get current user
         const user = await base44.auth.me();
+        console.log('=== DEBUG TrelloProjectSelector loadData ===');
+        console.log('User:', user?.email);
 
         // Fetch available Trello projects
         const projectsRes = await base44.functions.invoke('trelloGetProjects', {});
+        console.log('Fetched projects:', projectsRes.data.boards?.length, projectsRes.data.boards);
         setProjects(projectsRes.data.boards || []);
 
         // Fetch existing selections
@@ -39,8 +42,10 @@ export default function TrelloProjectSelector() {
           user_email: user.email,
           is_active: true
         });
+        console.log('Existing selections:', selections.length, selections);
 
         const selectedIds = new Set(selections.map(s => s.board_id));
+        console.log('Selected IDs:', Array.from(selectedIds));
         setSelectedProjects(selectedIds);
 
         // Fetch user's subscription status for quota info
@@ -84,11 +89,18 @@ export default function TrelloProjectSelector() {
       setSavingSelection(true);
       
       const selectedIds = Array.from(selectedProjects);
+      const selectedBoards = projects.filter(p => selectedIds.includes(p.id));
+      
+      console.log('=== DEBUG handleConfirmSelection ===');
+      console.log('Selected IDs to save:', selectedIds);
+      console.log('Selected boards to save:', selectedBoards);
       
       const response = await base44.functions.invoke('trelloSaveProjectSelection', {
         selected_board_ids: selectedIds,
-        boards: projects.filter(p => selectedIds.includes(p.id))
+        boards: selectedBoards
       });
+
+      console.log('Save response:', response.data);
 
       if (response.data.success) {
         toast.success('Sélection sauvegardée avec succès');
