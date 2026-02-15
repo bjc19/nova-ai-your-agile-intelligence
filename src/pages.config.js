@@ -66,10 +66,10 @@ import Register from './pages/Register';
 import ResetPassword from './pages/ResetPassword';
 import Results from './pages/Results';
 import Settings from './pages/Settings';
-import TeamManagement from './pages/TeamManagement';
 import TrelloProjectSelector from './pages/TrelloProjectSelector';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
+import TeamManagement from './pages/TeamManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -93,10 +93,10 @@ export const PAGES = {
     "ResetPassword": ResetPassword,
     "Results": Results,
     "Settings": Settings,
-    "TeamManagement": TeamManagement,
     "TrelloProjectSelector": TrelloProjectSelector,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
+    "TeamManagement": TeamManagement,
 }
 
 export const pagesConfig = {
