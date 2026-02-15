@@ -27,7 +27,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         // Load ONLY Jira projects if Jira is connected
         if (jiraConns.length > 0) {
           const jiraData = await base44.entities.JiraProjectSelection.filter({ 
-            user_email: user?.email,
+            created_by: user?.email,
             is_active: true 
           });
           console.log("🔍 [WorkspaceSelector] Jira selections loaded:", jiraData.length, jiraData);
