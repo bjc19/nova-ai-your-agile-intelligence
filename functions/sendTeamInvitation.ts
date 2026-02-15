@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     }
 
     // Vérifier si l'utilisateur est déjà membre de l'espace de travail
-    const existingMember = await base44.asServiceRole.entities.WorkspaceMember.filter({
+    const existingMember = await base44.entities.WorkspaceMember.filter({
       user_email: email,
       workspace_id: workspaceId
     });
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     }
 
     // Créer l'invitation avec InvitationToken (pas de TeamMember encore)
-    const invitationToken = await base44.asServiceRole.entities.InvitationToken.create({
+    const invitationToken = await base44.entities.InvitationToken.create({
       invitee_email: email,
       invited_by: user.email,
       role: role,
