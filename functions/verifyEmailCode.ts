@@ -24,6 +24,21 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
+    // Mark user as verified in the User entity
+    try {
+      const users = await base44.asServiceRole.entities.User.filter({
+        email: email
+      });
+      if (users && users.length > 0) {
+        await base44.asServiceRole.entities.User.update(users[0].id, {
+          verified_at: new Date().toISOString()
+        });
+        console.log(`User ${email} marked as verified in User entity`);
+      }
+    } catch (updateError) {
+      console.error('Error updating user verified_at:', updateError.message);
+    }
+
     // Finalize the invitation (create workspace member, etc)
     try {
       await base44.functions.invoke('finalizeInvitation', {
