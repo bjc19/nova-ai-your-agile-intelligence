@@ -29,8 +29,7 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2 } from
-"lucide-react";
+  Loader2 } from "lucide-react";
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
@@ -232,8 +231,7 @@ export default function DashboardAdmins() {
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                  userRole={user?.app_role || user?.role} />
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
