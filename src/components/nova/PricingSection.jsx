@@ -62,7 +62,7 @@ const plans = [
       "Equipe ≤ 15 membres ",
       "Intégrations Jira / Trello + Slack et/ou Confluence",
       "≤ 10 projets Jira / Trello ",
-      "70 analyses manuelles",
+      "30 analyses manuelles",
       "Insights contextualisés avancés",
       "Rapports sommaires mensuels automatiques",
     ],
