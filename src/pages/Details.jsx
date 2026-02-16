@@ -48,6 +48,7 @@ export default function Details() {
   const itemsPerPage = 10;
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [generatedImpacts, setGeneratedImpacts] = useState({});
+  const [impactsLoading, setImpactsLoading] = useState(false);
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -268,35 +269,36 @@ export default function Details() {
 
   const { items, icon: Icon, color, title } = getDetailsData();
 
-  // Generate LLM-based impact for resolved items
-  const generateResolutionImpact = async (item) => {
-    if (!item.status === 'resolved' || generatedImpacts[item.id]) return;
+  // Generate all impacts for resolved items at once (batch)
+  useEffect(() => {
+    const resolvedItems = filteredItems.filter(i => i.status === 'resolved');
+    if (resolvedItems.length === 0 || impactsLoading) return;
+
+    const missingImpacts = resolvedItems.filter(i => !generatedImpacts[i.id]);
+    if (missingImpacts.length === 0) return;
+
+    setImpactsLoading(true);
     
-    try {
-      const prompt = `Sur la base de ce problème/blocker résolu:
-        Titre: ${item.issue || item.description}
-        Contexte: ${item.context || 'Sprint agile'}
-        
-        Fournis un impact REALISTE et PROBABLE de sa résolution sur:
-        1. Les métriques du projet (délais, qualité, productivité)
-        2. La santé de l'équipe (moral, productivité, charge)
-        3. Les bénéfices mesurables attendus
-        
-        Sois précis et basé sur le benchmarking agile. Format: court paragraphe de 2-3 phrases max.`;
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: false,
+    Promise.all(
+      missingImpacts.map(item =>
+        base44.integrations.Core.InvokeLLM({
+          prompt: `Problème résolu: "${item.issue || item.description}"
+Impact REALISTE et PROBABLE en 2-3 phrases max (métriques projet, santé équipe, bénéfices mesurables).`,
+          add_context_from_internet: false,
+        }).then(result => ({ id: item.id, impact: result }))
+        .catch(() => ({ id: item.id, impact: "Impact non disponible" }))
+      )
+    ).then(results => {
+      setGeneratedImpacts(prev => {
+        const updated = { ...prev };
+        results.forEach(({ id, impact }) => {
+          updated[id] = impact;
+        });
+        return updated;
       });
-
-      setGeneratedImpacts(prev => ({
-        ...prev,
-        [item.id]: result
-      }));
-    } catch (error) {
-      console.error('Error generating impact:', error);
-    }
-  };
+      setImpactsLoading(false);
+    });
+  }, [filteredItems, detailType]);
 
   // Filter and sort items by urgency and date (most recent first)
   const filteredItems = (urgencyFilter 
@@ -581,11 +583,7 @@ export default function Details() {
                    animate={{ height: expandedItemId === item.id ? "auto" : 0, opacity: expandedItemId === item.id ? 1 : 0 }}
                    transition={{ duration: 0.3 }}
                    className="overflow-hidden border-t border-slate-100"
-                   onAnimationComplete={() => {
-                     if (expandedItemId === item.id && item.status === 'resolved') {
-                       generateResolutionImpact(item);
-                     }
-                   }}
+
                    >
                    <div className="p-5 bg-slate-50/50 space-y-4">
                   {/* Root Cause Analysis */}
@@ -612,16 +610,9 @@ export default function Details() {
                   {item.status === 'resolved' ? (
                     <div>
                       <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact Réel Probable</h4>
-                      {generatedImpacts[item.id] ? (
-                        <p className="text-sm text-slate-600">
-                          {generatedImpacts[item.id]}
-                        </p>
-                      ) : (
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
-                          Analyse de l'impact...
-                        </div>
-                      )}
+                      <p className="text-sm text-slate-600">
+                        {generatedImpacts[item.id] || "En cours d'analyse..."}
+                      </p>
                     </div>
                   ) : (
                     (item.action || item.mitigation || item.recommendation) && (
