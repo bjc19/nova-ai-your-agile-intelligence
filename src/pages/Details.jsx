@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield, ChevronDown } from "lucide-react";
-import ContextualRecommendations from "@/components/nova/ContextualRecommendations";
 import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 
 // Anonymize names in text
@@ -48,55 +47,6 @@ export default function Details() {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
   const [expandedItemId, setExpandedItemId] = useState(null);
-  const [recommendationsCache, setRecommendationsCache] = useState({});
-
-  // Generate truly contextual recommendations using LLM
-  const getContextualRecommendations = async (item) => {
-    if (recommendationsCache[item.id]) {
-      return recommendationsCache[item.id];
-    }
-
-    try {
-      const prompt = `Basé sur ce problème détecté dans une équipe agile:
-
-TITRE: ${item.title || 'Non spécifié'}
-DESCRIPTION: ${item.description || 'Non spécifié'}
-CAUSE RACINE: ${item.root_cause || item.cause || 'Non identifiée'}
-IMPACT: ${item.impact || 'Non spécifié'}
-URGENCE: ${item.urgency || item.criticite || 'Non spécifié'}
-
-Génère EXACTEMENT 3 recommandations concrètes, pertinentes et actionnables pour corriger ce problème spécifique (pas génériques).
-
-Format JSON strict:
-[
-  {"title": "Titre court", "description": "Description détaillée et spécifique au problème", "icon": "emoji"},
-  {"title": "Titre court", "description": "Description détaillée et spécifique au problème", "icon": "emoji"},
-  {"title": "Titre court", "description": "Description détaillée et spécifique au problème", "icon": "emoji"}
-]`;
-
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              title: { type: "string" },
-              description: { type: "string" },
-              icon: { type: "string" }
-            }
-          }
-        }
-      });
-
-      const recs = response.data || [];
-      setRecommendationsCache(prev => ({ ...prev, [item.id]: recs }));
-      return recs;
-    } catch (error) {
-      console.error("Error generating recommendations:", error);
-      return [];
-    }
-  };
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -613,8 +563,17 @@ Format JSON strict:
                   )}
 
                   {/* Mitigation/Action */}
-                  <ContextualRecommendations item={item} />
-
+                  {(item.action || item.mitigation || item.recommendation) && (
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
+                      <ul className="space-y-2">
+                        <li className="text-sm text-slate-600 flex gap-2">
+                          <span className="text-blue-600 font-semibold">•</span>
+                          <span>{anonymizeNamesInText(anonymizeText(item.action || item.mitigation || item.recommendation))}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
 
                   {/* Confidence Score */}
                   {item.confidence_score && (
