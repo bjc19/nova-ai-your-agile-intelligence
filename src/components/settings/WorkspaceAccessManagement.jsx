@@ -43,7 +43,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       const allUsers = await base44.entities.User.list();
       return allUsers || [];
     },
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   // Fetch pending invitations with react-query - only 'pending' and 'pending_email_verification'
@@ -70,7 +70,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       });
       return uniqueInvitations;
     },
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
