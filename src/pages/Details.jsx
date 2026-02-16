@@ -507,7 +507,7 @@ export default function Details() {
                                 {t('resolved')}
                               </Badge>
                             )}
-                            {item.status !== "resolved" && (item.urgency === 'high' || item.urgency === 'medium') && (
+                            {item.status !== "resolved" && (item.urgency === 'high' || item.urgency === 'medium') && !localResolvedIds.has(item.id) && (
                               <Button
                                 size="sm"
                                 variant="outline"
