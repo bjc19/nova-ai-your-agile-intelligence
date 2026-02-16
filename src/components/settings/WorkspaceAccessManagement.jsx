@@ -348,7 +348,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">Membre</SelectItem>
-                      <SelectItem value="contributor">Contributeur</SelectItem>
                       {currentRole === 'admin' && (
                         <SelectItem value="admin">Admin</SelectItem>
                       )}
