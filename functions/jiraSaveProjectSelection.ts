@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     console.log('📋 Fetching existing selections...');
     // Deactivate all previous Jira project selections for this user
-    const existingSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({
+    const existingSelections = await base44.entities.JiraProjectSelection.filter({
       is_active: true
     });
     console.log('✅ Found', existingSelections.length, 'existing active selections');
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     for (const selection of existingSelections) {
       if (!selected_project_ids.includes(selection.jira_project_id)) {
         console.log('🔄 Deactivating project:', selection.jira_project_id);
-        await base44.asServiceRole.entities.JiraProjectSelection.update(selection.id, {
+        await base44.entities.JiraProjectSelection.update(selection.id, {
           is_active: false
         });
       }
@@ -63,18 +63,18 @@ Deno.serve(async (req) => {
       }
 
       console.log('🔍 Checking existing for project:', projectId);
-      const existing = await base44.asServiceRole.entities.JiraProjectSelection.filter({
+      const existing = await base44.entities.JiraProjectSelection.filter({
         jira_project_id: projectId
       });
 
       if (existing.length > 0) {
         console.log('♻️ Reactivating existing project:', projectId);
-        await base44.asServiceRole.entities.JiraProjectSelection.update(existing[0].id, {
+        await base44.entities.JiraProjectSelection.update(existing[0].id, {
           is_active: true
         });
       } else {
         console.log('➕ Creating new project selection:', projectId);
-        const created = await base44.asServiceRole.entities.JiraProjectSelection.create({
+        const created = await base44.entities.JiraProjectSelection.create({
           jira_project_id: projectId,
           jira_project_key: project.key,
           jira_project_name: project.name,
