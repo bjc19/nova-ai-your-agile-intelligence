@@ -95,9 +95,9 @@ export default function QuickStats({ analysisHistory = [] }) {
           });
         }
         
-        setGdprSignals(prev => [...filteredSlack, ...filteredJira]);
+        setGdprSignals([...filteredSlack, ...filteredJira]);
         setTeamsInsights(filteredTeams);
-        setResolvedItems(resolved);
+        setResolvedItems(resolved.map(item => item.item_id));
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
