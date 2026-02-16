@@ -136,29 +136,58 @@ export default function QuickStats({ analysisHistory = [] }) {
     }
   };
   
-  // Count items (match Details page logic)
-  const analysisBlockers = analysisHistory.flatMap((a) => 
-    (a.analysis_data?.blockers || []).filter(b => b.urgency)
+  // Helper: check if item is resolved
+  const isItemResolved = (itemId) => resolvedItems.includes(itemId);
+
+  // Count items (match Details page logic) - EXCLUDING resolved items
+  const analysisBlockers = analysisHistory.flatMap((a, idx) => 
+    (a.analysis_data?.blockers || []).filter((b, bidx) => 
+      b.urgency && !isItemResolved(`${idx}-${bidx}`)
+    )
   ).length;
-  const analysisRisks = analysisHistory.flatMap((a) => 
-    (a.analysis_data?.risks || [])
+  const analysisRisks = analysisHistory.flatMap((a, idx) => 
+    (a.analysis_data?.risks || []).filter((r, ridx) => 
+      !isItemResolved(`${idx}-${ridx}`)
+    )
   ).length;
-  
-  // Count GDPR markers (Slack): critique/haute → blockers, moyenne → risks
-  const slackBlockers = gdprSignals.filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily').filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-  const slackRisks = gdprSignals.filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily').filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
-  
-  // Count Jira markers: critique/haute → blockers, moyenne/basse → risks
-  const jiraBlockers = gdprSignals.filter(s => s.detection_source === 'jira_backlog').filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-  const jiraRisks = gdprSignals.filter(s => s.detection_source === 'jira_backlog').filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
-  
-  // Count Teams markers: critique/haute → blockers, moyenne/basse → risks
-  const teamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
-  const teamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne' || i.criticite === 'basse').length;
-  
+
+  // Count GDPR markers (Slack): critique/haute → blockers, moyenne → risks - EXCLUDING resolved
+  const slackBlockers = gdprSignals
+    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
+    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
+    .filter(s => !isItemResolved(`gdpr-blocker-${s.id}`))
+    .length;
+  const slackRisks = gdprSignals
+    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
+    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
+    .filter(s => !isItemResolved(`gdpr-risk-${s.id}`))
+    .length;
+
+  // Count Jira markers: critique/haute → blockers, moyenne/basse → risks - EXCLUDING resolved
+  const jiraBlockers = gdprSignals
+    .filter(s => s.detection_source === 'jira_backlog')
+    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
+    .filter(s => !isItemResolved(`jira-blocker-${s.id}`))
+    .length;
+  const jiraRisks = gdprSignals
+    .filter(s => s.detection_source === 'jira_backlog')
+    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
+    .filter(s => !isItemResolved(`jira-risk-${s.id}`))
+    .length;
+
+  // Count Teams markers: critique/haute → blockers, moyenne/basse → risks - EXCLUDING resolved
+  const teamsBlockers = teamsInsights
+    .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
+    .filter(i => !isItemResolved(`teams-blocker-${i.id}`))
+    .length;
+  const teamsRisks = teamsInsights
+    .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
+    .filter(i => !isItemResolved(`teams-risk-${i.id}`))
+    .length;
+
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
-  const resolvedBlockers = resolvedItems.filter(r => r.item_type === 'blocker').length;
+  const resolvedBlockers = resolvedItems.length;
   
   // Calculate Technical Health Index (IST) = Resolved / (Blockers + Risks)
   const denominator = totalBlockers + totalRisks;
