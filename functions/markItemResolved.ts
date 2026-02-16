@@ -15,17 +15,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // If it's a PatternDetection, update it directly with service role
+    // If it's a PatternDetection, update it directly
     if (source === 'pattern_detection') {
-      try {
-        await base44.asServiceRole.entities.PatternDetection.update(itemId, {
-          status: 'resolved',
-          resolved_date: new Date().toISOString(),
-        });
-      } catch (patternError) {
-        console.error('PatternDetection update error:', patternError);
-        // Continue to create ResolvedItem anyway
-      }
+      await base44.entities.PatternDetection.update(itemId, {
+        status: 'resolved',
+        resolved_date: new Date().toISOString(),
+      });
     }
 
     // Create ResolvedItem record for tracking
