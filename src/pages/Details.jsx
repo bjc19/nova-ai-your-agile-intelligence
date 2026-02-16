@@ -484,17 +484,27 @@ export default function Details() {
                           </div>
                         )}
                         <p className="text-sm text-slate-600 mt-2">
-                          {anonymizeNamesInText(anonymizeText(displayItem.issue || displayItem.description || displayItem.action || displayItem.mitigation || "-"))}
+                          {anonymizeNamesInText(anonymizeText(displayItem.issue || displayItem.description || "-"))}
                         </p>
-                        {displayItem.action && (
-                          <p className="text-xs text-slate-500 mt-2">
-                            <strong>{t('action')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.action))}
-                          </p>
-                        )}
-                        {displayItem.impact && (
-                          <p className="text-xs text-slate-500 mt-1">
-                            <strong>{t('impact')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.impact))}
-                          </p>
+                        {item.status === "resolved" ? (
+                          displayItem.impact && (
+                            <p className="text-xs text-slate-500 mt-2">
+                              <strong>Impact:</strong> {anonymizeNamesInText(anonymizeText(displayItem.impact))}
+                            </p>
+                          )
+                        ) : (
+                          <>
+                            {displayItem.action && (
+                              <p className="text-xs text-slate-500 mt-2">
+                                <strong>{t('action')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.action))}
+                              </p>
+                            )}
+                            {displayItem.impact && (
+                              <p className="text-xs text-slate-500 mt-1">
+                                <strong>{t('impact')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.impact))}
+                              </p>
+                            )}
+                          </>
                         )}
                         <div className="flex items-center gap-2 mt-3 flex-wrap">
                           <span className={`text-xs ${
