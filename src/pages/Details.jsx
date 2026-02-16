@@ -24,19 +24,6 @@ const anonymizeNamesInText = (text) => {
   });
 };
 
-const translateContent = async (text, targetLanguage) => {
-  if (!text || targetLanguage === 'en') return text;
-  
-  try {
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Traduis ce texte en français de manière concise:\n\n${text}`,
-    });
-    return result || text;
-  } catch (error) {
-    return text;
-  }
-};
-
 export default function Details() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
