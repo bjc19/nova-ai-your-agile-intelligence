@@ -638,20 +638,23 @@ export default function JiraProjectSelector() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm font-medium text-slate-700 mb-3">Membres assignés :</p>
-                {memberAssignments[project.id]?.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {[...new Set(memberAssignments[project.id])].map(memberEmail => {
-                      const member = teamMembers.find(m => m.user_email === memberEmail);
-                      return (
-                        <Badge key={memberEmail} variant="secondary" className="text-sm">
-                          {member?.user_name || memberEmail}
+                {(() => {
+                  const validMembers = [...new Set(memberAssignments[project.id] || [])]
+                    .map(memberEmail => teamMembers.find(m => m.user_email === memberEmail))
+                    .filter(member => member !== undefined);
+                  
+                  return validMembers.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {validMembers.map(member => (
+                        <Badge key={member.user_email} variant="secondary" className="text-sm">
+                          {member.user_name || member.user_email}
                         </Badge>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500 italic">Aucun membre assigné à ce projet</p>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500 italic">Aucun membre assigné à ce projet</p>
+                  );
+                })()}
               </CardContent>
             </Card>
           ))}
