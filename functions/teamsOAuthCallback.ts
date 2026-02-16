@@ -62,24 +62,18 @@ Deno.serve(async (req) => {
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
     
-    console.log('Creating TeamsConnection for user:', state);
+    console.log('Tokens obtained, sending to frontend for authenticated creation');
     
-    // Use service role for creation (callback is unauthenticated)
-    // RLS allows create if user_email is not null
-    const base44 = createClientFromRequest(req);
-    const result = await base44.asServiceRole.entities.TeamsConnection.create({
-      user_email: state,
+    // Encode tokens for safe transfer via postMessage
+    const tokenData = btoa(JSON.stringify({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
-      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+      expires_in: tokens.expires_in,
       tenant_id: tenantId,
-      scopes: tokens.scope ? tokens.scope.split(' ') : [],
-      is_active: true
-    });
+      scopes: tokens.scope ? tokens.scope.split(' ') : []
+    }));
 
-    console.log('Teams connection created:', result?.id);
-
-    // Close popup and refresh parent
+    // Close popup and send tokens to frontend
     return new Response(`
       <html>
         <head>
@@ -97,7 +91,7 @@ Deno.serve(async (req) => {
             <p style="font-size: 12px; color: #666;">Cette fenêtre va se fermer...</p>
           </div>
           <script>
-            window.opener?.postMessage({ type: 'teams-connected' }, '*');
+            window.opener?.postMessage({ type: 'teams-oauth-success', data: '${tokenData}' }, '*');
             setTimeout(() => window.close(), 2000);
           </script>
         </body>
