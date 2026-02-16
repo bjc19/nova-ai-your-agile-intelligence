@@ -103,10 +103,11 @@ Nova
       // Continue même si l'email échoue - la demande est créée
     }
 
+    console.log('✅ Success - returning response');
     return Response.json({ success: true, message: 'Demande envoyée avec succès' });
 
   } catch (error) {
-    console.error('joinTeamRequest error:', error);
+    console.error('❌ joinTeamRequest error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
