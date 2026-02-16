@@ -94,8 +94,8 @@ Deno.serve(async (req) => {
     }
 
     // ===== SOURCES NON-MANUELLES: Détection automatique par mots-clés =====
-    // Si pas de pattern_ids explicites (sources Slack/Teams/Jira)
-    if (patternDetections.length === 0 && (source === 'slack' || source === 'teams' || source === 'jira' || source === 'confluence')) {
+    // Si pas de pattern_ids explicites (sources Slack/Teams/Jira/Trello/Confluence)
+    if (patternDetections.length === 0 && (source === 'slack' || source === 'teams' || source === 'jira' || source === 'trello' || source === 'confluence')) {
       const analysisText = [
         analysisData.summary,
         ...blockersData.map(b => b.issue),
