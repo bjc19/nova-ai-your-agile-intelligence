@@ -81,6 +81,12 @@ export default function Details() {
     queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
   });
 
+  // Fetch PatternDetections with resolved status
+  const { data: resolvedPatterns = [] } = useQuery({
+    queryKey: ['patternDetections', 'resolved'],
+    queryFn: () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 100),
+  });
+
   // Separate Slack (GDPR) and Teams markers
   const gdprMarkersData = allMarkersData.filter(m => 
     m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
