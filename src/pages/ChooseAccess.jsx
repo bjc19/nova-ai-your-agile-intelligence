@@ -93,7 +93,10 @@ export default function ChooseAccess() {
 
 
         // Silently fail, user might not be authenticated
-      }}, 10000);return () => clearInterval(interval);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, [navigate, requestStatus]);
 
   const handleSubscribe = () => {
