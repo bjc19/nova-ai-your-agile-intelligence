@@ -624,8 +624,7 @@ export default function Details() {
                           </li>
                         </ul>
                       </div>
-                    )
-                  )}
+                      )}
 
                   {/* Confidence Score */}
                   {item.confidence_score && (
