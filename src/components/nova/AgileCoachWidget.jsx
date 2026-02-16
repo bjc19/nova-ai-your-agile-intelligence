@@ -65,10 +65,32 @@ export default function AgileCoachWidget() {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !conversation) return;
 
-    const userMessage = inputValue;
+    const userMessage = inputValue.trim();
     setInputValue('');
-    setLoading(true);
 
+    // Handle /clear command
+    if (userMessage === '/clear') {
+      setLoading(true);
+      try {
+        const user = await base44.auth.me();
+        const newConvo = await base44.agents.createConversation({
+          agent_name: 'AgileCoachatbot',
+          metadata: {
+            name: `Chat rapide avec ${user?.full_name || 'Admin'}`,
+            description: 'Mini conversation avec le Coach Agile Nova'
+          }
+        });
+        setConversation(newConvo);
+        setMessages([]);
+      } catch (error) {
+        console.error('Error clearing conversation:', error);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    setLoading(true);
     try {
       await base44.agents.addMessage(conversation, {
         role: 'user',
