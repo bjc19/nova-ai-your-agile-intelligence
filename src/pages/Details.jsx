@@ -29,7 +29,6 @@ export default function Details() {
   const { t, language } = useLanguage();
   const [detailType, setDetailType] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState([]);
-  const [translatedItems, setTranslatedItems] = useState({});
   const [urgencyFilter, setUrgencyFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
