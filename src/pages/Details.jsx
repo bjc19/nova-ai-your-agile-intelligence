@@ -300,6 +300,10 @@ export default function Details() {
         analysisDate: item.analysisDate || item.created_date,
       });
 
+      // Track resolution count for Dashboard sync
+      const resolvedCount = parseInt(sessionStorage.getItem('resolvedCount') || '0');
+      sessionStorage.setItem('resolvedCount', String(resolvedCount + 1));
+
       toast.success('Item marqué comme résolu');
     } catch (error) {
       console.error('Erreur résolution:', error);
