@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -102,6 +101,18 @@ export default function TrelloProjectSelector() {
       });
 
       if (response.data.success) {
+        // Wait a moment for database to propagate
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Reload selections from database to ensure UI is in sync
+        const savedSelections = await base44.entities.TrelloProjectSelection.filter({
+          is_active: true
+        });
+        
+        const savedIds = new Set(savedSelections.map(s => s.board_id));
+        setSelectedProjects(savedIds);
+        
+        const selectedBoards = projects.filter(p => savedIds.has(p.id));
         setSelectedProjectsData(selectedBoards);
         
         // Charger les membres de l'équipe et les utilisateurs (exclure l'utilisateur actuel)
