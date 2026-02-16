@@ -81,6 +81,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Process multi-source patterns if workspace available
+    if (workspace_id) {
+      try {
+        await base44.asServiceRole.functions.invoke('processMultiSourcePatterns', {
+          analysisId: createdAnalysis.id,
+          analysisData: analysisRecord.analysis_data,
+          workspaceId: workspace_id,
+          source: analysisRecord.source,
+          blockersData: analysisRecord.analysis_data?.blockers || [],
+          risksData: analysisRecord.analysis_data?.risks || []
+        });
+      } catch (e) {
+        console.log('Multi-source pattern processing skipped:', e.message);
+      }
+    }
+
     return Response.json({ analysis: createdAnalysis });
   } catch (error) {
     console.error('Analysis creation error:', error);
