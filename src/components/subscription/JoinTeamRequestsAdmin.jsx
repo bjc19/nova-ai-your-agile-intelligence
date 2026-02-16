@@ -32,7 +32,7 @@ export default function JoinTeamRequestsAdmin() {
 
   useEffect(() => {
     loadRequests();
-    
+
     // Set up polling to refresh every 5 seconds
     const interval = setInterval(loadRequests, 5000);
     return () => clearInterval(interval);
@@ -76,7 +76,7 @@ export default function JoinTeamRequestsAdmin() {
       });
 
       // Remove from UI
-      setRequests(requests.filter(r => r.id !== request.id));
+      setRequests(requests.filter((r) => r.id !== request.id));
     } catch (error) {
       console.error('Error approving request:', error);
     }
@@ -89,7 +89,7 @@ export default function JoinTeamRequestsAdmin() {
         processed_at: new Date().toISOString()
       });
 
-      setRequests(requests.filter(r => r.id !== request.id));
+      setRequests(requests.filter((r) => r.id !== request.id));
     } catch (error) {
       console.error('Error rejecting request:', error);
     }
@@ -101,22 +101,22 @@ export default function JoinTeamRequestsAdmin() {
         <CardContent className="p-6 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         </CardContent>
-      </Card>
-    );
+      </Card>);
+
   }
 
   if (requests.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            Demandes d'adhésion à l'équipe
-          </CardTitle>
-          <CardDescription>Aucune demande en attente</CardDescription>
-        </CardHeader>
-      </Card>
-    );
+    return null;
+
+
+
+
+
+
+
+
+
+
   }
 
   return (
@@ -132,41 +132,41 @@ export default function JoinTeamRequestsAdmin() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {requests.map((request, index) => (
-            <motion.div
-              key={request.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg"
-            >
+          {requests.map((request, index) =>
+          <motion.div
+            key={request.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-lg">
+
               <div className="flex-1">
                 <p className="font-medium text-slate-900">{request.requester_name}</p>
                 <p className="text-sm text-slate-600">{request.requester_email}</p>
               </div>
               <div className="flex gap-2">
                 <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleReject(request)}
-                  className="text-red-600 hover:text-red-700"
-                >
+                size="sm"
+                variant="outline"
+                onClick={() => handleReject(request)}
+                className="text-red-600 hover:text-red-700">
+
                   <X className="w-4 h-4 mr-1" />
                   Rejeter
                 </Button>
                 <Button
-                  size="sm"
-                  onClick={() => handleApprove(request)}
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                >
+                size="sm"
+                onClick={() => handleApprove(request)}
+                className="bg-emerald-600 hover:bg-emerald-700">
+
                   <CheckCircle2 className="w-4 h-4 mr-1" />
                   Approuver
                 </Button>
               </div>
             </motion.div>
-          ))}
+          )}
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>);
+
 }
