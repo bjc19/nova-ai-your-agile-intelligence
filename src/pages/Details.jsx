@@ -113,38 +113,7 @@ export default function Details() {
     setAnalysisHistory(filtered);
   }, [historyData, selectedPeriod]);
 
-  // Translate item content when language changes
-  const getTranslatedItem = async (item) => {
-    const cacheKey = `${item.id}-${language}`;
-    if (translatedItems[cacheKey]) {
-      return translatedItems[cacheKey];
-    }
 
-    const translated = { ...item };
-    if (language === 'fr') {
-      if (item.action) {
-        translated.action = await translateContent(item.action, language);
-      }
-      if (item.impact) {
-        translated.impact = await translateContent(item.impact, language);
-      }
-      if (item.description) {
-        translated.description = await translateContent(item.description, language);
-      }
-      if (item.issue) {
-        translated.issue = await translateContent(item.issue, language);
-      }
-      if (item.mitigation) {
-        translated.mitigation = await translateContent(item.mitigation, language);
-      }
-    }
-
-    setTranslatedItems(prev => ({
-      ...prev,
-      [cacheKey]: translated
-    }));
-    return translated;
-  };
 
   // Calculate data based on type
   const getDetailsData = () => {
