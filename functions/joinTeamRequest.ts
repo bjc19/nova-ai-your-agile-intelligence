@@ -47,19 +47,28 @@ Deno.serve(async (req) => {
     }
 
     // Créer la demande (avec ou sans subscription_id)
-    const joinRequest = await base44.entities.JoinTeamRequest.create({
+    console.log('About to create JoinTeamRequest with:', {
       requester_email: user.email,
       requester_name: user.full_name,
       manager_email: managerEmail,
       subscription_id: subscriptionId || null,
       status: 'pending'
     });
-    
-    console.log('Join request created:', { 
-      requestId: joinRequest.id, 
-      managerEmail, 
-      subscriptionId 
-    });
+
+    let joinRequest;
+    try {
+      joinRequest = await base44.entities.JoinTeamRequest.create({
+        requester_email: user.email,
+        requester_name: user.full_name,
+        manager_email: managerEmail,
+        subscription_id: subscriptionId || null,
+        status: 'pending'
+      });
+      console.log('✅ Join request created successfully:', joinRequest);
+    } catch (createError) {
+      console.error('❌ Error creating join request:', createError);
+      throw createError;
+    }
 
     // Envoyer un email au gestionnaire
     const appUrl = Deno.env.get("APP_URL") || "https://nova.app";
