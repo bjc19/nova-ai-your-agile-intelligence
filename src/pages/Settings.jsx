@@ -36,7 +36,6 @@ import {
 import { toast } from "sonner";
 
 export default function Settings() {
-  useAccessControl();
   const navigate = useNavigate();
   const [slackConnected, setSlackConnected] = useState(false);
   const [slackTeamName, setSlackTeamName] = useState(null);
