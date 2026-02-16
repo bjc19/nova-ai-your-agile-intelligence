@@ -30,7 +30,7 @@ export default function ChooseAccess() {
           const workspaceMembers = await base44.entities.WorkspaceMember.filter({
             user_email: u.email
           });
-          
+
           if (workspaceMembers && workspaceMembers.length > 0) {
             // User has been invited - redirect to Dashboard directly
             navigate(createPageUrl("Dashboard"));
@@ -79,7 +79,7 @@ export default function ChooseAccess() {
           if (latestRequest.status !== requestStatus) {
             setRequestStatus(latestRequest.status);
             setPendingRequestId(latestRequest.id);
-            
+
             // If approved, redirect to dashboard
             if (latestRequest.status === 'approved') {
               setTimeout(() => {
@@ -89,11 +89,11 @@ export default function ChooseAccess() {
           }
         }
       } catch (e) {
-        // Silently fail, user might not be authenticated
-      }
-    }, 10000);
 
-    return () => clearInterval(interval);
+
+
+        // Silently fail, user might not be authenticated
+      }}, 10000);return () => clearInterval(interval);
   }, [navigate, requestStatus]);
 
   const handleSubscribe = () => {
@@ -140,8 +140,8 @@ export default function ChooseAccess() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -156,8 +156,8 @@ export default function ChooseAccess() {
         </div>
 
         {/* Pending Request Status */}
-        {requestStatus === "pending" && (
-          <Card className="border-2 border-blue-500 bg-blue-50">
+        {requestStatus === "pending" &&
+        <Card className="border-2 border-blue-500 bg-blue-50">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center">
@@ -182,10 +182,10 @@ export default function ChooseAccess() {
               </div>
             </CardContent>
           </Card>
-        )}
+        }
 
-        {requestStatus === "rejected" && (
-          <Card className="border-2 border-red-500 bg-red-50">
+        {requestStatus === "rejected" &&
+        <Card className="border-2 border-red-500 bg-red-50">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-red-200 flex items-center justify-center">
@@ -201,18 +201,18 @@ export default function ChooseAccess() {
               <p className="text-sm text-slate-600">
                 Malheureusement, votre demande pour rejoindre cette équipe a été refusée. Vous pouvez essayer avec un autre administrateur ou souscrire à votre propre plan.
               </p>
-              <Button 
-                onClick={handleRejectionConfirm}
-                className="w-full"
-              >
+              <Button
+              onClick={handleRejectionConfirm}
+              className="w-full">
+
                 Je comprends
               </Button>
             </CardContent>
           </Card>
-        )}
+        }
 
-        {!requestStatus && (
-          <div className="grid md:grid-cols-2 gap-6">
+        {!requestStatus &&
+        <div className="grid md:grid-cols-2 gap-6">
           
           <Card className="border-2 hover:border-blue-500 transition-all cursor-pointer" onClick={handleSubscribe}>
             <CardHeader>
@@ -243,49 +243,49 @@ export default function ChooseAccess() {
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:border-purple-500 transition-all">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mb-4">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-              <CardTitle className="text-2xl">Rejoindre une équipe</CardTitle>
-              <CardDescription>Vous avez été invité par un administrateur ?</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Email de l'administrateur</label>
-                <Input 
-                  type="email"
-                  placeholder="admin@entreprise.com"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  disabled={submitting}
-                />
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex gap-2">
-                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-900">
-                    Saisissez l'email de l'administrateur qui vous a invité. Il recevra votre demande d'accès et pourra l'approuver depuis son tableau de bord.
-                  </p>
-                </div>
-              </div>
+          
 
-              <Button 
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
-                onClick={handleJoinTeam}
-                disabled={submitting}
-              >
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Envoyer la demande
-              </Button>
-            </CardContent>
-          </Card>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         </div>
-        )}
-        </div>
-        </div>
-        );
         }
+        </div>
+        </div>);
+
+}
