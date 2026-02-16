@@ -30,17 +30,25 @@ Deno.serve(async (req) => {
 
     console.log('Teams connection created:', result?.id);
 
-    // Diagnostic: Relit immédiatement pour vérifier l'existence
+    // Diagnostic: Essayer de relire directement par ID
+    console.log('[DIAGNOSTIC] user.email:', user.email);
+    console.log('[DIAGNOSTIC] result.user_email:', result?.user_email);
+    
+    try {
+      const directRead = await base44.entities.TeamsConnection.read(result?.id);
+      console.log('[DIAGNOSTIC] Direct read by ID - SUCCESS');
+      console.log('[DIAGNOSTIC] Stored user_email:', directRead?.user_email);
+      console.log('[DIAGNOSTIC] Is active:', directRead?.is_active);
+    } catch (e) {
+      console.log('[DIAGNOSTIC] Direct read by ID - FAILED:', e.message);
+    }
+
+    // Essayer filter comme avant
     const verification = await base44.entities.TeamsConnection.filter({
       user_email: user.email,
       is_active: true
     });
     console.log('[DIAGNOSTIC] After create - filter result:', verification.length, 'records');
-    if (verification.length > 0) {
-      console.log('[DIAGNOSTIC] Connection verified:', verification[0].id);
-    } else {
-      console.log('[DIAGNOSTIC] Connection NOT FOUND after creation!');
-    }
 
     return new Response(JSON.stringify({ success: true, connection_id: result?.id }), {
       status: 200,
