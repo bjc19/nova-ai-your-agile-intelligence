@@ -127,7 +127,15 @@ export default function Settings() {
 
   const loadTeamsConnection = async () => {
     try {
-      const teamsConns = await base44.entities.TeamsConnection.list();
+      const user = await base44.auth.me();
+      if (!user) {
+        setTeamsConnected(false);
+        return;
+      }
+      const teamsConns = await base44.entities.TeamsConnection.filter({ 
+        user_email: user.email,
+        is_active: true
+      });
       setTeamsConnected(teamsConns.length > 0);
     } catch (error) {
       console.error('Error loading Teams connection:', error);
