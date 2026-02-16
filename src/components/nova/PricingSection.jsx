@@ -36,7 +36,7 @@ const plans = [
     included: [
       "Equipe ≤ 5 membres ",
       "1 source externe au choix (Jira / Trello)",
-      "Projets ≤ 5 projets Jira / Trello ",
+      "≤ 5 projets Jira / Trello ",
       "30 analyses manuelles uniquement",
       "Insights contextualisés",
     ],
@@ -61,7 +61,7 @@ const plans = [
     included: [
       "Equipe ≤ 15 membres ",
       "Intégrations Jira / Trello + Slack et/ou Confluence",
-      "Projets ≤ 10 projets Jira / Trello ",
+      "≤ 10 projets Jira / Trello ",
       "70 analyses manuelles",
       "Insights contextualisés avancés",
       "Rapports sommaires mensuels automatiques",
