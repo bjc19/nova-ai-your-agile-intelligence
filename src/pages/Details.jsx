@@ -293,17 +293,17 @@ export default function Details() {
     if (missingImpacts.length === 0) return;
 
     setImpactsLoading(true);
-    
+
     Promise.all(
       missingImpacts.map(item =>
         base44.integrations.Core.InvokeLLM({
           prompt: `Ce problème/blocker a été RÉSOLU: "${item.issue || item.description}"
 
-Formule l'impact prospectif en 2-3 phrases max sur 2 niveaux:
-1. OUTPUT immédiat: Qu'est-ce qui change directement/court terme (capacité, délai, qualité)?
-2. OUTCOMES futur: Si cette solution s'installe durablement, quel sera l'impact sur la vélocité, la stabilité, la satisfaction de l'équipe?
+  Formule l'impact prospectif en 2-3 phrases max sur 2 niveaux:
+  1. OUTPUT immédiat: Qu'est-ce qui change directement/court terme (capacité, délai, qualité)?
+  2. OUTCOMES futur: Si cette solution s'installe durablement, quel sera l'impact sur la vélocité, la stabilité, la satisfaction de l'équipe?
 
-Sois précis et chiffré si possible. Format: "Immédiatement... À moyen terme..."`,
+  Sois précis et chiffré si possible. Format: "Immédiatement... À moyen terme..."`,
           add_context_from_internet: false,
         }).then(result => ({ id: item.id, impact: result }))
         .catch(() => ({ id: item.id, impact: "Impact non disponible" }))
@@ -319,6 +319,29 @@ Sois précis et chiffré si possible. Format: "Immédiatement... À moyen terme.
       setImpactsLoading(false);
     });
   }, [filteredItems, detailType]);
+
+  // Handle marking item as resolved
+  const handleMarkResolved = async (item) => {
+    if (item.source !== 'pattern_detection') {
+      toast.error('Seuls les patterns détectés peuvent être marqués comme résolus');
+      return;
+    }
+
+    setResolvingItemId(item.id);
+    try {
+      await base44.entities.PatternDetection.update(item.id, {
+        status: 'resolved',
+        resolved_date: new Date().toISOString(),
+      });
+      toast.success('Item marqué comme résolu');
+      // Refresh the list
+      window.location.reload();
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour');
+    } finally {
+      setResolvingItemId(null);
+    }
+  };
 
   // Count items by urgency
   const itemsWithUrgency = items.filter(item => item.urgency);
