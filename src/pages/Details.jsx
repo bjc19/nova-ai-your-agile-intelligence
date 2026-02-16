@@ -220,7 +220,7 @@ export default function Details() {
       color = "text-blue-600";
       title = t('detectedBlockersIssues');
     } else if (detailType === "risks") {
-      // Analyses risks + GDPR risks (moyenne) + Teams risks (moyenne)
+      // Analyses risks + GDPR risks (moyenne) + Teams risks (moyenne) + unresolved patterns
       items = analysisHistory.flatMap((analysis, idx) => {
         const risks = analysis.analysis_data?.risks || [];
         return risks.map((risk, ridx) => ({
@@ -261,6 +261,19 @@ export default function Details() {
             analysisTitle: '#Microsoft Teams',
             analysisDate: marker.created_date,
           }))
+      ).concat(
+        unresolvedPatterns.map((pattern, idx) => ({
+          id: pattern.id,
+          issue: pattern.pattern_name,
+          description: pattern.context,
+          status: pattern.status,
+          urgency: pattern.severity === 'critical' ? 'high' : pattern.severity === 'high' ? 'medium' : 'low',
+          source: 'pattern_detection',
+          confidence_score: pattern.confidence_score,
+          analysisTitle: `Pattern: ${pattern.pattern_name}`,
+          analysisDate: pattern.created_date,
+          pattern_id: pattern.pattern_id,
+        }))
       );
       icon = ShieldAlert;
       color = "text-amber-600";
