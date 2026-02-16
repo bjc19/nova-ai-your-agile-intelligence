@@ -16,7 +16,7 @@ export default function ChooseAccess() {
   const [loading, setLoading] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [requestStatus, setRequestStatus] = useState(null); // 'pending', 'rejected'
+  const [requestStatus, setRequestStatus] = useState(null);
   const [pendingRequestId, setPendingRequestId] = useState(null);
 
   useEffect(() => {
@@ -25,14 +25,12 @@ export default function ChooseAccess() {
         const u = await base44.auth.me();
         setUser(u);
 
-        // Check if user has been invited (has workspace member record)
         try {
           const workspaceMembers = await base44.entities.WorkspaceMember.filter({
             user_email: u.email
           });
 
           if (workspaceMembers && workspaceMembers.length > 0) {
-            // User has been invited - redirect to Dashboard directly
             navigate(createPageUrl("Dashboard"));
             return;
           }
@@ -46,7 +44,6 @@ export default function ChooseAccess() {
           return;
         }
 
-        // Check for pending or rejected requests
         const requests = await base44.entities.JoinTeamRequest.filter({
           requester_email: u.email
         });
@@ -57,7 +54,6 @@ export default function ChooseAccess() {
           setPendingRequestId(latestRequest.id);
         }
       } catch (e) {
-        // User not authenticated, stay on this page to allow sign up
         setUser(null);
       } finally {
         setLoading(false);
@@ -65,7 +61,6 @@ export default function ChooseAccess() {
     };
     checkAuth();
 
-    // Setup polling every 10 seconds to check for status updates
     const interval = setInterval(async () => {
       try {
         const u = await base44.auth.me();
@@ -75,12 +70,10 @@ export default function ChooseAccess() {
 
         if (requests.length > 0) {
           const latestRequest = requests[requests.length - 1];
-          // Only update if status changed
           if (latestRequest.status !== requestStatus) {
             setRequestStatus(latestRequest.status);
             setPendingRequestId(latestRequest.id);
 
-            // If approved, redirect to dashboard
             if (latestRequest.status === 'approved') {
               setTimeout(() => {
                 navigate(createPageUrl("Dashboard"));
@@ -89,9 +82,6 @@ export default function ChooseAccess() {
           }
         }
       } catch (e) {
-
-
-
         // Silently fail, user might not be authenticated
       }
     }, 10000);
@@ -143,14 +133,13 @@ export default function ChooseAccess() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>);
-
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-6">
       <div className="max-w-4xl mx-auto space-y-8">
-        
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-slate-900">
             {user ? `Bienvenue ${user.full_name} 👋` : "Bienvenue 👋"}
@@ -158,9 +147,8 @@ export default function ChooseAccess() {
           <p className="text-lg text-slate-600">Accedez à Nova AI en tant qu'administrateur d'équipe en souscrivant à un plan :</p>
         </div>
 
-        {/* Pending Request Status */}
-        {requestStatus === "pending" &&
-        <Card className="border-2 border-blue-500 bg-blue-50">
+        {requestStatus === "pending" && (
+          <Card className="border-2 border-blue-500 bg-blue-50">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center">
@@ -185,10 +173,10 @@ export default function ChooseAccess() {
               </div>
             </CardContent>
           </Card>
-        }
+        )}
 
-        {requestStatus === "rejected" &&
-        <Card className="border-2 border-red-500 bg-red-50">
+        {requestStatus === "rejected" && (
+          <Card className="border-2 border-red-500 bg-red-50">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-red-200 flex items-center justify-center">
@@ -205,92 +193,50 @@ export default function ChooseAccess() {
                 Malheureusement, votre demande pour rejoindre cette équipe a été refusée. Vous pouvez essayer avec un autre administrateur ou souscrire à votre propre plan.
               </p>
               <Button
-              onClick={handleRejectionConfirm}
-              className="w-full">
-
+                onClick={handleRejectionConfirm}
+                className="w-full"
+              >
                 Je comprends
               </Button>
             </CardContent>
           </Card>
-        }
+        )}
 
-        {!requestStatus &&
-        <div className="flex justify-center">
-        <div className="w-full max-w-md">
-          
-          <Card className="border-2 hover:border-blue-500 transition-all cursor-pointer" onClick={handleSubscribe}>
-            <CardHeader>
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                <CreditCard className="w-6 h-6 text-blue-600" />
-              </div>
-              <CardTitle className="text-2xl">Souscrire à un plan</CardTitle>
-              <CardDescription>Créez votre propre équipe et invitez vos collaborateurs</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 mb-6">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <span className="text-sm text-slate-600">Accès immédiat à toutes les fonctionnalités</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <span className="text-sm text-slate-600">Invitez jusqu'à 25 membres selon le plan</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <span className="text-sm text-slate-600">Plans à partir de 49$/mois</span>
-                </li>
-              </ul>
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600">
-                Voir les plans
-              </Button>
-            </CardContent>
-          </Card>
-
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        </div>
-        </div>
-        }
-        </div>
-        </div>);
-
+        {!requestStatus && (
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              <Card className="border-2 hover:border-blue-500 transition-all cursor-pointer" onClick={handleSubscribe}>
+                <CardHeader>
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                    <CreditCard className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <CardTitle className="text-2xl">Souscrire à un plan</CardTitle>
+                  <CardDescription>Créez votre propre équipe et invitez vos collaborateurs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 mb-6">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <span className="text-sm text-slate-600">Accès immédiat à toutes les fonctionnalités</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <span className="text-sm text-slate-600">Invitez jusqu'à 25 membres selon le plan</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <span className="text-sm text-slate-600">Plans à partir de 49$/mois</span>
+                    </li>
+                  </ul>
+                  <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600">
+                    Voir les plans
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
