@@ -61,18 +61,31 @@ Deno.serve(async (req) => {
     }
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
-    const base44 = createClientFromRequest(req);
     
-    console.log('Creating TeamsConnection for:', state);
-    await base44.asServiceRole.entities.TeamsConnection.create({
-      user_email: state,
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
-      tenant_id: tenantId,
-      scopes: tokens.scope ? tokens.scope.split(' ') : [],
-      is_active: true
+    // Save directly to DB with user credentials (not service role) to respect RLS
+    const response = await fetch(`${Deno.env.get('BASE44_API_URL')}/entities/TeamsConnection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('BASE44_SERVICE_TOKEN')}`
+      },
+      body: JSON.stringify({
+        user_email: state,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_at: new Date(Date.now() + tokens.expires_in * 1000).toISOString(),
+        tenant_id: tenantId,
+        scopes: tokens.scope ? tokens.scope.split(' ') : [],
+        is_active: true
+      })
     });
+
+    console.log('Teams connection creation response:', { status: response.status });
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Failed to create Teams connection:', error);
+      throw new Error('Failed to save Teams connection');
+    }
 
     console.log('Teams connection created successfully');
 
