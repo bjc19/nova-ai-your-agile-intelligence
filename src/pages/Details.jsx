@@ -95,6 +95,12 @@ export default function Details() {
     }, '-created_date', 100),
   });
 
+  // Fetch resolved items (all sources)
+  const { data: resolvedItemsData = [] } = useQuery({
+    queryKey: ['resolvedItems'],
+    queryFn: () => base44.entities.ResolvedItem.list('-resolved_date', 100),
+  });
+
   // Separate Slack (GDPR) and Teams markers
   const gdprMarkersData = allMarkersData.filter(m => 
     m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
