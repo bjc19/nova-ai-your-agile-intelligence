@@ -1,5 +1,37 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+const JIRA_TOKEN_URL = 'https://auth.atlassian.com/oauth/token';
+
+async function refreshJiraToken(connection) {
+  if (connection.refresh_token === 'none' || !connection.refresh_token) {
+    throw new Error('No refresh token available');
+  }
+
+  const tokenResponse = await fetch(JIRA_TOKEN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      grant_type: 'refresh_token',
+      client_id: Deno.env.get('JIRA_CLIENT_ID'),
+      client_secret: Deno.env.get('JIRA_CLIENT_SECRET'),
+      refresh_token: connection.refresh_token
+    })
+  });
+
+  if (!tokenResponse.ok) {
+    throw new Error(`Failed to refresh token: ${tokenResponse.status}`);
+  }
+
+  const tokenData = await tokenResponse.json();
+  return {
+    access_token: tokenData.access_token,
+    refresh_token: tokenData.refresh_token || connection.refresh_token,
+    expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
+  };
+}
+
 // Utility functions
 async function sha256(str) {
   const encoder = new TextEncoder();
@@ -36,9 +68,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No active Jira connection' }, { status: 400 });
     }
 
-    const connection = connections[0];
+    let connection = connections[0];
 
-    // Fetch Jira issues
+    // Check and refresh token if expired
+    if (new Date(connection.expires_at) <= new Date()) {
+      console.log('Jira token expired, refreshing...');
+      try {
+        const newTokenData = await refreshJiraToken(connection);
+
+        // Update connection with new token
+        await base44.asServiceRole.entities.JiraConnection.update(connection.id, {
+          access_token: newTokenData.access_token,
+          refresh_token: newTokenData.refresh_token,
+          expires_at: newTokenData.expires_at
+        });
+
+        connection = { ...connection, ...newTokenData };
+        console.log('Token refreshed successfully');
+      } catch (refreshError) {
+        console.error('Error refreshing token:', refreshError);
+        return Response.json({ error: 'Jira token refresh failed' }, { status: 401 });
+      }
+    }
+
+     // Fetch Jira issues
     const issuesResponse = await fetch(
       `https://api.atlassian.com/ex/jira/${connection.cloud_id}/rest/api/3/search?jql=status!=%22Done%22&maxResults=50&fields=key,summary,status,priority,assignee,created,updated,issuetype`,
       {
