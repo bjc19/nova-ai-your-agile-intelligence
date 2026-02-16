@@ -152,7 +152,7 @@ export default function ChooseAccess() {
           <h1 className="text-4xl font-bold text-slate-900">
             {user ? `Bienvenue ${user.full_name} 👋` : "Bienvenue 👋"}
           </h1>
-          <p className="text-lg text-slate-600">Accedez à Nova AI en tant que administrateur d'équipe en choisissant l'une des options ci-dessous :</p>
+          <p className="text-lg text-slate-600">Accedez à Nova AI en tant qu'administrateur d'équipe en choisissant l'une des options ci-dessous :</p>
         </div>
 
         {/* Pending Request Status */}
