@@ -421,13 +421,7 @@ export default function Details() {
                     {/* Items */}
                     <div className="space-y-3">
                     {filteredItems.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((item, index) => {
-              const cacheKey = `${item.id}-${language}`;
-              const displayItem = translatedItems[cacheKey] || item;
-              
-              // Trigger translation if needed
-              if (language === 'fr' && !translatedItems[cacheKey]) {
-                getTranslatedItem(item);
-              }
+              const displayItem = item;
               
               return (
               <motion.div
