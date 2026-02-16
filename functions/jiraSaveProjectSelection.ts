@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     console.log('✅ Found', existingSelections.length, 'existing active selections');
 
     for (const selection of existingSelections) {
-      if (!selected_project_ids.includes(selection.jira_project_id)) {
+      if (!selectedProjectIdSet.has(selection.jira_project_id)) {
         console.log('🔄 Deactivating project:', selection.jira_project_id);
         await base44.entities.JiraProjectSelection.update(selection.id, {
           is_active: false
