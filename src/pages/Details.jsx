@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield, ChevronDown } from "lucide-react";
+import ContextualRecommendations from "@/components/nova/ContextualRecommendations";
 import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 
 // Anonymize names in text
