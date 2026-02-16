@@ -14,49 +14,73 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         const user = await base44.auth.me();
         console.log("🔍 [WorkspaceSelector] User loaded:", user?.email);
         
-        // Check which connection is active (Jira OR Trello, never both)
-        const [jiraConns, trelloConns] = await Promise.all([
-          base44.entities.JiraProjectSelection.filter({ created_by: user?.email, is_active: true }),
-          base44.entities.TrelloConnection.filter({ user_email: user?.email, is_active: true })
-        ]);
-        console.log("🔍 [WorkspaceSelector] Jira connections:", jiraConns.length);
-        console.log("🔍 [WorkspaceSelector] Trello connections:", trelloConns.length);
-
         let selections = [];
         
-        // Load ONLY Jira projects if Jira is connected
-        if (jiraConns.length > 0) {
-          const jiraData = await base44.entities.JiraProjectSelection.filter({ 
-            created_by: user?.email,
-            is_active: true 
-          });
-          console.log("🔍 [WorkspaceSelector] Jira selections loaded:", jiraData.length, jiraData);
-          selections = jiraData.map(ws => ({
-            ...ws,
-            display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
-          }));
-        } 
-        // Otherwise, load ONLY Trello boards if Trello is connected
-        else if (trelloConns.length > 0) {
-          const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
-            user_email: user?.email,
-            is_active: true 
-          });
-          console.log("🔍 [WorkspaceSelector] Trello selections loaded:", trelloData.length, trelloData);
-          selections = trelloData.map(ws => ({
-            ...ws,
-            display_name: ws.board_name || 'Trello Board (Unnamed)'
-          }));
-        }
-
-        // For regular users, only show workspaces they're assigned to
+        // For regular users, load only assigned workspaces
         if (userRole === 'user') {
           const workspaceMembers = await base44.entities.WorkspaceMember.filter({
             user_email: user?.email
           });
           const assignedWorkspaceIds = workspaceMembers.map(wm => wm.workspace_id);
-          console.log("🔍 [WorkspaceSelector] User role filter - assigned IDs:", assignedWorkspaceIds);
-          selections = selections.filter(ws => assignedWorkspaceIds.includes(ws.id));
+          console.log("🔍 [WorkspaceSelector] User role - assigned IDs:", assignedWorkspaceIds);
+
+          if (assignedWorkspaceIds.length > 0) {
+            // Load Jira projects by IDs
+            const jiraData = await base44.entities.JiraProjectSelection.filter({ 
+              id: { "$in": assignedWorkspaceIds },
+              is_active: true 
+            });
+            console.log("🔍 [WorkspaceSelector] Jira projects loaded:", jiraData.length, jiraData);
+            selections.push(...jiraData.map(ws => ({
+              ...ws,
+              display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
+            })));
+
+            // Load Trello boards by IDs
+            const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
+              id: { "$in": assignedWorkspaceIds },
+              is_active: true 
+            });
+            console.log("🔍 [WorkspaceSelector] Trello boards loaded:", trelloData.length, trelloData);
+            selections.push(...trelloData.map(ws => ({
+              ...ws,
+              display_name: ws.board_name || 'Trello Board (Unnamed)'
+            })));
+          }
+        } else {
+          // For admin/contributor: load all their projects
+          // Check which connection is active (Jira OR Trello, never both)
+          const [jiraConns, trelloConns] = await Promise.all([
+            base44.entities.JiraProjectSelection.filter({ created_by: user?.email, is_active: true }),
+            base44.entities.TrelloConnection.filter({ user_email: user?.email, is_active: true })
+          ]);
+          console.log("🔍 [WorkspaceSelector] Jira connections:", jiraConns.length);
+          console.log("🔍 [WorkspaceSelector] Trello connections:", trelloConns.length);
+
+          // Load ONLY Jira projects if Jira is connected
+          if (jiraConns.length > 0) {
+            const jiraData = await base44.entities.JiraProjectSelection.filter({ 
+              created_by: user?.email,
+              is_active: true 
+            });
+            console.log("🔍 [WorkspaceSelector] Jira selections loaded:", jiraData.length, jiraData);
+            selections = jiraData.map(ws => ({
+              ...ws,
+              display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
+            }));
+          } 
+          // Otherwise, load ONLY Trello boards if Trello is connected
+          else if (trelloConns.length > 0) {
+            const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
+              user_email: user?.email,
+              is_active: true 
+            });
+            console.log("🔍 [WorkspaceSelector] Trello selections loaded:", trelloData.length, trelloData);
+            selections = trelloData.map(ws => ({
+              ...ws,
+              display_name: ws.board_name || 'Trello Board (Unnamed)'
+            }));
+          }
         }
 
         console.log("🔍 [WorkspaceSelector] Final selections:", selections.length, selections);
