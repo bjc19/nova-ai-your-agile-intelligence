@@ -158,7 +158,7 @@ export default function QuickStats({ analysisHistory = [] }) {
   
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
-  const resolvedBlockers = Math.floor(totalBlockers * 0.6); // Simulated
+  const resolvedBlockers = resolvedItems.filter(r => r.item_type === 'blocker').length;
   
   // Calculate Technical Health Index (IST) = Resolved / (Blockers + Risks)
   const denominator = totalBlockers + totalRisks;
