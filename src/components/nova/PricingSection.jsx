@@ -37,7 +37,7 @@ const plans = [
       "Equipe ≤ 5 membres ",
       "1 source externe au choix (Jira / Trello)",
       "≤ 5 projets Jira / Trello ",
-      "30 analyses manuelles uniquement",
+      "10 analyses manuelles uniquement",
       "Insights contextualisés",
     ],
     limitations: [
