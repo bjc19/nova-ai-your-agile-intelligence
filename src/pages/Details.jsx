@@ -34,8 +34,6 @@ export default function Details() {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
   const [expandedItemId, setExpandedItemId] = useState(null);
-  const [generatedImpacts, setGeneratedImpacts] = useState({});
-  const [impactsLoading, setImpactsLoading] = useState(false);
   const [resolvingItemId, setResolvingItemId] = useState(null);
 
   // Get the detail type and period from sessionStorage
