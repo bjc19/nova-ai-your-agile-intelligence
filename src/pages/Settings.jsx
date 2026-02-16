@@ -142,9 +142,9 @@ export default function Settings() {
 
       // Listen for popup message
       const messageHandler = async (event) => {
-        console.log('Teams popup message received:', event.data);
-        if (event.data?.type === 'teams-connected') {
-          console.log('Teams connected message detected');
+        console.log('Teams popup message received:', event.data?.type);
+        if (event.data?.type === 'teams-oauth-success') {
+          console.log('Teams oauth success detected');
           window.removeEventListener('message', messageHandler);
           // Refetch from DB to ensure persistence
           setTimeout(async () => {
