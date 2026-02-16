@@ -269,6 +269,12 @@ export default function Details() {
 
   const { items, icon: Icon, color, title } = getDetailsData();
 
+  // Filter and sort items by urgency and date (most recent first)
+  const filteredItems = (urgencyFilter 
+    ? items.filter(item => item.urgency === urgencyFilter)
+    : items
+  ).sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
+
   // Generate all impacts for resolved items at once (batch)
   useEffect(() => {
     const resolvedItems = filteredItems.filter(i => i.status === 'resolved');
@@ -299,12 +305,6 @@ Impact REALISTE et PROBABLE en 2-3 phrases max (métriques projet, santé équip
       setImpactsLoading(false);
     });
   }, [filteredItems, detailType]);
-
-  // Filter and sort items by urgency and date (most recent first)
-  const filteredItems = (urgencyFilter 
-    ? items.filter(item => item.urgency === urgencyFilter)
-    : items
-  ).sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
 
   // Count items by urgency
   const itemsWithUrgency = items.filter(item => item.urgency);
