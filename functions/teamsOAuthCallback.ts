@@ -61,12 +61,13 @@ Deno.serve(async (req) => {
     }
 
     const tenantId = JSON.parse(atob(tokens.access_token.split('.')[1])).tid;
-    const base44 = createClientFromRequest(req);
     
     console.log('Creating TeamsConnection for user:', state);
     
-    // Create connection directly (not via service role) to respect RLS
-    await base44.entities.TeamsConnection.create({
+    // Use service role for creation (callback is unauthenticated)
+    // RLS allows create if user_email is not null
+    const base44 = createClientFromRequest(req);
+    const result = await base44.asServiceRole.entities.TeamsConnection.create({
       user_email: state,
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
@@ -76,7 +77,7 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    console.log('Teams connection created successfully');
+    console.log('Teams connection created:', result?.id);
 
     // Close popup and refresh parent
     return new Response(`
