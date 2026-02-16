@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
-import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield } from "lucide-react";
+import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield, ChevronDown } from "lucide-react";
 import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 
 // Anonymize names in text
@@ -46,6 +46,7 @@ export default function Details() {
   const [urgencyFilter, setUrgencyFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
+  const [expandedItemId, setExpandedItemId] = useState(null);
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -402,9 +403,13 @@ export default function Details() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.05 * index }}
-                className="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-md transition-all pointer-events-auto cursor-auto"
+                className="rounded-xl border border-slate-200 bg-white overflow-hidden"
               >
-                <div className="flex items-start gap-4 pointer-events-auto">
+                <div 
+                  onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
+                  className="p-5 hover:bg-slate-50/50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-start gap-4">
                   <div className={`p-2 rounded-lg ${
                     item.source === 'gdpr' ? 'bg-blue-100' : 
                     item.source === 'teams' ? 'bg-purple-100' : 
@@ -518,10 +523,71 @@ export default function Details() {
                       </>
                     )}
                   </div>
-                </div>
-              </motion.div>
-              );
-              })}
+                  <div className="flex-shrink-0">
+                    <motion.div
+                      animate={{ rotate: expandedItemId === item.id ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="w-5 h-5 text-slate-400" />
+                    </motion.div>
+                  </div>
+                  </div>
+                  </div>
+
+                  {/* Expanded Details */}
+                  <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: expandedItemId === item.id ? "auto" : 0, opacity: expandedItemId === item.id ? 1 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden border-t border-slate-100"
+                  >
+                  <div className="p-5 bg-slate-50/50 space-y-4">
+                  {/* Root Cause Analysis */}
+                  {(item.root_cause || item.cause) && (
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Cause Racine</h4>
+                      <p className="text-sm text-slate-600">
+                        {anonymizeNamesInText(anonymizeText(item.root_cause || item.cause))}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* System Impact */}
+                  {(item.impact || item.system_impact) && (
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact Système</h4>
+                      <p className="text-sm text-slate-600">
+                        {anonymizeNamesInText(anonymizeText(item.impact || item.system_impact))}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Mitigation/Action */}
+                  {(item.action || item.mitigation || item.recommendation) && (
+                    <div>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
+                      <ul className="space-y-2">
+                        <li className="text-sm text-slate-600 flex gap-2">
+                          <span className="text-blue-600 font-semibold">•</span>
+                          <span>{anonymizeNamesInText(anonymizeText(item.action || item.mitigation || item.recommendation))}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Confidence Score */}
+                  {item.confidence_score && (
+                    <div className="pt-2 border-t border-slate-200">
+                      <span className="text-xs text-slate-500">
+                        Confiance: {Math.round(item.confidence_score * 100)}%
+                      </span>
+                    </div>
+                  )}
+                  </div>
+                  </motion.div>
+                  </motion.div>
+                  );
+                  })}
               </div>
 
               {/* Pagination buttons */}
