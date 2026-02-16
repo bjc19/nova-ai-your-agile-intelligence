@@ -87,6 +87,14 @@ export default function Details() {
     queryFn: () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 100),
   });
 
+  // Fetch unresolved PatternDetections
+  const { data: unresolvedPatterns = [] } = useQuery({
+    queryKey: ['patternDetections', 'unresolved'],
+    queryFn: () => base44.entities.PatternDetection.filter({ 
+      status: { $nin: ['resolved', 'dismissed'] } 
+    }, '-created_date', 100),
+  });
+
   // Separate Slack (GDPR) and Teams markers
   const gdprMarkersData = allMarkersData.filter(m => 
     m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
