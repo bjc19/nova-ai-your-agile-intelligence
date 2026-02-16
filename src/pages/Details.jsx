@@ -47,78 +47,54 @@ export default function Details() {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
   const [expandedItemId, setExpandedItemId] = useState(null);
+  const [recommendationsCache, setRecommendationsCache] = useState({});
 
-  // Generate contextual recommendations based on item
-  const getContextualRecommendations = (item) => {
-    const recommendations = [];
-    const urgency = item.urgency || item.criticite;
-    const source = item.source;
-    const workshop = item.analysisData?.workshop_type;
-
-    // Recommendation 1: Immediate action
-    if (urgency === 'high' || urgency === 'critique') {
-      recommendations.push({
-        title: "Action Immédiate",
-        description: "Escalader auprès du lead technique et du responsable de l'équipe pour résolution en priorité",
-        icon: "🚨"
-      });
-    } else if (urgency === 'medium' || urgency === 'moyenne') {
-      recommendations.push({
-        title: "Planifier dans le Sprint",
-        description: "Intégrer la résolution dans le prochain sprint avec un critère d'acceptation clair",
-        icon: "⏱️"
-      });
-    } else {
-      recommendations.push({
-        title: "Ajouter au Backlog",
-        description: "Cataloguer comme amélioration future et planifier quand la capacité le permet",
-        icon: "📋"
-      });
+  // Generate truly contextual recommendations using LLM
+  const getContextualRecommendations = async (item) => {
+    if (recommendationsCache[item.id]) {
+      return recommendationsCache[item.id];
     }
 
-    // Recommendation 2: Root cause investigation (context-specific)
-    if (source === 'gdpr') {
-      recommendations.push({
-        title: "Audit Slack",
-        description: "Analyser les messages du canal pour identifier les patterns récurrents et causes systémiques",
-        icon: "🔍"
-      });
-    } else if (source === 'teams') {
-      recommendations.push({
-        title: "Analyser les Transcripts",
-        description: "Examiner les réunions Teams pour évaluer la fréquence et le contexte du problème",
-        icon: "📹"
-      });
-    } else {
-      recommendations.push({
-        title: "Investiguer la Cause Racine",
-        description: "Organiser une rétrospective ciblée pour identifier et documenter les causes fondamentales",
-        icon: "🎯"
-      });
-    }
+    try {
+      const prompt = `Basé sur ce problème détecté dans une équipe agile:
 
-    // Recommendation 3: Process improvement
-    if (workshop === 'daily_scrum' || workshop === 'standup') {
-      recommendations.push({
-        title: "Améliorer le Daily",
-        description: "Réserver 5 min en daily pour explicitement adresser ces blocages et facteurs de friction",
-        icon: "✅"
-      });
-    } else if (workshop === 'retrospective') {
-      recommendations.push({
-        title: "Créer une Action Retro",
-        description: "Générer une action concrète en rétro avec propriétaire et deadline de suivi",
-        icon: "📊"
-      });
-    } else {
-      recommendations.push({
-        title: "Documenter et Partager",
-        description: "Créer une page Confluence avec la solution pour éviter la répétition du problème",
-        icon: "📝"
-      });
-    }
+TITRE: ${item.title || 'Non spécifié'}
+DESCRIPTION: ${item.description || 'Non spécifié'}
+CAUSE RACINE: ${item.root_cause || item.cause || 'Non identifiée'}
+IMPACT: ${item.impact || 'Non spécifié'}
+URGENCE: ${item.urgency || item.criticite || 'Non spécifié'}
 
-    return recommendations;
+Génère EXACTEMENT 3 recommandations concrètes, pertinentes et actionnables pour corriger ce problème spécifique (pas génériques).
+
+Format JSON strict:
+[
+  {"title": "Titre court", "description": "Description détaillée et spécifique au problème", "icon": "emoji"},
+  {"title": "Titre court", "description": "Description détaillée et spécifique au problème", "icon": "emoji"},
+  {"title": "Titre court", "description": "Description détaillée et spécifique au problème", "icon": "emoji"}
+]`;
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string" },
+              description: { type: "string" },
+              icon: { type: "string" }
+            }
+          }
+        }
+      });
+
+      const recs = response.data || [];
+      setRecommendationsCache(prev => ({ ...prev, [item.id]: recs }));
+      return recs;
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      return [];
+    }
   };
 
   // Get the detail type and period from sessionStorage
@@ -636,26 +612,8 @@ export default function Details() {
                   )}
 
                   {/* Mitigation/Action */}
-                  <div>
-                    <h4 className="font-semibold text-slate-900 text-sm mb-3">Recommandations Contextualisées</h4>
-                    <div className="space-y-3">
-                      {getContextualRecommendations(item).map((rec, idx) => (
-                        <div key={idx} className="border border-slate-200 rounded-lg p-3 bg-white">
-                          <div className="flex items-start gap-2">
-                            <span className="text-lg flex-shrink-0">{rec.icon}</span>
-                            <div className="min-w-0 flex-1">
-                              <h5 className="font-semibold text-slate-900 text-xs">
-                                {rec.title}
-                              </h5>
-                              <p className="text-xs text-slate-600 mt-1">
-                                {rec.description}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <ContextualRecommendations item={item} />
+
 
                   {/* Confidence Score */}
                   {item.confidence_score && (
