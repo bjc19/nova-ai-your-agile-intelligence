@@ -142,19 +142,23 @@ export default function Settings() {
 
       // Listen for popup message
       const messageHandler = async (event) => {
-        console.log('Teams popup message received:', event.data?.type);
-        if (event.data?.type === 'teams-oauth-success') {
-          console.log('Teams oauth success detected');
-          window.removeEventListener('message', messageHandler);
-          // Refetch from DB to ensure persistence
-          setTimeout(async () => {
-            const teamsConns = await base44.entities.TeamsConnection.list();
-            console.log('Teams connections found:', teamsConns.length);
-            setTeamsConnected(teamsConns.length > 0);
-            setConnectingTeams(false);
-          }, 1000);
-        }
-      };
+            console.log('Teams popup message received:', event.data?.type);
+            if (event.data?.type === 'teams-oauth-success' || event.data?.type === 'teams-connected') {
+              console.log('Teams oauth success detected');
+              window.removeEventListener('message', messageHandler);
+              // Refetch from DB to ensure persistence - allow more time for DB sync
+              setTimeout(async () => {
+                const user = await base44.auth.me();
+                const teamsConns = await base44.entities.TeamsConnection.filter({
+                  user_email: user.email,
+                  is_active: true
+                });
+                console.log('Teams connections found:', teamsConns.length, 'for user:', user.email);
+                setTeamsConnected(teamsConns.length > 0);
+                setConnectingTeams(false);
+              }, 2000);
+            }
+          };
       window.addEventListener('message', messageHandler);
 
       // Open in popup window
