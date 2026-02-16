@@ -176,6 +176,9 @@ export default function Settings() {
 
             console.log('[Teams] Connection saved:', saveResult.data);
 
+            // Wait for DB replication before checking
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
             // Reload connection to verify
             await loadTeamsConnection();
             toast.success('Microsoft Teams connecté avec succès');
