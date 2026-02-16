@@ -58,6 +58,7 @@ import DashboardAdmins from './pages/DashboardAdmins';
 import DashboardCommonUsers from './pages/DashboardCommonUsers';
 import DashboardContributors from './pages/DashboardContributors';
 import Demo from './pages/Demo';
+import Details from './pages/Details';
 import Home from './pages/Home';
 import JiraProjectSelector from './pages/JiraProjectSelector';
 import Plans from './pages/Plans';
@@ -70,7 +71,6 @@ import TeamManagement from './pages/TeamManagement';
 import TrelloProjectSelector from './pages/TrelloProjectSelector';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import Details from './pages/Details';
 import __Layout from './Layout.jsx';
 
 
@@ -86,6 +86,7 @@ export const PAGES = {
     "DashboardCommonUsers": DashboardCommonUsers,
     "DashboardContributors": DashboardContributors,
     "Demo": Demo,
+    "Details": Details,
     "Home": Home,
     "JiraProjectSelector": JiraProjectSelector,
     "Plans": Plans,
@@ -98,7 +99,6 @@ export const PAGES = {
     "TrelloProjectSelector": TrelloProjectSelector,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "Details": Details,
 }
 
 export const pagesConfig = {

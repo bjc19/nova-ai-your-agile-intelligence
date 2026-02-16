@@ -48,10 +48,34 @@ function LayoutContent({ children, currentPageName }) {
           // Fetch pending alerts for admins
           if ((user?.app_role || user?.role) === 'admin') {
             try {
-              const alerts = await base44.entities.SprintHealth.filter({ 
+              const sprintAlerts = await base44.entities.SprintHealth.filter({ 
                 status: "critical" 
               });
-              setPendingAlerts(alerts.length);
+
+              // Fetch connection errors from all integration sources
+              const jiraErrors = await base44.entities.JiraConnection.filter({ 
+                connection_status_error: true 
+              });
+              const trelloErrors = await base44.entities.TrelloConnection.filter({ 
+                connection_status_error: true 
+              });
+              const confluenceErrors = await base44.entities.ConfluenceConnection.filter({ 
+                connection_status_error: true 
+              });
+              const slackErrors = await base44.entities.SlackConnection.filter({ 
+                connection_status_error: true 
+              });
+              const teamsErrors = await base44.entities.TeamsConnection.filter({ 
+                connection_status_error: true 
+              });
+
+              const totalConnectionErrors = (jiraErrors?.length || 0) + 
+                                            (trelloErrors?.length || 0) + 
+                                            (confluenceErrors?.length || 0) + 
+                                            (slackErrors?.length || 0) + 
+                                            (teamsErrors?.length || 0);
+
+              setPendingAlerts((sprintAlerts?.length || 0) + totalConnectionErrors);
             } catch (e) {
               setPendingAlerts(0);
             }
