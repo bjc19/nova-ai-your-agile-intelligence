@@ -532,10 +532,10 @@ export default function Settings() {
           setTeamConfig(configs[0]);
         }
 
-        // Check connections
+        // Check connections - filter by user for RLS compliance
         const [slackConns, teamsConns, jiraConns, confluenceConns, trelloConns] = await Promise.all([
-        base44.entities.SlackConnection.list(),
-        base44.entities.TeamsConnection.list(),
+        base44.entities.SlackConnection.filter({ user_email: user.email, is_active: true }),
+        base44.entities.TeamsConnection.filter({ user_email: user.email, is_active: true }),
         base44.entities.JiraConnection.list(),
         base44.entities.ConfluenceConnection.list(),
         base44.entities.TrelloConnection.filter({ user_email: user?.email })]
