@@ -279,7 +279,8 @@ export default function Details() {
   const filteredItems = (urgencyFilter 
     ? items.filter(item => item.urgency === urgencyFilter)
     : items
-  ).sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
+  ).filter(item => !localResolvedIds.has(item.id))
+   .sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
 
 
 
