@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     // Tenter de lire l'enregistrement spécifiquement par son ID
     try {
       if (result?.id) {
-        const createdRecord = await base44.entities.TeamsConnection.read(result.id);
+        const createdRecord = await base44.entities.TeamsConnection.get(result.id);
         console.log('[DIAGNOSTIC - POST-CREATION] Record read by ID:', createdRecord ? 'Found' : 'Not Found', 'ID:', createdRecord?.id, 'Email:', createdRecord?.user_email);
       } else {
         console.log('[DIAGNOSTIC - POST-CREATION] No ID returned from create operation.');
