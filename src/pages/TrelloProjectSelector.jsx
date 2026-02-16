@@ -190,8 +190,17 @@ export default function TrelloProjectSelector() {
     });
   };
 
-  const handleRemoveAssignedMember = async (event, boardId, memberEmail) => { // Added event param
-    event.stopPropagation(); // Stop event propagation to prevent parent onClick
+  const handleRemoveAssignedMember = async (event, boardId, memberEmail) => {
+    event.stopPropagation();
+    
+    // Optimistic UI update
+    setMemberAssignments(prev => {
+      const current = prev[boardId] || [];
+      return {
+        ...prev,
+        [boardId]: current.filter(email => email !== memberEmail)
+      };
+    });
     
     try {
       const existingAssignment = await base44.entities.WorkspaceMember.filter({
@@ -201,20 +210,19 @@ export default function TrelloProjectSelector() {
       
       if (existingAssignment.length > 0) {
         await base44.entities.WorkspaceMember.delete(existingAssignment[0].id);
-        
-        setMemberAssignments(prev => {
-          const current = prev[boardId] || [];
-          return {
-            ...prev,
-            [boardId]: current.filter(email => email !== memberEmail)
-          };
-        });
-        
-        toast.success('Membre retiré avec succès');
+        toast.success('Membre retiré');
       }
     } catch (error) {
       console.error('Error removing member:', error);
-      toast.error('Erreur lors du retrait du membre');
+      toast.error('Erreur lors du retrait');
+      // Rollback on error
+      setMemberAssignments(prev => {
+        const current = prev[boardId] || [];
+        return {
+          ...prev,
+          [boardId]: [...current, memberEmail]
+        };
+      });
     }
   };
 
