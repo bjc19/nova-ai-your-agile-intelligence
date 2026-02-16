@@ -9,6 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check user role (handle both 'role' and 'app_role')
+    const userRole = user.app_role || user.role;
+    console.log(`User: ${user.email}, Role: ${userRole}`);
+
     const { itemId, source, itemType, title, urgency, analysisDate } = await req.json();
 
     if (!itemId || !source) {
