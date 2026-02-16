@@ -562,17 +562,39 @@ export default function Details() {
                     </div>
                   )}
 
-                  {/* Mitigation/Action */}
-                  {(item.action || item.mitigation || item.recommendation) && (
+                  {/* Mitigation/Action or Resolution Impact */}
+                  {item.status === 'resolved' ? (
                     <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
-                      <ul className="space-y-2">
-                        <li className="text-sm text-slate-600 flex gap-2">
-                          <span className="text-blue-600 font-semibold">•</span>
-                          <span>{anonymizeNamesInText(anonymizeText(item.action || item.mitigation || item.recommendation))}</span>
-                        </li>
-                      </ul>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact de la Résolution</h4>
+                      <div className="space-y-2 text-sm text-slate-600">
+                        <div className="flex gap-2">
+                          <span className="text-green-600 font-semibold">✓</span>
+                          <span>Impact probable sur le projet et les métriques</span>
+                        </div>
+                        {item.impact_metrics && (
+                          <div className="flex gap-2 ml-5 text-xs text-slate-500">
+                            <span>Métriques de qualité: {item.impact_metrics}</span>
+                          </div>
+                        )}
+                        {item.team_health_impact && (
+                          <div className="flex gap-2 ml-5 text-xs text-slate-500">
+                            <span>Santé de l'équipe: {item.team_health_impact}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  ) : (
+                    (item.action || item.mitigation || item.recommendation) && (
+                      <div>
+                        <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
+                        <ul className="space-y-2">
+                          <li className="text-sm text-slate-600 flex gap-2">
+                            <span className="text-blue-600 font-semibold">•</span>
+                            <span>{anonymizeNamesInText(anonymizeText(item.action || item.mitigation || item.recommendation))}</span>
+                          </li>
+                        </ul>
+                      </div>
+                    )
                   )}
 
                   {/* Confidence Score */}
