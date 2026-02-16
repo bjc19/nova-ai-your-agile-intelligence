@@ -15,23 +15,31 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid selected_board_ids' }, { status: 400 });
     }
 
-    // Fetch user's team configuration to check quota
-    const configs = await base44.entities.TeamConfiguration.list();
-    const config = configs.length > 0 ? configs[0] : null;
+    // Fetch user's subscription status to check quota
+    let maxProjectsAllowed = 5;
+    let userPlan = 'starter';
+    try {
+      const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+      maxProjectsAllowed = statusRes.data.maxProjectsAllowed || 5;
+      userPlan = statusRes.data.plan || 'starter';
+    } catch (e) {
+      console.log('Could not fetch subscription status, using default quota');
+    }
 
-    // Get plan info - for now assume a default quota of 10 projects
-    // This can be extended to use actual plan data
-    const maxProjectsAllowed = 10;
-
+    // Check quota: count of new boards should not exceed maxProjectsAllowed
     if (selected_board_ids.length > maxProjectsAllowed) {
+      const errorMsg = `Vous avez atteint la limite de ${maxProjectsAllowed} tableaux Trello pour votre plan ${userPlan}. Veuillez mettre à niveau.`;
+      console.error('Quota exceeded:', selected_board_ids.length, '>', maxProjectsAllowed);
       return Response.json(
-        { error: `Quota exceeded. Maximum ${maxProjectsAllowed} projects allowed.` },
+        { error: errorMsg, success: false },
         { status: 400 }
       );
     }
 
     // Get existing selections for this user (RLS filters by created_by automatically)
-    const existingSelections = await base44.entities.TrelloProjectSelection.filter({});
+    const existingSelections = await base44.entities.TrelloProjectSelection.filter({
+      is_active: true
+    });
 
     // Deactivate selections that are no longer in the new selection
     const toDeactivate = existingSelections.filter(
