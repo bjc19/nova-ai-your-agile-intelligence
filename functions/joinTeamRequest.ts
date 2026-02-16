@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     // Chercher l'abonnement du gestionnaire
     let subscriptionId = null;
     try {
-      const managerSub = await base44.asServiceRole.entities.Subscription.filter({
+      const managerSub = await base44.entities.Subscription.filter({
         user_email: managerEmail,
         status: 'active'
       });
