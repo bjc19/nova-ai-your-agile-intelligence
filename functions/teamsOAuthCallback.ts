@@ -91,7 +91,8 @@ Deno.serve(async (req) => {
             <p style="font-size: 12px; color: #666;">Cette fenêtre va se fermer...</p>
           </div>
           <script>
-            window.opener?.postMessage({ type: 'teams-oauth-success', data: '${tokenData}' }, '*');
+            console.log('[Teams Popup] Sending token to parent...');
+            window.opener?.postMessage({ type: 'teams-connected', data: '${tokenData}' }, '*');
             setTimeout(() => window.close(), 2000);
           </script>
         </body>
