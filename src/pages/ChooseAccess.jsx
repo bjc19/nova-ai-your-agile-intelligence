@@ -212,7 +212,8 @@ export default function ChooseAccess() {
         }
 
         {!requestStatus &&
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="flex justify-center">
+        <div className="w-full max-w-md">
           
           <Card className="border-2 hover:border-blue-500 transition-all cursor-pointer" onClick={handleSubscribe}>
             <CardHeader>
