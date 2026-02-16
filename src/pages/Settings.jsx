@@ -153,7 +153,7 @@ export default function Settings() {
       const messageHandler = async (event) => {
         console.log('[Teams] Message received:', event.data?.type, 'from origin:', event.origin);
         
-        if (event.data?.type === 'teams-oauth-success') {
+        if (event.data?.type === 'teams-oauth-success' || event.data?.type === 'teams-connected') {
           if (!messageHandlerActive) return;
           messageHandlerActive = false;
           window.removeEventListener('message', messageHandler);
