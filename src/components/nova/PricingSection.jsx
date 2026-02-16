@@ -94,6 +94,7 @@ const plans = [
       "Croisement complet multi-sources (Jira/Trello + Confluence + Slack + Teams, etc.)",
       "Module de gestion du changement & Transformation organisationnelle",
       "Chatbot Intelligent / Coach agile - 24/7",
+      "Notifications intelligentes",
       "Recommandations courageuses contextualisées",
       "Rapports mensuels détaillés automatiques",
       "Exports avancés (PDF, Excel, PowerPoint)",
