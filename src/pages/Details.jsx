@@ -151,7 +151,18 @@ export default function Details() {
     let icon, color, title;
 
     if (detailType === "blockers") {
-      // Analyses blockers + GDPR blockers (critique/haute) + Teams blockers (critique/haute)
+      // Fetch unresolved patterns separately
+      const unresolvedPatternDetections = async () => {
+        try {
+          return await base44.entities.PatternDetection.filter({ 
+            status: { $nin: ['resolved'] } 
+          }, '-created_date', 100);
+        } catch {
+          return [];
+        }
+      };
+      
+      // Analyses blockers + GDPR blockers (critique/haute) + Teams blockers (critique/haute) + unresolved patterns
       items = analysisHistory.flatMap((analysis, idx) => {
         const blockers = analysis.analysis_data?.blockers || [];
         return blockers.map((blocker, bidx) => ({
