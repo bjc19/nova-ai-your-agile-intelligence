@@ -47,6 +47,7 @@ export default function Details() {
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 10;
   const [expandedItemId, setExpandedItemId] = useState(null);
+  const [generatedImpacts, setGeneratedImpacts] = useState({});
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -266,6 +267,36 @@ export default function Details() {
   };
 
   const { items, icon: Icon, color, title } = getDetailsData();
+
+  // Generate LLM-based impact for resolved items
+  const generateResolutionImpact = async (item) => {
+    if (!item.status === 'resolved' || generatedImpacts[item.id]) return;
+    
+    try {
+      const prompt = `Sur la base de ce problème/blocker résolu:
+        Titre: ${item.issue || item.description}
+        Contexte: ${item.context || 'Sprint agile'}
+        
+        Fournis un impact REALISTE et PROBABLE de sa résolution sur:
+        1. Les métriques du projet (délais, qualité, productivité)
+        2. La santé de l'équipe (moral, productivité, charge)
+        3. Les bénéfices mesurables attendus
+        
+        Sois précis et basé sur le benchmarking agile. Format: court paragraphe de 2-3 phrases max.`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: false,
+      });
+
+      setGeneratedImpacts(prev => ({
+        ...prev,
+        [item.id]: result
+      }));
+    } catch (error) {
+      console.error('Error generating impact:', error);
+    }
+  };
 
   // Filter and sort items by urgency and date (most recent first)
   const filteredItems = (urgencyFilter 
@@ -545,13 +576,18 @@ export default function Details() {
                   </div>
 
                   {/* Expanded Details */}
-                  <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: expandedItemId === item.id ? "auto" : 0, opacity: expandedItemId === item.id ? 1 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden border-t border-slate-100"
-                  >
-                  <div className="p-5 bg-slate-50/50 space-y-4">
+                   <motion.div
+                   initial={{ height: 0, opacity: 0 }}
+                   animate={{ height: expandedItemId === item.id ? "auto" : 0, opacity: expandedItemId === item.id ? 1 : 0 }}
+                   transition={{ duration: 0.3 }}
+                   className="overflow-hidden border-t border-slate-100"
+                   onAnimationComplete={() => {
+                     if (expandedItemId === item.id && item.status === 'resolved') {
+                       generateResolutionImpact(item);
+                     }
+                   }}
+                   >
+                   <div className="p-5 bg-slate-50/50 space-y-4">
                   {/* Root Cause Analysis */}
                   {(item.root_cause || item.cause) && (
                     <div>
@@ -575,23 +611,17 @@ export default function Details() {
                   {/* Mitigation/Action or Resolution Impact */}
                   {item.status === 'resolved' ? (
                     <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact de la Résolution</h4>
-                      <div className="space-y-2 text-sm text-slate-600">
-                        <div className="flex gap-2">
-                          <span className="text-green-600 font-semibold">✓</span>
-                          <span>Impact probable sur le projet et les métriques</span>
+                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact Réel Probable</h4>
+                      {generatedImpacts[item.id] ? (
+                        <p className="text-sm text-slate-600">
+                          {generatedImpacts[item.id]}
+                        </p>
+                      ) : (
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                          Analyse de l'impact...
                         </div>
-                        {item.impact_metrics && (
-                          <div className="flex gap-2 ml-5 text-xs text-slate-500">
-                            <span>Métriques de qualité: {item.impact_metrics}</span>
-                          </div>
-                        )}
-                        {item.team_health_impact && (
-                          <div className="flex gap-2 ml-5 text-xs text-slate-500">
-                            <span>Santé de l'équipe: {item.team_health_impact}</span>
-                          </div>
-                        )}
-                      </div>
+                      )}
                     </div>
                   ) : (
                     (item.action || item.mitigation || item.recommendation) && (
