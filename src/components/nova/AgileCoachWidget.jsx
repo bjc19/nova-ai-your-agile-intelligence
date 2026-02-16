@@ -94,7 +94,7 @@ export default function AgileCoachWidget() {
   }
 
   return (
-    <div className="fixed bottom-32 right-6 w-96 h-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col z-40 overflow-hidden">
+    <div className="fixed bottom-6 right-6 w-96 h-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col z-40 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
