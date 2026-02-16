@@ -614,15 +614,7 @@ export default function Details() {
                   )}
 
                   {/* Mitigation/Action or Resolution Impact */}
-                  {item.status === 'resolved' ? (
-                    <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact Réel Probable</h4>
-                      <p className="text-sm text-slate-600">
-                        {generatedImpacts[item.id] || "En cours d'analyse..."}
-                      </p>
-                    </div>
-                  ) : (
-                    (item.action || item.mitigation || item.recommendation) && (
+                  {(item.action || item.mitigation || item.recommendation) && (
                       <div>
                         <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
                         <ul className="space-y-2">
