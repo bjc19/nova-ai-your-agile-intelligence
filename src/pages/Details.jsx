@@ -283,41 +283,7 @@ export default function Details() {
     : items
   ).sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
 
-  // Generate all impacts for resolved items at once (batch)
-  useEffect(() => {
-    const resolvedItems = filteredItems.filter(i => i.status === 'resolved');
-    if (resolvedItems.length === 0 || impactsLoading) return;
 
-    const missingImpacts = resolvedItems.filter(i => !generatedImpacts[i.id]);
-    if (missingImpacts.length === 0) return;
-
-    setImpactsLoading(true);
-
-    Promise.all(
-      missingImpacts.map(item =>
-        base44.integrations.Core.InvokeLLM({
-          prompt: `Ce problème/blocker a été RÉSOLU: "${item.issue || item.description}"
-
-  Formule l'impact prospectif en 2-3 phrases max sur 2 niveaux:
-  1. OUTPUT immédiat: Qu'est-ce qui change directement/court terme (capacité, délai, qualité)?
-  2. OUTCOMES futur: Si cette solution s'installe durablement, quel sera l'impact sur la vélocité, la stabilité, la satisfaction de l'équipe?
-
-  Sois précis et chiffré si possible. Format: "Immédiatement... À moyen terme..."`,
-          add_context_from_internet: false,
-        }).then(result => ({ id: item.id, impact: result }))
-        .catch(() => ({ id: item.id, impact: "Impact non disponible" }))
-      )
-    ).then(results => {
-      setGeneratedImpacts(prev => {
-        const updated = { ...prev };
-        results.forEach(({ id, impact }) => {
-          updated[id] = impact;
-        });
-        return updated;
-      });
-      setImpactsLoading(false);
-    });
-  }, [filteredItems, detailType]);
 
   // Handle marking item as resolved
   const handleMarkResolved = async (item) => {
