@@ -29,7 +29,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2 } from "lucide-react";
+  Loader2 } from
+"lucide-react";
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
@@ -62,9 +63,10 @@ export default function DashboardAdmins() {
 
   // Check authentication and role
   useEffect(() => {
+    let isMounted = true;
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) {
+      if (!authenticated || !isMounted) {
         navigate(createPageUrl("Home"));
         return;
       }
@@ -72,41 +74,48 @@ export default function DashboardAdmins() {
       const currentUser = await base44.auth.me();
 
       // Role verification - only 'admin' can access
-      if (currentUser?.role !== 'admin') {
+      if (currentUser?.role !== 'admin' || !isMounted) {
         navigate(createPageUrl("Home"));
         return;
       }
 
-      setUser(currentUser);
+      // Load all data in parallel
+      try {
+        const [activeSprints, teamConfigs, pendingAlerts] = await Promise.all([
+          base44.entities.SprintContext.filter({ is_active: true }),
+          base44.entities.TeamConfiguration.list(),
+          base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" })
+        ]);
 
-      // Load sprint context
-      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-      if (activeSprints.length > 0) {
-        setSprintContext(activeSprints[0]);
+        if (!isMounted) return;
+
+        setUser(currentUser);
+        
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
+        }
+
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        if (isMounted) setIsLoading(false);
       }
-
-      // Check onboarding
-      const teamConfigs = await base44.entities.TeamConfiguration.list();
-      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-        setShowOnboarding(true);
-      }
-
-      // Check multi-project alerts
-      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-        admin_response: "pending"
-      });
-      if (pendingAlerts.length > 0) {
-        const latest = pendingAlerts[pendingAlerts.length - 1];
-        setMultiProjectAlert({
-          confidence: latest.detection_score,
-          signals: latest.weighted_signals,
-          log_id: latest.id
-        });
-      }
-
-      setIsLoading(false);
     };
     checkAuth();
+    return () => { isMounted = false; };
   }, [navigate]);
 
   // Fetch analysis history
@@ -216,7 +225,7 @@ export default function DashboardAdmins() {
                     </Badge>
                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      {sprintInfo.name}
                     </Badge>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
