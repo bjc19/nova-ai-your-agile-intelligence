@@ -34,6 +34,7 @@ export default function Details() {
   const itemsPerPage = 10;
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [resolvingItemId, setResolvingItemId] = useState(null);
+  const [localResolvedIds, setLocalResolvedIds] = useState(new Set());
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
