@@ -30,10 +30,21 @@ Deno.serve(async (req) => {
 
     console.log('Teams connection created:', result?.id);
 
-    // Diagnostic: Essayer list() au lieu de filter()
-    console.log('[DIAGNOSTIC] user.email:', user.email);
-    console.log('[DIAGNOSTIC] result.user_email:', result?.user_email);
-    
+    // NOUVEAUX LOGS DE DIAGNOSTIC
+    console.log('[DIAGNOSTIC - POST-CREATION] User email:', user.email, 'User role:', user.app_role || user.role);
+
+    // Tenter de lire l'enregistrement spécifiquement par son ID
+    try {
+      if (result?.id) {
+        const createdRecord = await base44.entities.TeamsConnection.read(result.id);
+        console.log('[DIAGNOSTIC - POST-CREATION] Record read by ID:', createdRecord ? 'Found' : 'Not Found', 'ID:', createdRecord?.id, 'Email:', createdRecord?.user_email);
+      } else {
+        console.log('[DIAGNOSTIC - POST-CREATION] No ID returned from create operation.');
+      }
+    } catch (e) {
+      console.log('[DIAGNOSTIC - POST-CREATION] Read by ID FAILED:', e.message);
+    }
+
     // Essayer list() pour voir tous les enregistrements
     try {
       const allRecords = await base44.entities.TeamsConnection.list();
