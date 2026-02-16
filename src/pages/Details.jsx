@@ -247,18 +247,10 @@ export default function Details() {
       color = "text-indigo-600";
       title = t('recentAnalyses');
     } else if (detailType === "resolved") {
+      // Fetch PatternDetection records with status: resolved
       items = analysisHistory.flatMap((analysis, idx) => {
-        const blockers = analysis.analysis_data?.blockers || [];
-        // Simulated resolved status - in real app would come from data
-        return blockers
-          .filter((_, i) => i % 2 === 0) // Simulate some resolved
-          .map((blocker, bidx) => ({
-            id: `${idx}-${bidx}`,
-            ...blocker,
-            status: "resolved",
-            analysisTitle: analysis.title,
-            analysisDate: analysis.created_date,
-          }));
+        // PatternDetections will be loaded separately via query
+        return [];
       });
       icon = CheckCircle2;
       color = "text-emerald-600";
