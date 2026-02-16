@@ -166,7 +166,7 @@ export default function Details() {
 
     if (detailType === "blockers") {
       // Analyses blockers + GDPR blockers (critique/haute) + Teams blockers (critique/haute) + unresolved patterns
-      items = analysisHistory.flatMap((analysis, idx) => {
+      const allBlockers = analysisHistory.flatMap((analysis, idx) => {
         const blockers = analysis.analysis_data?.blockers || [];
         return blockers.map((blocker, bidx) => ({
           id: `${idx}-${bidx}`,
@@ -222,6 +222,8 @@ export default function Details() {
           pattern_id: pattern.pattern_id,
         }))
       );
+      // Filter out already resolved items
+      items = allBlockers.filter(item => !resolvedItemsData.some(resolved => resolved.item_id === item.id));
       icon = AlertOctagon;
       color = "text-blue-600";
       title = t('detectedBlockersIssues');
