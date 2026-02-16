@@ -21,10 +21,15 @@ Deno.serve(async (req) => {
 
     // If it's a PatternDetection, update it directly
     if (source === 'pattern_detection') {
-      await base44.entities.PatternDetection.update(itemId, {
-        status: 'resolved',
-        resolved_date: new Date().toISOString(),
-      });
+      try {
+        await base44.entities.PatternDetection.update(itemId, {
+          status: 'resolved',
+          resolved_date: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.log(`Cannot update PatternDetection directly (${error.data?.message}). Tracking via ResolvedItem only.`);
+        // RLS may prevent update, but ResolvedItem will track resolution
+      }
     }
 
     // Create ResolvedItem record for tracking
