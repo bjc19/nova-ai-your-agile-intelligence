@@ -296,7 +296,8 @@ export default function Details() {
       });
 
       toast.success('Item marqué comme résolu');
-      window.location.reload();
+      // Refetch resolved items without full reload
+      await refetchResolvedItems();
     } catch (error) {
       console.error('Erreur résolution:', error);
       toast.error('Erreur lors de la mise à jour');
