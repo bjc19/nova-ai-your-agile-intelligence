@@ -30,6 +30,18 @@ Deno.serve(async (req) => {
 
     console.log('Teams connection created:', result?.id);
 
+    // Diagnostic: Relit immédiatement pour vérifier l'existence
+    const verification = await base44.entities.TeamsConnection.filter({
+      user_email: user.email,
+      is_active: true
+    });
+    console.log('[DIAGNOSTIC] After create - filter result:', verification.length, 'records');
+    if (verification.length > 0) {
+      console.log('[DIAGNOSTIC] Connection verified:', verification[0].id);
+    } else {
+      console.log('[DIAGNOSTIC] Connection NOT FOUND after creation!');
+    }
+
     return new Response(JSON.stringify({ success: true, connection_id: result?.id }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
