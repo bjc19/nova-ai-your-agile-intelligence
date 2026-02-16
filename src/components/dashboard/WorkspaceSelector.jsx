@@ -25,22 +25,22 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
           console.log("🔍 [WorkspaceSelector] User role - assigned IDs:", assignedWorkspaceIds);
 
           if (assignedWorkspaceIds.length > 0) {
-            // Load Jira projects by IDs
-            const jiraData = await base44.entities.JiraProjectSelection.filter({ 
-              id: { "$in": assignedWorkspaceIds },
+            // Load all Jira projects and filter by jira_project_id
+            const allJiraData = await base44.entities.JiraProjectSelection.filter({ 
               is_active: true 
             });
+            const jiraData = allJiraData.filter(ws => assignedWorkspaceIds.includes(ws.jira_project_id));
             console.log("🔍 [WorkspaceSelector] Jira projects loaded:", jiraData.length, jiraData);
             selections.push(...jiraData.map(ws => ({
               ...ws,
               display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
             })));
 
-            // Load Trello boards by IDs
-            const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
-              id: { "$in": assignedWorkspaceIds },
+            // Load all Trello boards and filter by board_id
+            const allTrelloData = await base44.entities.TrelloProjectSelection.filter({ 
               is_active: true 
             });
+            const trelloData = allTrelloData.filter(ws => assignedWorkspaceIds.includes(ws.board_id));
             console.log("🔍 [WorkspaceSelector] Trello boards loaded:", trelloData.length, trelloData);
             selections.push(...trelloData.map(ws => ({
               ...ws,
