@@ -600,7 +600,7 @@ export default function Details() {
                                 {t('resolved')}
                               </Badge>
                             )}
-                            {item.status !== "resolved" && item.source === 'pattern_detection' && (
+                            {item.status !== "resolved" && (item.urgency === 'high' || item.urgency === 'medium') && (
                               <Button
                                 size="sm"
                                 variant="outline"
