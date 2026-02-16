@@ -49,6 +49,7 @@ export default function Details() {
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [generatedImpacts, setGeneratedImpacts] = useState({});
   const [impactsLoading, setImpactsLoading] = useState(false);
+  const [resolvingItemId, setResolvingItemId] = useState(null);
 
   // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
