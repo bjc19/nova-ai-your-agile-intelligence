@@ -103,8 +103,20 @@ export default function JiraProjectSelector() {
       console.log('✅ Backend response:', response);
 
       if (response.data.success) {
+        // Wait a moment for database to propagate
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Reload selections from database to ensure UI is in sync
+        const savedSelections = await base44.entities.JiraProjectSelection.filter({
+          is_active: true
+        });
+
+        const savedIds = new Set(savedSelections.map(s => s.jira_project_id));
+        setSelectedProjects(savedIds);
+
+        const selectedProjs = projects.filter(p => savedIds.has(p.id));
         setSelectedProjectsData(selectedProjs);
-        
+
         try {
           const currentUserEmail = currentUser?.email;
           const [teamMembers, allUsers] = await Promise.all([
@@ -135,7 +147,7 @@ export default function JiraProjectSelector() {
           console.error('Error loading members:', error);
           toast.error('Erreur lors du chargement des membres');
         }
-        
+
         const existingAssignments = {};
         for (const proj of selectedProjs) {
           try {
@@ -149,7 +161,7 @@ export default function JiraProjectSelector() {
           }
         }
         setMemberAssignments(existingAssignments);
-        
+
         toast.success('Projets sauvegardés ! Assignez maintenant les membres.');
         setStep(2);
       }
