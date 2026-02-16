@@ -30,25 +30,20 @@ Deno.serve(async (req) => {
 
     console.log('Teams connection created:', result?.id);
 
-    // Diagnostic: Essayer de relire directement par ID
+    // Diagnostic: Essayer list() au lieu de filter()
     console.log('[DIAGNOSTIC] user.email:', user.email);
     console.log('[DIAGNOSTIC] result.user_email:', result?.user_email);
     
+    // Essayer list() pour voir tous les enregistrements
     try {
-      const directRead = await base44.entities.TeamsConnection.read(result?.id);
-      console.log('[DIAGNOSTIC] Direct read by ID - SUCCESS');
-      console.log('[DIAGNOSTIC] Stored user_email:', directRead?.user_email);
-      console.log('[DIAGNOSTIC] Is active:', directRead?.is_active);
+      const allRecords = await base44.entities.TeamsConnection.list();
+      console.log('[DIAGNOSTIC] All TeamsConnection records:', allRecords.length);
+      allRecords.forEach((rec, idx) => {
+        console.log(`  [${idx}] ID: ${rec.id}, user_email: ${rec.user_email}, is_active: ${rec.is_active}`);
+      });
     } catch (e) {
-      console.log('[DIAGNOSTIC] Direct read by ID - FAILED:', e.message);
+      console.log('[DIAGNOSTIC] list() FAILED:', e.message);
     }
-
-    // Essayer filter comme avant
-    const verification = await base44.entities.TeamsConnection.filter({
-      user_email: user.email,
-      is_active: true
-    });
-    console.log('[DIAGNOSTIC] After create - filter result:', verification.length, 'records');
 
     return new Response(JSON.stringify({ success: true, connection_id: result?.id }), {
       status: 200,
