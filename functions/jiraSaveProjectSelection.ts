@@ -5,11 +5,15 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
+    console.log('🔍 User authenticated:', user?.email, 'Role:', user?.role, 'App Role:', user?.app_role);
+
     if (!user) {
+      console.error('❌ User not authenticated');
       return Response.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
     const { selected_project_ids, projects } = await req.json();
+    console.log('📥 Received data:', { selected_project_ids, projectCount: projects?.length });
 
     if (!Array.isArray(selected_project_ids) || !Array.isArray(projects)) {
       return Response.json({ error: 'Données invalides' }, { status: 400 });
@@ -26,42 +30,51 @@ Deno.serve(async (req) => {
 
     // Check quota
     if (selected_project_ids.length > maxProjectsAllowed) {
+      console.error('❌ Quota exceeded:', selected_project_ids.length, '>', maxProjectsAllowed);
       return Response.json({ 
         error: `Quota dépassé. Maximum ${maxProjectsAllowed} projets autorisés.`,
         success: false 
       }, { status: 400 });
     }
 
+    console.log('📋 Fetching existing selections...');
     // Deactivate all previous Jira project selections for this user
-    const existingSelections = await base44.entities.JiraProjectSelection.filter({
+    const existingSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({
       is_active: true
     });
+    console.log('✅ Found', existingSelections.length, 'existing active selections');
 
     for (const selection of existingSelections) {
       if (!selected_project_ids.includes(selection.jira_project_id)) {
-        await base44.entities.JiraProjectSelection.update(selection.id, {
+        console.log('🔄 Deactivating project:', selection.jira_project_id);
+        await base44.asServiceRole.entities.JiraProjectSelection.update(selection.id, {
           is_active: false
         });
       }
     }
 
     // Create or reactivate selected projects
+    console.log('💾 Processing', selected_project_ids.length, 'selected projects...');
     for (const projectId of selected_project_ids) {
       const project = projects.find(p => p.id === projectId);
-      if (!project) continue;
+      if (!project) {
+        console.warn('⚠️ Project not found:', projectId);
+        continue;
+      }
 
-      const existing = await base44.entities.JiraProjectSelection.filter({
+      console.log('🔍 Checking existing for project:', projectId);
+      const existing = await base44.asServiceRole.entities.JiraProjectSelection.filter({
         jira_project_id: projectId
       });
 
       if (existing.length > 0) {
-        // Reactivate if exists
-        await base44.entities.JiraProjectSelection.update(existing[0].id, {
+        console.log('♻️ Reactivating existing project:', projectId);
+        await base44.asServiceRole.entities.JiraProjectSelection.update(existing[0].id, {
           is_active: true
         });
       } else {
-        // Create new selection
-        await base44.entities.JiraProjectSelection.create({
+        console.log('➕ Creating new project selection:', projectId);
+        const created = await base44.asServiceRole.entities.JiraProjectSelection.create({
           jira_project_id: projectId,
           jira_project_key: project.key,
           jira_project_name: project.name,
@@ -69,16 +82,19 @@ Deno.serve(async (req) => {
           is_active: true,
           selected_date: new Date().toISOString()
         });
+        console.log('✅ Created:', created.id);
       }
     }
 
+    console.log('✅ All projects saved successfully');
     return Response.json({
       success: true,
       message: `${selected_project_ids.length} projet(s) Jira sauvegardé(s)`
     });
 
   } catch (error) {
-    console.error('Error saving Jira project selection:', error);
+    console.error('❌ Error saving Jira project selection:', error);
+    console.error('❌ Error stack:', error.stack);
     return Response.json({ 
       error: error.message,
       success: false 

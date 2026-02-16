@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -90,14 +89,18 @@ export default function JiraProjectSelector() {
 
     try {
       setSavingSelection(true);
-      
+
       const selectedIds = Array.from(selectedProjects);
       const selectedProjs = projects.filter(p => selectedIds.includes(p.id));
-      
+
+      console.log('🔍 Calling jiraSaveProjectSelection with:', { selectedIds, selectedProjs });
+
       const response = await base44.functions.invoke('jiraSaveProjectSelection', {
         selected_project_ids: selectedIds,
         projects: selectedProjs
       });
+
+      console.log('✅ Backend response:', response);
 
       if (response.data.success) {
         setSelectedProjectsData(selectedProjs);
@@ -151,12 +154,13 @@ export default function JiraProjectSelector() {
         setStep(2);
       }
     } catch (error) {
-      console.error('Error saving selection:', error);
-      toast.error('Erreur lors de la sauvegarde de la sélection');
+      console.error('❌ Error saving selection:', error);
+      console.error('❌ Error details:', error.response?.data || error.message);
+      toast.error(`Erreur lors de la sauvegarde: ${error.response?.data?.error || error.message}`);
     } finally {
       setSavingSelection(false);
     }
-  };
+    };
 
   const toggleMemberAssignment = (projectId, memberEmail) => {
     setMemberAssignments(prev => {
