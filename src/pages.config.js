@@ -49,6 +49,7 @@
  */
 import AcceptInvitation from './pages/AcceptInvitation';
 import AdminDevTools from './pages/AdminDevTools';
+import AgileCoach from './pages/AgileCoach';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
 import ChooseAccess from './pages/ChooseAccess';
@@ -70,13 +71,13 @@ import TeamManagement from './pages/TeamManagement';
 import TrelloProjectSelector from './pages/TrelloProjectSelector';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import AgileCoach from './pages/AgileCoach';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AcceptInvitation": AcceptInvitation,
     "AdminDevTools": AdminDevTools,
+    "AgileCoach": AgileCoach,
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
     "ChooseAccess": ChooseAccess,
@@ -98,7 +99,6 @@ export const PAGES = {
     "TrelloProjectSelector": TrelloProjectSelector,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "AgileCoach": AgileCoach,
 }
 
 export const pagesConfig = {

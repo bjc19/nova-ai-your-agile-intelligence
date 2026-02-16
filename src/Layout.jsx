@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LogOut, LogIn, Users, Menu, X } from "lucide-react";
+import { Sparkles, LogOut, LogIn, Users, Menu, X, Bell } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
       import { LoginDialog } from "@/components/LoginDialog";
       import { DemoSimulator } from "@/components/nova/DemoSimulator";
@@ -27,6 +27,7 @@ function LayoutContent({ children, currentPageName }) {
     const [userRole, setUserRole] = useState(null);
     const [canInvite, setCanInvite] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [pendingAlerts, setPendingAlerts] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,6 +43,18 @@ function LayoutContent({ children, currentPageName }) {
             setCanInvite(statusRes.data.canInvite || false);
           } catch (e) {
             setCanInvite(false);
+          }
+
+          // Fetch pending alerts for admins
+          if ((user?.app_role || user?.role) === 'admin') {
+            try {
+              const alerts = await base44.entities.SprintHealth.filter({ 
+                status: "critical" 
+              });
+              setPendingAlerts(alerts.length);
+            } catch (e) {
+              setPendingAlerts(0);
+            }
           }
         } else {
           setUserRole(null);
@@ -124,7 +137,20 @@ function LayoutContent({ children, currentPageName }) {
                       Équipe
                     </Link>
                    )}
-                  <Button 
+                   {userRole === 'admin' && (
+                    <button
+                      className="relative text-slate-600 hover:text-slate-900 transition-colors"
+                      title="Alertes"
+                    >
+                      <Bell className="w-5 h-5" />
+                      {pendingAlerts > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {pendingAlerts > 9 ? '9+' : pendingAlerts}
+                        </span>
+                      )}
+                    </button>
+                   )}
+                   <Button 
                      variant="ghost" 
                      size="sm"
                      onClick={async () => {
