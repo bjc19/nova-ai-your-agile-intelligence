@@ -46,26 +46,13 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   useEffect(() => {
     const fetchSignals = async () => {
-      const cacheKey = 'gdpr_markers_stats';
-      const cached = sessionStorage.getItem(cacheKey);
-      const cacheTimestamp = sessionStorage.getItem(`${cacheKey}_timestamp`);
-      
-      if (cached && cacheTimestamp) {
-        const age = Date.now() - parseInt(cacheTimestamp);
-        if (age < 5 * 60 * 1000) {
-          const { slack, teams, jira } = JSON.parse(cached);
-          setGdprSignals(slack);
-          setTeamsInsights(teams);
-          setGdprSignals(prev => [...slack, ...jira]);
-          return;
-        }
-      }
-      
+      // Always bypass cache to get fresh data when component mounts/remounts
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
         const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const resolved = await base44.entities.ResolvedItem.list('-resolved_date', 100);
         
         // Separate by source
         const slackMarkers = allMarkers.filter(m => 
@@ -108,18 +95,9 @@ export default function QuickStats({ analysisHistory = [] }) {
           });
         }
         
-        setGdprSignals(filteredSlack);
-        setTeamsInsights(filteredTeams);
-        // Store Jira data in gdprSignals too (will be separated by detection_source)
         setGdprSignals(prev => [...filteredSlack, ...filteredJira]);
-        
-        // Cache results
-        sessionStorage.setItem(cacheKey, JSON.stringify({
-          slack: filteredSlack,
-          teams: filteredTeams,
-          jira: filteredJira
-        }));
-        sessionStorage.setItem(`${cacheKey}_timestamp`, Date.now().toString());
+        setTeamsInsights(filteredTeams);
+        setResolvedItems(resolved);
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
