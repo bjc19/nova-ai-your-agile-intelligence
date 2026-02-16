@@ -25,6 +25,7 @@ export default function QuickStats({ analysisHistory = [] }) {
   const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
+  const [resolvedItems, setResolvedItems] = useState([]);
   const [userRole, setUserRole] = useState('user');
   const [currentPage, setCurrentPage] = useState(0);
   const [translatedTooltips, setTranslatedTooltips] = useState({});
