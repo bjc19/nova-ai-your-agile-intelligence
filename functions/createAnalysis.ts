@@ -62,6 +62,20 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Process multi-source patterns
+      try {
+        await base44.asServiceRole.functions.invoke('processMultiSourcePatterns', {
+          analysisId: multiSourceResult.data.analysis_id,
+          analysisData: analysisRecord.analysis_data,
+          workspaceId: workspace_id,
+          source: analysisRecord.source,
+          blockersData: analysisRecord.analysis_data?.blockers || [],
+          risksData: analysisRecord.analysis_data?.risks || []
+        });
+      } catch (e) {
+        console.log('Multi-source pattern processing skipped:', e.message);
+      }
+
       return Response.json({ analysis: multiSourceResult.data });
     }
 
