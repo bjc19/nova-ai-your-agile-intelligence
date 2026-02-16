@@ -402,9 +402,9 @@ export default function Details() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.05 * index }}
-                className="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-md transition-all"
+                className="rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-md transition-all pointer-events-auto cursor-auto"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4 pointer-events-auto">
                   <div className={`p-2 rounded-lg ${
                     item.source === 'gdpr' ? 'bg-blue-100' : 
                     item.source === 'teams' ? 'bg-purple-100' : 
