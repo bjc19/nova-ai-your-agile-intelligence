@@ -288,8 +288,14 @@ export default function Details() {
     Promise.all(
       missingImpacts.map(item =>
         base44.integrations.Core.InvokeLLM({
-          prompt: `Problème résolu: "${item.issue || item.description}"
-Impact REALISTE et PROBABLE en 2-3 phrases max (métriques projet, santé équipe, bénéfices mesurables).`,
+          prompt: `Ce problème/blocker a été RÉSOLU: "${item.issue || item.description}"
+
+Formule l'impact PROSPECTIF PROBABLE de cette résolution (ce qu'on peut attendre) en 2-3 phrases max:
+- Amélioration attendue des métriques (délai, qualité, productivité)
+- Bénéfices pour la santé/capacité de l'équipe
+- Changements attendus dans la vélocité/satisfaction
+
+Sois précis et basé sur benchmarking agile. Format: paragraphe prospectif (ex: "La résolution permettra...", "On peut s'attendre à...")`,
           add_context_from_internet: false,
         }).then(result => ({ id: item.id, impact: result }))
         .catch(() => ({ id: item.id, impact: "Impact non disponible" }))
