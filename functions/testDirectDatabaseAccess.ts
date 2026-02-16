@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
         count: allRecords.length,
         records: allRecords.slice(0, 3)
       });
+
     } catch (e) {
       console.log('[TEST] Service role échoué:', e.message);
       return Response.json({
