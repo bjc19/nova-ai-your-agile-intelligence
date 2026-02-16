@@ -34,13 +34,11 @@ const plans = [
     users: "5 utilisateurs inclus",
     addOn: "+15 CAD/utilisateur/mois (max 10)",
     included: [
-      "30 analyses manuelles uniquement",
-      "1 source externe au choix (Jira / Trello)",
       "Equipe ≤ 5 membres ",
+      "1 source externe au choix (Jira / Trello)",
+      "Projets ≤ 5 projets Jira / Trello ",
+      "30 analyses manuelles uniquement",
       "Insights contextualisés",
-      "Configuration guidée",
-      "Vue basique avec tendances",
-      "Visualisations simples"
     ],
     limitations: [
       "Pas de rapports mensuels automatiques",
@@ -61,13 +59,12 @@ const plans = [
     addOn: "+10 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
-      "70 analyses manuelles",
-      "Intégrations Jira / Trello + Slack et/ou Confluence",
       "Equipe ≤ 15 membres ",
+      "Intégrations Jira / Trello + Slack et/ou Confluence",
+      "Projets ≤ 10 projets Jira / Trello ",
+      "70 analyses manuelles",
       "Insights contextualisés avancés",
-      "Dashboard tendances complet",
       "Rapports sommaires mensuels automatiques",
-      "Alertes basiques sur dérives"
     ],
     limitations: [
       "Capacité d'equipe limitée à 15 membres ",
