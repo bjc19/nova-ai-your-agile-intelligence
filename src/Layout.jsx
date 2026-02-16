@@ -285,16 +285,21 @@ function LayoutContent({ children, currentPageName }) {
       />
 
       {/* Demo Simulator */}
-      {showDemoSimulator && (
-        <DemoSimulator 
-          onClose={() => setShowDemoSimulator(false)} 
-          onTriesUpdate={(remaining) => {
-            // Optionnel: gérer le compteur ici si nécessaire
-          }} 
-        />
-      )}
+            {showDemoSimulator && (
+              <DemoSimulator 
+                onClose={() => setShowDemoSimulator(false)} 
+                onTriesUpdate={(remaining) => {
+                  // Optionnel: gérer le compteur ici si nécessaire
+                }} 
+              />
+            )}
 
-      {/* Footer */}
+            {/* Agile Coach Widget - Admin Only */}
+            {isAuthenticated && (userRole === 'admin' || userRole === 'contributor') && (
+              <AgileCoachWidget />
+            )}
+
+            {/* Footer */}
       <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
