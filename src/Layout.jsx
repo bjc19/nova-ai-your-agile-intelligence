@@ -8,7 +8,7 @@ import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
       import { LoginDialog } from "@/components/LoginDialog";
       import { DemoSimulator } from "@/components/nova/DemoSimulator";
       import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
-      import { AgileCoachWidget } from "@/components/nova/AgileCoachWidget";
+      import AgileCoachWidget from "@/components/nova/AgileCoachWidget";
 import {
   Sheet,
   SheetContent,
