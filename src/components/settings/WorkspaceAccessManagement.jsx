@@ -35,7 +35,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
    const [newRole, setNewRole] = useState(null);
    const [userToDelete, setUserToDelete] = useState(null);
    const [changingPlan, setChangingPlan] = useState(false);
-   const [invitationToDelete, setInvitationToDelete] = useState(null);
+   const [deletingInvitation, setDeletingInvitation] = useState(null);
 
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
@@ -158,25 +158,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
     setUserToDelete(userToRemove);
   };
 
-  const handleDeleteInvitation = (invitationId) => {
-    if (!canManage) return;
-    setInvitationToDelete(pendingInvitations.find(inv => inv.id === invitationId));
-  };
-
-  const confirmDeleteInvitation = async () => {
-    if (!invitationToDelete) return;
-
-    try {
-      await base44.entities.InvitationToken.delete(invitationToDelete.id);
-      setPendingInvitations(pendingInvitations.filter(inv => inv.id !== invitationToDelete.id));
-      toast.success('Invitation supprimée');
-      setInvitationToDelete(null);
-    } catch (error) {
-      console.error('Delete invitation error:', error);
-      toast.error('Erreur lors de la suppression');
-    }
-  };
-
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
 
@@ -262,6 +243,18 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       toast.error('Erreur lors du changement de plan');
     } finally {
       setChangingPlan(false);
+    }
+  };
+
+  const handleDeleteInvitation = async (invitationId) => {
+    try {
+      await base44.functions.invoke('deleteInvitation', { invitationId });
+      setPendingInvitations(pendingInvitations.filter(inv => inv.id !== invitationId));
+      toast.success('Invitation annulée');
+      setDeletingInvitation(null);
+    } catch (error) {
+      console.error('Delete invitation error:', error);
+      toast.error('Erreur lors de la suppression de l\'invitation');
     }
   };
 
@@ -437,7 +430,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                              <Button 
                                variant="ghost" 
                                size="icon"
-                               onClick={() => handleDeleteInvitation(invitation.id)}
+                               onClick={() => setDeletingInvitation(invitation.id)}
                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
                              >
                                <Trash2 className="w-4 h-4" />
@@ -632,40 +625,40 @@ export default function WorkspaceAccessManagement({ currentRole }) {
             </Dialog>
 
             {/* Delete User Alert Dialog */}
-            <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Supprimer l'utilisateur</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir supprimer <strong>{userToDelete?.full_name}</strong> ? Cette action est irréversible.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="flex justify-end gap-2">
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmDeleteUser} className="bg-red-600 hover:bg-red-700">
-                    Supprimer
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
+             <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+               <AlertDialogContent>
+                 <AlertDialogHeader>
+                   <AlertDialogTitle>Supprimer l'utilisateur</AlertDialogTitle>
+                   <AlertDialogDescription>
+                     Êtes-vous sûr de vouloir supprimer <strong>{userToDelete?.full_name}</strong> ? Cette action est irréversible.
+                   </AlertDialogDescription>
+                 </AlertDialogHeader>
+                 <div className="flex justify-end gap-2">
+                   <AlertDialogCancel>Annuler</AlertDialogCancel>
+                   <AlertDialogAction onClick={confirmDeleteUser} className="bg-red-600 hover:bg-red-700">
+                     Supprimer
+                   </AlertDialogAction>
+                 </div>
+               </AlertDialogContent>
+             </AlertDialog>
 
-            {/* Delete Invitation Alert Dialog */}
-            <AlertDialog open={!!invitationToDelete} onOpenChange={(open) => !open && setInvitationToDelete(null)}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Supprimer l'invitation</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Êtes-vous sûr de vouloir supprimer l'invitation de <strong>{invitationToDelete?.invitee_email}</strong> ? Un nouveau lien d'invitation devra être envoyé.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="flex justify-end gap-2">
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmDeleteInvitation} className="bg-red-600 hover:bg-red-700">
-                    Supprimer
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
+             {/* Delete Invitation Alert Dialog */}
+             <AlertDialog open={!!deletingInvitation} onOpenChange={(open) => !open && setDeletingInvitation(null)}>
+               <AlertDialogContent>
+                 <AlertDialogHeader>
+                   <AlertDialogTitle>Annuler l'invitation</AlertDialogTitle>
+                   <AlertDialogDescription>
+                     Êtes-vous sûr de vouloir annuler cette invitation ? Cette action est irréversible.
+                   </AlertDialogDescription>
+                 </AlertDialogHeader>
+                 <div className="flex justify-end gap-2">
+                   <AlertDialogCancel>Annuler</AlertDialogCancel>
+                   <AlertDialogAction onClick={() => handleDeleteInvitation(deletingInvitation)} className="bg-red-600 hover:bg-red-700">
+                     Supprimer
+                   </AlertDialogAction>
+                 </div>
+               </AlertDialogContent>
+             </AlertDialog>
             </div>
             );
             }
