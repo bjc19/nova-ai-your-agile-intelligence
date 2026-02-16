@@ -517,7 +517,7 @@ export default function Details() {
                           <h3 className="font-semibold text-slate-900">
                             {anonymizeText(displayItem.member || displayItem.issue || displayItem.description || "-")}
                           </h3>
-                          <div className="flex gap-2 flex-wrap justify-end">
+                          <div className="flex gap-2 flex-wrap justify-end items-center">
                             {item.urgency && (
                               <Badge
                                 variant="outline"
@@ -541,6 +541,20 @@ export default function Details() {
                               <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
                                 {t('resolved')}
                               </Badge>
+                            )}
+                            {item.status !== "resolved" && item.source === 'pattern_detection' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkResolved(item);
+                                }}
+                                disabled={resolvingItemId === item.id}
+                                className="text-xs h-7 px-2 shrink-0"
+                              >
+                                {resolvingItemId === item.id ? 'Mise à jour...' : 'Marquer résolu'}
+                              </Button>
                             )}
                           </div>
                         </div>
