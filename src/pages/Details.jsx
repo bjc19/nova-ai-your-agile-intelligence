@@ -358,21 +358,36 @@ export default function Details() {
 
   // Handle marking item as resolved
   const handleMarkResolved = async (item) => {
-    if (item.source !== 'pattern_detection') {
-      toast.error('Seuls les patterns détectés peuvent être marqués comme résolus');
-      return;
-    }
-
     setResolvingItemId(item.id);
     try {
-      await base44.entities.PatternDetection.update(item.id, {
-        status: 'resolved',
-        resolved_date: new Date().toISOString(),
-      });
+      const user = await base44.auth.me();
+      
+      if (item.source === 'pattern_detection') {
+        // Update PatternDetection directly
+        await base44.entities.PatternDetection.update(item.id, {
+          status: 'resolved',
+          resolved_date: new Date().toISOString(),
+        });
+      } else {
+        // Create ResolvedItem for other sources
+        await base44.entities.ResolvedItem.create({
+          item_id: item.id,
+          source: item.source,
+          item_type: detailType === 'blockers' ? 'blocker' : 'risk',
+          title: item.issue || item.description || item.pattern_name || '-',
+          urgency: item.urgency || 'medium',
+          resolved_date: new Date().toISOString(),
+          resolved_by: user?.email || 'unknown',
+          original_analysis_date: item.analysisDate || item.created_date || new Date().toISOString(),
+        });
+      }
+
       toast.success('Item marqué comme résolu');
-      // Refresh the list
+      
+      // Invalidate queries to refresh data
       window.location.reload();
     } catch (error) {
+      console.error('Erreur résolution:', error);
       toast.error('Erreur lors de la mise à jour');
     } finally {
       setResolvingItemId(null);
