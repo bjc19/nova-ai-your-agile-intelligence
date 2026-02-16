@@ -90,6 +90,7 @@ const plans = [
      addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
       "Analyses illimitées",
+      "+/- 20 projets Jira / Trello ",
       "Croisement complet multi-sources (Jira/Trello + Confluence + Slack + Teams, etc.)",
       "Module de gestion du changement & Transformation organisationnelle",
       "Chatbot Intelligent / Coach agile - 24/7",
