@@ -41,9 +41,10 @@ Deno.serve(async (req) => {
       is_active: true
     });
 
-    // Deactivate selections that are no longer in the new selection
+    // Deactivate ACTIVE selections that are no longer in the new selection
+    const selectedBoardIdSet = new Set(selected_board_ids);
     const toDeactivate = existingSelections.filter(
-      sel => !selected_board_ids.includes(sel.board_id)
+      sel => !selectedBoardIdSet.has(sel.board_id)
     );
 
     for (const selection of toDeactivate) {
