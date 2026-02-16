@@ -128,6 +128,7 @@ export default function Settings() {
   const loadTeamsConnection = async () => {
     try {
       const user = await base44.auth.me();
+      console.log('[Teams] Loading connection for user:', user?.email);
       if (!user) {
         setTeamsConnected(false);
         return;
@@ -136,6 +137,7 @@ export default function Settings() {
         user_email: user.email,
         is_active: true
       });
+      console.log('[Teams] Found connections:', teamsConns.length);
       setTeamsConnected(teamsConns.length > 0);
     } catch (error) {
       console.error('Error loading Teams connection:', error);
