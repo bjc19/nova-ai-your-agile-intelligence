@@ -55,9 +55,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         setUsers(allUsers || []);
 
         // Load pending invitations and deduplicate by email
-        const invitations = await base44.entities.InvitationToken.filter({
-          status: 'pending'
-        });
+        const allInvitations = await base44.entities.InvitationToken.list();
+        const invitations = allInvitations.filter(inv => 
+          inv.status === 'pending' || inv.status === 'pending_email_verification'
+        );
         // Keep only the most recent invitation per email
         const uniqueInvitations = [];
         const seenEmails = new Set();
@@ -127,7 +128,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setInviteRole('user');
 
       // ✅ RAFRAÎCHIR LA LISTE DES INVITATIONS EN ATTENTE
-      const invitations = await base44.entities.InvitationToken.filter({ status: 'pending' });
+      const allInvitations = await base44.entities.InvitationToken.list();
+      const invitations = allInvitations.filter(inv => 
+        inv.status === 'pending' || inv.status === 'pending_email_verification'
+      );
       const uniqueInvitations = [];
       const seenEmails = new Set();
       (invitations || []).sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).forEach(inv => {
