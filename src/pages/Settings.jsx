@@ -146,9 +146,10 @@ export default function Settings() {
           window.removeEventListener('message', messageHandler);
           // Refetch from DB to ensure persistence
           setTimeout(async () => {
-            await loadTeamsConnection();
+            const teamsConns = await base44.entities.TeamsConnection.list();
+            setTeamsConnected(teamsConns.length > 0);
             setConnectingTeams(false);
-          }, 500);
+          }, 1000);
         }
       };
       window.addEventListener('message', messageHandler);
