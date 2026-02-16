@@ -258,10 +258,20 @@ export default function Details() {
         // PatternDetections will be loaded separately via query
         return [];
       });
+      items = resolvedPatterns.map((pattern, idx) => ({
+        id: pattern.id,
+        ...pattern,
+        issue: pattern.pattern_name,
+        description: pattern.context,
+        status: "resolved",
+        analysisTitle: `Pattern: ${pattern.pattern_name}`,
+        analysisDate: pattern.resolved_date,
+        source: 'pattern_detection',
+      }));
       icon = CheckCircle2;
       color = "text-emerald-600";
       title = t('resolved');
-    }
+      }
 
     return { items, icon: icon || AlertOctagon, color, title };
   };
