@@ -5,9 +5,10 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn, Users, Menu, X } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
-import { LoginDialog } from "@/components/LoginDialog";
-import { DemoSimulator } from "@/components/nova/DemoSimulator";
-import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
+      import { LoginDialog } from "@/components/LoginDialog";
+      import { DemoSimulator } from "@/components/nova/DemoSimulator";
+      import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
+      import { AgileCoachWidget } from "@/components/nova/AgileCoachWidget";
 import {
   Sheet,
   SheetContent,
