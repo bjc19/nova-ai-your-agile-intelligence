@@ -80,7 +80,7 @@ export default function Details() {
   });
 
   // Fetch resolved items (all sources)
-  const { data: resolvedItemsData = [] } = useQuery({
+  const { data: resolvedItemsData = [], refetch: refetchResolvedItems } = useQuery({
     queryKey: ['resolvedItems'],
     queryFn: () => base44.entities.ResolvedItem.list('-resolved_date', 100),
   });
