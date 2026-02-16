@@ -229,7 +229,7 @@ export default function Details() {
       title = t('detectedBlockersIssues');
     } else if (detailType === "risks") {
       // Analyses risks + GDPR risks (moyenne) + Teams risks (moyenne) + unresolved patterns
-      items = analysisHistory.flatMap((analysis, idx) => {
+      const allRisks = analysisHistory.flatMap((analysis, idx) => {
         const risks = analysis.analysis_data?.risks || [];
         return risks.map((risk, ridx) => ({
           id: `${idx}-${ridx}`,
@@ -282,6 +282,11 @@ export default function Details() {
           analysisDate: pattern.created_date,
           pattern_id: pattern.pattern_id,
         }))
+      );
+      // Filter out already resolved items and keep only high/medium urgency
+      items = allRisks.filter(item => 
+        !resolvedItemsData.some(resolved => resolved.item_id === item.id) &&
+        (item.urgency === 'high' || item.urgency === 'medium')
       );
       icon = ShieldAlert;
       color = "text-amber-600";
