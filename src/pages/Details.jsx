@@ -290,12 +290,11 @@ export default function Details() {
         base44.integrations.Core.InvokeLLM({
           prompt: `Ce problème/blocker a été RÉSOLU: "${item.issue || item.description}"
 
-Formule l'impact PROSPECTIF PROBABLE de cette résolution (ce qu'on peut attendre) en 2-3 phrases max:
-- Amélioration attendue des métriques (délai, qualité, productivité)
-- Bénéfices pour la santé/capacité de l'équipe
-- Changements attendus dans la vélocité/satisfaction
+Formule l'impact prospectif en 2-3 phrases max sur 2 niveaux:
+1. OUTPUT immédiat: Qu'est-ce qui change directement/court terme (capacité, délai, qualité)?
+2. OUTCOMES futur: Si cette solution s'installe durablement, quel sera l'impact sur la vélocité, la stabilité, la satisfaction de l'équipe?
 
-Sois précis et basé sur benchmarking agile. Format: paragraphe prospectif (ex: "La résolution permettra...", "On peut s'attendre à...")`,
+Sois précis et chiffré si possible. Format: "Immédiatement... À moyen terme..."`,
           add_context_from_internet: false,
         }).then(result => ({ id: item.id, impact: result }))
         .catch(() => ({ id: item.id, impact: "Impact non disponible" }))
