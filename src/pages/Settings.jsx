@@ -142,11 +142,14 @@ export default function Settings() {
 
       // Listen for popup message
       const messageHandler = async (event) => {
+        console.log('Teams popup message received:', event.data);
         if (event.data?.type === 'teams-connected') {
+          console.log('Teams connected message detected');
           window.removeEventListener('message', messageHandler);
           // Refetch from DB to ensure persistence
           setTimeout(async () => {
             const teamsConns = await base44.entities.TeamsConnection.list();
+            console.log('Teams connections found:', teamsConns.length);
             setTeamsConnected(teamsConns.length > 0);
             setConnectingTeams(false);
           }, 1000);
