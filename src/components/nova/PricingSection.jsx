@@ -35,16 +35,15 @@ const plans = [
     addOn: "+15 CAD/utilisateur/mois (max 10)",
     included: [
       "30 analyses manuelles uniquement",
+      "1 source externe au choix (Jira / Trello)",
+      "Equipe ≤ 5 membres ",
       "Insights contextualisés",
-      "1 source au choix (Slack, Jira ou Teams)",
       "Configuration guidée",
       "Vue basique avec tendances",
       "Visualisations simples"
     ],
     limitations: [
       "Pas de rapports mensuels automatiques",
-      "Pas de détection multi-projets",
-      "Pas de croisement avec sources externes",
       "Pas d'alertes automatiques",
       "Pas de KPIs détaillés"
     ],
@@ -58,25 +57,24 @@ const plans = [
     subtitle: "Idéal pour les equipes qui veulent plus de volume d'analyses",
     price: "99",
     yearlyPrice: "84",
-    users: "10 utilisateurs inclus",
+    users: "15 utilisateurs inclus",
     addOn: "+10 CAD/utilisateur/mois (max 25)",
     discount: "15% annuel",
     included: [
       "70 analyses manuelles",
-      "30 analyses post-réunion automatiques/mois",
+      "Intégrations Jira / Trello + Slack et/ou Confluence",
+      "Equipe ≤ 15 membres ",
       "Insights contextualisés avancés",
-      "Intégrations Slack, Jira, Teams",
-      "Croisement limité avec 2 sources externes",
       "Dashboard tendances complet",
       "Rapports sommaires mensuels automatiques",
       "Alertes basiques sur dérives"
     ],
     limitations: [
-      "Max 30 analyses post-réunion automatiques/mois",
-      "Pas de détection multi-projets avancée",
-      "Pas de croisement complet",
-      "Pas de KPIs détaillés",
-      "Pas d'analyses organisationnelles"
+      "Capacité d'equipe limitée à 15 membres ",
+      "Pas de notifications instantanées",
+      "Pas de coach/chatbot intelligent dédié",
+      "Pas de module de gestion du changement",
+
     ],
     ctaKey: "subscribe"
   },
@@ -94,15 +92,11 @@ const plans = [
     discount: "15% annuel",
      addonOption: "AI Coach 24/7 : +10 CAD/utilisateur",
     included: [
-      "Analyses post-réunion illimitées",
-      "Croisement complet multi-sources",
-      "Détection et adaptation multi-projets & multi-équipes",
+      "Analyses illimitées",
+      "Croisement complet multi-sources (Jira/Trello + Confluence + Slack + Teams, etc.)",
+      "Module de gestion du changement & Transformation organisationnelle",
+      "Chatbot Intelligent / Coach agile - 24/7",
       "Recommandations courageuses contextualisées",
-      "Stabilité Sprint Goal / Product Goal",
-      "Risques capacité / focus",
-      "Adoption recommandations (~65%)",
-      "Cycle time & flow efficiency",
-      "Dérives anticipées (~80%)",
       "Rapports mensuels détaillés automatiques",
       "Exports avancés (PDF, Excel, PowerPoint)",
       "Support prioritaire"
