@@ -367,31 +367,16 @@ export default function Details() {
   const handleMarkResolved = async (item) => {
     setResolvingItemId(item.id);
     try {
-      const user = await base44.auth.me();
-      
-      if (item.source === 'pattern_detection') {
-        // Update PatternDetection directly
-        await base44.entities.PatternDetection.update(item.id, {
-          status: 'resolved',
-          resolved_date: new Date().toISOString(),
-        });
-      } else {
-        // Create ResolvedItem for other sources
-        await base44.entities.ResolvedItem.create({
-          item_id: item.id,
-          source: item.source,
-          item_type: detailType === 'blockers' ? 'blocker' : 'risk',
-          title: item.issue || item.description || item.pattern_name || '-',
-          urgency: item.urgency || 'medium',
-          resolved_date: new Date().toISOString(),
-          resolved_by: user?.email || 'unknown',
-          original_analysis_date: item.analysisDate || item.created_date || new Date().toISOString(),
-        });
-      }
+      await base44.functions.invoke('markItemResolved', {
+        itemId: item.id,
+        source: item.source,
+        itemType: detailType === 'blockers' ? 'blocker' : 'risk',
+        title: item.issue || item.description || item.pattern_name || '-',
+        urgency: item.urgency || 'medium',
+        analysisDate: item.analysisDate || item.created_date,
+      });
 
       toast.success('Item marqué comme résolu');
-      
-      // Invalidate queries to refresh data
       window.location.reload();
     } catch (error) {
       console.error('Erreur résolution:', error);
