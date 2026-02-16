@@ -294,8 +294,8 @@ function LayoutContent({ children, currentPageName }) {
               />
             )}
 
-            {/* Agile Coach Widget - Admin Only */}
-            {isAuthenticated && (userRole === 'admin' || userRole === 'contributor') && (
+            {/* Agile Coach Widget */}
+            {isAuthenticated && (
               <AgileCoachWidget />
             )}
 
