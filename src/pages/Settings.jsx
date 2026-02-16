@@ -155,7 +155,21 @@ export default function Settings() {
       window.addEventListener('message', messageHandler);
 
       // Open in popup window
-      window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
+      const popup = window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
+      
+      // Fallback: check for connection after popup closes
+      const checkPopupClosed = setInterval(async () => {
+        if (popup && popup.closed) {
+          clearInterval(checkPopupClosed);
+          window.removeEventListener('message', messageHandler);
+          // Wait a bit for DB to sync, then reload
+          setTimeout(async () => {
+            const teamsConns = await base44.entities.TeamsConnection.list();
+            setTeamsConnected(teamsConns.length > 0);
+            setConnectingTeams(false);
+          }, 1500);
+        }
+      }, 500);
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);
