@@ -41,7 +41,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
           // For admin/contributor: load all projects (RLS will handle visibility)
           // Check which connection is active (Jira OR Trello, never both)
           const [jiraConns, trelloConns] = await Promise.all([
-            base44.entities.JiraProjectSelection.filter({ is_active: true }),
+            base44.entities.JiraConnection.filter({ is_active: true }),
             base44.entities.TrelloConnection.filter({ is_active: true })
           ]);
           console.log("🔍 [WorkspaceSelector] Jira connections:", jiraConns.length);
@@ -52,7 +52,9 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
             const jiraData = await base44.entities.JiraProjectSelection.filter({ 
               is_active: true 
             });
-            console.log("🔍 [WorkspaceSelector] Jira selections loaded:", jiraData.length, jiraData);
+            console.log("🔍 [WorkspaceSelector] Admin/Contributor - Jira selections loaded:", jiraData.length, jiraData);
+            console.log("🔍 [WorkspaceSelector] Current user role:", userRole);
+            console.log("🔍 [WorkspaceSelector] Current user email:", user?.email);
             selections = jiraData.map(ws => ({
               ...ws,
               display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
@@ -63,7 +65,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
             const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
               is_active: true 
             });
-            console.log("🔍 [WorkspaceSelector] Trello selections loaded:", trelloData.length, trelloData);
+            console.log("🔍 [WorkspaceSelector] Admin/Contributor - Trello selections loaded:", trelloData.length, trelloData);
             selections = trelloData.map(ws => ({
               ...ws,
               display_name: ws.board_name || 'Trello Board (Unnamed)'
