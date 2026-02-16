@@ -18,35 +18,25 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         
         // For regular users, load only assigned workspaces
         if (userRole === 'user') {
-          const workspaceMembers = await base44.entities.WorkspaceMember.filter({
-            user_email: user?.email
+          // Load Jira projects (RLS automatically filters based on WorkspaceMember relation)
+          const jiraData = await base44.entities.JiraProjectSelection.filter({ 
+            is_active: true 
           });
-          const assignedWorkspaceIds = workspaceMembers.map(wm => wm.workspace_id);
-          console.log("🔍 [WorkspaceSelector] User role - assigned IDs:", assignedWorkspaceIds);
+          console.log("🔍 [WorkspaceSelector] Jira projects loaded for user:", jiraData.length, jiraData);
+          selections.push(...jiraData.map(ws => ({
+            ...ws,
+            display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
+          })));
 
-          if (assignedWorkspaceIds.length > 0) {
-            // Load all Jira projects and filter by jira_project_id
-            const allJiraData = await base44.entities.JiraProjectSelection.filter({ 
-              is_active: true 
-            });
-            const jiraData = allJiraData.filter(ws => assignedWorkspaceIds.includes(ws.jira_project_id));
-            console.log("🔍 [WorkspaceSelector] Jira projects loaded:", jiraData.length, jiraData);
-            selections.push(...jiraData.map(ws => ({
-              ...ws,
-              display_name: ws.jira_project_name || 'Jira Project (Unnamed)'
-            })));
-
-            // Load all Trello boards and filter by board_id
-            const allTrelloData = await base44.entities.TrelloProjectSelection.filter({ 
-              is_active: true 
-            });
-            const trelloData = allTrelloData.filter(ws => assignedWorkspaceIds.includes(ws.board_id));
-            console.log("🔍 [WorkspaceSelector] Trello boards loaded:", trelloData.length, trelloData);
-            selections.push(...trelloData.map(ws => ({
-              ...ws,
-              display_name: ws.board_name || 'Trello Board (Unnamed)'
-            })));
-          }
+          // Load Trello boards (RLS automatically filters based on WorkspaceMember relation)
+          const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
+            is_active: true 
+          });
+          console.log("🔍 [WorkspaceSelector] Trello boards loaded for user:", trelloData.length, trelloData);
+          selections.push(...trelloData.map(ws => ({
+            ...ws,
+            display_name: ws.board_name || 'Trello Board (Unnamed)'
+          })));
         } else {
           // For admin/contributor: load all their projects
           // Check which connection is active (Jira OR Trello, never both)
