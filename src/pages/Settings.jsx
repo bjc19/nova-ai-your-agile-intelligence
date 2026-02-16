@@ -588,7 +588,7 @@ export default function Settings() {
 
   }
 
-  const canManageSettings = (currentRole === 'admin' || currentRole === 'contributor');
+  const canManageSettings = currentRole === 'admin' || currentRole === 'contributor';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -678,21 +678,7 @@ export default function Settings() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-8">
 
-          <Card>
-            
-
-
-
-
-
-
-
-
-
-
-
-
-            
+          
 
 
 
@@ -739,7 +725,21 @@ export default function Settings() {
 
 
 
-          </Card>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </motion.div>
         }
 
@@ -1195,8 +1195,8 @@ export default function Settings() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.35 }}
-          className="mb-8"
-        >
+          className="mb-8">
+
           <AccountDeletionSection />
         </motion.div>
 
