@@ -20,28 +20,38 @@ Deno.serve(async (req) => {
     }
 
     // Fetch user's subscription status to check quota
-    let maxProjectsAllowed = 10; // Default for starter
+    let maxProjectsAllowed = 5;
+    let userPlan = 'starter';
     try {
       const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-      maxProjectsAllowed = statusRes.data.maxProjectsAllowed || 10;
+      maxProjectsAllowed = statusRes.data.maxProjectsAllowed || 5;
+      userPlan = statusRes.data.plan || 'starter';
     } catch (e) {
       console.log('Could not fetch subscription status, using default quota');
     }
 
-    // Check quota
+    console.log('📋 Fetching existing active selections...');
+    // Get existing ACTIVE Jira project selections (RLS-compliant)
+    const existingSelections = await base44.entities.JiraProjectSelection.filter({
+      is_active: true
+    });
+    
+    const existingActiveCount = existingSelections.length;
+    console.log('✅ Found', existingActiveCount, 'existing active selections');
+
+    // Check quota: count of new projects should not exceed maxProjectsAllowed
     if (selected_project_ids.length > maxProjectsAllowed) {
+      const errorMsg = `Vous avez atteint la limite de ${maxProjectsAllowed} projets Jira pour votre plan ${userPlan}. Veuillez mettre à niveau.`;
       console.error('❌ Quota exceeded:', selected_project_ids.length, '>', maxProjectsAllowed);
       return Response.json({ 
-        error: `Quota dépassé. Maximum ${maxProjectsAllowed} projets autorisés.`,
+        error: errorMsg,
         success: false 
       }, { status: 400 });
     }
 
-    console.log('📋 Fetching existing selections...');
+    console.log('✅ Quota check passed. Proceeding with deactivation and creation...');
     // Deactivate all previous Jira project selections for this user
-    const existingSelections = await base44.entities.JiraProjectSelection.filter({
-      is_active: true
-    });
+    const selectedProjectIdSet = new Set(selected_project_ids);
     console.log('✅ Found', existingSelections.length, 'existing active selections');
 
     for (const selection of existingSelections) {
