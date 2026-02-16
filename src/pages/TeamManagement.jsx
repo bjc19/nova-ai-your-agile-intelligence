@@ -132,7 +132,7 @@ export default function TeamManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">Utilisateur</SelectItem>
-                    <SelectItem value="contributor">Contributeur</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

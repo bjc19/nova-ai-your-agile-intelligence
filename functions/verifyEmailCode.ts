@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 
     // Finalize the invitation (create workspace member, etc)
     try {
-      await base44.functions.invoke('finalizeInvitation', {
+      await base44.asServiceRole.functions.invoke('finalizeInvitation', {
         email: email
       });
     } catch (finError) {
@@ -67,7 +67,8 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true,
-      message: 'Email verified successfully'
+      message: 'Email verified successfully',
+      userRole: userRole
     });
   } catch (error) {
     console.error('Verification error:', error);

@@ -13,8 +13,9 @@ export function PendingInvitationsManager() {
   const { data: pendingInvitations = [], isLoading } = useQuery({
     queryKey: ['pendingInvitations'],
     queryFn: async () => {
-      const result = await base44.entities.InvitationToken.filter({ status: 'pending' });
-      return result;
+      const pending = await base44.entities.InvitationToken.filter({ status: 'pending' });
+      const pendingVerif = await base44.entities.InvitationToken.filter({ status: 'pending_email_verification' });
+      return [...pending, ...pendingVerif];
     }
   });
 
@@ -70,10 +71,10 @@ export function PendingInvitationsManager() {
               <p className="font-semibold text-slate-900">{invitation.invitee_email}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                  En attente
+                  {invitation.status === 'pending_email_verification' ? 'En attente d\'activation' : 'En attente'}
                 </Badge>
                 <Badge variant="outline" className="text-xs">
-                  {invitation.role === 'contributor' ? 'Contributeur' : 'Utilisateur'}
+                  {invitation.role === 'admin' ? 'Admin' : 'Utilisateur'}
                 </Badge>
                 <span className="text-xs text-slate-500">
                   Invité le {new Date(invitation.created_date).toLocaleDateString('fr')}

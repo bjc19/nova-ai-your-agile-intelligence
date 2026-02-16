@@ -40,8 +40,18 @@ export default function VerifyEmail() {
 
       if (response.data?.success) {
         setSuccess(true);
-        setTimeout(() => {
-          navigate(createPageUrl('Dashboard'));
+        setTimeout(async () => {
+          // Get user to determine which dashboard
+          try {
+            const user = await base44.auth.me();
+            const dashboardUrl = user?.app_role === 'admin' 
+              ? createPageUrl('DashboardAdmins') 
+              : createPageUrl('DashboardCommonUsers');
+            navigate(dashboardUrl);
+          } catch (err) {
+            // Fallback to default dashboard
+            navigate(createPageUrl('Dashboard'));
+          }
         }, 2000);
       } else {
         setError(response.data?.error || 'Erreur de vérification');
