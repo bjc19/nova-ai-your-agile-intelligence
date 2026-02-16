@@ -4,18 +4,18 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    const adminEmail = Deno.env.get("ADMIN_EMAIL");
-    
-    if (!adminEmail) {
+    // Get authenticated user
+    const user = await base44.auth.me();
+    if (!user) {
       return Response.json({ 
-        error: 'ADMIN_EMAIL not configured' 
-      }, { status: 500 });
+        error: 'Unauthorized' 
+      }, { status: 401 });
     }
 
     // Send test email using Core.SendEmail integration
-    const result = await base44.asServiceRole.integrations.Core.SendEmail({
+    const result = await base44.integrations.Core.SendEmail({
       from_name: "Nova Test",
-      to: adminEmail,
+      to: user.email,
       subject: "Test Resend - Vérification",
       body: `
         <h2>Test de l'intégration Resend</h2>
@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     return Response.json({ 
       success: true,
       message: 'Email de test envoyé avec succès',
-      sentTo: adminEmail,
+      sentTo: user.email,
       result
     });
   } catch (error) {
