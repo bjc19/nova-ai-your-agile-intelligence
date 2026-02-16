@@ -85,7 +85,7 @@ export default function AgileCoachWidget() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-32 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center z-40"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all hover:scale-110 flex items-center justify-center z-40"
         title="Chat avec le Coach Agile"
       >
         <MessageCircle className="w-6 h-6" />
