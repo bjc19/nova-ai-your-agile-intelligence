@@ -286,6 +286,9 @@ export default function Details() {
   // Handle marking item as resolved
   const handleMarkResolved = async (item) => {
     setResolvingItemId(item.id);
+    // Optimistically mark as resolved locally
+    setLocalResolvedIds(prev => new Set([...prev, item.id]));
+    
     try {
       await base44.functions.invoke('markItemResolved', {
         itemId: item.id,
@@ -297,11 +300,15 @@ export default function Details() {
       });
 
       toast.success('Item marqué comme résolu');
-      // Refetch resolved items without full reload
-      await refetchResolvedItems();
     } catch (error) {
       console.error('Erreur résolution:', error);
       toast.error('Erreur lors de la mise à jour');
+      // Remove from local resolved if request failed
+      setLocalResolvedIds(prev => {
+        const updated = new Set(prev);
+        updated.delete(item.id);
+        return updated;
+      });
     } finally {
       setResolvingItemId(null);
     }
