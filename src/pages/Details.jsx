@@ -159,17 +159,6 @@ export default function Details() {
     let icon, color, title;
 
     if (detailType === "blockers") {
-      // Fetch unresolved patterns separately
-      const unresolvedPatternDetections = async () => {
-        try {
-          return await base44.entities.PatternDetection.filter({ 
-            status: { $nin: ['resolved'] } 
-          }, '-created_date', 100);
-        } catch {
-          return [];
-        }
-      };
-      
       // Analyses blockers + GDPR blockers (critique/haute) + Teams blockers (critique/haute) + unresolved patterns
       items = analysisHistory.flatMap((analysis, idx) => {
         const blockers = analysis.analysis_data?.blockers || [];
@@ -213,6 +202,19 @@ export default function Details() {
             analysisData: { workshop_type: marker.type },
             analysisDate: marker.created_date,
           }))
+      ).concat(
+        unresolvedPatterns.map((pattern, idx) => ({
+          id: pattern.id,
+          issue: pattern.pattern_name,
+          description: pattern.context,
+          status: pattern.status,
+          urgency: pattern.severity === 'critical' ? 'high' : pattern.severity === 'high' ? 'medium' : 'low',
+          source: 'pattern_detection',
+          confidence_score: pattern.confidence_score,
+          analysisTitle: `Pattern: ${pattern.pattern_name}`,
+          analysisDate: pattern.created_date,
+          pattern_id: pattern.pattern_id,
+        }))
       );
       icon = AlertOctagon;
       color = "text-blue-600";
