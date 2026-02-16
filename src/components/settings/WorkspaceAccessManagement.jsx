@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -21,14 +22,12 @@ const PLANS = {
 const PLAN_ORDER = ['starter', 'growth', 'pro', 'custom'];
 
 export default function WorkspaceAccessManagement({ currentRole }) {
-  const [users, setUsers] = useState([]);
-  const [pendingInvitations, setPendingInvitations] = useState([]);
+  const queryClient = useQueryClient();
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPlan, setCurrentPlan] = useState('pro');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('user');
   const [inviting, setInviting] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [hiddenEmails, setHiddenEmails] = useState(new Set());
    const [editingUser, setEditingUser] = useState(null);
@@ -37,43 +36,58 @@ export default function WorkspaceAccessManagement({ currentRole }) {
    const [changingPlan, setChangingPlan] = useState(false);
    const [deletingInvitation, setDeletingInvitation] = useState(null);
 
+  // Fetch users with react-query
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['workspaceUsers'],
+    queryFn: async () => {
+      const allUsers = await base44.entities.User.list();
+      return allUsers || [];
+    },
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+  });
+
+  // Fetch pending invitations with react-query - only 'pending' and 'pending_email_verification'
+  const { data: pendingInvitations = [], isLoading: isLoadingInvitations } = useQuery({
+    queryKey: ['pendingInvitations'],
+    queryFn: async () => {
+      const allInvitations = await base44.entities.InvitationToken.list();
+      const userEmails = new Set((await base44.entities.User.list()).map(u => u.email));
+      
+      // Filter: only pending/pending_email_verification AND not yet registered as User
+      const pending = allInvitations.filter(inv => 
+        (inv.status === 'pending' || inv.status === 'pending_email_verification') &&
+        !userEmails.has(inv.invitee_email)
+      );
+      
+      // Deduplicate by email (keep most recent)
+      const uniqueInvitations = [];
+      const seenEmails = new Set();
+      pending.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).forEach(inv => {
+        if (!seenEmails.has(inv.invitee_email)) {
+          uniqueInvitations.push(inv);
+          seenEmails.add(inv.invitee_email);
+        }
+      });
+      return uniqueInvitations;
+    },
+    refetchInterval: 5000, // Auto-refresh every 5 seconds
+  });
+
   const canManage = currentRole === 'admin' || currentRole === 'contributor';
   const maxUsers = PLANS[currentPlan].maxUsers;
   const currentUsers = users.length + pendingInvitations.length;
   const canAddMore = currentUsers < maxUsers;
+  const loading = isLoadingUsers || isLoadingInvitations;
 
-  // Load users and plan info
+  // Load initial user and plan info
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
+    const loadInitialData = async () => {
       try {
         const user = await base44.auth.me();
         setCurrentUser(user);
 
-        // Load active users from User entity
-        const allUsers = await base44.entities.User.list();
-        setUsers(allUsers || []);
-
-        // Load pending invitations and deduplicate by email
-        const allInvitations = await base44.entities.InvitationToken.list();
-        const invitations = allInvitations.filter(inv => 
-          inv.status === 'pending' || inv.status === 'pending_email_verification'
-        );
-        // Keep only the most recent invitation per email
-        const uniqueInvitations = [];
-        const seenEmails = new Set();
-        (invitations || []).sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).forEach(inv => {
-          if (!seenEmails.has(inv.invitee_email)) {
-            uniqueInvitations.push(inv);
-            seenEmails.add(inv.invitee_email);
-          }
-        });
-        setPendingInvitations(uniqueInvitations);
-
-         // Initialize emails as visible by default
-         setHiddenEmails(new Set());
+        setHiddenEmails(new Set());
         
-        // Load plan from team config or assume pro for testing
         const configs = await base44.entities.TeamConfiguration.list();
         if (configs.length > 0) {
           setCurrentPlan(configs[0].plan || 'pro');
@@ -81,13 +95,11 @@ export default function WorkspaceAccessManagement({ currentRole }) {
           setCurrentPlan('pro');
         }
       } catch (error) {
-        console.error('Error loading workspace data:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error loading initial data:', error);
       }
     };
     
-    loadData();
+    loadInitialData();
   }, [currentRole]);
 
   const handleInvite = async () => {
@@ -127,20 +139,8 @@ export default function WorkspaceAccessManagement({ currentRole }) {
       setInviteEmail('');
       setInviteRole('user');
 
-      // ✅ RAFRAÎCHIR LA LISTE DES INVITATIONS EN ATTENTE
-      const allInvitations = await base44.entities.InvitationToken.list();
-      const invitations = allInvitations.filter(inv => 
-        inv.status === 'pending' || inv.status === 'pending_email_verification'
-      );
-      const uniqueInvitations = [];
-      const seenEmails = new Set();
-      (invitations || []).sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).forEach(inv => {
-        if (!seenEmails.has(inv.invitee_email)) {
-          uniqueInvitations.push(inv);
-          seenEmails.add(inv.invitee_email);
-        }
-      });
-      setPendingInvitations(uniqueInvitations);
+      // Refresh invitations list
+      queryClient.invalidateQueries({ queryKey: ['pendingInvitations'] });
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Erreur lors de l\'invitation' });
     } finally {
@@ -167,7 +167,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
 
     try {
       await base44.functions.invoke('deleteUser', { userId: userToDelete.id });
-      setUsers(users.filter(u => u.id !== userToDelete.id));
+      queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
       toast.success('Utilisateur supprimé avec succès');
       setUserToDelete(null);
     } catch (error) {
@@ -201,15 +201,10 @@ export default function WorkspaceAccessManagement({ currentRole }) {
         return;
       }
 
-      // Update local state
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, role: newRole } : u));
+      queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
       toast.success('Rôle mis à jour avec succès');
       setEditingUser(null);
       setNewRole(null);
-      
-      // Force refresh from database to ensure persistence
-      const allUsers = await base44.entities.User.list();
-      setUsers(allUsers || []);
     } catch (error) {
       console.error('Update role error:', error);
       toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour du rôle');
@@ -253,7 +248,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
   const handleDeleteInvitation = async (invitationId) => {
     try {
       await base44.functions.invoke('deleteInvitation', { invitationId });
-      setPendingInvitations(pendingInvitations.filter(inv => inv.id !== invitationId));
+      queryClient.invalidateQueries({ queryKey: ['pendingInvitations'] });
       toast.success('Invitation annulée');
       setDeletingInvitation(null);
     } catch (error) {
@@ -420,7 +415,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                            <div className="flex-1">
                              <p className="text-sm font-medium text-slate-900">{invitation.invitee_email}</p>
                              <p className="text-xs text-amber-600 mt-1">
-                               {invitation.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                               {invitation.role === 'admin' ? '🔑 Admin' : '👁️ Membre'}
                              </p>
                            </div>
                          </div>
@@ -484,13 +479,13 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                              <p className="text-sm font-medium text-slate-900">{user.full_name}</p>
                              <p className="text-xs text-slate-500">{user.email}</p>
                              <p className="text-xs text-slate-600 mt-1">
-                               {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                               {user.role === 'admin' ? '🔑 Admin' : '👁️ Membre'}
                              </p>
                            </div>
                          </div>
                          <div className="flex items-center gap-2">
                            <Badge variant="outline" className="text-xs">
-                             {user.role === 'admin' ? '🔑 Admin' : user.role === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
+                             {user.role === 'admin' ? '🔑 Admin' : '👁️ Membre'}
                            </Badge>
                            {canManage && user.email !== currentUser?.email && (
                              <Button 
@@ -606,7 +601,6 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">Membre</SelectItem>
-                      <SelectItem value="contributor">Contributeur</SelectItem>
                       {currentRole === 'admin' && (
                         <SelectItem value="admin">Admin</SelectItem>
                       )}
