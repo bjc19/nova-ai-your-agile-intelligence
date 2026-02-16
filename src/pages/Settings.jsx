@@ -146,17 +146,22 @@ export default function Settings() {
   const handleTeamsConnect = async () => {
     try {
       setConnectingTeams(true);
+      console.log('[Teams] Starting connection flow...');
       
       // Setup message listener BEFORE opening popup to avoid race condition
+      let messageHandlerActive = true;
       const messageHandler = async (event) => {
-        console.log('Teams popup message received:', event.data?.type);
+        console.log('[Teams] Message received:', event.data?.type, 'from origin:', event.origin);
+        
         if (event.data?.type === 'teams-oauth-success') {
+          if (!messageHandlerActive) return;
+          messageHandlerActive = false;
           window.removeEventListener('message', messageHandler);
 
           try {
             // Decode token data from popup
             const tokenData = JSON.parse(atob(event.data.data));
-            console.log('Token data decoded, saving connection...');
+            console.log('[Teams] Token data decoded, saving connection...');
 
             // Save connection via authenticated endpoint
             const saveResult = await base44.functions.invoke('teamsSaveConnection', {
@@ -167,32 +172,54 @@ export default function Settings() {
               scopes: tokenData.scopes
             });
 
-            console.log('Connection saved:', saveResult.data);
+            console.log('[Teams] Connection saved:', saveResult.data);
 
             // Reload connection to verify
             await loadTeamsConnection();
             toast.success('Microsoft Teams connecté avec succès');
           } catch (error) {
-            console.error('Error saving Teams connection:', error);
+            console.error('[Teams] Error saving connection:', error);
             toast.error('Erreur lors de la sauvegarde: ' + error.message);
           } finally {
             setConnectingTeams(false);
+            console.log('[Teams] Button state reset (success path)');
           }
         } else if (event.data?.type === 'teams-error') {
+          if (!messageHandlerActive) return;
+          messageHandlerActive = false;
           window.removeEventListener('message', messageHandler);
-          console.error('Teams error:', event.data.error);
+          console.error('[Teams] OAuth error:', event.data.error);
           toast.error('Erreur Teams: ' + event.data.error);
           setConnectingTeams(false);
+          console.log('[Teams] Button state reset (error path)');
         }
       };
 
       window.addEventListener('message', messageHandler);
+      console.log('[Teams] Message listener attached');
       
-      // NOW open popup after listener is ready
+      // Open popup after listener is ready
       const { data } = await base44.functions.invoke('teamsOAuthStart');
-      window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
+      const popup = window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
+      console.log('[Teams] Popup opened:', !!popup);
+      
+      // Timeout safety: reset button after 2 minutes if no response
+      const timeoutId = setTimeout(() => {
+        if (messageHandlerActive) {
+          console.warn('[Teams] Timeout reached - no response from popup');
+          messageHandlerActive = false;
+          window.removeEventListener('message', messageHandler);
+          setConnectingTeams(false);
+          toast.error('Connexion expirée - veuillez réessayer');
+        }
+      }, 120000);
+      
+      // Clear timeout if flow completes
+      const originalHandler = messageHandler;
+      messageHandler.timeoutId = timeoutId;
+      
     } catch (error) {
-      console.error('Error starting Teams OAuth:', error);
+      console.error('[Teams] Error starting OAuth:', error);
       toast.error('Erreur lors du démarrage: ' + error.message);
       setConnectingTeams(false);
     }
