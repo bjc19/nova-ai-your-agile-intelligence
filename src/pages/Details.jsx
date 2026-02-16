@@ -254,10 +254,6 @@ export default function Details() {
       title = t('recentAnalyses');
     } else if (detailType === "resolved") {
       // Fetch PatternDetection records with status: resolved
-      items = analysisHistory.flatMap((analysis, idx) => {
-        // PatternDetections will be loaded separately via query
-        return [];
-      });
       items = resolvedPatterns.map((pattern, idx) => ({
         id: pattern.id,
         ...pattern,
@@ -271,7 +267,11 @@ export default function Details() {
       icon = CheckCircle2;
       color = "text-emerald-600";
       title = t('resolved');
-      }
+    } else if (detailType === "blockers" || detailType === "risks") {
+      // Fetch non-resolved PatternDetections for marking as resolved
+      const unresolved = base44.entities.PatternDetection.filter?.({ status: { $nin: ['resolved'] } }, '-created_date', 100) || [];
+      // items construction already includes them from analysis data
+    }
 
     return { items, icon: icon || AlertOctagon, color, title };
   };
