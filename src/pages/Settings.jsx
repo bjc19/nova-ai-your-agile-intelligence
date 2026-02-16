@@ -140,43 +140,40 @@ export default function Settings() {
       setConnectingTeams(true);
       const { data } = await base44.functions.invoke('teamsOAuthStart');
 
-      // Listen for popup message
       const messageHandler = async (event) => {
-            console.log('Teams popup message received:', event.data?.type);
-            if (event.data?.type === 'teams-oauth-success' || event.data?.type === 'teams-connected') {
-              console.log('Teams oauth success detected');
-              window.removeEventListener('message', messageHandler);
-              // Refetch from DB to ensure persistence - allow more time for DB sync
-              setTimeout(async () => {
-                const user = await base44.auth.me();
-                const teamsConns = await base44.entities.TeamsConnection.filter({
-                  user_email: user.email,
-                  is_active: true
-                });
-                console.log('Teams connections found:', teamsConns.length, 'for user:', user.email);
-                setTeamsConnected(teamsConns.length > 0);
-                setConnectingTeams(false);
-              }, 2000);
-            }
-          };
-      window.addEventListener('message', messageHandler);
-
-      // Open in popup window
-      const popup = window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
-      
-      // Fallback: check for connection after popup closes
-      const checkPopupClosed = setInterval(async () => {
-        if (popup && popup.closed) {
-          clearInterval(checkPopupClosed);
+        console.log('Teams popup message received:', event.data?.type);
+        if (event.data?.type === 'teams-oauth-success') {
           window.removeEventListener('message', messageHandler);
-          // Wait a bit for DB to sync, then reload
-          setTimeout(async () => {
-            const teamsConns = await base44.entities.TeamsConnection.list();
-            setTeamsConnected(teamsConns.length > 0);
+
+          try {
+            // Decode token data from popup
+            const tokenData = JSON.parse(atob(event.data.data));
+
+            // Save connection via authenticated endpoint
+            await base44.functions.invoke('teamsSaveConnection', {
+              access_token: tokenData.access_token,
+              refresh_token: tokenData.refresh_token,
+              expires_in: tokenData.expires_in,
+              tenant_id: tokenData.tenant_id,
+              scopes: tokenData.scopes
+            });
+
+            // Reload connection
+            await loadTeamsConnection();
             setConnectingTeams(false);
-          }, 1500);
+          } catch (error) {
+            console.error('Error saving Teams connection:', error);
+            setConnectingTeams(false);
+          }
+        } else if (event.data?.type === 'teams-error') {
+          window.removeEventListener('message', messageHandler);
+          console.error('Teams error:', event.data.error);
+          setConnectingTeams(false);
         }
-      }, 500);
+      };
+
+      window.addEventListener('message', messageHandler);
+      window.open(data.authUrl, 'teams-oauth', 'width=600,height=700,scrollbars=yes');
     } catch (error) {
       console.error('Error starting Teams OAuth:', error);
       setConnectingTeams(false);
