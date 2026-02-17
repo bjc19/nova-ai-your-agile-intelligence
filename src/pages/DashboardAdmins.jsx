@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -29,7 +30,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2 } from
+  Loader2,
+  RefreshCw } from
 "lucide-react";
 
 export default function DashboardAdmins() {
@@ -64,52 +66,48 @@ export default function DashboardAdmins() {
   // Check authentication and role
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        if (!authenticated) {
-          navigate(createPageUrl("Home"));
-          return;
-        }
-
-        const currentUser = await base44.auth.me();
-
-        // Role verification - only 'admin' can access
-        if (currentUser?.role !== 'admin') {
-          navigate(createPageUrl("Home"));
-          return;
-        }
-
-        setUser(currentUser);
-
-        // Parallel API calls to reduce rate limit issues
-        const [activeSprints, teamConfigs, pendingAlerts] = await Promise.all([
-          base44.entities.SprintContext.filter({ is_active: true }),
-          base44.entities.TeamConfiguration.list(),
-          base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" })
-        ]);
-
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
-
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
-
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
-          });
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Auth check error:", error);
-        setIsLoading(false);
+      const authenticated = await base44.auth.isAuthenticated();
+      if (!authenticated) {
+        navigate(createPageUrl("Home"));
+        return;
       }
+
+      const currentUser = await base44.auth.me();
+
+      // Role verification - only 'admin' can access
+      if (currentUser?.role !== 'admin') {
+        navigate(createPageUrl("Home"));
+        return;
+      }
+
+      setUser(currentUser);
+
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
+      }
+
+      // Check onboarding
+      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+        setShowOnboarding(true);
+      }
+
+      // Check multi-project alerts
+      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+        admin_response: "pending"
+      });
+      if (pendingAlerts.length > 0) {
+        const latest = pendingAlerts[pendingAlerts.length - 1];
+        setMultiProjectAlert({
+          confidence: latest.detection_score,
+          signals: latest.weighted_signals,
+          log_id: latest.id
+        });
+      }
+
+      setIsLoading(false);
     };
     checkAuth();
   }, [navigate]);
