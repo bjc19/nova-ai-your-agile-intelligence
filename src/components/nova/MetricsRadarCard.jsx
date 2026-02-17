@@ -387,25 +387,25 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                               </div>
                             ))}
 
-                            {lever.dependency_aware?.warning && (
-                              <DependencyWarning warning={lever.dependency_aware.warning} />
+                            {enrichedLever.dependency_aware?.warning && (
+                              <DependencyWarning warning={enrichedLever.dependency_aware.warning} />
                             )}
 
-                            {lever.pilotWarning && !lever.dependency_aware?.warning && (
+                            {enrichedLever.pilotWarning && !enrichedLever.dependency_aware?.warning && (
                               <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 mb-2">
-                                {lever.pilotWarning}
+                                {enrichedLever.pilotWarning}
                               </div>
                             )}
 
-                            {lever.dependency_aware?.requires_validation && (
+                            {enrichedLever.dependency_aware?.requires_validation && (
                               <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800 mb-2">
-                                ⚠️ Cette recommandation nécessite une validation humaine en raison de {lever.dependency_aware.validation_reason}
+                                ⚠️ Cette recommandation nécessite une validation humaine en raison de {enrichedLever.dependency_aware.validation_reason}
                               </div>
                             )}
 
                             <div className="flex gap-2 pt-2">
                               <Button
-                                onClick={() => onDiscussWithCoach?.(lever)}
+                                onClick={() => onDiscussWithCoach?.(enrichedLever)}
                                 className="flex-1"
                                 variant="outline"
                               >
@@ -413,11 +413,11 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                 Discuter / valider avec le Coach
                               </Button>
                               <Button
-                                disabled={!lever.dependency_aware?.can_apply}
-                                className={lever.dependency_aware?.can_apply ? "" : "opacity-50 cursor-not-allowed"}
+                                disabled={!enrichedLever.dependency_aware?.can_apply}
+                                className={enrichedLever.dependency_aware?.can_apply ? "" : "opacity-50 cursor-not-allowed"}
                                 title={
-                                  !lever.dependency_aware?.can_apply
-                                    ? lever.dependency_aware?.requires_validation
+                                  !enrichedLever.dependency_aware?.can_apply
+                                    ? enrichedLever.dependency_aware?.requires_validation
                                       ? "Validation Coach/PO requise"
                                       : "Confiance insuffisante – enablers manquants"
                                     : "Appliquer la recommandation"
