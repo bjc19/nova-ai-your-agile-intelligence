@@ -42,14 +42,11 @@ Deno.serve(async (req) => {
     };
     maxProjectsAllowed = maxProjectsAllowed || quotas[userPlan] || 5;
 
-    console.log('📋 Fetching existing active selections...');
-    // Get existing ACTIVE Jira project selections (RLS-compliant)
-    const existingSelections = await base44.entities.JiraProjectSelection.filter({
-      is_active: true
-    });
+    console.log('📋 Fetching ALL existing selections (active and inactive)...');
+    // Get ALL Jira project selections (not just active ones) to properly manage state
+    const allExistingSelections = await base44.entities.JiraProjectSelection.list();
     
-    const existingActiveCount = existingSelections.length;
-    console.log('✅ Found', existingActiveCount, 'existing active selections');
+    console.log('✅ Found', allExistingSelections.length, 'total existing selections');
 
     // Check quota: count of new projects should not exceed maxProjectsAllowed
     if (selected_project_ids.length > maxProjectsAllowed) {
