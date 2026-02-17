@@ -404,11 +404,10 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
     }
   };
 
-  // Count ONLY real recommendations (not samples)
-  const realRecsCount = (allSourceRecommendations?.length || 0) + (latestAnalysis?.recommendations?.length || 0);
+  // Don't render if no real recommendations for the selected workspace
+  const hasRealRecommendations = allSourceRecommendations.length > 0 || (latestAnalysis?.recommendations?.length > 0);
 
-  // Don't render if no real recommendations
-  if (realRecsCount === 0) {
+  if (!hasRealRecommendations) {
     return null;
   }
 
