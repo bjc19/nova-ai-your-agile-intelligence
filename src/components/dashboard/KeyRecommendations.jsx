@@ -404,14 +404,21 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
     }
   };
 
+  // Don't render if no real recommendations for the selected workspace
+  const hasRealRecommendations = allSourceRecommendations.length > 0 || (latestAnalysis?.recommendations?.length > 0);
+
+  if (!hasRealRecommendations) {
+    return null;
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.25 }}
-    >
-      <Card className="overflow-hidden">
-        {(isAdmin || isContributor) && (
+     <motion.div
+       initial={{ opacity: 0, y: 20 }}
+       animate={{ opacity: 1, y: 0 }}
+       transition={{ duration: 0.5, delay: 0.25 }}
+     >
+       <Card className="overflow-hidden">
+         {(isAdmin || isContributor) && (
           <CardHeader className="pb-3 bg-gradient-to-br from-amber-50/50 to-orange-50/30">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-amber-100">
