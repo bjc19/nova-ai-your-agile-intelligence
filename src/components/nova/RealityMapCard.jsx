@@ -224,10 +224,10 @@ Actions recommandées :
       // Save notification record
       const notificationRecord = await base44.entities.RealityNotification.create({
         analysis_date: new Date().toISOString(),
-        recipients: [{ name: mainAdmin.full_name || "Admin", zone: "Executive" }],
-        friction_index: frictionIndex.label,
-        wastes_count: wastesAnalysis.wastes.length,
-        sent_by: currentUser.email
+        recipients: [{ name: mainAdmin?.full_name || "Admin", zone: "Executive" }],
+        friction_index: frictionIndex?.label || "Non disponible",
+        wastes_count: wastesAnalysis?.wastes?.length || 0,
+        sent_by: currentUser?.email || "Unknown"
       });
 
       toast.success("Alerte envoyée à l'administrateur ✓", {
