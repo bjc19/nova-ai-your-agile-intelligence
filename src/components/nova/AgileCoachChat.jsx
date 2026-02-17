@@ -13,6 +13,7 @@ export default function AgileCoachChat() {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Initialize conversation on mount
   useEffect(() => {
@@ -57,6 +58,21 @@ export default function AgileCoachChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const getCustomResponse = (userMessage) => {
+    const lowerMessage = userMessage.toLowerCase().trim();
+    
+    // Check for specific questions
+    if (lowerMessage.includes('quel est ton nom') || lowerMessage.includes('comment t\'appelles tu') || lowerMessage.includes('qui es tu')) {
+      return 'Mon nom est Nova, un coach Agile dédié à votre équipe.';
+    }
+    
+    if (lowerMessage.includes('qui t\'a créé') || lowerMessage.includes('qui t\'a conçu') || lowerMessage.includes('qui t\'a programmé') || lowerMessage.includes('qui t\'as programmé')) {
+      return 'J\'ai été créé par Novagile, une startup innovante de solutions agiles et de business intelligence basée au Canada.';
+    }
+    
+    return null;
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !conversation) return;
 
@@ -65,15 +81,36 @@ export default function AgileCoachChat() {
     setLoading(true);
 
     try {
-      await base44.agents.addMessage(conversation, {
-        role: 'user',
-        content: userMessage
-      });
+      // Check for custom responses
+      const customResponse = getCustomResponse(userMessage);
+      
+      if (customResponse) {
+        // Add user message
+        await base44.agents.addMessage(conversation, {
+          role: 'user',
+          content: userMessage
+        });
+        
+        // Add custom assistant response
+        await base44.agents.addMessage(conversation, {
+          role: 'assistant',
+          content: customResponse
+        });
+      } else {
+        // Send normal message to agent
+        await base44.agents.addMessage(conversation, {
+          role: 'user',
+          content: userMessage
+        });
+      }
+      
       // Messages will be updated via subscription
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
       setLoading(false);
+      // Focus back to input
+      inputRef.current?.focus();
     }
   };
 
@@ -149,12 +186,14 @@ export default function AgileCoachChat() {
       <div className="border-t border-slate-200 bg-white p-6 rounded-b-xl">
         <div className="flex gap-3">
           <Input
+            ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Posez votre question au Coach Agile..."
             disabled={loading}
             className="flex-1"
+            autoFocus
           />
           <Button
             onClick={handleSendMessage}
