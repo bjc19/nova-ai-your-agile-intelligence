@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
 
     if (analysisType === 'jira') {
       console.log('🔄 Appel analyzeJiraGDPR pour', jiraProject.jira_project_key);
-      analysisResult = await base44.functions.invoke('analyzeJiraGDPR', {
+      analysisResult = await base44.asServiceRole.functions.invoke('analyzeJiraGDPR', {
         projectKey: jiraProject.jira_project_key,
         projectSelectionId: projectSelectionId,
         autoTrigger: true,
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
       });
     } else if (analysisType === 'trello') {
       console.log('🔄 Appel analyzeTrelloGDPR pour', trelloProject.trello_board_id);
-      analysisResult = await base44.functions.invoke('analyzeTrelloGDPR', {
+      analysisResult = await base44.asServiceRole.functions.invoke('analyzeTrelloGDPR', {
         boardId: trelloProject.trello_board_id,
         projectSelectionId: projectSelectionId,
         autoTrigger: true,
