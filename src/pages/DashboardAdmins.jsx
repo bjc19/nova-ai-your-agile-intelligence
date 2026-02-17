@@ -23,6 +23,7 @@ import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
 import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import {
   Mic,
@@ -219,7 +220,7 @@ export default function DashboardAdmins() {
                     </Badge>
                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {format(new Date(), 'dd MMMM yyyy')}
+                      {format(new Date(), 'dd MMMM yyyy', { locale: fr })}
                     </Badge>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
@@ -361,10 +362,9 @@ export default function DashboardAdmins() {
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
             }
-
-               <SprintPerformanceChart analysisHistory={analysisHistory} />
-               <PredictiveInsights />
-               <KeyRecommendations
+              
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
