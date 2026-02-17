@@ -319,8 +319,8 @@ export default function Details() {
     }
   };
 
-  // Count items by urgency
-  const itemsWithUrgency = items.filter(item => item.urgency);
+  // Count items by urgency (only unresolved items)
+  const itemsWithUrgency = filteredItems.filter(item => item.urgency);
   const urgencyCounts = itemsWithUrgency.reduce((acc, item) => {
    acc[item.urgency] = (acc[item.urgency] || 0) + 1;
    return acc;
