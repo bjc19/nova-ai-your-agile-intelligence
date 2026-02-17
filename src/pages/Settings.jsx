@@ -11,8 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
-import { useTheme } from "@/components/ThemeContext";
-import ThemeToggle from "@/components/settings/ThemeToggle";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
 import WorkspaceMemberAssignment from "@/components/workspace/WorkspaceMemberAssignment";
 import AccountDeletionSection from "@/components/settings/AccountDeletionSection";
@@ -35,9 +33,7 @@ import {
   Target,
   Layers,
   Database,
-  AlertTriangle,
-  Moon,
-  Sun } from
+  AlertTriangle } from
 "lucide-react";
 import { toast } from "sonner";
 
@@ -878,9 +874,6 @@ export default function Settings() {
         </motion.div>
         }
 
-        {/* Theme Settings */}
-        <ThemeToggle t={t} />
-
         {/* Language Settings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -891,8 +884,8 @@ export default function Settings() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900">
-                  <Languages className="w-5 h-5 text-indigo-600 dark:text-indigo-300" />
+                <div className="p-2 rounded-lg bg-indigo-100">
+                  <Languages className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
                   <CardTitle className="text-base">{t('languageSettings')}</CardTitle>
@@ -905,8 +898,8 @@ export default function Settings() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-1">{t('interfaceLanguage')}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('languageDescription')}</p>
+                  <p className="text-sm font-medium text-slate-900 mb-1">{t('interfaceLanguage')}</p>
+                  <p className="text-xs text-slate-500">{t('languageDescription')}</p>
                 </div>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="w-[180px]">

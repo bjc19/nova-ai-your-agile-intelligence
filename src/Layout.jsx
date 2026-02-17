@@ -5,12 +5,11 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Sparkles, LogOut, LogIn, Users, Menu, X, Bell } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
-import { ThemeProvider } from "@/components/ThemeContext";
-                  import { LoginDialog } from "@/components/LoginDialog";
-                  import { DemoSimulator } from "@/components/nova/DemoSimulator";
-                  import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
-                  import AgileCoachWidget from "@/components/nova/AgileCoachWidget";
-                  import AdminNotificationsPanel from "@/components/AdminNotificationsPanel";
+            import { LoginDialog } from "@/components/LoginDialog";
+            import { DemoSimulator } from "@/components/nova/DemoSimulator";
+            import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
+            import AgileCoachWidget from "@/components/nova/AgileCoachWidget";
+            import AdminNotificationsPanel from "@/components/AdminNotificationsPanel";
 import {
   Sheet,
   SheetContent,
@@ -96,35 +95,35 @@ function LayoutContent({ children, currentPageName }) {
   const isPublicPage = currentPageName === "Home" || currentPageName === "Demo" || currentPageName === "AcceptInvitation";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50">
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+      <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {isAuthenticated ? (
-                <button
-                  onClick={() => navigate(createPageUrl("Dashboard"))}
-                  className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    Nova
-                  </span>
-                </button>
-              ) : (
-                <Link 
-                  to={createPageUrl("Home")}
-                  className="flex items-center gap-2.5"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                    Nova
-                  </span>
-                </Link>
-                )}
+            <button
+              onClick={() => navigate(createPageUrl("Dashboard"))}
+              className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-slate-900 tracking-tight">
+                Nova
+              </span>
+            </button>
+          ) : (
+            <Link 
+              to={createPageUrl("Home")}
+              className="flex items-center gap-2.5"
+            >
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-slate-900 tracking-tight">
+                Nova
+              </span>
+            </Link>
+            )}
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-6">
@@ -338,16 +337,16 @@ function LayoutContent({ children, currentPageName }) {
             )}
 
             {/* Footer */}
-            <footer className="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 mt-auto">
+      <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-sm font-semibold text-slate-900 dark:text-white">Nova</span>
-              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">{t('Your Agile Intelligence')}</span>
-              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
+              <span className="text-sm font-semibold text-slate-900">Nova</span>
+              <span className="text-xs text-slate-400 ml-2">{t('Your Agile Intelligence')}</span>
+              <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
             </div>
           </div>
         </div>
@@ -358,10 +357,8 @@ function LayoutContent({ children, currentPageName }) {
 
     export default function Layout({ children, currentPageName }) {
     return (
-    <ThemeProvider>
     <LanguageProvider>
     <LayoutContent children={children} currentPageName={currentPageName} />
     </LanguageProvider>
-    </ThemeProvider>
     );
     }
