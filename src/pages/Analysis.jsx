@@ -95,6 +95,23 @@ export default function Analysis() {
    useEffect(() => {
      const checkPermissions = async () => {
        try {
+         const subscription = await base44.functions.invoke('getUserSubscriptionStatus', {});
+         const { manualAnalysisAdminOnly, manualAnalysesCount, maxManualAnalyses } = subscription.data;
+
+         // Check if manual analysis is admin-only and user is not admin
+         if (manualAnalysisAdminOnly && user?.role !== 'admin') {
+           setCanCreateAnalysis(false);
+           setMessage({ type: 'error', text: 'Seuls les admins peuvent créer des analyses manuelles avec votre plan actuel' });
+           return;
+         }
+
+         // Check if manual analysis limit is reached
+         if (manualAnalysesCount >= maxManualAnalyses) {
+           setCanCreateAnalysis(false);
+           setMessage({ type: 'error', text: `Limite d'analyses manuelles atteinte (${manualAnalysesCount}/${maxManualAnalyses})` });
+           return;
+         }
+
          const hasPermission = user?.role === 'admin' || user?.role === 'contributor';
          setCanCreateAnalysis(hasPermission);
 
