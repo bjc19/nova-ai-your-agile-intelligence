@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
     return Response.json({
       projects: projects.filter(p => !p.isArchived),
       selectedProjects: selectedKeys,
-      currentPlan: plan,
+      currentPlan: userPlan,
       quota: quota,
       currentCount: currentCount,
       availableSlots: Math.max(0, quota - currentCount)
