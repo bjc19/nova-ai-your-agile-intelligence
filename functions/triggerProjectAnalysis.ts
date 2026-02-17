@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     let analysisType = null;
 
     try {
-      const jiraProjects = await base44.entities.JiraProjectSelection.filter({
+      const jiraProjects = await base44.asServiceRole.entities.JiraProjectSelection.filter({
         id: projectSelectionId,
         is_active: true
       });
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     if (!analysisType) {
       try {
-        const trelloProjects = await base44.entities.TrelloProjectSelection.filter({
+        const trelloProjects = await base44.asServiceRole.entities.TrelloProjectSelection.filter({
           id: projectSelectionId,
           is_active: true
         });
