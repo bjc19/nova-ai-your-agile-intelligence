@@ -54,8 +54,10 @@ export default function Settings() {
   const [teamConfig, setTeamConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [currentRole, setCurrentRole] = useState('user');
-  const [switchingRole, setSwitchingRole] = useState(false);
-  const [jiraDebugInfo, setJiraDebugInfo] = useState(null);
+   const [switchingRole, setSwitchingRole] = useState(false);
+   const [jiraDebugInfo, setJiraDebugInfo] = useState(null);
+   const [planLimitations, setPlanLimitations] = useState(null);
+   const [loadingLimitations, setLoadingLimitations] = useState(true);
 
   const loadSlackConnection = async () => {
     try {
@@ -554,11 +556,19 @@ export default function Settings() {
 
 
   // Load data once on mount only
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const user = await base44.auth.me();
-        setCurrentRole(user?.role || 'user');
+   useEffect(() => {
+     const loadData = async () => {
+       try {
+         const user = await base44.auth.me();
+         setCurrentRole(user?.role || 'user');
+
+         // Load plan limitations for source restrictions
+         try {
+           const limitationsRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+           setPlanLimitations(limitationsRes.data);
+         } catch (e) {
+           setPlanLimitations(null);
+         }
 
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
@@ -596,15 +606,16 @@ export default function Settings() {
         }
 
         setConfluenceConnected(confluenceConns.length > 0);
-        setTrelloConnected(trelloConns.length > 0);
-      } catch (error) {
-        console.error("Erreur chargement données:", error);
-      } finally {
-        setLoadingConfig(false);
-      }
-    };
-    loadData();
-  }, []);
+          setTrelloConnected(trelloConns.length > 0);
+        } catch (error) {
+          console.error("Erreur chargement données:", error);
+        } finally {
+          setLoadingConfig(false);
+          setLoadingLimitations(false);
+        }
+        };
+        loadData();
+        }, []);
 
   const handleProjectModeChange = async (newMode) => {
     try {
