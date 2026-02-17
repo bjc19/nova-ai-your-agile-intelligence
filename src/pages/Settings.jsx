@@ -17,6 +17,7 @@ import AccountDeletionSection from "@/components/settings/AccountDeletionSection
 import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
 import PlanAssignmentSection from "@/components/settings/PlanAssignmentSection";
 import PlanLimitationsDisplay from "@/components/settings/PlanLimitationsDisplay";
+import TeamConfigurationSettings from "@/components/settings/TeamConfigurationSettings";
 import {
   ArrowLeft,
   MessageSquare,
@@ -802,14 +803,15 @@ export default function Settings() {
         }
 
         {/* Team & Projects Configuration - Admin only */}
-        {currentRole === 'admin' &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8">
+         {currentRole === 'admin' &&
+         <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5, delay: 0.1 }}
+           className="mb-8">
 
-          
+           <TeamConfigurationSettings />
+
 
 
 
