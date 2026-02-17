@@ -232,26 +232,7 @@ export default function QuickStats({ analysisHistory = [] }) {
   const totalAllBlockers = (allAnalysisBlockers || 0) + allSlackBlockers + allJiraBlockers + allTeamsBlockers;
   const totalAllRisks = (allAnalysisRisks || 0) + allSlackRisks + allJiraRisks + allTeamsRisks;
   
-  // Filter resolved items by period
-  const selectedPeriod = sessionStorage.getItem("selectedPeriod");
-  let filteredResolved = resolvedItems;
-  
-  if (selectedPeriod) {
-    const period = JSON.parse(selectedPeriod);
-    const startDate = new Date(period.start);
-    const endDate = new Date(period.end);
-    endDate.setHours(23, 59, 59, 999);
-    
-    // Get resolved items entities to check dates
-    const resolvedEntities = resolvedItems.map(itemId => {
-      // Find the corresponding resolved entity
-      return resolvedItems.find(r => r === itemId);
-    });
-    
-    filteredResolved = resolvedItems; // Keep all for now as we need the full count
-  }
-  
-  const resolvedBlockers = filteredResolved.length;
+  const resolvedBlockers = resolvedItems.length;
   
   // Calculate Technical Health Index (IST) = Resolved / (All Problems Ever Detected)
   // Total = ALL blockers + ALL risks (including those now resolved)
