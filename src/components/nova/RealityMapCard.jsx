@@ -568,7 +568,7 @@ Actions recommandées :
               </div>
 
               <div className="space-y-2">
-                {wastesAnalysis.wastes.map((waste, index) => (
+                 {wastesAnalysis?.wastes?.map((waste, index) => (
                   <div key={index}>
                     <button
                       onClick={() => setExpandedWaste(expandedWaste === index ? null : index)}
