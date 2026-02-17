@@ -66,20 +66,20 @@ export default function JiraProjectSelector() {
   }, []);
 
   const handleProjectToggle = (projectId) => {
-    const newSelected = new Set(selectedProjects);
-    
-    if (newSelected.has(projectId)) {
-      newSelected.delete(projectId);
-    } else {
-      if (newSelected.size >= maxProjects) {
-        toast.error(`Quota atteint. Maximum ${maxProjects} projets autorisés.`);
-        return;
-      }
-      newSelected.add(projectId);
-    }
-    
-    setSelectedProjects(newSelected);
-  };
+     const newSelected = new Set(selectedProjects);
+
+     if (newSelected.has(projectId)) {
+       newSelected.delete(projectId);
+     } else {
+       if (newSelected.size >= maxProjects) {
+         toast.error(`Limite atteinte. Maximum ${maxProjects} projets autorisés pour le plan ${userPlan}.`);
+         return;
+       }
+       newSelected.add(projectId);
+     }
+
+     setSelectedProjects(newSelected);
+   };
 
   const handleConfirmSelection = async () => {
     if (selectedProjects.size === 0) {
