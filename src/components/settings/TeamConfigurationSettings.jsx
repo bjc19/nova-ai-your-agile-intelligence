@@ -58,17 +58,24 @@ export default function TeamConfigurationSettings() {
   const handleModeChange = async (mode) => {
     setIsSaving(true);
     try {
+      const user = await base44.auth.me();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const configs = await base44.entities.TeamConfiguration.list();
       
       if (configs.length > 0) {
         await base44.entities.TeamConfiguration.update(configs[0].id, {
           project_mode: mode,
-          confirmed_by_admin: mode !== "auto_detect"
+          confirmed_by_admin: mode !== "auto_detect",
+          user_email: user.email
         });
       } else {
         await base44.entities.TeamConfiguration.create({
           project_mode: mode,
-          confirmed_by_admin: mode !== "auto_detect"
+          confirmed_by_admin: mode !== "auto_detect",
+          user_email: user.email
         });
       }
 

@@ -35,13 +35,15 @@ Deno.serve(async (req) => {
         await base44.entities.TeamConfiguration.update(currentConfig.id, {
           project_mode: "multi_projects",
           confirmed_by_admin: false,
-          project_count: totalProjects
+          project_count: totalProjects,
+          user_email: user.email
         });
       } else {
         await base44.entities.TeamConfiguration.create({
           project_mode: "multi_projects",
           confirmed_by_admin: false,
-          project_count: totalProjects
+          project_count: totalProjects,
+          user_email: user.email
         });
       }
 
@@ -54,7 +56,8 @@ Deno.serve(async (req) => {
     } else if (totalProjects === 1 && currentConfig && currentConfig.project_mode === "auto_detect") {
       // Si un seul projet et auto_detect, rester en auto_detect mais mettre à jour le count
       await base44.entities.TeamConfiguration.update(currentConfig.id, {
-        project_count: 1
+        project_count: 1,
+        user_email: user.email
       });
     }
 

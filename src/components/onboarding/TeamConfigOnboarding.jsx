@@ -26,6 +26,11 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
     setIsSubmitting(true);
 
     try {
+      const user = await base44.auth.me();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       // Créer ou mettre à jour la configuration
       const existingConfigs = await base44.entities.TeamConfiguration.list();
       
@@ -33,14 +38,16 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
         await base44.entities.TeamConfiguration.update(existingConfigs[0].id, {
           project_mode: mode,
           confirmed_by_admin: mode !== "auto_detect",
-          onboarding_completed: true
+          onboarding_completed: true,
+          user_email: user.email
         });
       } else {
         await base44.entities.TeamConfiguration.create({
           project_mode: mode,
           confirmed_by_admin: mode !== "auto_detect",
           onboarding_completed: true,
-          project_count: mode === "multi_projects" ? 2 : 1
+          project_count: mode === "multi_projects" ? 2 : 1,
+          user_email: user.email
         });
       }
 
