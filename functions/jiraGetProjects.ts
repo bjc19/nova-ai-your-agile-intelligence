@@ -128,8 +128,15 @@ Deno.serve(async (req) => {
       console.warn('Could not fetch subscription status, using starter defaults');
     }
 
-    // Use plan quotas from database or fallback
-    const quota = planDetails?.max_jira_projects || 5;
+    // Quotas par plan
+    const quotas = {
+      'starter': 5,
+      'growth': 10,
+      'pro': 50,
+      'enterprise': 999
+    };
+
+    const quota = planDetails?.max_jira_projects || quotas[userPlan] || 5;
     const currentCount = userSelections.filter(s => s.is_active).length;
 
     return Response.json({
