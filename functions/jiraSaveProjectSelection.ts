@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
     let userPlan = 'starter';
     
     try {
-      // Get subscription from database (RLS allows users to read their own subscription)
-      const subscriptions = await base44.entities.Subscription.filter({
+      // Get subscription from database using service role (bypass RLS for quota check)
+      const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
         user_email: user.email
       });
       console.log('🔍 Subscription lookup for email:', user.email, 'Result:', subscriptions.length);
