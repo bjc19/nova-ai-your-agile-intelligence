@@ -12,13 +12,16 @@ function generateUUID() {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { projectKey, projectSelectionId, autoTrigger, callingUserEmail, callingUserRole } = await req.json();
+    const reqBody = await req.json();
+    const { projectKey, projectSelectionId, autoTrigger, callingUserEmail, callingUserRole } = reqBody;
+
+    console.log('🔍 analyzeJiraGDPR called with:', { projectKey, autoTrigger, callingUserEmail, callingUserRole });
 
     // Authentication & Authorization check
-    // If autoTriggered (i.e. called by triggerProjectAnalysis), use the callingUserRole
-    // Otherwise, perform full authentication for direct calls
     let authorizedUserEmail = callingUserEmail;
     let authorizedUserRole = callingUserRole;
+
+    // If NOT autoTriggered, verify admin status from direct call
     if (!autoTrigger) {
       const user = await base44.auth.me();
       if (!user) {
@@ -28,32 +31,25 @@ Deno.serve(async (req) => {
       authorizedUserRole = user.role;
     }
 
+    // Verify admin access
     if (authorizedUserRole !== 'admin') {
+      console.error('❌ User is not admin:', authorizedUserRole);
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
+    console.log('✅ Authorization passed for:', authorizedUserEmail);
     console.log('Starting Jira GDPR analysis sync...');
 
-    // Get active Jira connections
-    // If auto-triggered for a specific project, filter connections to that project's user
-    // Otherwise, for a full admin analysis, retrieve all active connections
-    let jiraConnections;
-    if (autoTrigger && projectKey && authorizedUserEmail) {
-        // Retrieve the JiraConnection for the specific user who owns the project being analyzed
-        jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({
-            user_email: authorizedUserEmail,
-            is_active: true
-        });
-    } else {
-        jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({
-            is_active: true
-        });
-    }
+    // Get active Jira connections for this user
+    const jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({
+      user_email: authorizedUserEmail,
+      is_active: true
+    });
 
     if (jiraConnections.length === 0) {
       return Response.json({ 
         success: true, 
-        message: 'No Jira connections found',
+        message: 'No Jira connections found for this user',
         recordsProcessed: 0 
       });
     }
@@ -63,7 +59,7 @@ Deno.serve(async (req) => {
 
     for (const connection of jiraConnections) {
       try {
-        // Get selected projects
+        // Get selected projects for this connection
         const projectSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({
           user_email: connection.user_email,
           is_active: true
