@@ -241,10 +241,43 @@ Return JSON:
         }
       }
 
+      // Create AnalysisHistory entry
+      const analysisId = generateUUID();
+      try {
+        await base44.asServiceRole.entities.AnalysisHistory.create({
+          title: `Jira Analysis - ${jiraProject.jira_project_name}`,
+          source: 'jira_backlog',
+          jira_project_selection_id: projectSelectionId,
+          workspace_name: jiraProject.workspace_name,
+          blockers_count: totalRecordsProcessed,
+          risks_count: 0,
+          analysis_data: {
+            project_key: jiraProject.jira_project_key,
+            project_id: jiraProject.jira_project_id,
+            analyzed_at: new Date().toISOString(),
+            total_issues_scanned: 0
+          },
+          transcript_preview: `Analysis of Jira project ${jiraProject.jira_project_key}`,
+          contributing_sources: [{
+            source: 'jira_backlog',
+            confidence: 0.95,
+            metadata: {
+              project_key: jiraProject.jira_project_key
+            }
+          }],
+          cross_source_confidence: 0.95,
+          analysis_time: new Date().toISOString()
+        });
+        console.log('✅ AnalysisHistory created for Jira:', projectSelectionId);
+      } catch (error) {
+        console.error('Error creating AnalysisHistory:', error.message);
+      }
+
       return Response.json({
         success: true,
         message: `Jira analysis completed - ${jiraProject.jira_project_name}`,
-        recordsProcessed: totalRecordsProcessed
+        recordsProcessed: totalRecordsProcessed,
+        analysisId: analysisId
       });
     }
 
