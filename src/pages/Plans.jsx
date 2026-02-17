@@ -6,9 +6,15 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, ArrowLeft, Loader2, X } from "lucide-react";
+import { Check, ArrowLeft, Loader2, X, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { ContactSalesModal } from "@/components/nova/ContactSalesModal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const PLANS = [
   {
