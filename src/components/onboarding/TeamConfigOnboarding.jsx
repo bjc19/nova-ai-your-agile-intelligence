@@ -44,11 +44,11 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
         });
       }
 
-      // Animation de succès
+      // Animation de succès puis fermeture immédiate
       setStep(2);
       setTimeout(() => {
         onComplete(mode);
-      }, 1500);
+      }, 800);
 
     } catch (error) {
       console.error("Erreur configuration:", error);
