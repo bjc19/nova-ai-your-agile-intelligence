@@ -435,7 +435,7 @@ Actions recommandées :
 
         <CardContent className="space-y-4">
           {/* Decision Map */}
-          {decisionAnalysis.decisionMap && decisionAnalysis.decisionMap.length > 0 && (
+              {decisionAnalysis?.decisionMap?.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Users className="w-4 h-4 text-blue-500" />
