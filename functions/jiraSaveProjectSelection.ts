@@ -59,8 +59,8 @@ Deno.serve(async (req) => {
     console.log('📊 Final quota:', maxProjectsAllowed, 'for plan:', userPlan);
 
     console.log('📋 Fetching ALL existing selections (active and inactive)...');
-    // Get ALL Jira project selections using asServiceRole to bypass RLS
-    const allExistingSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
+    // Get ALL Jira project selections respecting RLS
+    const allExistingSelections = await base44.entities.JiraProjectSelection.list();
     
     console.log('✅ Found', allExistingSelections.length, 'total existing selections');
 
