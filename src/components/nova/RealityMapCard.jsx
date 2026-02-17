@@ -66,10 +66,11 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
   const data = flowData;
   const metrics = flowMetrics;
 
-  const decisionAnalysis = analyzeDecisionReality(data);
-  const wastesAnalysis = identifySystemicWastes(metrics);
-  const frictionIndex = calculateFrictionIndex(wastesAnalysis.wastes);
-  const suggestions = generateActionableSuggestions(wastesAnalysis.wastes, decisionAnalysis.decisionMap || []);
+  // Safe analysis with null checks
+  const decisionAnalysis = data ? analyzeDecisionReality(data) : { canAnalyze: false, message: "Données insuffisantes", decisionMap: [] };
+  const wastesAnalysis = metrics ? identifySystemicWastes(metrics) : { canAnalyze: false, message: "Données insuffisantes", wastes: [] };
+  const frictionIndex = wastesAnalysis.wastes?.length > 0 ? calculateFrictionIndex(wastesAnalysis.wastes) : { emoji: "⚪", label: "Non disponible" };
+  const suggestions = (wastesAnalysis.wastes?.length > 0 && decisionAnalysis.decisionMap) ? generateActionableSuggestions(wastesAnalysis.wastes, decisionAnalysis.decisionMap) : [];
 
   // Fetch applied recommendations to check their status
   const { data: appliedRecommendations = [] } = useQuery({
