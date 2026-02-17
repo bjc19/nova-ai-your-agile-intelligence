@@ -18,7 +18,6 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -74,7 +73,7 @@ export default function DashboardAdmins() {
       const currentUser = await base44.auth.me();
 
       // Role verification - only 'admin' can access
-      if (currentUser?.role !== 'admin') {
+      if (currentUser?.app_role !== 'admin' && currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
       }
@@ -370,7 +369,6 @@ export default function DashboardAdmins() {
             </div>
 
             <div className="space-y-6">
-              <PredictiveInsights />
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>

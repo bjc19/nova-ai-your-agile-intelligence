@@ -37,7 +37,7 @@ function LayoutContent({ children, currentPageName }) {
         setIsAuthenticated(auth);
         if (auth) {
           const user = await base44.auth.me();
-          setUserRole(user?.app_role || user?.role);
+          setUserRole(user?.app_role || user?.role || null);
 
           try {
             const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
@@ -47,7 +47,8 @@ function LayoutContent({ children, currentPageName }) {
           }
 
           // Fetch pending alerts for admins
-          if ((user?.app_role || user?.role) === 'admin') {
+          const currentUserRole = user?.app_role || user?.role;
+          if (currentUserRole === 'admin') {
             try {
               const sprintAlerts = await base44.entities.SprintHealth.filter({ 
                 status: "critical" 
