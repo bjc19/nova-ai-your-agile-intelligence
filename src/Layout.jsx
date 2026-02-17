@@ -25,7 +25,7 @@ function LayoutContent({ children, currentPageName }) {
     const [isLoading, setIsLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
     const [showDemoSimulator, setShowDemoSimulator] = useState(false);
-
+    const [user, setUser] = useState(null);
     const [canInvite, setCanInvite] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [pendingAlerts, setPendingAlerts] = useState(0);
