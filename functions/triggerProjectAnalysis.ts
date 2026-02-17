@@ -86,9 +86,10 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('❌ Erreur:', error);
+    const errorMessage = error?.message || 'Erreur inconnue';
+    console.error('❌ Erreur:', errorMessage);
     return Response.json({
-      error: error.message,
+      error: errorMessage,
       success: false
     }, { status: 500 });
   }
