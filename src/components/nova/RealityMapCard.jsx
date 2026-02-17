@@ -425,12 +425,14 @@ Actions recommandées :
           </div>
 
           {/* Friction Index */}
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <span className="text-sm text-slate-600">Indice global de friction flux :</span>
-            <Badge className={`${frictionIndex.emoji === "🟢" ? "bg-emerald-100 text-emerald-700" : frictionIndex.emoji === "🟡" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
-              {frictionIndex.emoji} {frictionIndex.label}
-            </Badge>
-          </div>
+          {frictionIndex && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <span className="text-sm text-slate-600">Indice global de friction flux :</span>
+              <Badge className={`${frictionIndex.emoji === "🟢" ? "bg-emerald-100 text-emerald-700" : frictionIndex.emoji === "🟡" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
+                {frictionIndex.emoji} {frictionIndex.label}
+              </Badge>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent className="space-y-4">
