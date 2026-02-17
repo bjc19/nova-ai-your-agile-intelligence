@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
@@ -434,6 +435,9 @@ export default function Dashboard() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Predictive Insights */}
+            <PredictiveInsights />
+            
             {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
             
@@ -443,7 +447,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(user?.role === 'admin' || user?.role === 'contributor') && (
+{(userRole === 'admin' || userRole === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
