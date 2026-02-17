@@ -150,7 +150,7 @@ export default function Details() {
         teamsInsightsData
           .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
           .map((marker, idx) => ({
-            id: `teams-blocker-${idx}`,
+            id: `teams-blocker-${marker.id}`,
             issue: marker.probleme,
             description: marker.probleme,
             urgency: marker.criticite === 'critique' ? 'high' : 'medium',
@@ -212,7 +212,7 @@ export default function Details() {
         teamsInsightsData
           .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
           .map((marker, idx) => ({
-            id: `teams-risk-${idx}`,
+            id: `teams-risk-${marker.id}`,
             issue: marker.probleme,
             description: marker.probleme,
             urgency: 'medium',
