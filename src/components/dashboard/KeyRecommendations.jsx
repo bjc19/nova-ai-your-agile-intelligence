@@ -141,11 +141,6 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
         }));
       }
 
-      // If no recommendations from any source, use samples
-      if (allRecs.length === 0) {
-        return sampleRecommendations;
-      }
-
       // Apply translation if needed
       if (translatedRecommendations) {
         return translatedRecommendations;
@@ -154,58 +149,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
       return allRecs;
     };
 
-    // Sample recommendations for demo
-    const sampleRecommendations = language === 'fr' ? [
-    {
-      type: "escalation",
-      title: "Escalader le blocage d'intégration API",
-      description: "Retard de support API tierce affectant 2 membres. Considérer de contacter la gestion fournisseur.",
-      priority: "high",
-    },
-    {
-      type: "collaboration",
-      title: "Planifier une sync inter-équipes",
-      description: "Plusieurs dépendances identifiées entre tâches frontend et backend. Une sync de 15 min pourrait éviter des retards.",
-      priority: "medium",
-    },
-    {
-      type: "timeline",
-      title: "Revoir le calendrier du sprint",
-      description: "3 tâches risquent de manquer la deadline de démo. Considérer ajustement du scope ou réallocation de ressources.",
-      priority: "high",
-    },
-    {
-      type: "priority",
-      title: "Reprioriser les éléments du backlog",
-      description: "Tâches de faible priorité bloquant les éléments critiques. Suggérer de déplacer la tâche d'index de BDD en haut.",
-      priority: "medium",
-    },
-  ] : [
-    {
-      type: "escalation",
-      title: "Escalate API Integration Blocker",
-      description: "Third-party API support delay affecting 2 team members. Consider reaching out to vendor management.",
-      priority: "high",
-    },
-    {
-      type: "collaboration",
-      title: "Schedule Cross-Team Sync",
-      description: "Multiple dependencies identified between frontend and backend tasks. A 15-min sync could prevent delays.",
-      priority: "medium",
-    },
-    {
-      type: "timeline",
-      title: "Review Sprint Timeline",
-      description: "3 tasks at risk of missing the demo deadline. Consider scope adjustment or resource reallocation.",
-      priority: "high",
-    },
-    {
-      type: "priority",
-      title: "Reprioritize Backlog Items",
-      description: "Low-priority tasks blocking critical path items. Suggest moving database indexes task to top.",
-      priority: "medium",
-    },
-  ];
+    // NO sample/demo recommendations - only real data
 
   // Translate recommendations if needed
   useEffect(() => {

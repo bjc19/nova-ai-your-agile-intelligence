@@ -85,18 +85,8 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     return null;
   }
 
-  // Initialize with provided data or defaults
-  const initialData = sprintHealth || {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3,
-    blocked_tickets_over_48h: 2,
-    sprint_day: 5,
-    historical_sprints_count: 4,
-    problematic_tickets: [],
-    drift_acknowledged: false
-  };
+  // Only use real sprint data - NO defaults
+  const initialData = sprintHealth;
 
   // Subscribe to real GDPR markers in production
   useEffect(() => {

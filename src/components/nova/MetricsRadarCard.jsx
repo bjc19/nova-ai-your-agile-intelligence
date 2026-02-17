@@ -40,44 +40,20 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [userResponse, setUserResponse] = useState("");
 
-  // Demo data if none provided
-  const data = metricsData || {
-    velocity: { current: 45, trend: "up", change: 20 },
-    flow_efficiency: { current: 28, target: 55 },
-    cycle_time: { current: 9, target: 4 },
-    throughput: { current: 6, variance: 0.3 },
-    deployment_frequency: { current: 1, target: 3 },
-    data_days: 14,
-  };
-
-  const historical = historicalData || {
-    sprints_count: 1,
-    data_days: 7,
-    is_audit_phase: false,
-    is_new_team: true,
-  };
+  // Only use provided data - NO demo/mock data
+  const data = metricsData;
+  const historical = historicalData;
 
   // Detect pilot mode
   const pilotMode = detectPilotMode(historical);
   
   const analysis = analyzeMetricsHealth(data);
 
-  const integration = integrationStatus || {
-    jira_connected: true,
-    slack_connected: false,
-    dora_pipeline: false,
-    flow_metrics_available: true,
-  };
+  const integration = integrationStatus;
 
-  if (!analysis.canAnalyze) {
-    return (
-      <Card className="border-2 border-slate-200 bg-slate-50">
-        <CardContent className="p-6 text-center">
-          <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-          <p className="text-sm text-slate-600">{analysis.message}</p>
-        </CardContent>
-      </Card>
-    );
+  // Don't render if no data provided
+  if (!data || !historical || !analysis.canAnalyze) {
+    return null;
   }
 
   // Users see a simplified view

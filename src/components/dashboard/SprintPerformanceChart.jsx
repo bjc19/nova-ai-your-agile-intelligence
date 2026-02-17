@@ -29,7 +29,7 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
     fetchJiraData();
   }, []);
 
-  // Use Jira data if available, otherwise fall back to analysisHistory, then sample data
+  // Use Jira data if available, otherwise fall back to analysisHistory - NO sample data
   const chartData = jiraData.length > 0
     ? jiraData
     : analysisHistory.length > 0
@@ -40,21 +40,7 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
         blockersData: item.analysis_data?.blockers || [],
         risksData: item.analysis_data?.risks || [],
       }))
-    : language === 'fr' ? [
-        { day: "Lun", blockers: 2, risks: 1, blockersData: [{member: "Marc", issue: "Bloqué sur l'intégration de l'API payment"}], risksData: [{description: "Risque de dépassement de délai pour la release"}] },
-        { day: "Mar", blockers: 3, risks: 2, blockersData: [{member: "Sarah", issue: "Problème de performance sur la requête SQL"}, {member: "Thomas", issue: "En attente de revue de code depuis 2 jours"}], risksData: [{description: "Dépendance externe non validée"}] },
-        { day: "Mer", blockers: 1, risks: 1, blockersData: [{member: "Julie", issue: "Bug critique en production à corriger"}], risksData: [{description: "Manque de ressources pour la phase de test"}] },
-        { day: "Jeu", blockers: 4, risks: 3, blockersData: [{member: "Pierre", issue: "Conflit de merge complexe à résoudre"}], risksData: [{description: "Scope creep détecté sur la feature principale"}] },
-        { day: "Ven", blockers: 2, risks: 1, blockersData: [{member: "Emma", issue: "Serveur de staging indisponible"}], risksData: [{description: "Vélocité en baisse ce sprint"}] },
-        { day: "Aujourd'hui", blockers: 3, risks: 2, blockersData: [{member: "Lucas", issue: "Besoin d'aide sur l'architecture microservices"}, {member: "Sophie", issue: "Tests e2e qui échouent de manière intermittente"}], risksData: [{description: "Sprint Goal potentiellement en danger"}, {description: "Charge de travail déséquilibrée dans l'équipe"}] },
-      ] : [
-        { day: "Mon", blockers: 2, risks: 1, blockersData: [{member: "Mike", issue: "Stuck on payment API integration"}], risksData: [{description: "Deadline risk for release"}] },
-        { day: "Tue", blockers: 3, risks: 2, blockersData: [{member: "Sarah", issue: "SQL query performance issue"}, {member: "Tom", issue: "Waiting for code review for 2 days"}], risksData: [{description: "External dependency not validated"}] },
-        { day: "Wed", blockers: 1, risks: 1, blockersData: [{member: "Julia", issue: "Critical production bug to fix"}], risksData: [{description: "Lack of testing resources"}] },
-        { day: "Thu", blockers: 4, risks: 3, blockersData: [{member: "Peter", issue: "Complex merge conflict to resolve"}], risksData: [{description: "Scope creep detected on main feature"}] },
-        { day: "Fri", blockers: 2, risks: 1, blockersData: [{member: "Emma", issue: "Staging server unavailable"}], risksData: [{description: "Velocity declining this sprint"}] },
-        { day: "Today", blockers: 3, risks: 2, blockersData: [{member: "Luke", issue: "Need help with microservices architecture"}, {member: "Sophie", issue: "E2E tests failing intermittently"}], risksData: [{description: "Sprint Goal potentially at risk"}, {description: "Unbalanced workload in team"}] },
-      ];
+    : [];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload || !payload.length) return null;
@@ -114,6 +100,11 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
     if (trend < 0) return `${trend} ${t('fromYesterday')}`;
     return t('noChange');
   };
+
+  // Don't render if no real data
+  if (chartData.length === 0) {
+    return null;
+  }
 
   return (
     <motion.div
