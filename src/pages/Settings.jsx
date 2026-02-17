@@ -86,8 +86,8 @@ export default function Settings() {
          setConnectingSlack(true);
 
          // Check plan restrictions
-         if (planLimitations && !planLimitations.primarySources?.includes('slack') && !planLimitations.contributiveSources?.includes('slack')) {
-           toast.error(`Slack n'est pas disponible avec le plan ${planLimitations.plan}`);
+         if (planLimitations && !planLimitations.primary_sources?.includes('slack') && !planLimitations.contributive_sources?.includes('slack')) {
+           toast.error(`Slack n'est pas disponible avec ce plan`);
            setConnectingSlack(false);
            return;
          }
@@ -162,8 +162,8 @@ export default function Settings() {
          setConnectingTeams(true);
 
          // Check plan restrictions
-         if (planLimitations && !planLimitations.primarySources?.includes('teams') && !planLimitations.contributiveSources?.includes('teams')) {
-           toast.error(`Microsoft Teams n'est pas disponible avec le plan ${planLimitations.plan}`);
+         if (planLimitations && !planLimitations.primary_sources?.includes('teams') && !planLimitations.contributive_sources?.includes('teams')) {
+           toast.error(`Microsoft Teams n'est pas disponible avec ce plan`);
            setConnectingTeams(false);
            return;
          }
@@ -264,8 +264,8 @@ export default function Settings() {
          setConnectingJira(true);
 
          // Check plan restrictions
-         if (planLimitations && !planLimitations.primarySources?.includes('jira') && !planLimitations.contributiveSources?.includes('jira')) {
-           toast.error(`Jira n'est pas disponible avec le plan ${planLimitations.plan}`);
+         if (planLimitations && !planLimitations.primary_sources?.includes('jira') && !planLimitations.contributive_sources?.includes('jira')) {
+           toast.error(`Jira n'est pas disponible avec ce plan`);
            setConnectingJira(false);
            return;
          }
@@ -374,8 +374,8 @@ export default function Settings() {
          setConnectingConfluence(true);
 
          // Check plan restrictions
-         if (planLimitations && !planLimitations.primarySources?.includes('confluence') && !planLimitations.contributiveSources?.includes('confluence')) {
-           toast.error(`Confluence n'est pas disponible avec le plan ${planLimitations.plan}`);
+         if (planLimitations && !planLimitations.primary_sources?.includes('confluence') && !planLimitations.contributive_sources?.includes('confluence')) {
+           toast.error(`Confluence n'est pas disponible avec ce plan`);
            setConnectingConfluence(false);
            return;
          }
@@ -445,8 +445,8 @@ export default function Settings() {
          setConnectingTrello(true);
 
          // Check plan restrictions
-         if (planLimitations && !planLimitations.primarySources?.includes('trello') && !planLimitations.contributiveSources?.includes('trello')) {
-           toast.error(`Trello n'est pas disponible avec le plan ${planLimitations.plan}`);
+         if (planLimitations && !planLimitations.primary_sources?.includes('trello') && !planLimitations.contributive_sources?.includes('trello')) {
+           toast.error(`Trello n'est pas disponible avec ce plan`);
            setConnectingTrello(false);
            return;
          }
