@@ -105,23 +105,23 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
      };
 
      fetchSignals();
-    
-    const handleFocus = () => {
-      fetchSignals();
-    };
-    window.addEventListener('focus', handleFocus);
-    
-    // Listen for resolved count changes in sessionStorage
-    const handleStorageChange = () => {
-      fetchSignals();
-    };
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+
+     const handleFocus = () => {
+       fetchSignals();
+     };
+     window.addEventListener('focus', handleFocus);
+
+     // Listen for resolved count changes in sessionStorage
+     const handleStorageChange = () => {
+       fetchSignals();
+     };
+     window.addEventListener('storage', handleStorageChange);
+
+     return () => {
+       window.removeEventListener('focus', handleFocus);
+       window.removeEventListener('storage', handleStorageChange);
+     };
+     }, [selectedWorkspaceId]);
 
   // Anonymize names in text
   const anonymizeNamesInText = (text) => {
