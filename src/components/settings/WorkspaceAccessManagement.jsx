@@ -538,7 +538,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500">Illimite</p>
+                    <p className="text-xs text-slate-500">Illimité</p>
                     <p className="text-xs font-semibold text-slate-700 mt-1">{plan.price}</p>
                   </div>
                   {currentRole === 'admin' && !isCurrent && !isCustom && (
