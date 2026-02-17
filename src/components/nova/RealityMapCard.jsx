@@ -194,10 +194,10 @@ ${decisionAnalysis?.decisionMap?.map((entry, i) => `
   • Confiance : ${entry?.confidence || 0}%
 `).join('')}
 
-💡 PISTES SUGGÉRÉES (${suggestions.length}) :
-${suggestions.slice(0, 5).map((s, i) => `
-  ${i + 1}. ${s.text}
-     Effort: ${s.effort} | Impact: ${s.impact}
+💡 PISTES SUGGÉRÉES (${suggestions?.length || 0}) :
+${suggestions?.slice(0, 5).map((s, i) => `
+  ${i + 1}. ${s?.text || "Suggestion"}
+     Effort: ${s?.effort || "N/A"} | Impact: ${s?.impact || "N/A"}
 `).join('')}
 
 📈 DONNÉES : ${data.data_days} jours d'analyse
