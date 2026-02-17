@@ -43,8 +43,8 @@ Deno.serve(async (req) => {
     maxProjectsAllowed = maxProjectsAllowed || quotas[userPlan] || 5;
 
     console.log('📋 Fetching ALL existing selections (active and inactive)...');
-    // Get ALL Jira project selections (not just active ones) to properly manage state
-    const allExistingSelections = await base44.entities.JiraProjectSelection.list();
+    // Get ALL Jira project selections using asServiceRole to bypass RLS
+    const allExistingSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
     
     console.log('✅ Found', allExistingSelections.length, 'total existing selections');
 
