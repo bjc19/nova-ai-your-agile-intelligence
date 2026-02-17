@@ -14,16 +14,35 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user || user.role !== 'admin') {
+    if (!user) {
+      return Response.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const { projectKey, projectSelectionId, autoTrigger } = await req.json();
+    
+    // Auto-triggered calls from triggerProjectAnalysis bypass admin check
+    const isAutoTriggered = autoTrigger === true;
+    
+    if (!isAutoTriggered && user?.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     console.log('Starting Jira GDPR analysis sync...');
 
-    // Get active Jira connections
-    const jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({
-      is_active: true
-    });
+    let jiraConnections;
+    
+    if (isAutoTriggered && projectKey) {
+      // Single project analysis - get connection for this specific project
+      console.log('Auto-triggered analysis for project:', projectKey);
+      jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({
+        is_active: true
+      });
+    } else {
+      // Full admin analysis - all connections
+      jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({
+        is_active: true
+      });
+    }
 
     if (jiraConnections.length === 0) {
       return Response.json({ 
