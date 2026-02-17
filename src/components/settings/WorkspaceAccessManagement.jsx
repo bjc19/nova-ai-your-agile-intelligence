@@ -538,7 +538,7 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500">Illimité</p>
+                    <p className="text-xs text-slate-500">Jusqu'à {plan.maxUsers} utilisateurs</p>
                     <p className="text-xs font-semibold text-slate-700 mt-1">{plan.price}</p>
                   </div>
                   {currentRole === 'admin' && !isCurrent && !isCustom && (
@@ -569,7 +569,11 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                     </Button>
                   )}
                   {isCustom && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => window.location.href = 'mailto:contact@novagile.ca'}
+                    >
                       Nous contacter
                     </Badge>
                   )}
