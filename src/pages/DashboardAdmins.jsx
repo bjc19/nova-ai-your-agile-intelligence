@@ -249,6 +249,16 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
+                <Button
+                  onClick={handleRefreshAnalyses}
+                  disabled={!selectedWorkspaceId || isRefreshing}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'Rafraîchissement...' : 'Rafraîchir'}
+                </Button>
+
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
