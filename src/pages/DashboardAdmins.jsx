@@ -63,10 +63,9 @@ export default function DashboardAdmins() {
 
   // Check authentication and role
   useEffect(() => {
-    let isMounted = true;
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated || !isMounted) {
+      if (!authenticated) {
         navigate(createPageUrl("Home"));
         return;
       }
@@ -74,48 +73,41 @@ export default function DashboardAdmins() {
       const currentUser = await base44.auth.me();
 
       // Role verification - only 'admin' can access
-      if (currentUser?.role !== 'admin' || !isMounted) {
+      if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
       }
 
-      // Load all data in parallel
-      try {
-        const [activeSprints, teamConfigs, pendingAlerts] = await Promise.all([
-          base44.entities.SprintContext.filter({ is_active: true }),
-          base44.entities.TeamConfiguration.list(),
-          base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" })
-        ]);
+      setUser(currentUser);
 
-        if (!isMounted) return;
-
-        setUser(currentUser);
-        
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
-
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
-
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
-          });
-        }
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Auth check error:", error);
-        if (isMounted) setIsLoading(false);
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
       }
+
+      // Check onboarding
+      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+        setShowOnboarding(true);
+      }
+
+      // Check multi-project alerts
+      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+        admin_response: "pending"
+      });
+      if (pendingAlerts.length > 0) {
+        const latest = pendingAlerts[pendingAlerts.length - 1];
+        setMultiProjectAlert({
+          confidence: latest.detection_score,
+          signals: latest.weighted_signals,
+          log_id: latest.id
+        });
+      }
+
+      setIsLoading(false);
     };
     checkAuth();
-    return () => { isMounted = false; };
   }, [navigate]);
 
   // Fetch analysis history
@@ -232,7 +224,7 @@ export default function DashboardAdmins() {
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
                   <p className="text-slate-600 mt-2 text-lg">
-                    {t('sprintOverview')}
+                    {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                   </p>
                 </div>
               </div>
