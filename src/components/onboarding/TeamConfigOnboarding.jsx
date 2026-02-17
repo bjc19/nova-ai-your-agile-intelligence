@@ -119,25 +119,18 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
                         }`}
                         onClick={() => !isSubmitting && handleModeSelect(option.id)}
                       >
-                        <CardContent className="p-5">
-                          <div className="flex items-start gap-4">
-                            <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${option.color} flex items-center justify-center flex-shrink-0`}>
-                              <option.icon className="w-7 h-7 text-white" />
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${option.color} flex items-center justify-center flex-shrink-0`}>
+                              <option.icon className="w-5 h-5 text-white" />
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                              <h3 className="text-sm font-semibold text-slate-900 mb-0.5">
                                 {option.title}
                               </h3>
-                              <p className="text-sm text-slate-600 mb-3">
+                              <p className="text-xs text-slate-600 mb-2">
                                 {option.description}
                               </p>
-                              <div className="flex flex-wrap gap-2">
-                                {option.benefits.map((benefit, idx) => (
-                                  <Badge key={idx} variant="outline" className="text-xs">
-                                    {benefit}
-                                  </Badge>
-                                ))}
-                              </div>
                             </div>
                           </div>
                         </CardContent>
