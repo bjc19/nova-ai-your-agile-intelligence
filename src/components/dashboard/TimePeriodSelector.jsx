@@ -90,12 +90,33 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
     detectMode();
   }, []);
 
-  // Initialiser la période par défaut une fois le mode détecté
+  // Initialiser la période : restaurer depuis sessionStorage ou utiliser la période par défaut
   useEffect(() => {
     if (detectedMode) {
-      const defaultPeriodForMode = detectedMode === "Scrum" ? "current_sprint" : "current_week";
-      setSelectedPeriod(defaultPeriodForMode);
-      calculatePeriod(defaultPeriodForMode);
+      // Vérifier si une période a été sauvegardée dans sessionStorage
+      const savedPeriod = sessionStorage.getItem("selectedPeriod");
+      
+      if (savedPeriod) {
+        try {
+          const parsed = JSON.parse(savedPeriod);
+          // Récupérer le type de période pour restaurer la sélection du Select
+          const periodType = parsed.type || "current_sprint";
+          setSelectedPeriod(periodType);
+          // Recalculer pour mettre à jour le label et appeler onPeriodChange
+          calculatePeriod(periodType);
+        } catch (error) {
+          console.error("Erreur restauration période:", error);
+          // Fallback à la période par défaut
+          const defaultPeriodForMode = detectedMode === "Scrum" ? "current_sprint" : "current_week";
+          setSelectedPeriod(defaultPeriodForMode);
+          calculatePeriod(defaultPeriodForMode);
+        }
+      } else {
+        // Aucune période sauvegardée, utiliser la défaut
+        const defaultPeriodForMode = detectedMode === "Scrum" ? "current_sprint" : "current_week";
+        setSelectedPeriod(defaultPeriodForMode);
+        calculatePeriod(defaultPeriodForMode);
+      }
     }
   }, [detectedMode]);
 
