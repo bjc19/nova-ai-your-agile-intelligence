@@ -21,6 +21,7 @@ import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -217,7 +218,7 @@ export default function DashboardAdmins() {
                     </Badge>
                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      {sprintInfo.name}
                     </Badge>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
@@ -359,6 +360,8 @@ export default function DashboardAdmins() {
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
             }
+
+              <PredictiveInsights />
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
