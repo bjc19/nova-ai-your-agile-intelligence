@@ -200,6 +200,7 @@ export const translations = {
     situation: "Contexte",
     need: "Besoin",
     expectedOutcome: "Résultat attendu",
+    noNotificationFound: "Aucune notification pour le moment",
     },
   en: {
     // Navigation
@@ -399,6 +400,7 @@ export const translations = {
     situation: "Situation",
     need: "Need",
     expectedOutcome: "Expected Outcome",
+    noNotificationFound: "No notification found for now",
     }
     };
 

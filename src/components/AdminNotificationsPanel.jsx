@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Bell, AlertCircle } from "lucide-react";
+import { useLanguage } from "@/components/LanguageContext";
 import {
   Popover,
   PopoverContent,
@@ -9,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminNotificationsPanel({ pendingAlerts }) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [sprintAlerts, setSprintAlerts] = useState([]);
   const [connectionErrors, setConnectionErrors] = useState([]);
@@ -82,7 +84,7 @@ export default function AdminNotificationsPanel({ pendingAlerts }) {
           ) : totalNotifications === 0 ? (
             <div className="text-center py-6 text-slate-500">
               <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No notification found for now</p>
+              <p className="text-sm">{t('noNotificationFound')}</p>
             </div>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto">
