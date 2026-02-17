@@ -45,7 +45,7 @@ export default function DashboardAdmins() {
   const [sprintContext, setSprintContext] = useState(null);
 
   // Fetch GDPR signals
-  const { data: allGdprSignals = [] } = useQuery({
+  const { data: gdprSignals = [] } = useQuery({
     queryKey: ['gdprSignals'],
     queryFn: async () => {
       const sevenDaysAgo = new Date();
@@ -54,8 +54,6 @@ export default function DashboardAdmins() {
       return markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
     }
   });
-
-  const gdprSignals = allGdprSignals;
 
   // Check authentication and role
   useEffect(() => {
