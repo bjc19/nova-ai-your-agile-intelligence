@@ -338,7 +338,10 @@ export default function Details() {
           >
             <Button
               variant="ghost"
-              onClick={() => navigate(createPageUrl("Dashboard"))}
+              onClick={() => {
+                const previousDashboard = sessionStorage.getItem("previousDashboard") || "Dashboard";
+                navigate(createPageUrl(previousDashboard));
+              }}
               className="mb-6 text-slate-600 hover:text-slate-900"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
