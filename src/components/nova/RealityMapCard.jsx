@@ -508,7 +508,7 @@ Actions recommandées :
                         Répondre à Nova
                       </DialogTitle>
                       <DialogDescription className="space-y-2">
-                        <p className="text-sm text-slate-600 italic">"{decisionAnalysis.keyQuestion}"</p>
+                         <p className="text-sm text-slate-600 italic">"{decisionAnalysis?.keyQuestion || "Question non disponible"}"</p>
                         <div className="flex items-start gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200">
                           <Shield className="w-4 h-4 text-emerald-600 mt-0.5" />
                           <p className="text-xs text-emerald-700">
