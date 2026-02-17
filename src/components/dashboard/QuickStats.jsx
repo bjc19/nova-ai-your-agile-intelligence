@@ -324,10 +324,14 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const paginatedStats = stats.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
   const totalPages = Math.ceil(stats.length / itemsPerPage);
 
+  if (!hasRealData) {
+    return null; // Don't render if no real data
+  }
+
   return (
-    <TooltipProvider>
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+     <TooltipProvider>
+       <div className="space-y-4">
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {paginatedStats.map((stat, index) => {
              const isHealthCard = stat.labelKey === "technicalHealth";
              const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
