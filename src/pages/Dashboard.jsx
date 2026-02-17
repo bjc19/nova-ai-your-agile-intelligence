@@ -20,7 +20,6 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -238,7 +237,7 @@ export default function Dashboard() {
                     </Badge>
                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {sprintInfo.name}
+                      {format(new Date(), 'dd MMMM yyyy')}
                     </Badge>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
