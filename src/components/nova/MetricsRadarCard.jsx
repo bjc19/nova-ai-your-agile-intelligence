@@ -223,10 +223,19 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
               </div>
 
               <div className="space-y-2">
-                {enrichedLevers.map((lever, index) => {
+                {analysis.top3Levers.map((lever, index) => {
                   const metricInfo = METRIC_TYPES.ACTIONABLE[lever.metric];
                   const isSelected = selectedLever === lever.metric;
                   const options = generateLeverOptions(lever);
+
+                  // Enrich with pilot/dependency warnings on render
+                  const withDependency = enrichRecommendationWithDependency(
+                    { ...lever, required_enablers: ["dora_metrics", "flow_metrics"] },
+                    integration,
+                    70,
+                    { impact_percentage: 15 }
+                  );
+                  const enrichedLever = enrichRecommendationWithPilotWarning(withDependency, pilotMode);
 
                   return (
                     <div key={lever.metric}>
