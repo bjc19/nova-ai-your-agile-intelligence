@@ -345,9 +345,9 @@ function LayoutContent({ children, currentPageName }) {
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-sm font-semibold text-slate-900">Nova</span>
-              <span className="text-xs text-slate-400 ml-2">{t('Your Agile Intelligence')}</span>
-              <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
+              <span className="text-sm font-semibold text-slate-900 dark:text-white">Nova</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">{t('Your Agile Intelligence')}</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
             </div>
           </div>
         </div>
