@@ -132,8 +132,8 @@ export default function Details() {
       }).concat(
         gdprMarkersData
           .filter(m => m.criticite === 'critique' || m.criticite === 'haute')
-          .map((marker, idx) => ({
-            id: `gdpr-blocker-${idx}`,
+          .map((marker) => ({
+            id: `gdpr-blocker-${marker.id}`,
             issue: marker.probleme,
             description: marker.probleme,
             urgency: marker.criticite === 'critique' ? 'high' : 'medium',
@@ -195,8 +195,8 @@ export default function Details() {
       }).concat(
         gdprMarkersData
           .filter(m => m.criticite === 'moyenne')
-          .map((marker, idx) => ({
-            id: `gdpr-risk-${idx}`,
+          .map((marker) => ({
+            id: `gdpr-risk-${marker.id}`,
             issue: marker.probleme,
             description: marker.probleme,
             urgency: 'medium',
