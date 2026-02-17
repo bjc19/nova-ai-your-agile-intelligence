@@ -569,7 +569,11 @@ export default function WorkspaceAccessManagement({ currentRole }) {
                     </Button>
                   )}
                   {isCustom && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => window.location.href = 'mailto:contact@novagile.ca'}
+                    >
                       Nous contacter
                     </Badge>
                   )}
