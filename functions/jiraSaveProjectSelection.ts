@@ -24,17 +24,15 @@ Deno.serve(async (req) => {
     let userPlan = 'starter';
     
     try {
-      // Get subscription from database directly
-      const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
-        user_email: user.email
-      });
+      // Get subscription from database (RLS allows users to read their own subscription)
+      const subscriptions = await base44.entities.Subscription.list();
       
       if (subscriptions.length > 0) {
         userPlan = subscriptions[0].plan;
         console.log('✅ Found subscription plan:', userPlan);
         
         // Get plan details
-        const planDetails = await base44.asServiceRole.entities.Plan.filter({
+        const planDetails = await base44.entities.Plan.filter({
           plan_id: userPlan
         });
         
@@ -42,6 +40,8 @@ Deno.serve(async (req) => {
           maxProjectsAllowed = planDetails[0].max_jira_projects || 5;
           console.log('✅ Plan quota:', maxProjectsAllowed);
         }
+      } else {
+        console.warn('⚠️ No subscription found');
       }
     } catch (e) {
       console.warn('⚠️ Could not fetch subscription, using default quota');
