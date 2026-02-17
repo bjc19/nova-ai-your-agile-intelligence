@@ -14,7 +14,6 @@ import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
-import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
@@ -208,10 +207,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Onboarding Modal */}
-      <TeamConfigOnboarding
-        isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)} />
+
 
 
       {/* Hero Section */}
