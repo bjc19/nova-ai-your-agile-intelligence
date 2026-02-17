@@ -20,9 +20,6 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 
 import {
   Mic,
@@ -66,43 +63,71 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication (temporarily disabled for demo)
-  useEffect(() => {
-    const checkAuth = async () => {
+  // Check authentication - use React Query to prevent rate limiting
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      if (authenticated) {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
+      return authenticated ? await base44.auth.me() : null;
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000 // Keep in memory for 10 minutes
+  });
 
-        // Charger contexte sprint actif
-        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
+  const { data: sprintContextData } = useQuery({
+    queryKey: ['sprintContext'],
+    queryFn: () => base44.entities.SprintContext.filter({ is_active: true }),
+    enabled: !!currentUser,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000
+  });
 
-        // Vérifier onboarding
-        const teamConfigs = await base44.entities.TeamConfiguration.list();
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
+  const { data: teamConfigData } = useQuery({
+    queryKey: ['teamConfig'],
+    queryFn: () => base44.entities.TeamConfiguration.list(),
+    enabled: !!currentUser,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000
+  });
 
-        // Vérifier alertes multi-projets en attente
-        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-          admin_response: "pending"
-        });
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
-          });
-        }
-      }
+  const { data: multiProjectData } = useQuery({
+    queryKey: ['multiProjectAlerts'],
+    queryFn: () => base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
+    enabled: !!currentUser,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000
+  });
+
+  // Update state when queries finish loading
+  useEffect(() => {
+    if (currentUser !== undefined) {
+      setUser(currentUser);
       setIsLoading(false);
-    };
-    checkAuth();
-  }, [navigate]);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (sprintContextData?.length > 0) {
+      setSprintContext(sprintContextData[0]);
+    }
+  }, [sprintContextData]);
+
+  useEffect(() => {
+    if (teamConfigData?.length > 0 && !teamConfigData[0].onboarding_completed) {
+      setShowOnboarding(true);
+    }
+  }, [teamConfigData]);
+
+  useEffect(() => {
+    if (multiProjectData?.length > 0) {
+      const latest = multiProjectData[multiProjectData.length - 1];
+      setMultiProjectAlert({
+        confidence: latest.detection_score,
+        signals: latest.weighted_signals,
+        log_id: latest.id
+      });
+    }
+  }, [multiProjectData]);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
@@ -240,9 +265,9 @@ export default function Dashboard() {
                     </Badge>
                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {format(new Date(), 'dd MMMM yyyy', { locale: fr })}
+                      {sprintInfo.name}
                     </Badge>
-                    </div>
+                  </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
@@ -426,9 +451,6 @@ export default function Dashboard() {
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Predictive Insights */}
-            <PredictiveInsights />
             
             {/* Key Recommendations */}
             <KeyRecommendations
