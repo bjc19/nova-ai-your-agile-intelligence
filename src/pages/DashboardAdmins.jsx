@@ -254,16 +254,17 @@ export default function DashboardAdmins() {
               </div>
             </div>
 
-            {(!selectedPeriod || analysisHistory.length > 0) &&
+            {analysisHistory.length > 0 &&
             <>
-                <DailyQuote
-                lang={t('language') === 'English' ? 'en' : 'fr'}
-                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                patterns={[]} />
+               <DailyQuote
+               lang={t('language') === 'English' ? 'en' : 'fr'}
+               blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+               riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+               gdprSignals={gdprSignals}
+               patterns={[]} />
 
-                <QuickStats analysisHistory={analysisHistory} />
-              </>
+               <QuickStats analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
+             </>
             }
           </motion.div>
         </div>
