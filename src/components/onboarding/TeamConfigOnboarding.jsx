@@ -108,16 +108,18 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
 
                <div className="grid gap-3">
                   {modeOptions.map((option) => (
-                    <motion.div
+                    <motion.button
                       key={option.id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={() => !isSubmitting && handleModeSelect(option.id)}
+                      disabled={isSubmitting}
+                      className="w-full text-left"
                     >
                       <Card 
                         className={`cursor-pointer transition-all border-2 hover:border-blue-400 ${
                           selectedMode === option.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200'
                         }`}
-                        onClick={() => !isSubmitting && handleModeSelect(option.id)}
                       >
                         <CardContent className="p-3">
                           <div className="flex items-start gap-3">
@@ -135,7 +137,7 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
                           </div>
                         </CardContent>
                       </Card>
-                    </motion.div>
+                    </motion.button>
                   ))}
                 </div>
 
