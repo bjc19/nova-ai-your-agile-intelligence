@@ -12,18 +12,43 @@ function generateUUID() {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    const { boardId, projectSelectionId, autoTrigger, callingUserEmail, callingUserRole } = await req.json();
 
-    if (!user || user.role !== 'admin') {
+    // Authentication & Authorization check
+    // If autoTriggered (i.e. called by triggerProjectAnalysis), use the callingUserRole
+    // Otherwise, perform full authentication for direct calls
+    let authorizedUserEmail = callingUserEmail;
+    let authorizedUserRole = callingUserRole;
+    if (!autoTrigger) {
+      const user = await base44.auth.me();
+      if (!user) {
+        return Response.json({ error: 'Authentication required' }, { status: 401 });
+      }
+      authorizedUserEmail = user.email;
+      authorizedUserRole = user.role;
+    }
+
+    if (authorizedUserRole !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     console.log('Starting Trello GDPR analysis sync...');
 
     // Get active Trello connections
-    const trelloConnections = await base44.asServiceRole.entities.TrelloConnection.filter({
-      is_active: true
-    });
+    // If auto-triggered for a specific project, filter connections to that project's user
+    // Otherwise, for a full admin analysis, retrieve all active connections
+    let trelloConnections;
+    if (autoTrigger && boardId && authorizedUserEmail) {
+        // Retrieve the TrelloConnection for the specific user who owns the project being analyzed
+        trelloConnections = await base44.asServiceRole.entities.TrelloConnection.filter({
+            user_email: authorizedUserEmail,
+            is_active: true
+        });
+    } else {
+        trelloConnections = await base44.asServiceRole.entities.TrelloConnection.filter({
+            is_active: true
+        });
+    }
 
     if (trelloConnections.length === 0) {
       return Response.json({ 
@@ -34,7 +59,7 @@ Deno.serve(async (req) => {
     }
 
     let totalRecordsProcessed = 0;
-    const tenant_id = sha256(user.email || 'unknown');
+    const tenant_id = sha256(authorizedUserEmail || 'unknown');
 
     for (const connection of trelloConnections) {
       try {
