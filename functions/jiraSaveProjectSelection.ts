@@ -33,6 +33,15 @@ Deno.serve(async (req) => {
       console.error('❌ Error details:', e);
     }
 
+    // Quotas par plan (fallback si planDetails non disponible)
+    const quotas = {
+      'starter': 5,
+      'growth': 15,
+      'pro': 50,
+      'enterprise': 999
+    };
+    maxProjectsAllowed = maxProjectsAllowed || quotas[userPlan] || 5;
+
     console.log('📋 Fetching existing active selections...');
     // Get existing ACTIVE Jira project selections (RLS-compliant)
     const existingSelections = await base44.entities.JiraProjectSelection.filter({
