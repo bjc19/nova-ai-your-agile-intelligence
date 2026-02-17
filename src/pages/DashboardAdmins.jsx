@@ -166,25 +166,18 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  // Only create sprintHealth if we have real data
-  const filteredGdprSignals = selectedWorkspaceId 
-    ? gdprSignals.filter(s => s.team_id === selectedWorkspaceId || s.jira_project_selection_id === selectedWorkspaceId)
-    : gdprSignals;
-
-  const sprintHealth = (!selectedPeriod || analysisHistory.length > 0) && (filteredGdprSignals.length > 0 || analysisHistory.length > 0)
-    ? {
-        sprint_name: sprintContext?.sprint_name || "Sprint actif",
-        wip_count: filteredGdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length || 0,
-        wip_historical_avg: 5,
-        tickets_in_progress_over_3d: filteredGdprSignals.filter((s) => s.criticite === 'moyenne').length || 0,
-        blocked_tickets_over_48h: filteredGdprSignals.filter((s) => s.criticite === 'critique').length || 0,
-        sprint_day: 5,
-        historical_sprints_count: 4,
-        drift_acknowledged: false,
-        problematic_tickets: [],
-        gdprSignals: filteredGdprSignals
-      } 
-    : null;
+  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
+    sprint_name: "Sprint 14",
+    wip_count: 8,
+    wip_historical_avg: 5,
+    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+    sprint_day: 5,
+    historical_sprints_count: 4,
+    drift_acknowledged: false,
+    problematic_tickets: [],
+    gdprSignals: gdprSignals
+  } : null;
 
   if (isLoading) {
     return (
@@ -253,14 +246,14 @@ export default function DashboardAdmins() {
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
-              <DailyQuote
-              lang={t('language') === 'English' ? 'en' : 'fr'}
-              blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-              riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-              patterns={[]} />
+                <DailyQuote
+                lang={t('language') === 'English' ? 'en' : 'fr'}
+                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+                patterns={[]} />
 
-              <QuickStats analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
-            </>
+                <QuickStats analysisHistory={analysisHistory} />
+              </>
             }
           </motion.div>
         </div>
@@ -281,16 +274,16 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {(selectedPeriod || selectedWorkspaceId) && analysisHistory.length === 0 &&
+        {selectedPeriod && analysisHistory.length === 0 &&
         <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette sélection
+              Aucune analyse pour cette période
             </h3>
             <p className="text-slate-600 mb-6">
-              Aucune donnée disponible pour le workspace ou la période sélectionnée
+              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -312,8 +305,8 @@ export default function DashboardAdmins() {
 
             }
 
-              {analysisHistory.length > 0 && filteredGdprSignals.length > 0 &&
-              <MetricsRadarCard
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -337,10 +330,10 @@ export default function DashboardAdmins() {
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-              }
+            }
 
-              {analysisHistory.length > 0 && filteredGdprSignals.length > 0 &&
-              <RealityMapCard
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -365,13 +358,14 @@ export default function DashboardAdmins() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
-              }
+            }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-              <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+               <KeyRecommendations
+               latestAnalysis={latestAnalysis}
+               sourceUrl={latestAnalysis?.sourceUrl}
+               sourceName={latestAnalysis?.sourceName}
+               selectedWorkspaceId={selectedWorkspaceId} />
 
             </div>
 
