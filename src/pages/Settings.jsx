@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
+import { useTheme } from "@/components/ThemeContext";
+import ThemeToggle from "@/components/settings/ThemeToggle";
 import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessManagement";
 import WorkspaceMemberAssignment from "@/components/workspace/WorkspaceMemberAssignment";
 import AccountDeletionSection from "@/components/settings/AccountDeletionSection";
