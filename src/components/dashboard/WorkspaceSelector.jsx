@@ -88,7 +88,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
     };
 
     loadWorkspaces();
-  }, [user?.email]);
+  }, [user?.email, user?.role]);
 
   if (loading) {
     return null;
