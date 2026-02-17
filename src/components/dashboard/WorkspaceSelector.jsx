@@ -48,11 +48,12 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
           console.log("🔍 [WorkspaceSelector] Trello connections:", trelloConns.length);
 
           // Load ONLY Jira projects if Jira is connected
-          if (jiraConns.length > 0) {
-            const jiraData = await base44.entities.JiraProjectSelection.filter({ 
-              is_active: true 
-            });
-            console.log("🔍 [WorkspaceSelector] Admin/Contributor - Jira selections loaded:", jiraData.length, jiraData);
+           if (jiraConns.length > 0) {
+             const jiraData = await base44.entities.JiraProjectSelection.filter({ 
+               is_active: true 
+             });
+             console.log("🔍 [WorkspaceSelector] Admin/Contributor - Jira selections loaded:", jiraData.length, jiraData);
+             console.log("DEBUG: Jira selections loaded in WorkspaceSelector:", jiraData);
             console.log("🔍 [WorkspaceSelector] Current user role:", userRole);
             console.log("🔍 [WorkspaceSelector] Current user email:", user?.email);
             selections = jiraData.map(ws => ({
