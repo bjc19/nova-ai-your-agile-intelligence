@@ -32,7 +32,9 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
       }
 
       // Créer ou mettre à jour la configuration
-      const existingConfigs = await base44.entities.TeamConfiguration.list();
+      const existingConfigs = await base44.entities.TeamConfiguration.filter({
+        user_email: user.email
+      });
       
       if (existingConfigs.length > 0) {
         await base44.entities.TeamConfiguration.update(existingConfigs[0].id, {

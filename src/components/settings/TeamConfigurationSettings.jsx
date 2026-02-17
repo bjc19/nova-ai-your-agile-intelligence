@@ -63,7 +63,9 @@ export default function TeamConfigurationSettings() {
         throw new Error('User not authenticated');
       }
 
-      const configs = await base44.entities.TeamConfiguration.list();
+      const configs = await base44.entities.TeamConfiguration.filter({
+        user_email: user.email
+      });
       
       if (configs.length > 0) {
         await base44.entities.TeamConfiguration.update(configs[0].id, {
