@@ -490,7 +490,7 @@ Actions recommandées :
                         <DialogTrigger asChild>
                           <button className="w-full flex items-start gap-2 p-2 rounded-lg bg-white border border-blue-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer text-left">
                             <MessageSquare className="w-4 h-4 text-blue-600 mt-0.5" />
-                            <p className="text-xs text-blue-700 italic flex-1">{decisionAnalysis.keyQuestion}</p>
+                            <p className="text-xs text-blue-700 italic flex-1">{decisionAnalysis?.keyQuestion || "Question non disponible"}</p>
                             <Shield className="w-4 h-4 text-emerald-500" />
                           </button>
                         </DialogTrigger>
