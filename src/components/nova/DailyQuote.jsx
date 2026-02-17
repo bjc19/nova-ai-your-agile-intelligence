@@ -307,6 +307,58 @@ export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Récupère l'historique des quotes affichées depuis localStorage
+  const getQuoteHistory = () => {
+    try {
+      const stored = localStorage.getItem('quoteHistory24h');
+      if (!stored) return {};
+      
+      const history = JSON.parse(stored);
+      const now = Date.now();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      
+      // Nettoie les entrées de plus de 24h
+      const filtered = {};
+      Object.entries(history).forEach(([quoteKey, timestamps]) => {
+        const recent = timestamps.filter(t => now - t < oneDayMs);
+        if (recent.length > 0) {
+          filtered[quoteKey] = recent;
+        }
+      });
+      
+      return filtered;
+    } catch (error) {
+      console.error('Error reading quote history:', error);
+      return {};
+    }
+  };
+
+  // Ajoute une quote à l'historique
+  const addToQuoteHistory = (quoteKey) => {
+    try {
+      const history = getQuoteHistory();
+      if (!history[quoteKey]) {
+        history[quoteKey] = [];
+      }
+      history[quoteKey].push(Date.now());
+      localStorage.setItem('quoteHistory24h', JSON.stringify(history));
+    } catch (error) {
+      console.error('Error updating quote history:', error);
+    }
+  };
+
+  // Vérifie si une quote a été affichée plus de 2 fois en 24h
+  const canDisplayQuote = (quoteKey) => {
+    const history = getQuoteHistory();
+    const count = history[quoteKey]?.length || 0;
+    return count < 2;
+  };
+
+  // Génère une clé unique pour une quote
+  const getQuoteKey = (quote) => {
+    return `${quote.en}_${quote.author}`.replace(/\s+/g, '_');
+  };
+
   useEffect(() => {
     selectOrGenerateQuote();
   }, [blockerCount, riskCount, patterns]);
