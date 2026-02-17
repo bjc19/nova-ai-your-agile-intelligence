@@ -34,21 +34,8 @@ async function refreshJiraToken(connection) {
 
 Deno.serve(async (req) => {
   try {
-    let base44;
-    try {
-      base44 = createClientFromRequest(req);
-    } catch (initError) {
-      console.error('SDK initialization error:', initError);
-      return Response.json({ error: 'SDK initialization failed: ' + initError.message }, { status: 500 });
-    }
-
-    let user;
-    try {
-      user = await base44.auth.me();
-    } catch (authError) {
-      console.error('Auth error:', authError);
-      return Response.json({ error: 'Authentication failed: ' + authError.message }, { status: 401 });
-    }
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
 
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
