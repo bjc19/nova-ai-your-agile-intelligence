@@ -445,7 +445,7 @@ Actions recommandées :
               </div>
               
               <div className="space-y-2 mb-3">
-                {decisionAnalysis.decisionMap.map((entry, index) => {
+                {decisionAnalysis?.decisionMap?.map((entry, index) => {
                   const confLevel = getConfidenceLevel(entry.confidence);
                   return (
                     <div 
