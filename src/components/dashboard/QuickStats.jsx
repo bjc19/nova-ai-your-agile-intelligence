@@ -89,7 +89,7 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
         
         setGdprSignals([...filteredSlack, ...filteredJira]);
         setTeamsInsights(filteredTeams);
-        setResolvedItems(filteredResolved.map(item => item.data?.item_id || item.item_id));
+        setResolvedItems(filteredResolved.map(item => item.item_id));
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
