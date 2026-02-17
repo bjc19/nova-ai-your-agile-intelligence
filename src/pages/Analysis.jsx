@@ -98,18 +98,36 @@ export default function Analysis() {
          const subscription = await base44.functions.invoke('getUserSubscriptionStatus', {});
          const { manualAnalysisAdminOnly, manualAnalysesCount, maxManualAnalyses } = subscription.data;
 
-         // Check if manual analysis is admin-only and user is not admin
-         if (manualAnalysisAdminOnly && user?.role !== 'admin') {
-           setCanCreateAnalysis(false);
-           setMessage({ type: 'error', text: 'Seuls les admins peuvent créer des analyses manuelles avec votre plan actuel' });
-           return;
-         }
+         // Read user's subscription and plan directly (no service role)
+         try {
+           const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+           if (subs.length > 0) {
+             const plans = await base44.entities.Plan.filter({ plan_id: subs[0].plan });
+             if (plans.length > 0) {
+               const plan = plans[0];
+               
+               // Check if manual analysis is admin-only
+               if (plan.manual_analysis_admin_only && user?.role !== 'admin') {
+                 setCanCreateAnalysis(false);
+                 setMessage({ type: 'error', text: `Seuls les admins peuvent créer des analyses manuelles avec le plan ${subs[0].plan}` });
+                 return;
+               }
 
-         // Check if manual analysis limit is reached
-         if (manualAnalysesCount >= maxManualAnalyses) {
-           setCanCreateAnalysis(false);
-           setMessage({ type: 'error', text: `Limite d'analyses manuelles atteinte (${manualAnalysesCount}/${maxManualAnalyses})` });
-           return;
+               // Check manual analysis limit
+               const analysisCount = await base44.entities.AnalysisHistory.filter({ 
+                 created_by: user.email,
+                 analysis_time: { $gte: new Date(Date.now() - 30*24*60*60*1000).toISOString() }
+               });
+               
+               if (analysisCount.length >= plan.max_manual_analyses) {
+                 setCanCreateAnalysis(false);
+                 setMessage({ type: 'error', text: `Limite d'analyses manuelles atteinte (${analysisCount.length}/${plan.max_manual_analyses} ce mois)` });
+                 return;
+               }
+             }
+           }
+         } catch (e) {
+           console.error('Error checking plan restrictions:', e);
          }
 
          const hasPermission = user?.role === 'admin' || user?.role === 'contributor';
