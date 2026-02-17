@@ -43,7 +43,6 @@ export default function DashboardAdmins() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
 
   // Fetch GDPR signals
   const { data: allGdprSignals = [] } = useQuery({
