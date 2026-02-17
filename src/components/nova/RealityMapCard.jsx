@@ -178,20 +178,20 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
 📊 INDICE DE FRICTION GLOBAL : ${frictionIndex?.emoji || "?"} ${frictionIndex?.label || "Non disponible"}
 
 🔴 GASPILLAGES CRITIQUES DÉTECTÉS (${wastesAnalysis?.wastes?.length || 0}) :
-${wastesAnalysis.wastes.map((w, i) => `
-  ${i + 1}. ${w.name}
-     Métrique : ${w.metric}
-     Impact : ${w.impact}
-     ${w.emoji}
+${wastesAnalysis?.wastes?.map((w, i) => `
+  ${i + 1}. ${w?.name || "Gaspillage"}
+     Métrique : ${w?.metric || "N/A"}
+     Impact : ${w?.impact || "N/A"}
+     ${w?.emoji || ""}
 `).join('')}
 
 👥 CARTOGRAPHIE DÉCISIONNELLE – Zones d'influence réelle vs officielle :
-${decisionAnalysis.decisionMap?.map((entry, i) => `
-  Zone ${i + 1}: ${entry.zone}
-  • Rôle officiel : ${entry.officialRole}
-  • Décideur réel : ${entry.realDecider}
-  • Tickets impactés : ${entry.ticketsImpacted}
-  • Confiance : ${entry.confidence}%
+${decisionAnalysis?.decisionMap?.map((entry, i) => `
+  Zone ${i + 1}: ${entry?.zone || "Zone"}
+  • Rôle officiel : ${entry?.officialRole || "N/A"}
+  • Décideur réel : ${entry?.realDecider || "N/A"}
+  • Tickets impactés : ${entry?.ticketsImpacted || 0}
+  • Confiance : ${entry?.confidence || 0}%
 `).join('')}
 
 💡 PISTES SUGGÉRÉES (${suggestions.length}) :
