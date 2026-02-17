@@ -85,7 +85,7 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-md">
         <AnimatePresence mode="wait">
           {step === 1 ? (
             <motion.div
