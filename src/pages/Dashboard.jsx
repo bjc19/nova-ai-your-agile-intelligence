@@ -20,6 +20,8 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import { format } from "date-fns";
 
 import {
   Mic,
