@@ -175,17 +175,18 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 5,
-    historical_sprints_count: 4,
+  const sprintHealth = analysisHistory.length > 0 && sprintContext ? {
+    sprint_name: sprintContext.sprint_name,
+    wip_count: 0,
+    wip_historical_avg: 0,
+    tickets_in_progress_over_3d: gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+    blocked_tickets_over_48h: gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+    sprint_day: 0,
+    historical_sprints_count: 0,
     drift_acknowledged: false,
     problematic_tickets: [],
-    gdprSignals: gdprSignals
+    gdprSignals: gdprSignals,
+    analysis_data: analysisHistory.length > 0 ? analysisHistory[0].analysis_data : null
   } : null;
 
   if (isLoading) {
