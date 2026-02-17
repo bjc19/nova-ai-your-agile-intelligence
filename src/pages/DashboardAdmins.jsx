@@ -36,12 +36,10 @@ import {
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -183,23 +181,6 @@ export default function DashboardAdmins() {
     gdprSignals: gdprSignals
   } : null;
 
-  const handleRefreshAnalyses = async () => {
-    if (!selectedWorkspaceId) {
-      return;
-    }
-    setIsRefreshing(true);
-    try {
-      await base44.functions.invoke('triggerProjectAnalysis', {
-        projectSelectionId: selectedWorkspaceId
-      });
-      queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
-    } catch (error) {
-      console.error('Erreur lors du rafraîchissement des analyses:', error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -251,16 +232,6 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
-                <Button
-                  onClick={handleRefreshAnalyses}
-                  disabled={!selectedWorkspaceId || isRefreshing}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  {isRefreshing ? 'Rafraîchissement...' : 'Rafraîchir'}
-                </Button>
-
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
@@ -335,8 +306,6 @@ export default function DashboardAdmins() {
               onReviewSprint={() => console.log("Review sprint")} />
 
             }
-
-              <PredictiveInsights />
 
               {analysisHistory.length > 0 &&
             <MetricsRadarCard
