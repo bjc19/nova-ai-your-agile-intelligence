@@ -332,6 +332,32 @@ export default function Plans() {
                     </ul>
                   </div>
 
+                  {/* Locked Sources */}
+                  {plan.locked_sources && plan.locked_sources.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                      <p className="font-semibold text-sm mb-3 text-slate-700">Sources contributives verrouillées:</p>
+                      <div className="space-y-2">
+                        {plan.locked_sources.map((source) => (
+                          <TooltipProvider key={source}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200 opacity-50 cursor-not-allowed">
+                                  <Lock className="w-4 h-4 text-slate-400" />
+                                  <span className="text-xs text-slate-500 capitalize font-medium">{source}</span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="text-xs">
+                                  {source} est disponible uniquement pour les plans supérieurs
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Limitations */}
                   {plan.limitations && (
                     <div>
