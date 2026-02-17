@@ -823,6 +823,17 @@ Provide a detailed analysis in the following JSON format:`;
               {error}
             </motion.div>
           )}
+
+          {analysisLimitError && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 p-4 bg-amber-50 border border-amber-200 rounded-lg"
+            >
+              <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <span className="text-sm text-amber-800">{analysisLimitError}</span>
+            </motion.div>
+          )}
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
