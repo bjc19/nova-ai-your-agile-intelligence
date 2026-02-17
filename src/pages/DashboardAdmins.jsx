@@ -307,31 +307,31 @@ export default function DashboardAdmins() {
             }
 
               {analysisHistory.length > 0 &&
-            <MetricsRadarCard
+              <MetricsRadarCard
               metricsData={{
-                velocity: { current: 45, trend: "up", change: 20 },
-                flow_efficiency: { current: 28, target: 55 },
-                cycle_time: { current: 9, target: 4 },
-                throughput: { current: 6, variance: 0.3 },
-                deployment_frequency: { current: 1, target: 3 },
-                data_days: 14
+               velocity: { current: analysisHistory.length, trend: "stable", change: 0 },
+               flow_efficiency: { current: 0, target: 0 },
+               cycle_time: { current: 0, target: 0 },
+               throughput: { current: 0, variance: 0 },
+               deployment_frequency: { current: 0, target: 0 },
+               data_days: analysisHistory.length
               }}
               historicalData={{
-                sprints_count: 1,
-                data_days: 7,
-                is_audit_phase: false,
-                is_new_team: true
+               sprints_count: analysisHistory.length,
+               data_days: analysisHistory.length,
+               is_audit_phase: false,
+               is_new_team: analysisHistory.length === 1
               }}
               integrationStatus={{
-                jira_connected: true,
-                slack_connected: false,
-                dora_pipeline: false,
-                flow_metrics_available: true
+               jira_connected: analysisHistory.some(a => a.source === 'jira_backlog' || a.source === 'jira_agile'),
+               slack_connected: analysisHistory.some(a => a.source === 'slack'),
+               dora_pipeline: false,
+               flow_metrics_available: analysisHistory.length > 0
               }}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-            }
+              }
 
               {analysisHistory.length > 0 &&
             <RealityMapCard
