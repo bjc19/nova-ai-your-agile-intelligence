@@ -339,8 +339,8 @@ export default function DashboardAdmins() {
 
               }
 
-              {analysisHistory.length > 0 &&
-            <RealityMapCard
+              {analysisHistory.length > 0 && filteredGdprSignals.length > 0 &&
+              <RealityMapCard
               flowData={{
                 assignee_changes: [
                 { person: "Mary", count: 42 },
@@ -365,7 +365,7 @@ export default function DashboardAdmins() {
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
-            }
+              }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
