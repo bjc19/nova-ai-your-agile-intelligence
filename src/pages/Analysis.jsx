@@ -92,14 +92,11 @@ export default function Analysis() {
   ];
 
   // Check user permissions & load workspaces
-  useEffect(() => {
-    const checkPermissions = async () => {
-      try {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
-        
-        const hasPermission = currentUser.role === 'admin' || currentUser.role === 'contributor';
-        setCanCreateAnalysis(hasPermission);
+   useEffect(() => {
+     const checkPermissions = async () => {
+       try {
+         const hasPermission = user?.role === 'admin' || user?.role === 'contributor';
+         setCanCreateAnalysis(hasPermission);
 
         // Load available workspaces (JiraProjectSelection)
         const userWorkspaces = await base44.entities.JiraProjectSelection.filter({
