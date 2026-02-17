@@ -45,30 +45,21 @@ export default function DashboardAdmins() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals - filtered by selectedWorkspaceId if available
+  // Fetch GDPR signals
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        let filtered = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        
-        // Filter by workspace if selected
-        if (selectedWorkspaceId) {
-          filtered = filtered.filter((m) => {
-            const analysis = allAnalysisHistory.find(a => a.id === m.analysis_id);
-            return analysis && analysis.jira_project_selection_id === selectedWorkspaceId;
-          });
-        }
-        
-        setGdprSignals(filtered);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
       }
     };
     fetchSignals();
-  }, [selectedWorkspaceId, allAnalysisHistory]);
+  }, []);
 
   // Check authentication and role
   useEffect(() => {
@@ -175,18 +166,17 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  const sprintHealth = analysisHistory.length > 0 && sprintContext ? {
-    sprint_name: sprintContext.sprint_name,
-    wip_count: 0,
-    wip_historical_avg: 0,
-    tickets_in_progress_over_3d: gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 0,
-    historical_sprints_count: 0,
+  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
+    sprint_name: "Sprint 14",
+    wip_count: 8,
+    wip_historical_avg: 5,
+    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+    sprint_day: 5,
+    historical_sprints_count: 4,
     drift_acknowledged: false,
     problematic_tickets: [],
-    gdprSignals: gdprSignals,
-    analysis_data: analysisHistory.length > 0 ? analysisHistory[0].analysis_data : null
+    gdprSignals: gdprSignals
   } : null;
 
   if (isLoading) {
@@ -285,16 +275,16 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {(selectedPeriod || selectedWorkspaceId) && analysisHistory.length === 0 &&
+        {selectedPeriod && analysisHistory.length === 0 &&
         <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette sélection
+              Aucune analyse pour cette période
             </h3>
             <p className="text-slate-600 mb-6">
-              {selectedPeriod ? `Aucune donnée disponible du ${new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au ${new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}` : 'Sélectionnez un workspace pour voir les analyses'}
+              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -305,7 +295,7 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {analysisHistory.length > 0 &&
+        {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {sprintHealth &&
@@ -317,51 +307,59 @@ export default function DashboardAdmins() {
             }
 
               {analysisHistory.length > 0 &&
-              <MetricsRadarCard
+            <MetricsRadarCard
               metricsData={{
-               velocity: { current: analysisHistory.length, trend: "stable", change: 0 },
-               flow_efficiency: { current: 0, target: 0 },
-               cycle_time: { current: 0, target: 0 },
-               throughput: { current: 0, variance: 0 },
-               deployment_frequency: { current: 0, target: 0 },
-               data_days: analysisHistory.length
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
               }}
               historicalData={{
-               sprints_count: analysisHistory.length,
-               data_days: analysisHistory.length,
-               is_audit_phase: false,
-               is_new_team: analysisHistory.length === 1
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
               }}
               integrationStatus={{
-               jira_connected: analysisHistory.some(a => a.source === 'jira_backlog' || a.source === 'jira_agile'),
-               slack_connected: analysisHistory.some(a => a.source === 'slack'),
-               dora_pipeline: false,
-               flow_metrics_available: analysisHistory.length > 0
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
               }}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-              }
+            }
 
               {analysisHistory.length > 0 &&
-              <RealityMapCard
+            <RealityMapCard
               flowData={{
-               assignee_changes: [],
-               mention_patterns: [],
-               blocked_resolutions: [],
-               data_days: analysisHistory.length
+                assignee_changes: [
+                { person: "Mary", count: 42 },
+                { person: "John", count: 12 }],
+
+                mention_patterns: [
+                { person: "Mary", type: "prioritization", count: 35 },
+                { person: "Dave", type: "unblocking", count: 19 }],
+
+                blocked_resolutions: [
+                { person: "Dave", count: 19 }],
+
+                data_days: 30
               }}
               flowMetrics={{
-               blocked_tickets_over_5d: gdprSignals.length,
-               avg_cycle_time: 0,
-               avg_wait_time_percent: 0,
-               reopened_tickets: 0,
-               total_tickets: analysisHistory.length,
-               data_days: analysisHistory.length
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
-              }
+            }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
