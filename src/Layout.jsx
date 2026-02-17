@@ -96,7 +96,7 @@ function LayoutContent({ children, currentPageName }) {
   const isPublicPage = currentPageName === "Home" || currentPageName === "Demo" || currentPageName === "AcceptInvitation";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Navigation */}
       <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
