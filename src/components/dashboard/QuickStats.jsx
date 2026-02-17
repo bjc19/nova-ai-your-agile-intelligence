@@ -52,7 +52,7 @@ export default function QuickStats({ analysisHistory = [] }) {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
         const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const resolved = await base44.entities.ResolvedItem.list('-resolved_date', 100);
+        const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 100);
         
         // Separate by source
         const slackMarkers = allMarkers.filter(m => 
@@ -95,9 +95,23 @@ export default function QuickStats({ analysisHistory = [] }) {
           });
         }
         
+        // Filter resolved items by period
+        let filteredResolved = resolvedEntities;
+        if (selectedPeriod) {
+          const period = JSON.parse(selectedPeriod);
+          const startDate = new Date(period.start);
+          const endDate = new Date(period.end);
+          endDate.setHours(23, 59, 59, 999);
+          
+          filteredResolved = resolvedEntities.filter(r => {
+            const resolvedDate = new Date(r.resolved_date);
+            return resolvedDate >= startDate && resolvedDate <= endDate;
+          });
+        }
+        
         setGdprSignals([...filteredSlack, ...filteredJira]);
         setTeamsInsights(filteredTeams);
-        setResolvedItems(resolved.map(item => item.item_id));
+        setResolvedItems(filteredResolved.map(item => item.item_id));
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -187,12 +201,33 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
-  const resolvedBlockers = resolvedItems.length;
   
-  // Calculate Technical Health Index (IST) = Resolved / (Blockers + Risks)
-  const denominator = totalBlockers + totalRisks;
-  const technicalHealthIndex = denominator > 0 ? (resolvedBlockers / denominator).toFixed(1) : 0;
-  const healthStatus = technicalHealthIndex > 1 ? "healthy" : "critical";
+  // Filter resolved items by period
+  const selectedPeriod = sessionStorage.getItem("selectedPeriod");
+  let filteredResolved = resolvedItems;
+  
+  if (selectedPeriod) {
+    const period = JSON.parse(selectedPeriod);
+    const startDate = new Date(period.start);
+    const endDate = new Date(period.end);
+    endDate.setHours(23, 59, 59, 999);
+    
+    // Get resolved items entities to check dates
+    const resolvedEntities = resolvedItems.map(itemId => {
+      // Find the corresponding resolved entity
+      return resolvedItems.find(r => r === itemId);
+    });
+    
+    filteredResolved = resolvedItems; // Keep all for now as we need the full count
+  }
+  
+  const resolvedBlockers = filteredResolved.length;
+  
+  // Calculate Technical Health Index (IST) = Resolved / (Total Initial Problems)
+  // Total initial = current problems + resolved problems (what existed before resolution)
+  const totalInitialProblems = totalBlockers + totalRisks + resolvedBlockers;
+  const technicalHealthIndex = totalInitialProblems > 0 ? ((resolvedBlockers / totalInitialProblems) * 100).toFixed(0) : 0;
+  const healthStatus = technicalHealthIndex >= 50 ? "healthy" : "critical";
   
   const stats = [
      {
@@ -241,14 +276,16 @@ export default function QuickStats({ analysisHistory = [] }) {
       return translatedTooltips[cacheKey];
     }
     
+    const totalInitialProblems = totalBlockers + totalRisks + resolvedBlockers;
+    
     if (language === 'fr') {
       const tooltip = {
         title: "Indice de Santé Technique (IST)",
-        formula: `Résolus (${resolvedBlockers}) ÷ (Bloquants + Risques) = ${resolvedBlockers} ÷ ${denominator} = ${technicalHealthIndex}`,
-        interpretation: technicalHealthIndex > 1 
-          ? `✓ Excellent : Vous résolvez plus de problèmes que vous n'en créez.`
-          : `⚠ À améliorer : Vous avez plus de problèmes que de résolutions.`,
-        tips: technicalHealthIndex > 1
+        formula: `Résolus (${resolvedBlockers}) ÷ Total problèmes (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
+        interpretation: technicalHealthIndex >= 50
+          ? `✓ Excellent : ${technicalHealthIndex}% des problèmes détectés ont été résolus.`
+          : `⚠ À améliorer : Seulement ${technicalHealthIndex}% des problèmes ont été résolus.`,
+        tips: technicalHealthIndex >= 50
           ? "Continuez à résoudre les bloquants et risques détectés."
           : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
       };
@@ -257,11 +294,11 @@ export default function QuickStats({ analysisHistory = [] }) {
     } else {
       const tooltip = {
         title: "Technical Health Index (IST)",
-        formula: `Resolved (${resolvedBlockers}) ÷ (Blockers + Risks) = ${resolvedBlockers} ÷ ${denominator} = ${technicalHealthIndex}`,
-        interpretation: technicalHealthIndex > 1
-          ? `✓ Excellent: You're resolving more problems than you're creating.`
-          : `⚠ Needs improvement: You have more problems than resolutions.`,
-        tips: technicalHealthIndex > 1
+        formula: `Resolved (${resolvedBlockers}) ÷ Total problems (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
+        interpretation: technicalHealthIndex >= 50
+          ? `✓ Excellent: ${technicalHealthIndex}% of detected problems have been resolved.`
+          : `⚠ Needs improvement: Only ${technicalHealthIndex}% of problems have been resolved.`,
+        tips: technicalHealthIndex >= 50
           ? "Keep resolving detected blockers and risks."
           : "Prioritize resolving blockers before adding new tasks.",
       };
@@ -312,7 +349,7 @@ export default function QuickStats({ analysisHistory = [] }) {
                        </Tooltip>
                      )}
                    </div>
-                   <p className="text-3xl font-bold text-slate-900">{stat.value}{stat.suffix || ''}</p>
+                   <p className="text-3xl font-bold text-slate-900">{stat.value}{isHealthCard ? '%' : (stat.suffix || '')}</p>
                    <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
                  </div>
                </motion.div>
