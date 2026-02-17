@@ -562,7 +562,7 @@ Actions recommandées :
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <TrendingDown className="w-4 h-4 text-red-500" />
-                  <span className="text-sm font-semibold text-slate-900">TOP {wastesAnalysis.wastes.length} Gaspillages systémiques</span>
+                  <span className="text-sm font-semibold text-slate-900">TOP {wastesAnalysis?.wastes?.length || 0} Gaspillages systémiques</span>
                 </div>
                 <span className="text-xs text-slate-500">30 jours</span>
               </div>
