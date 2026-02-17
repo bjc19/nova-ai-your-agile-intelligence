@@ -52,7 +52,7 @@ export default function Settings() {
   const { language, setLanguage, t } = useLanguage();
   const [teamConfig, setTeamConfig] = useState(null);
   const [loadingConfig, setLoadingConfig] = useState(true);
-  const [currentRole, setCurrentRole] = useState('contributor');
+  const [currentRole, setCurrentRole] = useState('user');
   const [switchingRole, setSwitchingRole] = useState(false);
   const [jiraDebugInfo, setJiraDebugInfo] = useState(null);
 
@@ -557,7 +557,7 @@ export default function Settings() {
     const loadData = async () => {
       try {
         const user = await base44.auth.me();
-        setCurrentRole(user?.app_role || user?.role || 'user');
+        setCurrentRole(user?.role || 'user');
 
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
@@ -633,8 +633,8 @@ export default function Settings() {
     try {
       const user = await base44.auth.me();
 
-      // Update the user's app_role (custom role) without bypassing RLS
-      await base44.auth.updateMe({ app_role: newRole });
+      // Update the user's role without bypassing RLS
+      await base44.auth.updateMe({ role: newRole });
 
       // Update local state and refresh
       setCurrentRole(newRole);
@@ -658,7 +658,7 @@ export default function Settings() {
 
   }
 
-  const canManageSettings = currentRole === 'admin' || currentRole === 'contributor';
+  const canManageSettings = currentRole === 'admin';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -689,14 +689,12 @@ export default function Settings() {
             </div>
             <div className="text-right">
               <Badge className={`text-sm px-3 py-1 ${
-              currentRole === 'admin' ?
-              'bg-red-100 text-red-700' :
-              currentRole === 'contributor' ?
-              'bg-blue-100 text-blue-700' :
-              'bg-slate-100 text-slate-700'}`
-              }>
-                {currentRole === 'admin' ? '🔑 Admin' : currentRole === 'contributor' ? '👤 Contributeur' : '👁️ Membre'}
-              </Badge>
+                currentRole === 'admin' ?
+                'bg-red-100 text-red-700' :
+                'bg-slate-100 text-slate-700'}`
+                }>
+                  {currentRole === 'admin' ? '🔑 Admin' : '👁️ Utilisateur'}
+                </Badge>
             </div>
           </div>
           <p className="text-slate-600">

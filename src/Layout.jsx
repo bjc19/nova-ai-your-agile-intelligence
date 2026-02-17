@@ -25,7 +25,7 @@ function LayoutContent({ children, currentPageName }) {
     const [isLoading, setIsLoading] = useState(true);
     const [showLoginDialog, setShowLoginDialog] = useState(false);
     const [showDemoSimulator, setShowDemoSimulator] = useState(false);
-    const [userRole, setUserRole] = useState(null);
+
     const [canInvite, setCanInvite] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [pendingAlerts, setPendingAlerts] = useState(0);
@@ -37,7 +37,6 @@ function LayoutContent({ children, currentPageName }) {
         setIsAuthenticated(auth);
         if (auth) {
           const user = await base44.auth.me();
-          setUserRole(user?.app_role || user?.role || null);
 
           try {
             const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
@@ -47,8 +46,7 @@ function LayoutContent({ children, currentPageName }) {
           }
 
           // Fetch pending alerts for admins
-          const currentUserRole = user?.app_role || user?.role;
-          if (currentUserRole === 'admin') {
+           if (user?.role === 'admin') {
             try {
               const sprintAlerts = await base44.entities.SprintHealth.filter({ 
                 status: "critical" 
@@ -83,12 +81,10 @@ function LayoutContent({ children, currentPageName }) {
             }
           }
         } else {
-          setUserRole(null);
           setCanInvite(false);
         }
       } catch (err) {
         setIsAuthenticated(false);
-        setUserRole(null);
       }
       setIsLoading(false);
     };
@@ -104,7 +100,7 @@ function LayoutContent({ children, currentPageName }) {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {isAuthenticated ? (
             <button
-              onClick={() => navigate(userRole ? createPageUrl("Dashboard") : createPageUrl("ChooseAccess"))}
+              onClick={() => navigate(createPageUrl("Dashboard"))}
               className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
@@ -163,7 +159,7 @@ function LayoutContent({ children, currentPageName }) {
                       Équipe
                     </Link>
                    )}
-                   {userRole === 'admin' && (
+                   {user?.role === 'admin' && (
                     <AdminNotificationsPanel pendingAlerts={pendingAlerts} />
                    )}
                    <Button 
@@ -171,7 +167,6 @@ function LayoutContent({ children, currentPageName }) {
                      size="sm"
                      onClick={async () => {
                        setIsAuthenticated(false);
-                       setUserRole(null);
                        await base44.auth.logout();
                        window.location.href = createPageUrl("Home");
                      }}
@@ -263,7 +258,6 @@ function LayoutContent({ children, currentPageName }) {
                           <Button 
                             onClick={async () => {
                               setIsAuthenticated(false);
-                              setUserRole(null);
                               await base44.auth.logout();
                               window.location.href = createPageUrl("Home");
                               setMobileMenuOpen(false);
