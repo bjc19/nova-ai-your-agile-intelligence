@@ -32,7 +32,7 @@ import PilotModeIndicator from "./PilotModeIndicator";
 import { enrichRecommendationWithDependency } from "./DependencyAwarenessEngine";
 import DependencyWarning from "./DependencyWarning";
 
-export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, onDiscussWithCoach, onApplyLever }) {
+export default function MetricsRadarCard({ metricsData, historicalData, integrationStatus, analysisHistory, onDiscussWithCoach, onApplyLever }) {
   const { isAdmin, isContributor, isUser } = useRoleAccess();
   const [expanded, setExpanded] = useState(false);
   const [selectedLever, setSelectedLever] = useState(null);
@@ -40,16 +40,26 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [userResponse, setUserResponse] = useState("");
 
-  // Only use provided data - NO demo/mock data
-  const data = metricsData;
-  const historical = historicalData;
+  // If analysisHistory provided, extract data from it; otherwise use provided data
+  const data = metricsData || (analysisHistory?.length > 0 ? analysisHistory[0]?.analysis_data?.metricsData : null);
+  const historical = historicalData || (analysisHistory?.length > 0 ? {
+    sprints_count: 1,
+    data_days: 7,
+    is_audit_phase: false,
+    is_new_team: true
+  } : null);
 
   // Detect pilot mode
-  const pilotMode = detectPilotMode(historical);
+  const pilotMode = detectPilotMode(historical || {});
   
   const analysis = analyzeMetricsHealth(data);
 
-  const integration = integrationStatus;
+  const integration = integrationStatus || {
+    jira_connected: false,
+    slack_connected: false,
+    dora_pipeline: false,
+    flow_metrics_available: false
+  };
 
   // Don't render if no data provided
   if (!data || !historical || !analysis.canAnalyze) {
