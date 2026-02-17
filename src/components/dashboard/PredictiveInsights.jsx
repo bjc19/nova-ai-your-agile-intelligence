@@ -62,14 +62,14 @@ export default function PredictiveInsights() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-indigo-900">
             <Sparkles className="w-5 h-5" />
-            Analyse Prédictive
+            {t('predictiveAnalysis')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-3">
               <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
-              <p className="text-sm text-slate-600">Analyse des tendances en cours...</p>
+              <p className="text-sm text-slate-600">{t('analyzingTrends')}</p>
             </div>
           </div>
         </CardContent>
@@ -91,7 +91,7 @@ export default function PredictiveInsights() {
               className="mt-4"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Réessayer
+              {t('retry')}
             </Button>
           </div>
         </CardContent>
@@ -109,9 +109,9 @@ export default function PredictiveInsights() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-indigo-900">
               <Sparkles className="w-5 h-5" />
-              Analyse Prédictive
+              {t('predictiveAnalysis')}
               <Badge variant="outline" className="ml-2 bg-indigo-100 text-indigo-700 border-indigo-200">
-                Confiance: {prediction.confidence_score}%
+                {t('confidenceScore')}: {prediction.confidence_score}%
               </Badge>
             </CardTitle>
             <Button 
@@ -145,7 +145,7 @@ export default function PredictiveInsights() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-900">
               <AlertTriangle className="w-5 h-5 text-amber-600" />
-              Goulots d'Étranglement Probables
+              {t('probableBottlenecks')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -163,10 +163,10 @@ export default function PredictiveInsights() {
                     {bottleneck.timeframe}
                   </div>
                   <div>
-                    Probabilité: {bottleneck.probability}%
+                    {t('probability')}: {bottleneck.probability}%
                   </div>
                   <div>
-                    Confiance: {bottleneck.confidence}%
+                    {t('confidenceScore')}: {bottleneck.confidence}%
                   </div>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export default function PredictiveInsights() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-900">
               <Target className="w-5 h-5 text-red-600" />
-              Risques Potentiels
+              {t('potentialRisks')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -200,7 +200,7 @@ export default function PredictiveInsights() {
                 </div>
                 {risk.early_warning_signs && risk.early_warning_signs.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-xs font-medium text-slate-600 mb-1">Signaux d'alerte précoce:</p>
+                    <p className="text-xs font-medium text-slate-600 mb-1">{t('earlyWarningSigns')}:</p>
                     <ul className="text-sm text-slate-600 space-y-1">
                       {risk.early_warning_signs.map((sign, i) => (
                         <li key={i} className="flex items-start gap-2">
@@ -212,7 +212,7 @@ export default function PredictiveInsights() {
                   </div>
                 )}
                 <div className="mt-2 text-xs text-slate-500">
-                  Confiance: {risk.confidence}%
+                  {t('confidenceScore')}: {risk.confidence}%
                 </div>
               </div>
             ))}
@@ -226,23 +226,23 @@ export default function PredictiveInsights() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-blue-900">
               <Clock className="w-5 h-5" />
-              Prévision de Livraison
+              {t('deliveryForecast')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="p-4 bg-white rounded-lg border border-blue-100">
-                <p className="text-sm text-slate-600 mb-1">Estimation de livraison</p>
+                <p className="text-sm text-slate-600 mb-1">{t('estimatedDelivery')}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {prediction.delivery_forecast.estimated_completion}
                 </p>
                 <p className="text-sm text-slate-500 mt-1">
-                  Niveau de confiance: {prediction.delivery_forecast.confidence_level}
+                  {t('confidenceLevel')}: {prediction.delivery_forecast.confidence_level}
                 </p>
               </div>
               
               <div>
-                <p className="text-sm font-medium text-slate-700 mb-2">Facteurs d'influence:</p>
+                <p className="text-sm font-medium text-slate-700 mb-2">{t('influencingFactors')}:</p>
                 <div className="flex flex-wrap gap-2">
                   {prediction.delivery_forecast.factors?.map((factor, idx) => (
                     <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
@@ -255,7 +255,7 @@ export default function PredictiveInsights() {
               {prediction.delivery_forecast.velocity_trend && (
                 <div className="p-3 bg-slate-50 rounded-lg">
                   <p className="text-sm text-slate-600">
-                    <span className="font-medium">Tendance de vélocité:</span> {prediction.delivery_forecast.velocity_trend}
+                    <span className="font-medium">{t('velocityTrend')}:</span> {prediction.delivery_forecast.velocity_trend}
                   </p>
                 </div>
               )}
@@ -270,7 +270,7 @@ export default function PredictiveInsights() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-900">
               <Target className="w-5 h-5" />
-              Actions Préventives Recommandées
+              {t('preventiveActions')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -282,7 +282,7 @@ export default function PredictiveInsights() {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-slate-900">{action.action}</p>
                   <p className="text-xs text-slate-600 mt-1">
-                    Impact attendu: {action.expected_impact}
+                    {t('expectedImpact')}: {action.expected_impact}
                   </p>
                 </div>
               </div>

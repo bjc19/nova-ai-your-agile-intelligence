@@ -201,6 +201,27 @@ export const translations = {
     need: "Besoin",
     expectedOutcome: "Résultat attendu",
     noNotificationFound: "Aucune notification pour le moment",
+
+    // Predictive Analysis
+    predictiveAnalysis: "Analyse Prédictive",
+    confidenceScore: "Confiance",
+    analyzingTrends: "Analyse des tendances en cours...",
+    retry: "Réessayer",
+    healthTrend: "Tendance de Santé",
+    improving: "En amélioration",
+    declining: "En déclin",
+    stable: "Stable",
+    probableBottlenecks: "Goulots d'Étranglement Probables",
+    probability: "Probabilité",
+    potentialRisks: "Risques Potentiels",
+    earlyWarningSigns: "Signaux d'alerte précoce",
+    deliveryForecast: "Prévision de Livraison",
+    estimatedDelivery: "Estimation de livraison",
+    confidenceLevel: "Niveau de confiance",
+    influencingFactors: "Facteurs d'influence",
+    velocityTrend: "Tendance de vélocité",
+    preventiveActions: "Actions Préventives Recommandées",
+    expectedImpact: "Impact attendu",
     },
   en: {
     // Navigation
@@ -401,6 +422,27 @@ export const translations = {
     need: "Need",
     expectedOutcome: "Expected Outcome",
     noNotificationFound: "No notification found for now",
+
+    // Predictive Analysis
+    predictiveAnalysis: "Predictive Analysis",
+    confidenceScore: "Confidence",
+    analyzingTrends: "Analyzing trends...",
+    retry: "Retry",
+    healthTrend: "Health Trend",
+    improving: "Improving",
+    declining: "Declining",
+    stable: "Stable",
+    probableBottlenecks: "Probable Bottlenecks",
+    probability: "Probability",
+    potentialRisks: "Potential Risks",
+    earlyWarningSigns: "Early Warning Signs",
+    deliveryForecast: "Delivery Forecast",
+    estimatedDelivery: "Estimated delivery",
+    confidenceLevel: "Confidence level",
+    influencingFactors: "Influencing Factors",
+    velocityTrend: "Velocity trend",
+    preventiveActions: "Recommended Preventive Actions",
+    expectedImpact: "Expected impact",
     }
     };
 
