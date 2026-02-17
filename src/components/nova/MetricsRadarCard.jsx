@@ -69,17 +69,6 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
     flow_metrics_available: true,
   };
 
-  // Enrich levers with pilot warnings and dependency awareness
-  const enrichedLevers = analysis.top3Levers.map(lever => {
-    const withDependency = enrichRecommendationWithDependency(
-      { ...lever, required_enablers: ["dora_metrics", "flow_metrics"] },
-      integration,
-      70,
-      { impact_percentage: 15 }
-    );
-    return enrichRecommendationWithPilotWarning(withDependency, pilotMode);
-  });
-
   if (!analysis.canAnalyze) {
     return (
       <Card className="border-2 border-slate-200 bg-slate-50">
