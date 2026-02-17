@@ -82,9 +82,17 @@ export default function Settings() {
   };
 
   const handleSlackConnect = async () => {
-    try {
-      setConnectingSlack(true);
-      const { data } = await base44.functions.invoke('slackOAuthStart');
+       try {
+         setConnectingSlack(true);
+
+         // Check plan restrictions
+         if (planLimitations && !planLimitations.primarySources?.includes('slack') && !planLimitations.contributiveSources?.includes('slack')) {
+           toast.error(`Slack n'est pas disponible avec le plan ${planLimitations.plan}`);
+           setConnectingSlack(false);
+           return;
+         }
+
+         const { data } = await base44.functions.invoke('slackOAuthStart');
 
       // Open popup for OAuth
       const popup = window.open(data.authUrl, 'Slack OAuth', 'width=600,height=700');
@@ -150,9 +158,17 @@ export default function Settings() {
   };
 
   const handleTeamsConnect = async () => {
-    try {
-      setConnectingTeams(true);
-      console.log('[Teams] Starting connection flow...');
+       try {
+         setConnectingTeams(true);
+
+         // Check plan restrictions
+         if (planLimitations && !planLimitations.primarySources?.includes('teams') && !planLimitations.contributiveSources?.includes('teams')) {
+           toast.error(`Microsoft Teams n'est pas disponible avec le plan ${planLimitations.plan}`);
+           setConnectingTeams(false);
+           return;
+         }
+
+         console.log('[Teams] Starting connection flow...');
       
       // Setup message listener BEFORE opening popup to avoid race condition
       let messageHandlerActive = true;
@@ -244,9 +260,17 @@ export default function Settings() {
   };
 
   const handleJiraConnect = async () => {
-    try {
-      setConnectingJira(true);
-      const user = await base44.auth.me();
+       try {
+         setConnectingJira(true);
+
+         // Check plan restrictions
+         if (planLimitations && !planLimitations.primarySources?.includes('jira') && !planLimitations.contributiveSources?.includes('jira')) {
+           toast.error(`Jira n'est pas disponible avec le plan ${planLimitations.plan}`);
+           setConnectingJira(false);
+           return;
+         }
+
+         const user = await base44.auth.me();
       const response = await base44.functions.invoke('jiraOAuthStart', {
         customer_id: user.email
       });
@@ -346,9 +370,17 @@ export default function Settings() {
   };
 
   const handleConfluenceConnect = async () => {
-    try {
-      setConnectingConfluence(true);
-      const response = await base44.functions.invoke('confluenceOAuthStart');
+       try {
+         setConnectingConfluence(true);
+
+         // Check plan restrictions
+         if (planLimitations && !planLimitations.primarySources?.includes('confluence') && !planLimitations.contributiveSources?.includes('confluence')) {
+           toast.error(`Confluence n'est pas disponible avec le plan ${planLimitations.plan}`);
+           setConnectingConfluence(false);
+           return;
+         }
+
+         const response = await base44.functions.invoke('confluenceOAuthStart');
 
       const authUrl = response.data?.authUrl;
       if (!authUrl) {
@@ -409,9 +441,17 @@ export default function Settings() {
   };
 
   const handleTrelloConnect = async () => {
-    try {
-      setConnectingTrello(true);
-      const { data } = await base44.functions.invoke('trelloOAuthStart');
+       try {
+         setConnectingTrello(true);
+
+         // Check plan restrictions
+         if (planLimitations && !planLimitations.primarySources?.includes('trello') && !planLimitations.contributiveSources?.includes('trello')) {
+           toast.error(`Trello n'est pas disponible avec le plan ${planLimitations.plan}`);
+           setConnectingTrello(false);
+           return;
+         }
+
+         const { data } = await base44.functions.invoke('trelloOAuthStart');
 
       const messageHandler = async (event) => {
         if (event.data?.type === 'trello_success') {
