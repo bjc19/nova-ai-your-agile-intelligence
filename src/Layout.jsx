@@ -358,8 +358,10 @@ function LayoutContent({ children, currentPageName }) {
 
     export default function Layout({ children, currentPageName }) {
     return (
+    <ThemeProvider>
     <LanguageProvider>
     <LayoutContent children={children} currentPageName={currentPageName} />
     </LanguageProvider>
+    </ThemeProvider>
     );
     }
