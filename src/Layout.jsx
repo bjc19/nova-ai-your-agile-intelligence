@@ -98,7 +98,7 @@ function LayoutContent({ children, currentPageName }) {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
+      <nav className="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {isAuthenticated ? (
                 <button
