@@ -24,10 +24,13 @@ Deno.serve(async (req) => {
     let userPlan = 'starter';
     try {
       const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-      maxProjectsAllowed = statusRes.data.maxProjectsAllowed || 5;
+      const planDetails = statusRes.data.planDetails;
+      maxProjectsAllowed = planDetails?.max_jira_projects || 5;
       userPlan = statusRes.data.plan || 'starter';
+      console.log('✅ Plan details:', { plan: userPlan, maxJiraProjects: maxProjectsAllowed });
     } catch (e) {
-      console.log('Could not fetch subscription status, using default quota');
+      console.log('❌ Could not fetch subscription status, using default quota');
+      console.error('❌ Error details:', e);
     }
 
     console.log('📋 Fetching existing active selections...');

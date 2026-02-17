@@ -48,13 +48,12 @@ export default function JiraProjectSelector() {
         setSelectedProjects(selectedIds);
 
         try {
-          const subs = await base44.entities.Subscription.filter({ user_email: user.email });
-          if (subs.length > 0) {
-            const plans = await base44.entities.Plan.filter({ plan_id: subs[0].plan });
-            if (plans.length > 0) {
-              setUserPlan(subs[0].plan);
-              setMaxProjects(plans[0].max_jira_projects);
-            }
+          const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+          if (statusRes.data.planDetails) {
+            const planDetails = statusRes.data.planDetails;
+            setUserPlan(statusRes.data.plan);
+            setMaxProjects(planDetails.max_jira_projects);
+            console.log('✅ Loaded plan:', { plan: statusRes.data.plan, maxProjects: planDetails.max_jira_projects });
           }
         } catch (e) {
           console.error('Error loading plan:', e);
