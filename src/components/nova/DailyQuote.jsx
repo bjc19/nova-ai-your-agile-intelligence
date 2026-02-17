@@ -303,6 +303,39 @@ const ALL_QUOTES = [
   { en: "May the force be with you.", fr: "Que la force soit avec vous.", author: "Star Wars", tags: ["force", "blessing"] }
 ];
 
+// Track quote history in localStorage
+const getQuoteHistory = () => {
+  const stored = localStorage.getItem('quoteHistory');
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+};
+
+const addToQuoteHistory = (quoteText) => {
+  const history = getQuoteHistory();
+  const now = Date.now();
+  history.push({ text: quoteText, timestamp: now });
+  
+  // Keep only last 24 hours
+  const oneDayAgo = now - (24 * 60 * 60 * 1000);
+  const filtered = history.filter(item => item.timestamp > oneDayAgo);
+  
+  localStorage.setItem('quoteHistory', JSON.stringify(filtered));
+};
+
+const getQuoteOccurrencesIn24h = (quoteText) => {
+  const history = getQuoteHistory();
+  const now = Date.now();
+  const oneDayAgo = now - (24 * 60 * 60 * 1000);
+  
+  return history.filter(item => 
+    item.text === quoteText && item.timestamp > oneDayAgo
+  ).length;
+};
+
 export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 0, patterns = [] }) {
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -334,12 +367,18 @@ export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 
       q.tags && q.tags.some(tag => relevantTags.includes(tag))
     );
 
+    // Filtrer les quotes déjà affichées 2 fois en 24h
+    matchingQuotes = matchingQuotes.filter(q => 
+      getQuoteOccurrencesIn24h(q[lang]) < 2
+    );
+
     // Si pas de match ou contexte très spécifique, générer via LLM
     if (matchingQuotes.length === 0 || (hasBlockers && hasRisks && hasPatterns)) {
       await generateCustomQuote();
     } else {
       // Sélection aléatoire parmi les quotes matchantes
       const randomQuote = matchingQuotes[Math.floor(Math.random() * matchingQuotes.length)];
+      addToQuoteHistory(randomQuote[lang]);
       setSelectedQuote(randomQuote);
     }
   };
@@ -375,19 +414,23 @@ La citation doit être courte, percutante, et pertinente. Retourne un JSON avec:
         }
       });
 
-      setSelectedQuote({
+      const quote = {
         en: response.en,
         fr: response.fr,
         author: "Nova Team"
-      });
+      };
+      addToQuoteHistory(quote[lang]);
+      setSelectedQuote(quote);
     } catch (error) {
       console.error("Error generating custom quote:", error);
       // Fallback vers quote générique
-      setSelectedQuote({
+      const fallback = {
         en: "Progress over perfection, always.",
         fr: "Le progrès plutôt que la perfection, toujours.",
         author: "Nova Team"
-      });
+      };
+      addToQuoteHistory(fallback[lang]);
+      setSelectedQuote(fallback);
     } finally {
       setIsGenerating(false);
     }
