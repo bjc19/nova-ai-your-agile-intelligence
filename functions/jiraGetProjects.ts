@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     // Quotas par plan
     const quotas = {
       'starter': 5,
-      'growth': 10,
+      'growth': 15,
       'pro': 50,
       'enterprise': 999
     };
