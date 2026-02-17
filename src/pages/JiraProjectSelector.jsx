@@ -23,7 +23,7 @@ export default function JiraProjectSelector() {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [savingSelection, setSavingSelection] = useState(false);
   const [userPlan, setUserPlan] = useState(null);
-  const [maxProjects, setMaxProjects] = useState(5); // Changed default maxProjects to 5
+  const [maxProjects, setMaxProjects] = useState(5);
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -39,13 +39,17 @@ export default function JiraProjectSelector() {
         
         setProjects(projectsData.projects || []);
 
-        // Get existing selections
+        // Get existing Jira selections for the current user that are active
         const existingSelections = await base44.entities.JiraProjectSelection.filter({
           is_active: true
         });
-        
+
         const selectedIds = new Set(existingSelections.map(s => s.jira_project_id));
         setSelectedProjects(selectedIds);
+
+        // Set selectedProjectsData for step 2 if existing selections are found
+        const currentSelectedProjectsData = projectsData.projects.filter(p => selectedIds.has(p.id));
+        setSelectedProjectsData(currentSelectedProjectsData);
 
         try {
           const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
@@ -547,12 +551,12 @@ export default function JiraProjectSelector() {
                           <Badge 
                             key={member.user_email} 
                             variant="secondary"
-                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2" // Removed cursor-pointer
+                            className="bg-emerald-100 text-emerald-800 px-3 py-1.5 flex items-center gap-2"
                           >
                             <CheckCircle2 className="w-3 h-3" />
                             {member.user_name || member.user_email}
-                            <button // Wrapped X icon in a button
-                              onClick={(e) => handleRemoveAssignedMember(e, project.id, member.user_email)} // Passed event to stop propagation
+                            <button
+                              onClick={(e) => handleRemoveAssignedMember(e, project.id, member.user_email)}
                               className="ml-1 hover:text-emerald-900 transition-colors"
                             >
                               <X className="w-3 h-3" />

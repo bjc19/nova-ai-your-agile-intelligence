@@ -12,21 +12,35 @@ Deno.serve(async (req) => {
     // Fetch all available plans
     const allPlans = await base44.asServiceRole.entities.Plan.list();
 
+    let currentPlanId = 'starter';
+    let canInviteUser = false;
+    let subscriptionDetails = null;
+
     const ownSubscription = await base44.entities.Subscription.filter({ user_email: user.email });
-    
+
     if (ownSubscription.length > 0) {
       const sub = ownSubscription[0];
-      const planData = allPlans.find(p => p.plan_id === sub.plan?.toLowerCase());
-      
-      return Response.json({
-        hasAccess: true,
-        type: 'owner',
-        subscription: sub,
-        canInvite: sub.is_admin,
-        plan: sub.plan,
-        planDetails: planData || null
-      });
+      currentPlanId = sub.plan?.toLowerCase() || 'starter';
+      canInviteUser = sub.is_admin;
+      subscriptionDetails = sub;
+    } else if (user?.role === 'admin') {
+      currentPlanId = 'pro';
+      canInviteUser = true;
+    } else {
+      currentPlanId = 'starter';
+      canInviteUser = false;
     }
+
+    const planData = allPlans.find(p => p.plan_id === currentPlanId);
+
+    return Response.json({
+      hasAccess: true,
+      type: ownSubscription.length > 0 ? 'owner' : 'default',
+      subscription: subscriptionDetails,
+      canInvite: canInviteUser,
+      plan: currentPlanId,
+      planDetails: planData || null
+    });
 
     const teamMembership = await base44.entities.TeamMember.filter({ user_email: user.email });
     
