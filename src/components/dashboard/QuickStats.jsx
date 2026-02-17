@@ -36,9 +36,10 @@ export default function QuickStats({ analysisHistory = [] }) {
     const fetchUserRole = async () => {
       try {
         const user = await base44.auth.me();
-        setUserRole(user.role || 'user');
+        setUserRole(user?.app_role || user?.role || 'user');
       } catch (error) {
         console.error('Error fetching user role:', error);
+        setUserRole('user');
       }
     };
     fetchUserRole();
