@@ -41,12 +41,14 @@ import { Link } from "react-router-dom";
 
 export default function Analysis() {
    useAccessControl();
-   const navigate = useNavigate();
-   const queryClient = useQueryClient();
-   const { t, language } = useLanguage();
-  const [transcript, setTranscript] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { t, language } = useLanguage();
+    const { planLimitations, loading: limitationsLoading, canCreateManualAnalysis, user } = usePlanLimitations();
+   const [transcript, setTranscript] = useState("");
+   const [isAnalyzing, setIsAnalyzing] = useState(false);
+   const [error, setError] = useState(null);
+   const [analysisLimitError, setAnalysisLimitError] = useState(null);
   const [activeTab, setActiveTab] = useState("transcript");
   const [selectedSlackChannel, setSelectedSlackChannel] = useState(null);
   const [slackConnected, setSlackConnected] = useState(false);
