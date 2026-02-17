@@ -296,7 +296,7 @@ export default function Dashboard() {
 
             {/* Quick Stats - Only show if data in period */}
             {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
+            <QuickStats analysisHistory={analysisHistory} currentPageName="Dashboard" />
             }
           </motion.div>
         </div>

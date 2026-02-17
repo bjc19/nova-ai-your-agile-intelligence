@@ -163,7 +163,7 @@ export default function DashboardCommonUsers() {
 
             {/* Quick Stats */}
             {(!selectedPeriod || analysisHistory.length > 0) && (
-              <QuickStats analysisHistory={analysisHistory} />
+              <QuickStats analysisHistory={analysisHistory} currentPageName="DashboardCommonUsers" />
             )}
           </motion.div>
         </div>
