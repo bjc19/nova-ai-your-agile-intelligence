@@ -59,13 +59,12 @@ Deno.serve(async (req) => {
     }
 
     console.log('✅ Quota check passed. Proceeding with deactivation and creation...');
-    // Deactivate all previous Jira project selections for this user
+    // Deactivate ALL Jira project selections that are NOT in the current selection
     const selectedProjectIdSet = new Set(selected_project_ids);
-    console.log('✅ Found', existingSelections.length, 'existing active selections');
 
-    for (const selection of existingSelections) {
+    for (const selection of allExistingSelections) {
       if (!selectedProjectIdSet.has(selection.jira_project_id)) {
-        console.log('🔄 Deactivating project:', selection.jira_project_id);
+        console.log('🔄 Deactivating project:', selection.jira_project_id, '(id:', selection.id, ')');
         await base44.entities.JiraProjectSelection.update(selection.id, {
           is_active: false
         });
