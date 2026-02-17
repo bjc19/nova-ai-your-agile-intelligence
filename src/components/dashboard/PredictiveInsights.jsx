@@ -48,6 +48,15 @@ export default function PredictiveInsights() {
     }
   };
 
+  const translateImpact = (impact) => {
+    const impactMap = {
+      'high': t('high'),
+      'medium': t('medium'),
+      'low': t('low')
+    };
+    return impactMap[impact] || impact;
+  };
+
   const getTrendIcon = (trend) => {
     switch(trend) {
       case 'improving': return <TrendingUp className="w-5 h-5 text-green-600" />;
@@ -154,7 +163,7 @@ export default function PredictiveInsights() {
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-semibold text-slate-900">{bottleneck.area}</h4>
                   <Badge className={getImpactColor(bottleneck.impact)}>
-                    {bottleneck.impact}
+                    {translateImpact(bottleneck.impact)}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-slate-600">
@@ -166,7 +175,7 @@ export default function PredictiveInsights() {
                     {t('probability')}: {bottleneck.probability}%
                   </div>
                   <div>
-                    {t('confidenceScore')}: {bottleneck.confidence}%
+                    {t('confidence')}: {bottleneck.confidence}%
                   </div>
                 </div>
               </div>
@@ -188,15 +197,15 @@ export default function PredictiveInsights() {
             {prediction.risks.map((risk, idx) => (
               <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <div className="flex items-start justify-between mb-2">
-                  <p className="font-medium text-slate-900">{risk.description}</p>
-                  <div className="flex gap-2">
-                    <Badge className={getImpactColor(risk.likelihood)}>
-                      {risk.likelihood}
-                    </Badge>
-                    <Badge className={getImpactColor(risk.severity)}>
-                      {risk.severity}
-                    </Badge>
-                  </div>
+                 <p className="font-medium text-slate-900">{risk.description}</p>
+                 <div className="flex gap-2">
+                   <Badge className={getImpactColor(risk.likelihood)}>
+                     {translateImpact(risk.likelihood)}
+                   </Badge>
+                   <Badge className={getImpactColor(risk.severity)}>
+                     {translateImpact(risk.severity)}
+                   </Badge>
+                 </div>
                 </div>
                 {risk.early_warning_signs && risk.early_warning_signs.length > 0 && (
                   <div className="mt-3">
@@ -212,8 +221,8 @@ export default function PredictiveInsights() {
                   </div>
                 )}
                 <div className="mt-2 text-xs text-slate-500">
-                  {t('confidenceScore')}: {risk.confidence}%
-                </div>
+                   {t('confidence')}: {risk.confidence}%
+                 </div>
               </div>
             ))}
           </CardContent>
@@ -237,8 +246,8 @@ export default function PredictiveInsights() {
                   {prediction.delivery_forecast.estimated_completion}
                 </p>
                 <p className="text-sm text-slate-500 mt-1">
-                  {t('confidenceLevel')}: {prediction.delivery_forecast.confidence_level}
-                </p>
+                   {t('confidence')}: {prediction.delivery_forecast.confidence_level}
+                 </p>
               </div>
               
               <div>
@@ -277,7 +286,7 @@ export default function PredictiveInsights() {
             {prediction.preventive_actions.map((action, idx) => (
               <div key={idx} className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
                 <Badge className={getImpactColor(action.priority)}>
-                  {action.priority}
+                  {translateImpact(action.priority)}
                 </Badge>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-slate-900">{action.action}</p>

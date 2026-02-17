@@ -443,6 +443,13 @@ export const translations = {
     velocityTrend: "Velocity trend",
     preventiveActions: "Recommended Preventive Actions",
     expectedImpact: "Expected impact",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    improving: "Improving",
+    declining: "Declining",
+    stable: "Stable",
+    probability: "Probability",
     }
     };
 
