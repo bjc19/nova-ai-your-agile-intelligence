@@ -372,13 +372,13 @@ Actions recommandées :
     return confidenceConfig.low;
   };
 
-  if (!decisionAnalysis.canAnalyze || !wastesAnalysis.canAnalyze) {
+  if (!data || !metrics || !decisionAnalysis.canAnalyze || !wastesAnalysis.canAnalyze) {
     return (
       <Card className="border-2 border-slate-200 bg-slate-50">
         <CardContent className="p-6 text-center">
           <HelpCircle className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <p className="text-sm text-slate-600">
-            {decisionAnalysis.message || wastesAnalysis.message}
+            {!data || !metrics ? "Données insuffisantes pour l'analyse de réalité organisationnelle." : (decisionAnalysis.message || wastesAnalysis.message)}
           </p>
         </CardContent>
       </Card>
