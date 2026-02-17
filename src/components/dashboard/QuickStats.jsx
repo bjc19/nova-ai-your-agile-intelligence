@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/tooltip";
 import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
-export default function QuickStats({ analysisHistory = [] }) {
-  const { t, language } = useLanguage();
-  const navigate = useNavigate();
+export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard" }) {
+   const { t, language } = useLanguage();
+   const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
   const [teamsInsights, setTeamsInsights] = useState([]);
   const [resolvedItems, setResolvedItems] = useState([]);
@@ -137,9 +137,10 @@ export default function QuickStats({ analysisHistory = [] }) {
      } else if (labelKey === "resolved") {
        detailType = "resolved";
      }
-    
+
     if (detailType) {
       sessionStorage.setItem("detailsType", detailType);
+      sessionStorage.setItem("previousDashboard", currentPageName);
       navigate(createPageUrl("Details"));
     }
   };
