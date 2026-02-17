@@ -431,19 +431,23 @@ La citation doit être courte, percutante, et pertinente. Retourne un JSON avec:
         }
       });
 
-      setSelectedQuote({
+      const newQuote = {
         en: response.en,
         fr: response.fr,
         author: "Nova Team"
-      });
+      };
+      setSelectedQuote(newQuote);
+      addToQuoteHistory(getQuoteKey(newQuote));
     } catch (error) {
       console.error("Error generating custom quote:", error);
       // Fallback vers quote générique
-      setSelectedQuote({
+      const fallbackQuote = {
         en: "Progress over perfection, always.",
         fr: "Le progrès plutôt que la perfection, toujours.",
         author: "Nova Team"
-      });
+      };
+      setSelectedQuote(fallbackQuote);
+      addToQuoteHistory(getQuoteKey(fallbackQuote));
     } finally {
       setIsGenerating(false);
     }
