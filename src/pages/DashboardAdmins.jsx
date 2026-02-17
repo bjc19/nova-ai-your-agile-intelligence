@@ -336,6 +336,8 @@ export default function DashboardAdmins() {
 
             }
 
+              <PredictiveInsights />
+
               {analysisHistory.length > 0 &&
             <MetricsRadarCard
               metricsData={{
