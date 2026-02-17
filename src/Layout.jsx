@@ -99,23 +99,23 @@ function LayoutContent({ children, currentPageName }) {
       {/* Navigation */}
       <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {isAuthenticated ?
-          <button
-            onClick={() => navigate(createPageUrl("Dashboard"))}
-            className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-
+          {isAuthenticated ? (
+            <button
+              onClick={() => navigate(createPageUrl("Dashboard"))}
+              className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+            >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-slate-900 tracking-tight">
                 Nova
               </span>
-            </button> :
-
-          <Link
-            to={createPageUrl("Home")}
-            className="flex items-center gap-2.5">
-
+            </button>
+          ) : (
+            <Link 
+              to={createPageUrl("Home")}
+              className="flex items-center gap-2.5"
+            >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
@@ -123,7 +123,7 @@ function LayoutContent({ children, currentPageName }) {
                 Nova
               </span>
             </Link>
-          }
+          )}
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center gap-6">
@@ -316,25 +316,25 @@ function LayoutContent({ children, currentPageName }) {
       </main>
 
       {/* Login Dialog */}
-      <LoginDialog
+      <LoginDialog 
         isOpen={showLoginDialog}
-        onClose={() => setShowLoginDialog(false)} />
-
+        onClose={() => setShowLoginDialog(false)}
+      />
 
       {/* Demo Simulator */}
-            {showDemoSimulator &&
-      <DemoSimulator
-        onClose={() => setShowDemoSimulator(false)}
-        onTriesUpdate={(remaining) => {
+            {showDemoSimulator && (
+              <DemoSimulator 
+                onClose={() => setShowDemoSimulator(false)} 
+                onTriesUpdate={(remaining) => {
+                  // Optionnel: gérer le compteur ici si nécessaire
+                }} 
+              />
+            )}
 
-          // Optionnel: gérer le compteur ici si nécessaire
-        }} />
-      }
-
-            {/* Agile Coach Widget */}
-            {isAuthenticated &&
-      <AgileCoachWidget />
-      }
+             {/* Agile Coach Widget */}
+            {isAuthenticated && (
+              <AgileCoachWidget />
+            )}
 
             {/* Footer */}
       <footer className="border-t border-slate-200 bg-white mt-auto">
@@ -351,14 +351,14 @@ function LayoutContent({ children, currentPageName }) {
           </div>
         </div>
       </footer>
-    </div>);
+    </div>
+    );
+    }
 
-}
-
-export default function Layout({ children, currentPageName }) {
-  return (
+    export default function Layout({ children, currentPageName }) {
+    return (
     <LanguageProvider>
     <LayoutContent children={children} currentPageName={currentPageName} />
-    </LanguageProvider>);
-
-}
+    </LanguageProvider>
+    );
+    }
