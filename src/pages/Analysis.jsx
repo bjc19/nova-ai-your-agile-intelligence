@@ -61,7 +61,6 @@ export default function Analysis() {
   const [wordCount, setWordCount] = useState(0);
   const [showOutOfContextResult, setShowOutOfContextResult] = useState(false);
   const [outOfContextData, setOutOfContextData] = useState(null);
-  const [user, setUser] = useState(null);
   const [canCreateAnalysis, setCanCreateAnalysis] = useState(false);
   const [productGoalValidated, setProductGoalValidated] = useState(() => {
     return localStorage.getItem("productGoalValidated") === "true";
