@@ -47,16 +47,13 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   useEffect(() => {
     const fetchSignals = async () => {
-      // Always bypass cache to get fresh data when component mounts/remounts
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        // Force cache bypass by adding timestamp to query
         const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
         const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 100);
         
-        // Separate by source
         const slackMarkers = allMarkers.filter(m => 
           m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
         );
@@ -69,51 +66,30 @@ export default function QuickStats({ analysisHistory = [] }) {
           m.detection_source === 'jira_backlog'
         );
         
-        // Filter by period if available
         const selectedPeriod = sessionStorage.getItem("selectedPeriod");
         let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
         let filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        
-        if (selectedPeriod) {
-          const period = JSON.parse(selectedPeriod);
-          const startDate = new Date(period.start);
-          const endDate = new Date(period.end);
-          endDate.setHours(23, 59, 59, 999);
-          
-          filteredSlack = slackMarkers.filter(m => {
-            const markerDate = new Date(m.created_date);
-            return markerDate >= startDate && markerDate <= endDate;
-          });
-          
-          filteredTeams = teamsMarkers.filter(m => {
-            const markerDate = new Date(m.created_date);
-            return markerDate >= startDate && markerDate <= endDate;
-          });
-
-          filteredJira = jiraMarkers.filter(m => {
-            const markerDate = new Date(m.created_date);
-            return markerDate >= startDate && markerDate <= endDate;
-          });
-        }
-        
-        // Filter resolved items by period
         let filteredResolved = resolvedEntities;
+        
         if (selectedPeriod) {
           const period = JSON.parse(selectedPeriod);
           const startDate = new Date(period.start);
           const endDate = new Date(period.end);
           endDate.setHours(23, 59, 59, 999);
           
+          filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
+          filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
+          filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
           filteredResolved = resolvedEntities.filter(r => {
-            const resolvedDate = new Date(r.resolved_date);
+            const resolvedDate = new Date(r.data?.resolved_date || r.resolved_date);
             return resolvedDate >= startDate && resolvedDate <= endDate;
           });
         }
         
         setGdprSignals([...filteredSlack, ...filteredJira]);
         setTeamsInsights(filteredTeams);
-        setResolvedItems(filteredResolved.map(item => item.item_id));
+        setResolvedItems(filteredResolved.map(item => item.data?.item_id || item.item_id));
       } catch (error) {
         console.error("Erreur chargement signaux:", error);
       }
@@ -121,14 +97,20 @@ export default function QuickStats({ analysisHistory = [] }) {
 
     fetchSignals();
     
-    // Listen for window focus to refresh data when user navigates back
     const handleFocus = () => {
       fetchSignals();
     };
     window.addEventListener('focus', handleFocus);
     
+    // Listen for resolved count changes in sessionStorage
+    const handleStorageChange = () => {
+      fetchSignals();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
     return () => {
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
 
