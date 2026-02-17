@@ -45,45 +45,48 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Check authentication and load data
+  // Fetch GDPR signals from last 7 days
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadDashboardData = async () => {
+    const fetchSignals = async () => {
       try {
-        const authenticated = await base44.auth.isAuthenticated();
-        
-        if (!authenticated) {
-          if (isMounted) setIsLoading(false);
-          return;
-        }
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+
+    fetchSignals();
+  }, []);
+
+  // Check authentication (temporarily disabled for demo)
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authenticated = await base44.auth.isAuthenticated();
+      if (authenticated) {
         const currentUser = await base44.auth.me();
-        if (!isMounted) return;
-        
         setUser(currentUser);
 
-        // Load all data in parallel to reduce sequential requests
-        const [activeSprints, teamConfigs, pendingAlerts, gdprMarkers] = await Promise.all([
-          base44.entities.SprintContext.filter({ is_active: true }).catch(() => []),
-          base44.entities.TeamConfiguration.list().catch(() => []),
-          base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }).catch(() => []),
-          base44.entities.GDPRMarkers.list('-created_date', 100).catch(() => [])
-        ]);
-
-        if (!isMounted) return;
-
-        // Set sprint context
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
         if (activeSprints.length > 0) {
           setSprintContext(activeSprints[0]);
         }
 
-        // Check onboarding
+        // Vérifier onboarding
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Set multi-project alert
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
         if (pendingAlerts.length > 0) {
           const latest = pendingAlerts[pendingAlerts.length - 1];
           setMultiProjectAlert({
@@ -92,34 +95,17 @@ export default function Dashboard() {
             log_id: latest.id
           });
         }
-
-        // Filter GDPR signals
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const recentMarkers = gdprMarkers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-
-      } catch (error) {
-        console.error("Error loading dashboard:", error);
-      } finally {
-        if (isMounted) setIsLoading(false);
       }
+      setIsLoading(false);
     };
-
-    loadDashboardData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    checkAuth();
+  }, [navigate]);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading && !!user,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchOnWindowFocus: false
+    enabled: !isLoading
   });
 
   // Filter analysis history based on selected period
@@ -457,7 +443,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(user?.role === 'admin' || user?.role === 'contributor' || user?.app_role === 'admin' || user?.app_role === 'contributor') && (
+{(userRole === 'admin' || userRole === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
