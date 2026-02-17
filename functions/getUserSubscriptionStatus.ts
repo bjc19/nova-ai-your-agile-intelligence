@@ -9,16 +9,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
+    // Fetch all available plans
+    const allPlans = await base44.asServiceRole.entities.Plan.list();
+
     const ownSubscription = await base44.entities.Subscription.filter({ user_email: user.email });
     
     if (ownSubscription.length > 0) {
       const sub = ownSubscription[0];
-      const planQuotas = {
-        'starter': 5,
-        'growth': 15,
-        'pro': 25
-      };
-      const maxProjectsAllowed = planQuotas[sub.plan?.toLowerCase()] || 5;
+      const planData = allPlans.find(p => p.plan_id === sub.plan?.toLowerCase());
       
       return Response.json({
         hasAccess: true,
@@ -26,7 +24,7 @@ Deno.serve(async (req) => {
         subscription: sub,
         canInvite: sub.is_admin,
         plan: sub.plan,
-        maxProjectsAllowed
+        planDetails: planData || null
       });
     }
 
@@ -38,13 +36,8 @@ Deno.serve(async (req) => {
         user_email: membership.admin_email 
       });
 
-      const planQuotas = {
-        'starter': 5,
-        'growth': 15,
-        'pro': 25
-      };
       const adminPlan = adminSub[0]?.plan?.toLowerCase() || 'starter';
-      const maxProjectsAllowed = planQuotas[adminPlan] || 5;
+      const planData = allPlans.find(p => p.plan_id === adminPlan);
 
       return Response.json({
         hasAccess: true,
@@ -53,7 +46,7 @@ Deno.serve(async (req) => {
         subscription: adminSub[0] || null,
         canInvite: membership.role === 'contributor',
         plan: adminSub[0]?.plan,
-        maxProjectsAllowed
+        planDetails: planData || null
       });
     }
 
