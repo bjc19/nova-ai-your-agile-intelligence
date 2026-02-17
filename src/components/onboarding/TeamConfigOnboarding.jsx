@@ -139,10 +139,8 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
                   ))}
                 </div>
 
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    💡 <strong>Pas d'inquiétude :</strong> Vous pourrez modifier cette configuration à tout moment dans les Paramètres (section "Équipe & Projets").
-                  </p>
+                <div className="mt-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                  💡 Modifiable à tout moment dans les Paramètres
                 </div>
               </div>
             </motion.div>
