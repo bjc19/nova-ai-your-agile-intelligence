@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -18,7 +18,6 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -30,14 +29,12 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2,
-  RefreshCw } from
+  Loader2 } from
 "lucide-react";
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,23 +44,31 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch GDPR signals
+  // Fetch GDPR signals - filtered by selectedWorkspaceId if available
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
+        let filtered = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        
+        // Filter by workspace if selected
+        if (selectedWorkspaceId) {
+          filtered = filtered.filter((m) => {
+            const analysis = allAnalysisHistory.find(a => a.id === m.analysis_id);
+            return analysis && analysis.jira_project_selection_id === selectedWorkspaceId;
+          });
+        }
+        
+        setGdprSignals(filtered);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
       }
     };
     fetchSignals();
-  }, []);
+  }, [selectedWorkspaceId, allAnalysisHistory]);
 
   // Check authentication and role
   useEffect(() => {
@@ -183,21 +188,6 @@ export default function DashboardAdmins() {
     gdprSignals: gdprSignals
   } : null;
 
-  const handleRefreshAnalyses = async () => {
-    if (!selectedWorkspaceId) return;
-    setIsRefreshing(true);
-    try {
-      await base44.functions.invoke('triggerProjectAnalysis', {
-        projectSelectionId: selectedWorkspaceId
-      });
-      queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -249,16 +239,6 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
-                <Button
-                  onClick={handleRefreshAnalyses}
-                  disabled={!selectedWorkspaceId || isRefreshing}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  {isRefreshing ? 'Rafraîchissement...' : 'Rafraîchir'}
-                </Button>
-
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
@@ -333,8 +313,6 @@ export default function DashboardAdmins() {
               onReviewSprint={() => console.log("Review sprint")} />
 
             }
-
-            <PredictiveInsights />
 
               {analysisHistory.length > 0 &&
             <MetricsRadarCard
