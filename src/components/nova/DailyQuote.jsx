@@ -386,6 +386,9 @@ export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 
       q.tags && q.tags.some(tag => relevantTags.includes(tag))
     );
 
+    // Filtre les quotes déjà affichées plus de 2 fois en 24h
+    matchingQuotes = matchingQuotes.filter(q => canDisplayQuote(getQuoteKey(q)));
+
     // Si pas de match ou contexte très spécifique, générer via LLM
     if (matchingQuotes.length === 0 || (hasBlockers && hasRisks && hasPatterns)) {
       await generateCustomQuote();
@@ -393,6 +396,7 @@ export default function DailyQuote({ lang = "fr", blockerCount = 0, riskCount = 
       // Sélection aléatoire parmi les quotes matchantes
       const randomQuote = matchingQuotes[Math.floor(Math.random() * matchingQuotes.length)];
       setSelectedQuote(randomQuote);
+      addToQuoteHistory(getQuoteKey(randomQuote));
     }
   };
 
