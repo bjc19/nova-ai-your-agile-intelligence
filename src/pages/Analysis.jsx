@@ -23,6 +23,7 @@ import { detectOutOfContext } from "@/components/nova/outOfContextDetection";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/components/LanguageContext";
 import { anonymizeAnalysisData } from "@/components/nova/anonymizationEngine";
+import { usePlanLimitations } from "@/components/hooks/usePlanLimitations";
 import { 
   Sparkles, 
   ArrowLeft, 
@@ -33,7 +34,8 @@ import {
   Upload,
   FileText,
   Settings,
-  AlertTriangle
+  AlertTriangle,
+  Lock
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
