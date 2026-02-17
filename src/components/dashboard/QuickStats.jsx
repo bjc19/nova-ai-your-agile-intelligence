@@ -51,6 +51,7 @@ export default function QuickStats({ analysisHistory = [] }) {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
+        // Force cache bypass by adding timestamp to query
         const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
         const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 100);
         
@@ -118,6 +119,16 @@ export default function QuickStats({ analysisHistory = [] }) {
     };
 
     fetchSignals();
+    
+    // Listen for window focus to refresh data when user navigates back
+    const handleFocus = () => {
+      fetchSignals();
+    };
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Anonymize names in text

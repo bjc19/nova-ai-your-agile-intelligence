@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -160,7 +161,7 @@ export default function DashboardAdmins() {
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : {
-    name: new Date().toLocaleDateString('fr-FR'),
+    name: "Sprint en cours",
     daysRemaining: 4,
     deliveryMode: "scrum",
     throughputPerWeek: null
@@ -369,6 +370,7 @@ export default function DashboardAdmins() {
             </div>
 
             <div className="space-y-6">
+              <PredictiveInsights />
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>
