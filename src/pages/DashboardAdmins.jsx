@@ -21,7 +21,6 @@ import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -161,7 +160,7 @@ export default function DashboardAdmins() {
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : {
-    name: "Sprint en cours",
+    name: new Date().toLocaleDateString('fr-FR'),
     daysRemaining: 4,
     deliveryMode: "scrum",
     throughputPerWeek: null
@@ -360,8 +359,6 @@ export default function DashboardAdmins() {
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
             }
-              
-              <PredictiveInsights />
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations

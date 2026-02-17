@@ -250,7 +250,34 @@ export default function Dashboard() {
                   </p>
                 </div>
                 
+                <div className="flex items-center gap-3">
+                {sprintInfo.deliveryMode === "scrum" && sprintInfo.daysRemaining > 0 &&
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600">
+                      <span className="font-semibold text-slate-900">{sprintInfo.daysRemaining}</span> {t('daysLeftInSprint')}
+                    </span>
+                  </div>
+                  }
+                {sprintInfo.deliveryMode === "kanban" && sprintInfo.throughputPerWeek &&
+                  <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200">
+                    <Zap className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600">
+                      <span className="font-semibold text-slate-900">{sprintInfo.throughputPerWeek}</span> tickets/semaine
+                    </span>
+                  </div>
+                  }
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5">
 
+                      <Mic className="w-4 h-4 mr-2" />
+                      {t('newAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
               
               {/* Time Period Selector */}
@@ -416,7 +443,7 @@ export default function Dashboard() {
         </div>
         }
 
-{(userRole === 'admin' || userRole === 'contributor') && (
+{(user?.role === 'admin' || user?.role === 'contributor') && (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
