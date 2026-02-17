@@ -38,7 +38,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
 
@@ -63,71 +63,43 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication - use React Query to prevent rate limiting
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
+  // Check authentication (temporarily disabled for demo)
+  useEffect(() => {
+    const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      return authenticated ? await base44.auth.me() : null;
-    },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000 // Keep in memory for 10 minutes
-  });
+      if (authenticated) {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
 
-  const { data: sprintContextData } = useQuery({
-    queryKey: ['sprintContext'],
-    queryFn: () => base44.entities.SprintContext.filter({ is_active: true }),
-    enabled: !!currentUser,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000
-  });
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
+        }
 
-  const { data: teamConfigData } = useQuery({
-    queryKey: ['teamConfig'],
-    queryFn: () => base44.entities.TeamConfiguration.list(),
-    enabled: !!currentUser,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000
-  });
+        // Vérifier onboarding
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
 
-  const { data: multiProjectData } = useQuery({
-    queryKey: ['multiProjectAlerts'],
-    queryFn: () => base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
-    enabled: !!currentUser,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000
-  });
-
-  // Update state when queries finish loading
-  useEffect(() => {
-    if (currentUser !== undefined) {
-      setUser(currentUser);
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
+      }
       setIsLoading(false);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (sprintContextData?.length > 0) {
-      setSprintContext(sprintContextData[0]);
-    }
-  }, [sprintContextData]);
-
-  useEffect(() => {
-    if (teamConfigData?.length > 0 && !teamConfigData[0].onboarding_completed) {
-      setShowOnboarding(true);
-    }
-  }, [teamConfigData]);
-
-  useEffect(() => {
-    if (multiProjectData?.length > 0) {
-      const latest = multiProjectData[multiProjectData.length - 1];
-      setMultiProjectAlert({
-        confidence: latest.detection_score,
-        signals: latest.weighted_signals,
-        log_id: latest.id
-      });
-    }
-  }, [multiProjectData]);
+    };
+    checkAuth();
+  }, [navigate]);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({

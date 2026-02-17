@@ -38,22 +38,28 @@ export default function DashboardAdmins() {
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
+  const [gdprSignals, setGdprSignals] = useState([]);
 
   // Fetch GDPR signals
-  const { data: gdprSignals = [] } = useQuery({
-    queryKey: ['gdprSignals'],
-    queryFn: async () => {
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-      return markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-    }
-  });
+  useEffect(() => {
+    const fetchSignals = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+    fetchSignals();
+  }, []);
 
   // Check authentication and role
   useEffect(() => {
@@ -73,56 +79,36 @@ export default function DashboardAdmins() {
       }
 
       setUser(currentUser);
+
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
+      }
+
+      // Check onboarding
+      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+        setShowOnboarding(true);
+      }
+
+      // Check multi-project alerts
+      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+        admin_response: "pending"
+      });
+      if (pendingAlerts.length > 0) {
+        const latest = pendingAlerts[pendingAlerts.length - 1];
+        setMultiProjectAlert({
+          confidence: latest.detection_score,
+          signals: latest.weighted_signals,
+          log_id: latest.id
+        });
+      }
+
       setIsLoading(false);
     };
     checkAuth();
   }, [navigate]);
-
-  // Fetch sprint context using react-query
-  const { data: sprintContextData = [] } = useQuery({
-    queryKey: ['sprintContext'],
-    queryFn: () => base44.entities.SprintContext.filter({ is_active: true }),
-    enabled: !isLoading
-  });
-
-  useEffect(() => {
-    if (sprintContextData.length > 0) {
-      setSprintContext(sprintContextData[0]);
-    }
-  }, [sprintContextData]);
-
-  // Fetch team configuration using react-query
-  const { data: teamConfigData = [] } = useQuery({
-    queryKey: ['teamConfiguration'],
-    queryFn: () => base44.entities.TeamConfiguration.list(),
-    enabled: !isLoading
-  });
-
-  useEffect(() => {
-    if (teamConfigData.length === 0 || !teamConfigData[0].onboarding_completed) {
-      setShowOnboarding(true);
-    }
-  }, [teamConfigData]);
-
-  // Fetch multi-project alerts using react-query
-  const { data: pendingAlertsData = [] } = useQuery({
-    queryKey: ['multiProjectAlerts'],
-    queryFn: () => base44.entities.MultiProjectDetectionLog.filter({
-      admin_response: "pending"
-    }),
-    enabled: !isLoading
-  });
-
-  useEffect(() => {
-    if (pendingAlertsData.length > 0) {
-      const latest = pendingAlertsData[pendingAlertsData.length - 1];
-      setMultiProjectAlert({
-        confidence: latest.detection_score,
-        signals: latest.weighted_signals,
-        log_id: latest.id
-      });
-    }
-  }, [pendingAlertsData]);
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
