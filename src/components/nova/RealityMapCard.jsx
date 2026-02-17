@@ -738,7 +738,7 @@ Actions recommandées :
           )}
 
           {/* Actionable Suggestions */}
-          {suggestions.length > 0 && (
+          {suggestions?.length > 0 && (
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
                 <Button
