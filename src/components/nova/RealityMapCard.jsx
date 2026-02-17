@@ -134,6 +134,7 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
         // Only check recommendations applied 7+ days ago
         if (daysSince >= daysSinceApplication && reco.verification_status === 'pending') {
           // Compare current metrics with baseline
+          if (!metrics || !reco.target_metric) return;
           const currentValue = metrics[reco.target_metric];
           const baselineValue = reco.baseline_value;
           
