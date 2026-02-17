@@ -22,18 +22,33 @@ Deno.serve(async (req) => {
     // Fetch user's subscription status to check quota
     let maxProjectsAllowed = 5;
     let userPlan = 'starter';
+    
     try {
-      const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-      const planDetails = statusRes.data.planDetails;
-      maxProjectsAllowed = planDetails?.max_jira_projects || 5;
-      userPlan = statusRes.data.plan || 'starter';
-      console.log('✅ Plan details:', { plan: userPlan, maxJiraProjects: maxProjectsAllowed });
+      // Get subscription from database directly
+      const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
+        user_email: user.email
+      });
+      
+      if (subscriptions.length > 0) {
+        userPlan = subscriptions[0].plan;
+        console.log('✅ Found subscription plan:', userPlan);
+        
+        // Get plan details
+        const planDetails = await base44.asServiceRole.entities.Plan.filter({
+          plan_id: userPlan
+        });
+        
+        if (planDetails.length > 0) {
+          maxProjectsAllowed = planDetails[0].max_jira_projects || 5;
+          console.log('✅ Plan quota:', maxProjectsAllowed);
+        }
+      }
     } catch (e) {
-      console.log('❌ Could not fetch subscription status, using default quota');
-      console.error('❌ Error details:', e);
+      console.warn('⚠️ Could not fetch subscription, using default quota');
+      console.error('Error:', e.message);
     }
 
-    // Quotas par plan (fallback si planDetails non disponible)
+    // Quotas par plan (fallback)
     const quotas = {
       'starter': 5,
       'growth': 15,
@@ -41,6 +56,7 @@ Deno.serve(async (req) => {
       'enterprise': 999
     };
     maxProjectsAllowed = maxProjectsAllowed || quotas[userPlan] || 5;
+    console.log('📊 Final quota:', maxProjectsAllowed, 'for plan:', userPlan);
 
     console.log('📋 Fetching ALL existing selections (active and inactive)...');
     // Get ALL Jira project selections using asServiceRole to bypass RLS
