@@ -153,7 +153,7 @@ export default function QuickStats({ analysisHistory = [] }) {
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // Count items (match Details page logic) - EXCLUDING resolved items
+  // Count UNRESOLVED items (for display purposes)
   const analysisBlockers = analysisHistory.flatMap((a, idx) => 
     (a.analysis_data?.blockers || []).filter((b, bidx) => 
       b.urgency && !isItemResolved(`${idx}-${bidx}`)
@@ -202,6 +202,42 @@ export default function QuickStats({ analysisHistory = [] }) {
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
   
+  // Count ALL items (including resolved) for IST calculation
+  const allAnalysisBlockers = analysisHistory.flatMap((a) => 
+    (a.analysis_data?.blockers || []).filter((b) => b.urgency)
+  ).length;
+  const allAnalysisRisks = analysisHistory.flatMap((a) => 
+    (a.analysis_data?.risks || [])
+  ).length;
+  
+  const allSlackBlockers = gdprSignals
+    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
+    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
+    .length;
+  const allSlackRisks = gdprSignals
+    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
+    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
+    .length;
+  
+  const allJiraBlockers = gdprSignals
+    .filter(s => s.detection_source === 'jira_backlog')
+    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
+    .length;
+  const allJiraRisks = gdprSignals
+    .filter(s => s.detection_source === 'jira_backlog')
+    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
+    .length;
+  
+  const allTeamsBlockers = teamsInsights
+    .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
+    .length;
+  const allTeamsRisks = teamsInsights
+    .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
+    .length;
+  
+  const totalAllBlockers = (allAnalysisBlockers || 0) + allSlackBlockers + allJiraBlockers + allTeamsBlockers;
+  const totalAllRisks = (allAnalysisRisks || 0) + allSlackRisks + allJiraRisks + allTeamsRisks;
+  
   // Filter resolved items by period
   const selectedPeriod = sessionStorage.getItem("selectedPeriod");
   let filteredResolved = resolvedItems;
@@ -223,9 +259,9 @@ export default function QuickStats({ analysisHistory = [] }) {
   
   const resolvedBlockers = filteredResolved.length;
   
-  // Calculate Technical Health Index (IST) = Resolved / (Total Initial Problems)
-  // Total initial = current problems + resolved problems (what existed before resolution)
-  const totalInitialProblems = totalBlockers + totalRisks + resolvedBlockers;
+  // Calculate Technical Health Index (IST) = Resolved / (All Problems Ever Detected)
+  // Total = ALL blockers + ALL risks (including those now resolved)
+  const totalInitialProblems = totalAllBlockers + totalAllRisks;
   const technicalHealthIndex = totalInitialProblems > 0 ? ((resolvedBlockers / totalInitialProblems) * 100).toFixed(0) : 0;
   const healthStatus = technicalHealthIndex >= 50 ? "healthy" : "critical";
   
@@ -276,15 +312,15 @@ export default function QuickStats({ analysisHistory = [] }) {
       return translatedTooltips[cacheKey];
     }
     
-    const totalInitialProblems = totalBlockers + totalRisks + resolvedBlockers;
+    const totalAllProblems = totalAllBlockers + totalAllRisks;
     
     if (language === 'fr') {
       const tooltip = {
         title: "Indice de Santé Technique (IST)",
-        formula: `Résolus (${resolvedBlockers}) ÷ Total problèmes (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
+        formula: `Résolus (${resolvedBlockers}) ÷ (Bloquants + Risques détectés) (${totalAllProblems}) × 100 = ${technicalHealthIndex}%`,
         interpretation: technicalHealthIndex >= 50
           ? `✓ Excellent : ${technicalHealthIndex}% des problèmes détectés ont été résolus.`
-          : `⚠ À améliorer : Seulement ${technicalHealthIndex}% des problèmes ont été résolus.`,
+          : `⚠ À améliorer : Seulement ${technicalHealthIndex}% des problèmes détectés ont été résolus.`,
         tips: technicalHealthIndex >= 50
           ? "Continuez à résoudre les bloquants et risques détectés."
           : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
@@ -294,10 +330,10 @@ export default function QuickStats({ analysisHistory = [] }) {
     } else {
       const tooltip = {
         title: "Technical Health Index (IST)",
-        formula: `Resolved (${resolvedBlockers}) ÷ Total problems (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
+        formula: `Resolved (${resolvedBlockers}) ÷ (Blockers + Risks detected) (${totalAllProblems}) × 100 = ${technicalHealthIndex}%`,
         interpretation: technicalHealthIndex >= 50
           ? `✓ Excellent: ${technicalHealthIndex}% of detected problems have been resolved.`
-          : `⚠ Needs improvement: Only ${technicalHealthIndex}% of problems have been resolved.`,
+          : `⚠ Needs improvement: Only ${technicalHealthIndex}% of detected problems have been resolved.`,
         tips: technicalHealthIndex >= 50
           ? "Keep resolving detected blockers and risks."
           : "Prioritize resolving blockers before adding new tasks.",
