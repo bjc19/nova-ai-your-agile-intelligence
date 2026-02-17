@@ -278,13 +278,13 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
-                              {lever.dependency_aware?.warning ? (
-                                <DependencyWarning warning={lever.dependency_aware.warning} compact />
+                              {enrichedLever.dependency_aware?.warning ? (
+                                <DependencyWarning warning={enrichedLever.dependency_aware.warning} compact />
                               ) : (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Badge variant="outline" className="text-xs cursor-help flex items-center gap-1">
-                                      Confiance {lever.dependency_aware?.confidence || lever.confidence}%
+                                      Confiance {enrichedLever.dependency_aware?.confidence || lever.confidence}%
                                       <HelpCircle className="w-3 h-3 text-slate-400" />
                                     </Badge>
                                   </TooltipTrigger>
