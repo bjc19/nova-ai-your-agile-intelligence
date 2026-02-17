@@ -36,7 +36,8 @@ function LayoutContent({ children, currentPageName }) {
         const auth = await base44.auth.isAuthenticated();
         setIsAuthenticated(auth);
         if (auth) {
-          const user = await base44.auth.me();
+          const currentUser = await base44.auth.me();
+          setUser(currentUser);
 
           try {
             const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
@@ -46,7 +47,7 @@ function LayoutContent({ children, currentPageName }) {
           }
 
           // Fetch pending alerts for admins
-           if (user?.role === 'admin') {
+           if (currentUser?.role === 'admin') {
             try {
               const sprintAlerts = await base44.entities.SprintHealth.filter({ 
                 status: "critical" 
