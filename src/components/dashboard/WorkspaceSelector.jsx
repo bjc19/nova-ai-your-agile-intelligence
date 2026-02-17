@@ -54,7 +54,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
               created_by: user?.email
             });
             console.log("🔍 [WorkspaceSelector] Admin/Contributor - Jira selections loaded:", jiraData.length, jiraData);
-            console.log("🔍 [WorkspaceSelector] Current user role:", userRole);
+            console.log("🔍 [WorkspaceSelector] Current user role:", user?.role);
             console.log("🔍 [WorkspaceSelector] Current user email:", user?.email);
             selections = jiraData.map(ws => ({
               ...ws,
