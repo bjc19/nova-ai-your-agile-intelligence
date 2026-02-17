@@ -24,21 +24,17 @@ Deno.serve(async (req) => {
     let userPlan = 'starter';
     
     try {
-      // Get subscription from database using service role (bypass RLS for quota check)
+      // Get subscription from database directly
       const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
         user_email: user.email
       });
-      console.log('🔍 Subscription lookup for email:', user.email, 'Result:', subscriptions.length);
-      if (subscriptions.length > 0) {
-        console.log('🔍 Subscription details:', JSON.stringify(subscriptions[0]));
-      }
       
       if (subscriptions.length > 0) {
         userPlan = subscriptions[0].plan;
         console.log('✅ Found subscription plan:', userPlan);
         
         // Get plan details
-        const planDetails = await base44.entities.Plan.filter({
+        const planDetails = await base44.asServiceRole.entities.Plan.filter({
           plan_id: userPlan
         });
         
@@ -46,8 +42,6 @@ Deno.serve(async (req) => {
           maxProjectsAllowed = planDetails[0].max_jira_projects || 5;
           console.log('✅ Plan quota:', maxProjectsAllowed);
         }
-      } else {
-        console.warn('⚠️ No subscription found');
       }
     } catch (e) {
       console.warn('⚠️ Could not fetch subscription, using default quota');
@@ -65,8 +59,8 @@ Deno.serve(async (req) => {
     console.log('📊 Final quota:', maxProjectsAllowed, 'for plan:', userPlan);
 
     console.log('📋 Fetching ALL existing selections (active and inactive)...');
-    // Get ALL Jira project selections respecting RLS
-    const allExistingSelections = await base44.entities.JiraProjectSelection.list();
+    // Get ALL Jira project selections using asServiceRole to bypass RLS
+    const allExistingSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
     
     console.log('✅ Found', allExistingSelections.length, 'total existing selections');
 
