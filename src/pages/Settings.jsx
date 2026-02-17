@@ -602,13 +602,24 @@ export default function Settings() {
          const user = await base44.auth.me();
          setCurrentRole(user?.role || 'user');
 
-         // Load plan limitations for source restrictions
-         try {
-           const limitationsRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-           setPlanLimitations(limitationsRes.data);
-         } catch (e) {
-           setPlanLimitations(null);
-         }
+         // Load plan limitations for source restrictions - read from user's Subscription entity
+              try {
+                const subs = await base44.entities.Subscription.filter({ user_email: user.email });
+                if (subs.length > 0) {
+                  // Get plan details from Plan entity
+                  const plans = await base44.entities.Plan.filter({ plan_id: subs[0].plan });
+                  if (plans.length > 0) {
+                    setPlanLimitations(plans[0]);
+                  } else {
+                    setPlanLimitations(null);
+                  }
+                } else {
+                  setPlanLimitations(null);
+                }
+              } catch (e) {
+                console.error('Error loading plan limitations:', e);
+                setPlanLimitations(null);
+              }
 
         // Load team config
         const configs = await base44.entities.TeamConfiguration.list();
