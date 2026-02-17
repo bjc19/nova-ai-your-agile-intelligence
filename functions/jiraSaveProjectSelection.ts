@@ -25,7 +25,9 @@ Deno.serve(async (req) => {
     
     try {
       // Get subscription from database (RLS allows users to read their own subscription)
-      const subscriptions = await base44.entities.Subscription.list();
+      const subscriptions = await base44.entities.Subscription.filter({
+        user_email: user.email
+      });
       
       if (subscriptions.length > 0) {
         userPlan = subscriptions[0].plan;
