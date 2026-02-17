@@ -24,10 +24,11 @@ Deno.serve(async (req) => {
     let userPlan = 'starter';
     
     try {
-      // Get subscription from database (RLS allows users to read their own subscription)
-      const subscriptions = await base44.entities.Subscription.filter({
+      // Get subscription from database using service role (admin access for quota lookup)
+      const subscriptions = await base44.asServiceRole.entities.Subscription.filter({
         user_email: user.email
       });
+      console.log('🔍 Subscription lookup result:', subscriptions.length, subscriptions);
       
       if (subscriptions.length > 0) {
         userPlan = subscriptions[0].plan;
