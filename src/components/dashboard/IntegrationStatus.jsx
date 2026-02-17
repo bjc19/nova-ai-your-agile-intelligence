@@ -157,7 +157,7 @@ export default function IntegrationStatus({ integrations = {} }) {
                 {connectedCount} {t('connectedOf')} {Object.keys(displayIntegrations).length} {t('connected').toLowerCase()}
               </p>
             </div>
-            {(userRole === 'admin' || userRole === 'contributor' || userRole === 'app_admin' || userRole === 'app_contributor') && (
+            {(userRole === 'admin' || userRole === 'contributor') && (
               <Link to={createPageUrl("Settings")}>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Settings className="w-4 h-4" />
