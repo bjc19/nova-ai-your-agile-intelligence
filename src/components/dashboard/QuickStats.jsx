@@ -250,7 +250,10 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const technicalHealthIndex = totalInitialProblems > 0 ? ((resolvedBlockers / totalInitialProblems) * 100).toFixed(0) : 0;
   const healthStatus = technicalHealthIndex >= 50 ? "healthy" : "critical";
   
-  const stats = [
+  // Only show stats if we have real data
+  const hasRealData = gdprSignals.length > 0 || analysisHistory.length > 0 || resolvedItems.length > 0;
+
+  const stats = hasRealData ? [
      {
        labelKey: "totalBlockers",
        value: totalBlockers,
@@ -268,22 +271,22 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
        textColor: "text-amber-600",
      },
      {
-      labelKey: "resolved",
-      value: resolvedBlockers,
-      icon: CheckCircle2,
-      color: "from-emerald-500 to-emerald-600",
-      bgColor: "bg-emerald-500/10",
-      textColor: "text-emerald-600",
-    },
-    {
-      labelKey: "technicalHealth",
-      value: technicalHealthIndex,
-      icon: Activity,
-      color: healthStatus === "healthy" ? "from-green-500 to-green-600" : "from-red-500 to-red-600",
-      bgColor: healthStatus === "healthy" ? "bg-green-500/10" : "bg-red-500/10",
-      textColor: healthStatus === "healthy" ? "text-green-600" : "text-red-600",
-    },
-  ];
+       labelKey: "resolved",
+       value: resolvedBlockers,
+       icon: CheckCircle2,
+       color: "from-emerald-500 to-emerald-600",
+       bgColor: "bg-emerald-500/10",
+       textColor: "text-emerald-600",
+     },
+     {
+       labelKey: "technicalHealth",
+       value: technicalHealthIndex,
+       icon: Activity,
+       color: healthStatus === "healthy" ? "from-green-500 to-green-600" : "from-red-500 to-red-600",
+       bgColor: healthStatus === "healthy" ? "bg-green-500/10" : "bg-red-500/10",
+       textColor: healthStatus === "healthy" ? "text-green-600" : "text-red-600",
+     },
+   ] : [];
 
 
 
