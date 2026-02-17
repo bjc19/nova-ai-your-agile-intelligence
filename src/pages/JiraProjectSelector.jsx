@@ -125,26 +125,19 @@ export default function JiraProjectSelector() {
 
         try {
           const currentUserEmail = currentUser?.email;
-          const [teamMembers, allUsers] = await Promise.all([
-            base44.entities.TeamMember.list(),
-            base44.entities.User.list()
-          ]);
+          // Load only workspace members (more efficient with RLS)
+          const workspaceMembers = await base44.entities.WorkspaceMember.list();
+          const uniqueEmails = [...new Set(workspaceMembers.map(m => m.user_email))];
 
           const memberMap = new Map();
-
-          allUsers.forEach(u => {
-            if (u.email !== currentUserEmail) {
-              memberMap.set(u.email, {
-                user_email: u.email,
-                user_name: u.full_name || u.email,
-                role: u.role || 'user'
+          uniqueEmails.forEach(email => {
+            const wsm = workspaceMembers.find(m => m.user_email === email);
+            if (email !== currentUserEmail && wsm) {
+              memberMap.set(email, {
+                user_email: email,
+                user_name: wsm.user_name || email,
+                role: wsm.role || 'user'
               });
-            }
-          });
-
-          teamMembers.forEach(tm => {
-            if (tm.user_email !== currentUserEmail) {
-              memberMap.set(tm.user_email, tm);
             }
           });
 
@@ -154,18 +147,17 @@ export default function JiraProjectSelector() {
           toast.error('Erreur lors du chargement des membres');
         }
 
+        // Load all assignments in parallel instead of sequential calls
+        const projectIds = selectedProjs.map(p => p.id);
+        const allAssignments = await base44.entities.WorkspaceMember.list();
         const existingAssignments = {};
-        for (const proj of selectedProjs) {
-          try {
-            const existingMembers = await base44.entities.WorkspaceMember.filter({
-              workspace_id: proj.id
-            });
-            existingAssignments[proj.id] = existingMembers.map(m => m.user_email);
-          } catch (error) {
-            console.error(`Error loading existing assignments for project ${proj.id}:`, error);
-            existingAssignments[proj.id] = [];
-          }
-        }
+
+        projectIds.forEach(projId => {
+          existingAssignments[projId] = allAssignments
+            .filter(m => m.workspace_id === projId)
+            .map(m => m.user_email);
+        });
+
         setMemberAssignments(existingAssignments);
 
         toast.success('Projets sauvegardés ! Assignez maintenant les membres.');
