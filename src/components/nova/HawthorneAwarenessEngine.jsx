@@ -10,6 +10,16 @@ export const PILOT_MODE = {
 };
 
 export function detectPilotMode(historicalData) {
+  // Handle missing data safely
+  if (!historicalData || typeof historicalData !== 'object') {
+    return {
+      isPilot: true,
+      confidence: PILOT_MODE.CONFIDENCE_PILOT,
+      reason: "Données insuffisantes",
+      requiresCoachValidation: true,
+    };
+  }
+
   const {
     sprints_count = 0,
     data_days = 0,
