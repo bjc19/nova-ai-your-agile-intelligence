@@ -274,16 +274,16 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {selectedPeriod && analysisHistory.length === 0 &&
+        {(selectedPeriod || selectedWorkspaceId) && analysisHistory.length === 0 &&
         <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette période
+              Aucune analyse pour cette sélection
             </h3>
             <p className="text-slate-600 mb-6">
-              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
+              Aucune donnée disponible pour le workspace ou la période sélectionnée
             </p>
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
