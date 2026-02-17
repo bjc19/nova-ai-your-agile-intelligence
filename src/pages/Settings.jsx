@@ -15,6 +15,7 @@ import WorkspaceAccessManagement from "@/components/settings/WorkspaceAccessMana
 import WorkspaceMemberAssignment from "@/components/workspace/WorkspaceMemberAssignment";
 import AccountDeletionSection from "@/components/settings/AccountDeletionSection";
 import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
+import PlanAssignmentSection from "@/components/settings/PlanAssignmentSection";
 import {
   ArrowLeft,
   MessageSquare,
@@ -1256,6 +1257,40 @@ export default function Settings() {
               </Card>
             )}
           </div>
+        </motion.div>
+        }
+
+        {/* Plan Assignment - Admin only (Dev Mode) */}
+        {currentRole === 'admin' &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.33 }}
+          className="mb-8">
+
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100">
+                  <Target className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    Attribution de Plan (Dev Mode)
+                    <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                      Dev Only
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Simulez différents plans d'abonnement pour tester les fonctionnalités
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <PlanAssignmentSection />
+            </CardContent>
+          </Card>
         </motion.div>
         }
 
