@@ -37,7 +37,6 @@ import {
 export default function DashboardAdmins() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const queryClient = useQueryClient();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +46,6 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch GDPR signals
   useEffect(() => {
