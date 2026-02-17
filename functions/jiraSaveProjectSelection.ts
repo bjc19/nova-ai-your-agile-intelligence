@@ -109,6 +109,17 @@ Deno.serve(async (req) => {
     }
 
     console.log('✅ All projects saved successfully');
+    
+    // Synchronize team configuration if multiple projects selected
+    if (selected_project_ids.length > 1) {
+      try {
+        console.log('🔄 Synchronizing team configuration for multi-project mode...');
+        await base44.functions.invoke('updateTeamConfigFromProjectSelection', {});
+      } catch (syncError) {
+        console.warn('⚠️ Team config sync failed (non-critical):', syncError.message);
+      }
+    }
+    
     return Response.json({
       success: true,
       message: `${selected_project_ids.length} projet(s) Jira sauvegardé(s)`
