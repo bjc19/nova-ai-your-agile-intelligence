@@ -200,7 +200,9 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
     setTranscript(simulatedSlackMessages);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    setAnalysisLimitError(null);
+
     if (!transcript.trim()) {
       setError("Aucun texte détecté. Collez le contenu de votre atelier Scrum pour analyse.");
       return;
@@ -223,6 +225,17 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
 
     if (!selectedWorkspaceId) {
       setError("Veuillez sélectionner un workspace.");
+      return;
+    }
+
+    // Check plan limitations for manual analysis
+    const limitCheck = await canCreateManualAnalysis();
+    if (!limitCheck.allowed) {
+      if (limitCheck.reason === 'manual_analysis_admin_only') {
+        setAnalysisLimitError("Les analyses manuelles sont réservées aux administrateurs sur votre plan.");
+      } else if (limitCheck.reason === 'max_manual_analyses_reached') {
+        setAnalysisLimitError(`Limite atteinte: ${limitCheck.limit} analyses manuelles maximum par plan.`);
+      }
       return;
     }
 
