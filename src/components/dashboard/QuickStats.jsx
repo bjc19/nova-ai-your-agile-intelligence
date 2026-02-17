@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
-export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard" }) {
+export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard", selectedWorkspaceId = null }) {
    const { t, language } = useLanguage();
    const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
