@@ -129,9 +129,9 @@ export default function PredictiveInsights() {
             {getTrendIcon(prediction.overall_health_trend)}
             <div className="flex-1">
               <p className="font-medium text-slate-900">
-                Tendance de Santé: {
-                  prediction.overall_health_trend === 'improving' ? 'En amélioration' :
-                  prediction.overall_health_trend === 'declining' ? 'En déclin' : 'Stable'
+                {t('healthTrend')}: {
+                  prediction.overall_health_trend === 'improving' ? t('improving') :
+                  prediction.overall_health_trend === 'declining' ? t('declining') : t('stable')
                 }
               </p>
             </div>
