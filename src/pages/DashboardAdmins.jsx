@@ -183,6 +183,23 @@ export default function DashboardAdmins() {
     gdprSignals: gdprSignals
   } : null;
 
+  const handleRefreshAnalyses = async () => {
+    if (!selectedWorkspaceId) {
+      return;
+    }
+    setIsRefreshing(true);
+    try {
+      await base44.functions.invoke('triggerProjectAnalysis', {
+        projectSelectionId: selectedWorkspaceId
+      });
+      queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
+    } catch (error) {
+      console.error('Erreur lors du rafraîchissement des analyses:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
