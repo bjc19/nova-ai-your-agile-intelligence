@@ -21,6 +21,7 @@ import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -73,7 +74,7 @@ export default function DashboardAdmins() {
       const currentUser = await base44.auth.me();
 
       // Role verification - only 'admin' can access
-      if (currentUser?.app_role !== 'admin' && currentUser?.role !== 'admin') {
+      if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
       }
