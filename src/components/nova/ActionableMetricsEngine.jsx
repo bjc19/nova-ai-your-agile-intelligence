@@ -71,6 +71,17 @@ export const METRIC_TYPES = {
 export const MIN_DATA_DAYS = 7;
 
 export function analyzeMetricsHealth(metricsData) {
+  // Handle missing data safely
+  if (!metricsData || typeof metricsData !== 'object') {
+    return {
+      status: "insufficient_data",
+      message: "Aucune donnée disponible pour l'analyse.",
+      canAnalyze: false,
+      detectedIssues: [],
+      top3Levers: [],
+    };
+  }
+
   const {
     velocity = null,
     flow_efficiency = null,
