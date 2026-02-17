@@ -51,8 +51,8 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 100);
+        const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
+        const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 10000);
         
         const slackMarkers = allMarkers.filter(m => 
           m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
