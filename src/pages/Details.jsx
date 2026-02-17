@@ -305,6 +305,7 @@ export default function Details() {
       sessionStorage.setItem('resolvedCount', String(resolvedCount + 1));
 
       toast.success('Item marqué comme résolu');
+      refetchResolvedItems();
     } catch (error) {
       console.error('Erreur résolution:', error);
       toast.error('Erreur lors de la mise à jour');
