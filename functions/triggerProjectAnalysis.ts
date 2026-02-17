@@ -82,8 +82,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      message: `Analyse déclenchée pour ${analysisType} - ${analysisType === 'jira' ? jiraProject.jira_project_name : trelloProject.trello_board_name}`,
-      analysisResult
+      message: `Analyse déclenchée pour ${analysisType} - ${analysisType === 'jira' ? jiraProject.jira_project_name : trelloProject.trello_board_name}`
     });
 
   } catch (error) {
