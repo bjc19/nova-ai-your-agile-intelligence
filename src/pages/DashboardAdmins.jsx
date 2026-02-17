@@ -166,18 +166,25 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 5,
-    historical_sprints_count: 4,
-    drift_acknowledged: false,
-    problematic_tickets: [],
-    gdprSignals: gdprSignals
-  } : null;
+  // Only create sprintHealth if we have real data
+  const filteredGdprSignals = selectedWorkspaceId 
+    ? gdprSignals.filter(s => s.team_id === selectedWorkspaceId || s.jira_project_selection_id === selectedWorkspaceId)
+    : gdprSignals;
+
+  const sprintHealth = (!selectedPeriod || analysisHistory.length > 0) && (filteredGdprSignals.length > 0 || analysisHistory.length > 0)
+    ? {
+        sprint_name: sprintContext?.sprint_name || "Sprint actif",
+        wip_count: filteredGdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length || 0,
+        wip_historical_avg: 5,
+        tickets_in_progress_over_3d: filteredGdprSignals.filter((s) => s.criticite === 'moyenne').length || 0,
+        blocked_tickets_over_48h: filteredGdprSignals.filter((s) => s.criticite === 'critique').length || 0,
+        sprint_day: 5,
+        historical_sprints_count: 4,
+        drift_acknowledged: false,
+        problematic_tickets: [],
+        gdprSignals: filteredGdprSignals
+      } 
+    : null;
 
   if (isLoading) {
     return (
