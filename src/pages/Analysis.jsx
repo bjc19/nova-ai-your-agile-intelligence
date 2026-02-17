@@ -113,8 +113,10 @@ export default function Analysis() {
         console.error('Error checking permissions:', error);
       }
     };
-    checkPermissions();
-  }, []);
+    if (user) {
+      checkPermissions();
+    }
+  }, [user]);
 
   // Generate alignment report on mount
   useEffect(() => {
