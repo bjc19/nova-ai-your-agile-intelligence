@@ -11,8 +11,11 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   useEffect(() => {
     const loadWorkspaces = async () => {
       try {
-        const user = await base44.auth.me();
-        console.log("🔍 [WorkspaceSelector] User loaded:", user?.email);
+        if (!user?.email) {
+          console.log("🔍 [WorkspaceSelector] User not available, skipping");
+          return;
+        }
+        console.log("🔍 [WorkspaceSelector] User from props:", user?.email);
         
         let selections = [];
         
