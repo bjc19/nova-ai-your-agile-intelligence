@@ -557,7 +557,7 @@ Actions recommandées :
           )}
 
           {/* Systemic Wastes */}
-          {wastesAnalysis.wastes.length > 0 ? (
+              {wastesAnalysis?.wastes?.length > 0 ? (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
