@@ -94,26 +94,19 @@ export default function TeamConfigOnboarding({ isOpen, onComplete }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <DialogHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl">Bienvenue sur Nova !</DialogTitle>
-                    <DialogDescription className="text-base">
-                      Configuration initiale pour des analyses précises
-                    </DialogDescription>
-                  </div>
-                </div>
+              <DialogHeader className="pb-3">
+               <DialogTitle className="text-lg">Bienvenue sur Nova !</DialogTitle>
+               <DialogDescription className="text-sm">
+                 Configuration rapide
+               </DialogDescription>
               </DialogHeader>
 
-              <div className="mt-6">
-                <p className="text-slate-700 mb-6">
-                  Votre équipe gère-t-elle <strong>un seul projet</strong> ou <strong>plusieurs projets</strong> simultanément ?
-                </p>
+              <div className="max-h-[60vh] overflow-y-auto">
+               <p className="text-sm text-slate-700 mb-4">
+                 Votre équipe gère-t-elle <strong>un seul projet</strong> ou <strong>plusieurs projets</strong> ?
+               </p>
 
-                <div className="grid gap-4">
+               <div className="grid gap-3">
                   {modeOptions.map((option) => (
                     <motion.div
                       key={option.id}
