@@ -343,32 +343,24 @@ export default function DashboardAdmins() {
               }
 
               {analysisHistory.length > 0 &&
-            <RealityMapCard
+              <RealityMapCard
               flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
-
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
-
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
-
-                data_days: 30
+               assignee_changes: [],
+               mention_patterns: [],
+               blocked_resolutions: [],
+               data_days: analysisHistory.length
               }}
               flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
+               blocked_tickets_over_5d: gdprSignals.length,
+               avg_cycle_time: 0,
+               avg_wait_time_percent: 0,
+               reopened_tickets: 0,
+               total_tickets: analysisHistory.length,
+               data_days: analysisHistory.length
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
-            }
+              }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
