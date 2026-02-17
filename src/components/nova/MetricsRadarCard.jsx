@@ -42,24 +42,14 @@ export default function MetricsRadarCard({ metricsData, historicalData, integrat
 
   // If analysisHistory provided, extract data from it; otherwise use provided data
   const data = metricsData || (analysisHistory?.length > 0 ? analysisHistory[0]?.analysis_data?.metricsData : null);
-  const historical = historicalData || (analysisHistory?.length > 0 ? {
-    sprints_count: 1,
-    data_days: 7,
-    is_audit_phase: false,
-    is_new_team: true
-  } : null);
+  const historical = historicalData || (analysisHistory?.length > 0 ? analysisHistory[0]?.analysis_data?.historicalData : null);
 
   // Detect pilot mode
   const pilotMode = detectPilotMode(historical || {});
   
   const analysis = analyzeMetricsHealth(data);
 
-  const integration = integrationStatus || {
-    jira_connected: false,
-    slack_connected: false,
-    dora_pipeline: false,
-    flow_metrics_available: false
-  };
+  const integration = integrationStatus;
 
   // Don't render if no data provided
   if (!data || !historical || !analysis.canAnalyze) {
