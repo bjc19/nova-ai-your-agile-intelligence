@@ -418,10 +418,43 @@ Return JSON with: has_issue (bool), criticality (basse/moyenne/haute/critique), 
         }
       }
 
+      // Create AnalysisHistory entry
+      const analysisId = generateUUID();
+      try {
+        await base44.asServiceRole.entities.AnalysisHistory.create({
+          title: `Trello Analysis - ${trelloProject.trello_board_name}`,
+          source: 'trello',
+          jira_project_selection_id: projectSelectionId,
+          workspace_name: trelloProject.board_name,
+          blockers_count: totalRecordsProcessed,
+          risks_count: 0,
+          analysis_data: {
+            board_id: trelloProject.board_id,
+            board_name: trelloProject.trello_board_name,
+            analyzed_at: new Date().toISOString(),
+            total_cards_scanned: 0
+          },
+          transcript_preview: `Analysis of Trello board ${trelloProject.trello_board_name}`,
+          contributing_sources: [{
+            source: 'trello',
+            confidence: 0.95,
+            metadata: {
+              board_id: trelloProject.board_id
+            }
+          }],
+          cross_source_confidence: 0.95,
+          analysis_time: new Date().toISOString()
+        });
+        console.log('✅ AnalysisHistory created for Trello:', projectSelectionId);
+      } catch (error) {
+        console.error('Error creating AnalysisHistory:', error.message);
+      }
+
       return Response.json({
         success: true,
         message: `Trello analysis completed - ${trelloProject.trello_board_name}`,
-        recordsProcessed: totalRecordsProcessed
+        recordsProcessed: totalRecordsProcessed,
+        analysisId: analysisId
       });
     }
 
