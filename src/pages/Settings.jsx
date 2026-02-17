@@ -16,6 +16,7 @@ import WorkspaceMemberAssignment from "@/components/workspace/WorkspaceMemberAss
 import AccountDeletionSection from "@/components/settings/AccountDeletionSection";
 import JoinTeamRequestsAdmin from "@/components/subscription/JoinTeamRequestsAdmin";
 import PlanAssignmentSection from "@/components/settings/PlanAssignmentSection";
+import PlanLimitationsDisplay from "@/components/settings/PlanLimitationsDisplay";
 import {
   ArrowLeft,
   MessageSquare,
