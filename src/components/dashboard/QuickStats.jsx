@@ -21,6 +21,10 @@ import {
 import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
 export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard", selectedWorkspaceId = null }) {
+   // CRITICAL: No rendering if no workspace selected OR workspace has zero data
+   if (selectedWorkspaceId && analysisHistory.length === 0) {
+     return null;
+   }
    const { t, language } = useLanguage();
    const navigate = useNavigate();
   const [gdprSignals, setGdprSignals] = useState([]);
