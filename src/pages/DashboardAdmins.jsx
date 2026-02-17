@@ -244,17 +244,16 @@ export default function DashboardAdmins() {
               </div>
             </div>
 
-            {analysisHistory.length > 0 &&
+            {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
-               <DailyQuote
-               lang={t('language') === 'English' ? 'en' : 'fr'}
-               blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-               riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-               gdprSignals={gdprSignals}
-               patterns={[]} />
+              <DailyQuote
+              lang={t('language') === 'English' ? 'en' : 'fr'}
+              blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+              riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+              patterns={[]} />
 
-               <QuickStats analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
-             </>
+              <QuickStats analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
+            </>
             }
           </motion.div>
         </div>
@@ -275,16 +274,16 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {(selectedPeriod || selectedWorkspaceId) && analysisHistory.length === 0 &&
+        {selectedPeriod && analysisHistory.length === 0 &&
         <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette sélection
+              Aucune analyse pour cette période
             </h3>
             <p className="text-slate-600 mb-6">
-              {selectedPeriod ? `Aucune donnée disponible du ${new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au ${new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}` : 'Sélectionnez un workspace pour voir les analyses'}
+              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
             <Link to={createPageUrl("Analysis")}>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -295,7 +294,7 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {analysisHistory.length > 0 &&
+        {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {sprintHealth &&
@@ -307,51 +306,59 @@ export default function DashboardAdmins() {
             }
 
               {analysisHistory.length > 0 &&
-              <MetricsRadarCard
+            <MetricsRadarCard
               metricsData={{
-               velocity: { current: analysisHistory.length, trend: "stable", change: 0 },
-               flow_efficiency: { current: 0, target: 0 },
-               cycle_time: { current: 0, target: 0 },
-               throughput: { current: 0, variance: 0 },
-               deployment_frequency: { current: 0, target: 0 },
-               data_days: analysisHistory.length
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
               }}
               historicalData={{
-               sprints_count: analysisHistory.length,
-               data_days: analysisHistory.length,
-               is_audit_phase: false,
-               is_new_team: analysisHistory.length === 1
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
               }}
               integrationStatus={{
-               jira_connected: analysisHistory.some(a => a.source === 'jira_backlog' || a.source === 'jira_agile'),
-               slack_connected: analysisHistory.some(a => a.source === 'slack'),
-               dora_pipeline: false,
-               flow_metrics_available: analysisHistory.length > 0
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
               }}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-              }
+            }
 
               {analysisHistory.length > 0 &&
-              <RealityMapCard
+            <RealityMapCard
               flowData={{
-               assignee_changes: [],
-               mention_patterns: [],
-               blocked_resolutions: [],
-               data_days: analysisHistory.length
+                assignee_changes: [
+                { person: "Mary", count: 42 },
+                { person: "John", count: 12 }],
+
+                mention_patterns: [
+                { person: "Mary", type: "prioritization", count: 35 },
+                { person: "Dave", type: "unblocking", count: 19 }],
+
+                blocked_resolutions: [
+                { person: "Dave", count: 19 }],
+
+                data_days: 30
               }}
               flowMetrics={{
-               blocked_tickets_over_5d: gdprSignals.length,
-               avg_cycle_time: 0,
-               avg_wait_time_percent: 0,
-               reopened_tickets: 0,
-               total_tickets: analysisHistory.length,
-               data_days: analysisHistory.length
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30
               }}
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
-              }
+            }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
