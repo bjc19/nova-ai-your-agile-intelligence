@@ -32,7 +32,7 @@ export default function IntegrationStatus({ integrations = {} }) {
       const authenticated = await base44.auth.isAuthenticated();
       if (authenticated) {
         const user = await base44.auth.me();
-        setUserRole(user?.role);
+        setUserRole(user?.app_role || user?.role || 'user');
         
         // Show all workspace connections for transparency
         const [slackConns, teamsConns, jiraConns, trelloConns, confluenceConns] = await Promise.all([
@@ -157,7 +157,7 @@ export default function IntegrationStatus({ integrations = {} }) {
                 {connectedCount} {t('connectedOf')} {Object.keys(displayIntegrations).length} {t('connected').toLowerCase()}
               </p>
             </div>
-            {(userRole === 'admin' || userRole === 'contributor') && (
+            {(userRole === 'admin' || userRole === 'contributor' || userRole === 'app_admin' || userRole === 'app_contributor') && (
               <Link to={createPageUrl("Settings")}>
                 <Button variant="outline" size="sm" className="gap-2">
                   <Settings className="w-4 h-4" />
