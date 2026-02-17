@@ -480,7 +480,7 @@ Actions recommandées :
               {/* Neutral Reading */}
               <div className="p-3 rounded-xl bg-blue-50 border border-blue-200">
                 <p className="text-sm text-blue-900 mb-2">
-                  <strong>Signal observé :</strong> {decisionAnalysis.neutralReading}
+                  <strong>Signal observé :</strong> {decisionAnalysis?.neutralReading || "Non disponible"}
                 </p>
                 
                 <Dialog open={isResponseDialogOpen} onOpenChange={setIsResponseDialogOpen}>
