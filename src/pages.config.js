@@ -53,6 +53,7 @@ import AgileCoach from './pages/AgileCoach';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
 import ChooseAccess from './pages/ChooseAccess';
+import Dashboard from './pages/Dashboard';
 import DashboardAdmins from './pages/DashboardAdmins';
 import DashboardCommonUsers from './pages/DashboardCommonUsers';
 import DashboardContributors from './pages/DashboardContributors';
@@ -80,6 +81,7 @@ export const PAGES = {
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
     "ChooseAccess": ChooseAccess,
+    "Dashboard": Dashboard,
     "DashboardAdmins": DashboardAdmins,
     "DashboardCommonUsers": DashboardCommonUsers,
     "DashboardContributors": DashboardContributors,

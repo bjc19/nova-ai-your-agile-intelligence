@@ -101,7 +101,7 @@ function LayoutContent({ children, currentPageName }) {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           {isAuthenticated ? (
             <button
-              onClick={() => navigate(createPageUrl(user?.role === 'admin' ? "DashboardAdmins" : user?.role === 'contributor' ? "DashboardContributors" : "DashboardCommonUsers"))}
+              onClick={() => navigate(createPageUrl("Dashboard"))}
               className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
@@ -131,12 +131,12 @@ function LayoutContent({ children, currentPageName }) {
                 <div className="w-6 h-6 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" />
               ) : isAuthenticated ? (
                 <>
-                          <Link 
-                             to={createPageUrl(user?.role === 'admin' ? "DashboardAdmins" : user?.role === 'contributor' ? "DashboardContributors" : "DashboardCommonUsers")}
-                             className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                           >
-                             {t('dashboard')}
-                           </Link>
+                  <Link 
+                     to={createPageUrl("Dashboard")}
+                     className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                   >
+                     {t('dashboard')}
+                   </Link>
                    {((user?.role === 'admin') || canInvite) && (
                       <Link 
                         to={createPageUrl("Analysis")}
@@ -223,7 +223,7 @@ function LayoutContent({ children, currentPageName }) {
                     {isAuthenticated ? (
                       <>
                         <Link 
-                           to={createPageUrl(user?.role === 'admin' ? "DashboardAdmins" : user?.role === 'contributor' ? "DashboardContributors" : "DashboardCommonUsers")}
+                           to={createPageUrl("Dashboard")}
                            className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
                            onClick={() => setMobileMenuOpen(false)}
                          >
