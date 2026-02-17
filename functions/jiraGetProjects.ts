@@ -117,17 +117,19 @@ Deno.serve(async (req) => {
     const userSelections = await base44.entities.JiraProjectSelection.list();
     const selectedKeys = userSelections.map(s => s.jira_project_key);
 
-    // Get subscription plan (default to Pro)
-    const plan = 'pro';
+    // Get subscription plan
+    let userPlan = 'starter';
+    let planDetails = null;
+    try {
+      const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
+      userPlan = statusRes.data.plan || 'starter';
+      planDetails = statusRes.data.planDetails;
+    } catch (e) {
+      console.warn('Could not fetch subscription status, using starter defaults');
+    }
 
-    const quotas = {
-      'starter': 1,
-      'growth': 3,
-      'pro': 10,
-      'enterprise': 999
-    };
-
-    const quota = quotas[plan] || 10;
+    // Use plan quotas from database or fallback
+    const quota = planDetails?.max_jira_projects || 5;
     const currentCount = userSelections.filter(s => s.is_active).length;
 
     return Response.json({
