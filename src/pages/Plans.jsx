@@ -390,5 +390,6 @@ export default function Plans() {
         )}
       </div>
     </div>
+    </TooltipProvider>
   );
 }
