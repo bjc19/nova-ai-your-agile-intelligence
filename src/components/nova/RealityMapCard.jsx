@@ -749,7 +749,7 @@ Actions recommandées :
                 >
                   <div className="flex items-center gap-2">
                     <Target className="w-4 h-4 text-blue-500" />
-                    <span>Pistes possibles à explorer ({suggestions.length})</span>
+                    <span>Pistes possibles à explorer ({suggestions?.length || 0})</span>
                   </div>
                   {showSuggestions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </Button>
