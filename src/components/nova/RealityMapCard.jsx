@@ -175,9 +175,9 @@ export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals
 
 ═════════════════════════════════════════════
 
-📊 INDICE DE FRICTION GLOBAL : ${frictionIndex.emoji} ${frictionIndex.label}
+📊 INDICE DE FRICTION GLOBAL : ${frictionIndex?.emoji || "?"} ${frictionIndex?.label || "Non disponible"}
 
-🔴 GASPILLAGES CRITIQUES DÉTECTÉS (${wastesAnalysis.wastes.length}) :
+🔴 GASPILLAGES CRITIQUES DÉTECTÉS (${wastesAnalysis?.wastes?.length || 0}) :
 ${wastesAnalysis.wastes.map((w, i) => `
   ${i + 1}. ${w.name}
      Métrique : ${w.metric}
