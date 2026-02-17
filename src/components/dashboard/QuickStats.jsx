@@ -306,16 +306,10 @@ export default function QuickStats({ analysisHistory = [] }) {
 
   // Helper to generate tooltip for technicalHealth
   const getTechnicalHealthTooltip = () => {
-    const cacheKey = `tooltip-${language}`;
-    
-    if (translatedTooltips[cacheKey]) {
-      return translatedTooltips[cacheKey];
-    }
-    
     const totalAllProblems = totalAllBlockers + totalAllRisks;
     
     if (language === 'fr') {
-      const tooltip = {
+      return {
         title: "Indice de Santé Technique (IST)",
         formula: `Résolus (${resolvedBlockers}) ÷ (Bloquants + Risques détectés) (${totalAllProblems}) × 100 = ${technicalHealthIndex}%`,
         interpretation: technicalHealthIndex >= 50
@@ -325,10 +319,8 @@ export default function QuickStats({ analysisHistory = [] }) {
           ? "Continuez à résoudre les bloquants et risques détectés."
           : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
       };
-      setTranslatedTooltips(prev => ({...prev, [cacheKey]: tooltip}));
-      return tooltip;
     } else {
-      const tooltip = {
+      return {
         title: "Technical Health Index (IST)",
         formula: `Resolved (${resolvedBlockers}) ÷ (Blockers + Risks detected) (${totalAllProblems}) × 100 = ${technicalHealthIndex}%`,
         interpretation: technicalHealthIndex >= 50
@@ -338,8 +330,6 @@ export default function QuickStats({ analysisHistory = [] }) {
           ? "Keep resolving detected blockers and risks."
           : "Prioritize resolving blockers before adding new tasks.",
       };
-      setTranslatedTooltips(prev => ({...prev, [cacheKey]: tooltip}));
-      return tooltip;
     }
   };
 
