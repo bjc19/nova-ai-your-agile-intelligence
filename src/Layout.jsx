@@ -136,14 +136,14 @@ function LayoutContent({ children, currentPageName }) {
                    >
                      {t('dashboard')}
                    </Link>
-                   {((userRole === 'admin' || userRole === 'contributor') || canInvite) && (
-                     <Link 
-                       to={createPageUrl("Analysis")}
-                       className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-                     >
-                       {t('analyze')}
-                     </Link>
-                   )}
+                   {((user?.role === 'admin') || canInvite) && (
+                      <Link 
+                        to={createPageUrl("Analysis")}
+                        className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        {t('analyze')}
+                      </Link>
+                    )}
                    <Link 
                     to={createPageUrl("Settings")}
                     className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
@@ -228,7 +228,7 @@ function LayoutContent({ children, currentPageName }) {
                          >
                            {t('dashboard')}
                          </Link>
-                         {((userRole === 'admin' || userRole === 'contributor') || canInvite) && (
+                         {((user?.role === 'admin') || canInvite) && (
                            <Link 
                              to={createPageUrl("Analysis")}
                             className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
@@ -236,7 +236,7 @@ function LayoutContent({ children, currentPageName }) {
                           >
                             {t('analyze')}
                           </Link>
-                        )}
+                         )}
                         <Link 
                           to={createPageUrl("Settings")}
                           className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
