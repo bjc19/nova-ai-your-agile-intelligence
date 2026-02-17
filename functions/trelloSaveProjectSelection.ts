@@ -83,6 +83,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Synchronize team configuration if multiple projects selected
+    if (selected_board_ids.length > 1) {
+      try {
+        console.log('Synchronizing team configuration for multi-project mode...');
+        await base44.functions.invoke('updateTeamConfigFromProjectSelection', {});
+      } catch (syncError) {
+        console.warn('Team config sync failed (non-critical):', syncError.message);
+      }
+    }
+
     return Response.json({
       success: true,
       message: `Successfully saved ${selected_board_ids.length} project(s)`
