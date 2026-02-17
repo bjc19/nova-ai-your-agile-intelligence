@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -217,11 +218,7 @@ export default function DashboardAdmins() {
                     </Badge>
                     <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {new Date().
-                      toLocaleDateString('fr-FR',
-                      { weekday: 'long', year: 
-                      'numeric', month: 'long', 
-                      day: 'numeric' })}
+                      {sprintInfo.name}
                     </Badge>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
@@ -337,34 +334,38 @@ export default function DashboardAdmins() {
             }
 
               {analysisHistory.length > 0 &&
-            <RealityMapCard
-              flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
+              <RealityMapCard
+                flowData={{
+                  assignee_changes: [
+                  { person: "Mary", count: 42 },
+                  { person: "John", count: 12 }],
 
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
+                  mention_patterns: [
+                  { person: "Mary", type: "prioritization", count: 35 },
+                  { person: "Dave", type: "unblocking", count: 19 }],
 
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
+                  blocked_resolutions: [
+                  { person: "Dave", count: 19 }],
 
-                data_days: 30
-              }}
-              flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
-              }}
-              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+                  data_days: 30
+                }}
+                flowMetrics={{
+                  blocked_tickets_over_5d: 12,
+                  avg_cycle_time: 8.2,
+                  avg_wait_time_percent: 65,
+                  reopened_tickets: 8,
+                  total_tickets: 100,
+                  data_days: 30
+                }}
+                onDiscussSignals={() => console.log("Discuss systemic signals")} />
 
-            }
-              
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              }
+
+              {analysisHistory.length > 0 &&
+              <PredictiveInsights />
+              }
+
+                <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
