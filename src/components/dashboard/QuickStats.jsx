@@ -46,56 +46,65 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   }, []);
 
   useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        
-        const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
-        const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 10000);
-        
-        const slackMarkers = allMarkers.filter(m => 
-          m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
-        );
-        
-        const teamsMarkers = allMarkers.filter(m => 
-          m.detection_source === 'teams_daily'
-        );
+     const fetchSignals = async () => {
+       try {
+         const sevenDaysAgo = new Date();
+         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-        const jiraMarkers = allMarkers.filter(m => 
-          m.detection_source === 'jira_backlog'
-        );
-        
-        const selectedPeriod = sessionStorage.getItem("selectedPeriod");
-        let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        let filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-        let filteredResolved = resolvedEntities;
-        
-        if (selectedPeriod) {
-          const period = JSON.parse(selectedPeriod);
-          const startDate = new Date(period.start);
-          const endDate = new Date(period.end);
-          endDate.setHours(23, 59, 59, 999);
-          
-          filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
-          filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
-          filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
-          filteredResolved = resolvedEntities.filter(r => {
-            const resolvedDate = new Date(r.data?.resolved_date || r.resolved_date);
-            return resolvedDate >= startDate && resolvedDate <= endDate;
-          });
-        }
-        
-        setGdprSignals([...filteredSlack, ...filteredJira]);
-        setTeamsInsights(filteredTeams);
-        setResolvedItems(filteredResolved.map(item => item.item_id));
-      } catch (error) {
-        console.error("Erreur chargement signaux:", error);
-      }
-    };
+         const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
+         const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 10000);
 
-    fetchSignals();
+         // Filter by workspace if selected
+         let workspaceMarkers = allMarkers;
+         let workspaceResolved = resolvedEntities;
+
+         if (selectedWorkspaceId) {
+           workspaceMarkers = allMarkers.filter(m => m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId);
+           workspaceResolved = resolvedEntities.filter(r => r.workspace_id === selectedWorkspaceId || r.jira_project_selection_id === selectedWorkspaceId);
+         }
+
+         const slackMarkers = workspaceMarkers.filter(m => 
+           m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
+         );
+
+         const teamsMarkers = workspaceMarkers.filter(m => 
+           m.detection_source === 'teams_daily'
+         );
+
+         const jiraMarkers = workspaceMarkers.filter(m => 
+           m.detection_source === 'jira_backlog'
+         );
+
+         const selectedPeriod = sessionStorage.getItem("selectedPeriod");
+         let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+         let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+         let filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
+         let filteredResolved = workspaceResolved;
+
+         if (selectedPeriod) {
+           const period = JSON.parse(selectedPeriod);
+           const startDate = new Date(period.start);
+           const endDate = new Date(period.end);
+           endDate.setHours(23, 59, 59, 999);
+
+           filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
+           filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
+           filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
+           filteredResolved = workspaceResolved.filter(r => {
+             const resolvedDate = new Date(r.data?.resolved_date || r.resolved_date);
+             return resolvedDate >= startDate && resolvedDate <= endDate;
+           });
+         }
+
+         setGdprSignals([...filteredSlack, ...filteredJira]);
+         setTeamsInsights(filteredTeams);
+         setResolvedItems(filteredResolved.map(item => item.item_id));
+       } catch (error) {
+         console.error("Erreur chargement signaux:", error);
+       }
+     };
+
+     fetchSignals();
     
     const handleFocus = () => {
       fetchSignals();
