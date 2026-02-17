@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Database, Layers } from "lucide-react";
 
-export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId, user }) {
+export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId, userRole }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,16 +11,13 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   useEffect(() => {
     const loadWorkspaces = async () => {
       try {
-        if (!user?.email) {
-          console.log("🔍 [WorkspaceSelector] User not available, skipping");
-          return;
-        }
-        console.log("🔍 [WorkspaceSelector] User from props:", user?.email);
+        const user = await base44.auth.me();
+        console.log("🔍 [WorkspaceSelector] User loaded:", user?.email);
         
         let selections = [];
         
         // For regular users, load only assigned workspaces
-        if (user?.role === 'user') {
+        if (userRole === 'user') {
           // Load Jira projects (RLS automatically filters based on WorkspaceMember relation)
           const jiraData = await base44.entities.JiraProjectSelection.filter({ 
             is_active: true 
@@ -53,11 +50,10 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
           // Load ONLY Jira projects if Jira is connected
           if (jiraConns.length > 0) {
             const jiraData = await base44.entities.JiraProjectSelection.filter({ 
-              is_active: true,
-              created_by: user?.email
+              is_active: true 
             });
             console.log("🔍 [WorkspaceSelector] Admin/Contributor - Jira selections loaded:", jiraData.length, jiraData);
-            console.log("🔍 [WorkspaceSelector] Current user role:", user?.role);
+            console.log("🔍 [WorkspaceSelector] Current user role:", userRole);
             console.log("🔍 [WorkspaceSelector] Current user email:", user?.email);
             selections = jiraData.map(ws => ({
               ...ws,
@@ -67,8 +63,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
           // Otherwise, load ONLY Trello boards if Trello is connected
           else if (trelloConns.length > 0) {
             const trelloData = await base44.entities.TrelloProjectSelection.filter({ 
-              is_active: true,
-              created_by: user?.email
+              is_active: true 
             });
             console.log("🔍 [WorkspaceSelector] Admin/Contributor - Trello selections loaded:", trelloData.length, trelloData);
             selections = trelloData.map(ws => ({
@@ -88,7 +83,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
     };
 
     loadWorkspaces();
-  }, [user?.email, user?.role]);
+  }, [userRole]);
 
   if (loading) {
     return null;
