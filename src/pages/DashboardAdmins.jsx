@@ -312,8 +312,8 @@ export default function DashboardAdmins() {
 
             }
 
-              {analysisHistory.length > 0 &&
-            <MetricsRadarCard
+              {analysisHistory.length > 0 && filteredGdprSignals.length > 0 &&
+              <MetricsRadarCard
               metricsData={{
                 velocity: { current: 45, trend: "up", change: 20 },
                 flow_efficiency: { current: 28, target: 55 },
@@ -337,7 +337,7 @@ export default function DashboardAdmins() {
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
-            }
+              }
 
               {analysisHistory.length > 0 &&
             <RealityMapCard
