@@ -339,21 +339,19 @@ export default function Plans() {
                       <p className="font-semibold text-sm mb-3 text-slate-700">Sources contributives verrouillées:</p>
                       <div className="space-y-2">
                         {plan.locked_sources.map((source) => (
-                          <TooltipProvider key={source}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200 opacity-50 cursor-not-allowed">
-                                  <Lock className="w-4 h-4 text-slate-400" />
-                                  <span className="text-xs text-slate-500 capitalize font-medium">{source}</span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs">
-                                  {source} est disponible uniquement pour les plans supérieurs
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <Tooltip key={source}>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200 opacity-50 cursor-not-allowed">
+                                <Lock className="w-4 h-4 text-slate-400" />
+                                <span className="text-xs text-slate-500 capitalize font-medium">{source}</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs">
+                                {source} est disponible uniquement pour les plans supérieurs
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         ))}
                       </div>
                     </div>
