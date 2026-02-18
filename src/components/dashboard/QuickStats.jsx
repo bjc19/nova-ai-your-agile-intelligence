@@ -115,8 +115,13 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
 
      fetchSignals();
 
+     // Debounced focus handler to avoid rate limit (min 30s between focus refetches)
+     let lastFetch = Date.now();
      const handleFocus = () => {
-       fetchSignals();
+       if (Date.now() - lastFetch > 30000) {
+         lastFetch = Date.now();
+         fetchSignals();
+       }
      };
      window.addEventListener('focus', handleFocus);
 
