@@ -34,6 +34,19 @@ Deno.serve(async (req) => {
     const jiraConn = jiraConnections[0];
     const accessToken = jiraConn.access_token;
     logs.push(`✅ Using connection: ${jiraConn.cloud_id}`);
+    logs.push(`📋 Stored scopes in DB: ${JSON.stringify(jiraConn.scopes)}`);
+
+    // Verify token details directly with Atlassian
+    try {
+      const tokenDetailsRes = await fetch('https://api.atlassian.com/oauth/token/accessible-resources', {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      const tokenDetails = await tokenDetailsRes.json();
+      logs.push(`🔐 Atlassian token verification: ${tokenDetailsRes.ok ? 'SUCCESS' : 'FAILED'}`);
+      logs.push(`📦 Accessible resources: ${JSON.stringify(tokenDetails)}`);
+    } catch (e) {
+      logs.push(`⚠️ Could not verify token: ${e.message}`);
+    }
 
     // Get ALL JiraProjectSelection records
     const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
