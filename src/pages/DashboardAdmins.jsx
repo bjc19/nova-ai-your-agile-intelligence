@@ -43,7 +43,8 @@ export default function DashboardAdmins() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
+          const [gdprSignals, setGdprSignals] = useState([]);
+          const [isSyncing, setIsSyncing] = useState(false);
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -110,28 +111,19 @@ export default function DashboardAdmins() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history with filters
-  const { data: analysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedPeriod, selectedWorkspaceId],
-    queryFn: async () => {
-      const queryFilter = {};
-      if (selectedPeriod) {
-        const startDate = new Date(selectedPeriod.start).toISOString();
-        const endDate = new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)).toISOString();
-        queryFilter.created_date = {
-          $gte: startDate,
-          $lte: endDate
-        };
-      }
-      if (selectedWorkspaceId) {
-        queryFilter.jira_project_selection_id = selectedWorkspaceId;
-      }
-      console.log("🔍 [DashboardAdmins] Query filter for AnalysisHistory:", queryFilter);
-      const results = await base44.entities.AnalysisHistory.filter(queryFilter, '-created_date', 100);
-      console.log("📊 [DashboardAdmins] Analysis results:", results.length, "records", results);
-      return results;
-    },
+  // Fetch analysis history
+  const { data: allAnalysisHistory = [] } = useQuery({
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
+  });
+
+  // Filter analysis history
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
+    return matchesPeriod && matchesWorkspace;
   });
 
   // Check for stored analysis
@@ -239,6 +231,27 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
+                <Button
+                  onClick={async () => {
+                    setIsSyncing(true);
+                    try {
+                      const res = await base44.functions.invoke('syncJiraBacklog', {});
+                      if (res.data.success) {
+                        window.location.reload();
+                      }
+                    } catch (error) {
+                      console.error('Sync error:', error);
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  disabled={isSyncing}
+                  className="gap-2"
+                  variant="outline">
+                  <Zap className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Syncing...' : 'Sync Jira'}
+                </Button>
+
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
