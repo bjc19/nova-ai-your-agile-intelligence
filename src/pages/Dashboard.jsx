@@ -20,6 +20,7 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import { getCacheService } from "@/components/hooks/useCacheService";
 
 import {
   Mic,
@@ -29,7 +30,8 @@ import {
   Calendar,
   Clock,
   Loader2,
-  TrendingUp } from
+  TrendingUp,
+  RefreshCw } from
 "lucide-react";
 
 export default function Dashboard() {
@@ -41,14 +43,10 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-
-  const handleWorkspaceChange = (workspaceId) => {
-    setSelectedWorkspaceId(workspaceId);
-  };
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -108,14 +106,8 @@ export default function Dashboard() {
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspaceId],
-    queryFn: async () => {
-      const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
-      if (selectedWorkspaceId) {
-        return analyses.filter(a => a.jira_project_selection_id === selectedWorkspaceId);
-      }
-      return analyses;
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -158,6 +150,28 @@ export default function Dashboard() {
       }
     }
   }, [selectedPeriod]);
+
+  // Refresh workspace data
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Invalidate cache and refetch analysis history
+      const cache = getCacheService?.();
+      if (cache) {
+        cache.invalidate('analysisHistory');
+      }
+      // Re-fetch signals
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+      const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+      setGdprSignals(recentMarkers);
+    } catch (error) {
+      console.error("Erreur rafraîchissement données:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Calculate sprint info from real data
   const calculateDaysRemaining = (endDate) => {
@@ -293,10 +307,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                onWorkspaceChange={handleWorkspaceChange}
-                activeWorkspaceId={selectedWorkspaceId}
-                userRole={user?.app_role || user?.role} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -304,7 +315,15 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
-
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="text-slate-600 hover:text-slate-700">
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                Rafraîchir
+              </Button>
               </div>
             </div>
 
