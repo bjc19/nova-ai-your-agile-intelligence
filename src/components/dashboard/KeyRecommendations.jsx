@@ -349,9 +349,7 @@ RÈGLE ABSOLUE D'ANONYMISATION : Si le texte contient des noms au format anonymi
   };
 
   // Don't render if no real recommendations for the selected workspace
-  const hasRealRecommendations = allSourceRecommendations.length > 0 || (latestAnalysis?.recommendations?.length > 0);
-
-  if (!hasRealRecommendations) {
+  if (allSourceRecommendations.length === 0) {
     return null;
   }
 
