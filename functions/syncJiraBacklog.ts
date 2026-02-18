@@ -35,36 +35,85 @@ Deno.serve(async (req) => {
     logs.push(`✅ Using connection: ${jiraConn.cloud_id}`);
     logs.push(`📋 Connection scopes: ${JSON.stringify(jiraConn.scopes)}`);
     
-    // Refresh token if needed before attempting API calls
-    logs.push('🔄 Calling refreshJiraAccessToken (via asServiceRole)...');
-    let refreshResult;
-    try {
-      refreshResult = await base44.asServiceRole.functions.invoke('refreshJiraAccessToken', {
-        connection_id: jiraConn.id
+    // Refresh token inline if needed
+    logs.push('🔄 Checking token expiry...');
+    const expiresAt = new Date(jiraConn.expires_at);
+    const now = new Date();
+    const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+
+    let accessToken = jiraConn.access_token;
+
+    if (timeUntilExpiry < 5 * 60 * 1000) {
+      logs.push('🔄 Token expiring soon, refreshing...');
+      const clientId = Deno.env.get('JIRA_CLIENT_ID');
+      const clientSecret = Deno.env.get('JIRA_CLIENT_SECRET');
+
+      if (!clientId || !clientSecret) {
+        logs.push('❌ Jira OAuth credentials not configured');
+        return Response.json({ error: 'Jira OAuth not configured' }, { status: 500 });
+      }
+
+      if (!jiraConn.refresh_token || jiraConn.refresh_token === 'none') {
+        logs.push('❌ No refresh token available');
+        await base44.asServiceRole.entities.JiraConnection.update(jiraConn.id, {
+          connection_status_error: true,
+          connection_error_message: 'Refresh token not available. Please reconnect Jira.',
+          connection_error_timestamp: new Date().toISOString(),
+          is_active: false
+        });
+        return Response.json({ 
+          error: 'No refresh token available. Please reconnect Jira.',
+          requiresReconnection: true
+        }, { status: 401 });
+      }
+
+      const refreshResponse = await fetch('https://auth.atlassian.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: jiraConn.refresh_token,
+        }),
       });
-      logs.push(`📊 Refresh result: success=${refreshResult.data.success}, status=${refreshResult.status}`);
-    } catch (refreshError) {
-      logs.push(`❌ refreshJiraAccessToken call failed: ${refreshError.message}`);
-      logs.push(`❌ Error details: ${JSON.stringify(refreshError)}`);
-      return Response.json({ 
-        success: false, 
-        message: `Token refresh failed: ${refreshError.message}`,
-        logs
-      }, { status: 500 });
-    }
 
-    if (!refreshResult.data.success) {
-      logs.push('❌ Token refresh failed');
-      return Response.json({ 
-        success: false, 
-        message: refreshResult.data.error || 'Token refresh failed',
-        logs,
-        requiresReconnection: refreshResult.data.requiresReconnection
-      }, { status: 401 });
-    }
+      logs.push(`📊 Refresh response status: ${refreshResponse.status}`);
 
-    const refreshedAccessToken = refreshResult.data.access_token;
-    logs.push(`✅ Token refreshed (expires: ${refreshResult.data.expires_at})`);
+      if (!refreshResponse.ok) {
+        const errorText = await refreshResponse.text();
+        logs.push(`❌ Token refresh failed: ${errorText.substring(0, 200)}`);
+        await base44.asServiceRole.entities.JiraConnection.update(jiraConn.id, {
+          connection_status_error: true,
+          connection_error_message: 'Token refresh failed. Please reconnect Jira.',
+          connection_error_timestamp: new Date().toISOString(),
+          is_active: false
+        });
+        return Response.json({ 
+          error: 'Token refresh failed. Please reconnect Jira.',
+          requiresReconnection: true
+        }, { status: 401 });
+      }
+
+      const refreshData = await refreshResponse.json();
+      accessToken = refreshData.access_token;
+      const newExpiresAt = new Date(Date.now() + refreshData.expires_in * 1000).toISOString();
+      const newRefreshToken = refreshData.refresh_token || jiraConn.refresh_token;
+
+      logs.push('✅ Token refreshed successfully');
+
+      await base44.asServiceRole.entities.JiraConnection.update(jiraConn.id, {
+        access_token: accessToken,
+        refresh_token: newRefreshToken,
+        expires_at: newExpiresAt,
+        connection_status_error: false,
+        connection_error_message: null,
+        connection_error_timestamp: null,
+        is_active: true
+      });
+    } else {
+      logs.push('✅ Token still valid');
+    }
     
     // CRITICAL: Validate scopes before attempting API calls
     const requiredScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software'];
