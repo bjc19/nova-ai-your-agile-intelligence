@@ -127,19 +127,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
         });
       });
 
-      // Add manual analysis recommendations if available (only if no data from backend)
-      if (allRecs.length === 0 && latestAnalysis?.recommendations && latestAnalysis.recommendations.length > 0) {
-        allRecs.push(...latestAnalysis.recommendations.map((rec, i) => {
-          const recText = typeof rec === 'string' ? rec : rec?.description || rec?.action || JSON.stringify(rec);
-          return {
-            type: "default",
-            title: recText.substring(0, 50) + (recText.length > 50 ? "..." : ""),
-            description: recText,
-            priority: i === 0 ? "high" : "medium",
-            source: 'analysis'
-          };
-        }));
-      }
+      // No fallback to latestAnalysis - only show recommendations linked to the selected workspace
 
       // Apply translation if needed
       if (translatedRecommendations) {
