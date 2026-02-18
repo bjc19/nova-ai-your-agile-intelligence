@@ -37,12 +37,17 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Get active Jira project selections
-    const jiraSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({ 
-      is_active: true 
+    // Get ALL Jira project selections (debug)
+    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
+    console.log(`🔍 TOTAL JiraProjectSelection found: ${allSelections.length}`);
+    allSelections.forEach((sel, i) => {
+      console.log(`  [${i}] ${sel.jira_project_name} - Board: ${sel.jira_board_id}, is_active: ${sel.is_active}`);
     });
 
-    console.log(`🔍 Found ${jiraSelections.length} active Jira project selections`);
+    // Get active Jira project selections
+    const jiraSelections = allSelections.filter(s => s.is_active === true);
+
+    console.log(`🔍 Found ${jiraSelections.length} ACTIVE Jira project selections`);
     if (jiraSelections.length > 0) {
       jiraSelections.forEach((sel, i) => {
         console.log(`  [${i}] ${sel.jira_project_name} - Board: ${sel.jira_board_id}, Key: ${sel.jira_project_key}`);
