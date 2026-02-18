@@ -36,10 +36,10 @@ Deno.serve(async (req) => {
     logs.push(`📋 Connection scopes: ${JSON.stringify(jiraConn.scopes)}`);
     
     // Refresh token if needed before attempting API calls
-    logs.push('🔄 Calling refreshJiraAccessToken...');
+    logs.push('🔄 Calling refreshJiraAccessToken (via asServiceRole)...');
     let refreshResult;
     try {
-      refreshResult = await base44.functions.invoke('refreshJiraAccessToken', {
+      refreshResult = await base44.asServiceRole.functions.invoke('refreshJiraAccessToken', {
         connection_id: jiraConn.id
       });
       logs.push(`📊 Refresh result: success=${refreshResult.data.success}, status=${refreshResult.status}`);
