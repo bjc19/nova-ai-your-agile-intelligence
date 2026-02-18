@@ -79,14 +79,42 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
              workspaceItemIds.add(`teams-risk-${m.id}`);
            });
 
-           // Analysis-based IDs: fetch analyses for this workspace and build analysis-{idx}-{bidx} IDs
+           // PatternDetection IDs linked to analyses of this workspace
            const workspaceAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId });
-           workspaceAnalyses.forEach((a, idx) => {
-             (a.analysis_data?.blockers || []).forEach((_, bidx) => workspaceItemIds.add(`${idx}-${bidx}`));
-             (a.analysis_data?.risks || []).forEach((_, ridx) => workspaceItemIds.add(`${idx}-${ridx}`));
+           const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
+
+           // Add PatternDetection IDs for analyses in this workspace
+           const patternDetections = await base44.entities.PatternDetection.list('-created_date', 10000);
+           patternDetections.forEach(p => {
+             if (workspaceAnalysisIds.has(p.analysis_id)) {
+               workspaceItemIds.add(p.id);
+             }
            });
 
-           workspaceResolved = resolvedEntities.filter(r => workspaceItemIds.has(r.item_id));
+           // For analysis-based resolved items (format "{analysisIndex}-{blockerIndex}"),
+           // we check the resolved item's original_analysis_date against workspace analyses dates
+           const workspaceAnalysisDates = new Set(workspaceAnalyses.map(a => a.created_date?.toString()));
+           resolvedEntities.forEach(r => {
+             const itemId = r.data?.item_id || r.item_id;
+             if (!itemId) return;
+             // Already matched by marker/pattern IDs
+             if (workspaceItemIds.has(itemId)) return;
+             // For "{idx}-{bidx}" format: match by original_analysis_date
+             if (/^\d+-\d+$/.test(itemId)) {
+               const originalDate = r.data?.original_analysis_date;
+               if (originalDate) {
+                 const matchingAnalysis = workspaceAnalyses.find(a =>
+                   a.created_date && Math.abs(new Date(a.created_date) - new Date(originalDate)) < 2000
+                 );
+                 if (matchingAnalysis) workspaceItemIds.add(itemId);
+               }
+             }
+           });
+
+           workspaceResolved = resolvedEntities.filter(r => {
+             const itemId = r.data?.item_id || r.item_id;
+             return workspaceItemIds.has(itemId);
+           });
          }
 
          const slackMarkers = workspaceMarkers.filter(m => 
