@@ -70,9 +70,10 @@ Deno.serve(async (req) => {
         client_secret: clientSecret,
         refresh_token: jiraConn.refresh_token,
       };
-      
+
       console.log(`📤 Request body keys: ${Object.keys(requestBody).join(', ')}`);
-      
+      console.log(`🔍 Refresh token length: ${jiraConn.refresh_token?.length}`);
+
       const refreshResponse = await fetch('https://auth.atlassian.com/oauth/token', {
         method: 'POST',
         headers: {
@@ -80,17 +81,13 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify(requestBody),
       });
-      
+
       console.log(`📊 Refresh response status: ${refreshResponse.status}`);
-      
-      if (!refreshResponse.ok) {
-        const responseText = await refreshResponse.text();
-        console.log(`❌ Refresh response body: ${responseText.substring(0, 500)}`);
-      }
+      const responseText = await refreshResponse.text();
+      console.log(`📨 Full response body: ${responseText}`);
 
       if (!refreshResponse.ok) {
-        const errorText = await refreshResponse.text();
-        console.error('❌ Token refresh failed:', errorText);
+        console.error('❌ Token refresh failed:', responseText);
         
         // Mark connection as having error
         await base44.entities.JiraConnection.update(connection_id, {
