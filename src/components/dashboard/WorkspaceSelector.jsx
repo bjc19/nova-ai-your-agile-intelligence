@@ -7,6 +7,7 @@ import { debugLog, useDebugWorkspaceFlow } from "@/components/hooks/useDebugWork
 export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId, userRole }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { logStateChange, logCallback, logRenderCycle } = useDebugWorkspaceFlow('WorkspaceSelector');
 
 
   useEffect(() => {
