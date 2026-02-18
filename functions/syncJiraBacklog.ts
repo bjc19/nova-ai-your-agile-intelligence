@@ -23,36 +23,40 @@ Deno.serve(async (req) => {
     logs.push(`🔍 Found ${jiraConnections.length} active Jira connections`);
 
     if (jiraConnections.length === 0) {
+      logs.push('❌ No active Jira connection found');
       return Response.json({ 
         success: false, 
-        message: 'No active Jira connection found' 
+        message: 'No active Jira connection found',
+        logs
       }, { status: 400 });
     }
 
     const jiraConn = jiraConnections[0];
-    console.log(`✅ Using connection: ${jiraConn.cloud_id}`);
+    logs.push(`✅ Using connection: ${jiraConn.cloud_id}`);
     
     const accessToken = jiraConn.access_token;
     if (!accessToken) {
+      logs.push('❌ No Jira access token');
       return Response.json({ 
         success: false, 
-        message: 'No Jira access token' 
+        message: 'No Jira access token',
+        logs
       }, { status: 400 });
     }
 
     // Diagnostic: fetch ALL project selections to check RLS filtering
-     const allSelections = await base44.entities.JiraProjectSelection.list();
-     console.log(`📊 ALL JiraProjectSelection count: ${allSelections.length}`);
-     if (allSelections.length > 0) {
-       console.log(`📊 First selection: ID=${allSelections[0].id}, is_active=${allSelections[0].is_active}`);
-     }
+    const allSelections = await base44.entities.JiraProjectSelection.list();
+    logs.push(`📊 ALL JiraProjectSelection count: ${allSelections.length}`);
+    if (allSelections.length > 0) {
+      logs.push(`📊 First selection: ID=${allSelections[0].id}, is_active=${allSelections[0].is_active}`);
+    }
 
-     // Get project selections (user-scoped, respects RLS)
-     const jiraSelections = await base44.entities.JiraProjectSelection.filter({ 
-       is_active: true 
-     });
+    // Get project selections (user-scoped, respects RLS)
+    const jiraSelections = await base44.entities.JiraProjectSelection.filter({ 
+      is_active: true 
+    });
 
-     console.log(`✅ Found ${jiraSelections.length} ACTIVE project selections`);
+    logs.push(`✅ Found ${jiraSelections.length} ACTIVE project selections`);
 
     if (jiraSelections.length === 0) {
       return Response.json({ 
