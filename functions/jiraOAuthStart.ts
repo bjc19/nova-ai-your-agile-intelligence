@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     authorizationUrl.searchParams.append('client_id', clientId);
     authorizationUrl.searchParams.append('redirect_uri', redirectUri);
     authorizationUrl.searchParams.append('response_type', 'code');
-    authorizationUrl.searchParams.append('scope', 'read:jira-work read:jira-user read:board-scope:jira-software read:sprint:jira-software read:project:jira offline_access');
+    authorizationUrl.searchParams.append('scope', 'read:jira-work read:jira-user read:board-scope:jira-software read:sprint:jira-software offline_access');
     authorizationUrl.searchParams.append('state', customer_id); // Pass customer_id as state
     authorizationUrl.searchParams.append('prompt', 'consent');
 
