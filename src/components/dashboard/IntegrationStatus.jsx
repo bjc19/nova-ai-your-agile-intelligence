@@ -30,35 +30,26 @@ export default function IntegrationStatus({ integrations = {} }) {
   const checkConnections = async () => {
     try {
       const authenticated = await base44.auth.isAuthenticated();
-      if (authenticated) {
-        const user = await base44.auth.me();
-        setUserRole(user?.app_role || user?.role || 'user');
-        
-        // Show all workspace connections for transparency
-        const [slackConns, teamsConns, jiraConns, trelloConns, confluenceConns] = await Promise.all([
-          base44.entities.SlackConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.TeamsConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.JiraConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.TrelloConnection.filter({ 
-            is_active: true
-          }),
-          base44.entities.ConfluenceConnection.filter({ 
-            is_active: true
-          })
-        ]);
-        
-        setSlackConnected(slackConns.length > 0);
-        setTeamsConnected(teamsConns.length > 0);
-        setJiraConnected(jiraConns.length > 0);
-        setTrelloConnected(trelloConns.length > 0);
-        setConfluenceConnected(confluenceConns.length > 0);
-      }
+      if (!authenticated) return;
+
+      const user = await base44.auth.me();
+      setUserRole(user?.app_role || user?.role || 'user');
+
+      // Sequential fetches to avoid rate limit - not all needed at once
+      const slackConns = await base44.entities.SlackConnection.filter({ is_active: true });
+      setSlackConnected(slackConns.length > 0);
+
+      const teamsConns = await base44.entities.TeamsConnection.filter({ is_active: true });
+      setTeamsConnected(teamsConns.length > 0);
+
+      const jiraConns = await base44.entities.JiraConnection.filter({ is_active: true });
+      setJiraConnected(jiraConns.length > 0);
+
+      const trelloConns = await base44.entities.TrelloConnection.filter({ is_active: true });
+      setTrelloConnected(trelloConns.length > 0);
+
+      const confluenceConns = await base44.entities.ConfluenceConnection.filter({ is_active: true });
+      setConfluenceConnected(confluenceConns.length > 0);
     } catch (error) {
       console.error("Error checking connections:", error);
     }
