@@ -169,8 +169,8 @@ Deno.serve(async (req) => {
      }
 
      console.log(`🔄 Starting board fetch for ${selected_project_ids.length} projects...`);
-     console.log('📦 Projects array:', JSON.stringify(projects));
-     console.log('🎯 Selected project IDs:', selected_project_ids);
+     console.log('📦 Projects array length:', projects.length);
+     console.log('🎯 Selected project IDs length:', selected_project_ids.length);
 
      for (const projectId of selected_project_ids) {
        console.log(`➡️  Processing projectId: ${projectId}`);
