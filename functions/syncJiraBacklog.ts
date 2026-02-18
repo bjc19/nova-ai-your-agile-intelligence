@@ -37,12 +37,19 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Get project selections (user-scoped, respects RLS)
-    const jiraSelections = await base44.entities.JiraProjectSelection.filter({ 
-      is_active: true 
-    });
+    // Diagnostic: fetch ALL project selections to check RLS filtering
+     const allSelections = await base44.entities.JiraProjectSelection.list();
+     console.log(`📊 ALL JiraProjectSelection count: ${allSelections.length}`);
+     if (allSelections.length > 0) {
+       console.log(`📊 First selection: ID=${allSelections[0].id}, is_active=${allSelections[0].is_active}`);
+     }
 
-    console.log(`✅ Found ${jiraSelections.length} active project selections`);
+     // Get project selections (user-scoped, respects RLS)
+     const jiraSelections = await base44.entities.JiraProjectSelection.filter({ 
+       is_active: true 
+     });
+
+     console.log(`✅ Found ${jiraSelections.length} ACTIVE project selections`);
 
     if (jiraSelections.length === 0) {
       return Response.json({ 
