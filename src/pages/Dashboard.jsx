@@ -45,6 +45,7 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [syncLoading, setSyncLoading] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
