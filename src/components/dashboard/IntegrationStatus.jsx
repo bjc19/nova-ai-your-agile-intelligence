@@ -26,31 +26,39 @@ export default function IntegrationStatus({ integrations = {} }) {
   const [trelloConnected, setTrelloConnected] = useState(false);
   const [confluenceConnected, setConfluenceConnected] = useState(false);
   const [userRole, setUserRole] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const checkConnections = async () => {
     try {
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) return;
-
-      const user = await base44.auth.me();
-      setUserRole(user?.app_role || user?.role || 'user');
-
-      // Sequential fetches to avoid rate limit - not all needed at once
-      const slackConns = await base44.entities.SlackConnection.filter({ is_active: true });
-      setSlackConnected(slackConns.length > 0);
-
-      const teamsConns = await base44.entities.TeamsConnection.filter({ is_active: true });
-      setTeamsConnected(teamsConns.length > 0);
-
-      const jiraConns = await base44.entities.JiraConnection.filter({ is_active: true });
-      setJiraConnected(jiraConns.length > 0);
-
-      const trelloConns = await base44.entities.TrelloConnection.filter({ is_active: true });
-      setTrelloConnected(trelloConns.length > 0);
-
-      const confluenceConns = await base44.entities.ConfluenceConnection.filter({ is_active: true });
-      setConfluenceConnected(confluenceConns.length > 0);
+      if (authenticated) {
+        const user = await base44.auth.me();
+        setUserRole(user?.app_role || user?.role || 'user');
+        
+        // Show all workspace connections for transparency
+        const [slackConns, teamsConns, jiraConns, trelloConns, confluenceConns] = await Promise.all([
+          base44.entities.SlackConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.TeamsConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.JiraConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.TrelloConnection.filter({ 
+            is_active: true
+          }),
+          base44.entities.ConfluenceConnection.filter({ 
+            is_active: true
+          })
+        ]);
+        
+        setSlackConnected(slackConns.length > 0);
+        setTeamsConnected(teamsConns.length > 0);
+        setJiraConnected(jiraConns.length > 0);
+        setTrelloConnected(trelloConns.length > 0);
+        setConfluenceConnected(confluenceConns.length > 0);
+      }
     } catch (error) {
       console.error("Error checking connections:", error);
     }
@@ -199,15 +207,10 @@ export default function IntegrationStatus({ integrations = {} }) {
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-500">{t('lastSyncCheck')}</span>
               <button 
-                onClick={async () => {
-                  setIsRefreshing(true);
-                  await checkConnections();
-                  setIsRefreshing(false);
-                }}
-                disabled={isRefreshing}
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
+                onClick={checkConnections}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className="w-3.5 h-3.5" />
                 {t('refresh')}
               </button>
             </div>
