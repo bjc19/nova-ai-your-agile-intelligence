@@ -52,6 +52,9 @@ Deno.serve(async (req) => {
     }
 
     // Get project selections (admin-scoped for sync operations)
+    // Add slight delay to ensure DB replication is complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     const jiraSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({ 
       is_active: true 
     });
