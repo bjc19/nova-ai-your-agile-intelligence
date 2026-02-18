@@ -93,6 +93,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
   useEffect(() => {
     if (!prodMode) return; // Skip in dev
 
+    const cache = getCacheService();
     const unsubscribe = base44.entities.GDPRMarkers.subscribe((event) => {
       if (event.type === 'create' || event.type === 'update') {
         setLiveGdprSignals((prev) => {
@@ -106,14 +107,20 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
             return [...prev, event.data];
           }
         });
+        // Invalidate cache on new signals
+        cache.invalidate('gdpr-markers-list');
       } else if (event.type === 'delete') {
         setLiveGdprSignals((prev) => prev.filter((s) => s.id !== event.id));
+        cache.invalidate('gdpr-markers-list');
       }
     });
 
-    // Fetch initial GDPR signals
-    base44.entities.GDPRMarkers.list('-created_date', 100).
-    then((signals) => setLiveGdprSignals(signals)).
+    // Fetch initial GDPR signals with cache
+    cache.get(
+      'gdpr-markers-sprint',
+      () => base44.entities.GDPRMarkers.list('-created_date', 100),
+      300
+    ).then((signals) => setLiveGdprSignals(signals)).
     catch((err) => console.error("Error fetching GDPR signals:", err));
 
     return unsubscribe;
