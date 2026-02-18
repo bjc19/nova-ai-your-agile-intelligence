@@ -64,19 +64,28 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
            workspaceMarkers = allMarkers.filter(m => m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId);
          }
 
-         // Build the set of valid item IDs for this workspace to filter resolved items
-         const workspaceItemIds = new Set();
-         workspaceMarkers.forEach((m, idx) => {
-           workspaceItemIds.add(`gdpr-blocker-${m.id}`);
-           workspaceItemIds.add(`gdpr-risk-${m.id}`);
-           workspaceItemIds.add(`jira-blocker-${m.id}`);
-           workspaceItemIds.add(`jira-risk-${m.id}`);
-           workspaceItemIds.add(`teams-blocker-${m.id}`);
-           workspaceItemIds.add(`teams-risk-${m.id}`);
-         });
-
          let workspaceResolved = resolvedEntities;
          if (selectedWorkspaceId) {
+           // Build set of valid item IDs for this workspace
+           const workspaceItemIds = new Set();
+
+           // GDPR/Jira/Teams marker-based IDs
+           workspaceMarkers.forEach(m => {
+             workspaceItemIds.add(`gdpr-blocker-${m.id}`);
+             workspaceItemIds.add(`gdpr-risk-${m.id}`);
+             workspaceItemIds.add(`jira-blocker-${m.id}`);
+             workspaceItemIds.add(`jira-risk-${m.id}`);
+             workspaceItemIds.add(`teams-blocker-${m.id}`);
+             workspaceItemIds.add(`teams-risk-${m.id}`);
+           });
+
+           // Analysis-based IDs: fetch analyses for this workspace and build analysis-{idx}-{bidx} IDs
+           const workspaceAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId });
+           workspaceAnalyses.forEach((a, idx) => {
+             (a.analysis_data?.blockers || []).forEach((_, bidx) => workspaceItemIds.add(`${idx}-${bidx}`));
+             (a.analysis_data?.risks || []).forEach((_, ridx) => workspaceItemIds.add(`${idx}-${ridx}`));
+           });
+
            workspaceResolved = resolvedEntities.filter(r => workspaceItemIds.has(r.item_id));
          }
 
