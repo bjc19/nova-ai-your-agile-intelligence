@@ -23,7 +23,16 @@ Deno.serve(async (req) => {
     }
 
     const jiraConn = jiraConnections[0];
-    const accessToken = await base44.asServiceRole.connectors.getAccessToken('jira');
+    
+    // Use the stored Jira access token from the connection
+    const accessToken = jiraConn.access_token;
+    
+    if (!accessToken) {
+      return Response.json({ 
+        success: false, 
+        message: 'No Jira access token available' 
+      }, { status: 400 });
+    }
 
     // Get active Jira project selections
     const jiraSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({ 
