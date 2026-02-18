@@ -9,12 +9,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const body = await req.json().catch(() => ({}));
+    const { selectedWorkspaceId } = body;
+
     // Fetch from all known sources
     const allRecommendations = [];
 
     // Source 0: Manual Analysis History
     try {
-      const analysisHistory = await base44.entities.AnalysisHistory.list('-created_date', 50);
+      const analysisHistory = selectedWorkspaceId
+        ? await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 50)
+        : await base44.entities.AnalysisHistory.list('-created_date', 50);
       analysisHistory.forEach(analysis => {
         if (analysis.analysis_data?.recommendations && Array.isArray(analysis.analysis_data.recommendations)) {
           analysis.analysis_data.recommendations.forEach(reco => {
