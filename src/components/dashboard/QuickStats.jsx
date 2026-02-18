@@ -126,11 +126,16 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
 
      fetchSignals();
 
-     // Debounced focus handler to avoid rate limit (min 30s between focus refetches)
+     // Debounced focus handler to avoid rate limit (min 60s between focus refetches)
      let lastFetch = Date.now();
      const handleFocus = () => {
-       if (Date.now() - lastFetch > 30000) {
-         lastFetch = Date.now();
+       const now = Date.now();
+       if (now - lastFetch > 60000) { // 60 seconds minimum between fetches
+         lastFetch = now;
+         // Invalidate cache to force fresh fetch on focus
+         const cache = getCacheService();
+         cache.invalidate('gdpr-markers-list');
+         cache.invalidate('pattern-detection-resolved');
          fetchSignals();
        }
      };
