@@ -45,7 +45,23 @@ export default function DashboardAdmins() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Check authentication, role, and load all init data in parallel
+  // Fetch GDPR signals
+  useEffect(() => {
+    const fetchSignals = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+    fetchSignals();
+  }, []);
+
+  // Check authentication and role
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -64,26 +80,30 @@ export default function DashboardAdmins() {
 
       setUser(currentUser);
 
-      // Load all init data in parallel (single batch, no sequential calls)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const [activeSprints, teamConfigs, pendingAlerts, markers] = await Promise.all([
-        base44.entities.SprintContext.filter({ is_active: true }),
-        base44.entities.TeamConfiguration.list('-created_date', 5),
-        base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
-        base44.entities.GDPRMarkers.list('-created_date', 100),
-      ]);
-
-      if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
-      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) setShowOnboarding(true);
-      if (pendingAlerts.length > 0) {
-        const latest = pendingAlerts[pendingAlerts.length - 1];
-        setMultiProjectAlert({ confidence: latest.detection_score, signals: latest.weighted_signals, log_id: latest.id });
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
       }
 
-      const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-      setGdprSignals(recentMarkers);
+      // Check onboarding
+      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+        setShowOnboarding(true);
+      }
+
+      // Check multi-project alerts
+      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+        admin_response: "pending"
+      });
+      if (pendingAlerts.length > 0) {
+        const latest = pendingAlerts[pendingAlerts.length - 1];
+        setMultiProjectAlert({
+          confidence: latest.detection_score,
+          signals: latest.weighted_signals,
+          log_id: latest.id
+        });
+      }
 
       setIsLoading(false);
     };
@@ -146,18 +166,7 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 5,
-    historical_sprints_count: 4,
-    drift_acknowledged: false,
-    problematic_tickets: [],
-    gdprSignals: gdprSignals
-  } : null;
+  const sprintHealth = analysisHistory.length > 0 ? analysisHistory[0] : null;
 
   if (isLoading) {
     return (
@@ -213,6 +222,14 @@ export default function DashboardAdmins() {
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="text-slate-600 hover:text-slate-700">
+                  Rafraîchir
+                </Button>
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
@@ -287,56 +304,13 @@ export default function DashboardAdmins() {
 
               {analysisHistory.length > 0 &&
             <MetricsRadarCard
-              metricsData={{
-                velocity: { current: 45, trend: "up", change: 20 },
-                flow_efficiency: { current: 28, target: 55 },
-                cycle_time: { current: 9, target: 4 },
-                throughput: { current: 6, variance: 0.3 },
-                deployment_frequency: { current: 1, target: 3 },
-                data_days: 14
-              }}
-              historicalData={{
-                sprints_count: 1,
-                data_days: 7,
-                is_audit_phase: false,
-                is_new_team: true
-              }}
-              integrationStatus={{
-                jira_connected: true,
-                slack_connected: false,
-                dora_pipeline: false,
-                flow_metrics_available: true
-              }}
-              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
+              analysisHistory={analysisHistory} />
 
             }
 
               {analysisHistory.length > 0 &&
             <RealityMapCard
-              flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
-
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
-
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
-
-                data_days: 30
-              }}
-              flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
-              }}
-              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+              analysisHistory={analysisHistory} />
 
             }
               
