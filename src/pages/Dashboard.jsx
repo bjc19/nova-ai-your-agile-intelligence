@@ -53,6 +53,51 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
+  // Handle workspace change
+  const handleWorkspaceChange = (workspaceId) => {
+    debugLog('Dashboard.handleWorkspaceChange called', { 
+      receivedValue: workspaceId,
+      type: typeof workspaceId
+    });
+
+    const id = workspaceId === 'null' ? null : (workspaceId === '' ? null : workspaceId);
+
+    debugLog('After normalizing workspaceId', { 
+      normalized: id,
+      isNull: id === null,
+      isEmpty: id === ''
+    });
+
+    setSelectedWorkspaceId(id);
+    debugLog('setState called with setSelectedWorkspaceId', { 
+      newState: id
+    });
+
+    if (id) {
+      sessionStorage.setItem('selectedWorkspaceId', id);
+      debugLog('sessionStorage.setItem executed', { 
+        key: 'selectedWorkspaceId',
+        value: id,
+        verified: sessionStorage.getItem('selectedWorkspaceId') === id
+      });
+    } else {
+      sessionStorage.removeItem('selectedWorkspaceId');
+      debugLog('sessionStorage.removeItem executed', { 
+        key: 'selectedWorkspaceId',
+        verified: !sessionStorage.getItem('selectedWorkspaceId')
+      });
+    }
+  };
+
+  // Load workspace from sessionStorage on mount
+  useEffect(() => {
+    const workspaceId = sessionStorage.getItem('selectedWorkspaceId');
+    if (workspaceId) {
+      debugLog('Dashboard.useEffect: Loaded workspace from sessionStorage', { workspaceId });
+      setSelectedWorkspaceId(workspaceId);
+    }
+  }, []);
+
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
