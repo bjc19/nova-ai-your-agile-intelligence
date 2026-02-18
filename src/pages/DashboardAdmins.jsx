@@ -234,7 +234,8 @@ export default function DashboardAdmins() {
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
+                  userRole={user?.role} />
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
@@ -243,6 +244,24 @@ export default function DashboardAdmins() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
 
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    setIsSyncing(true);
+                    try {
+                      const response = await base44.functions.invoke('syncJiraBacklog', {});
+                      console.log('Sync result:', response.data);
+                    } catch (error) {
+                      console.error('Sync error:', error);
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  disabled={isSyncing}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Syncing...' : 'Sync Now'}
+                </Button>
               </div>
             </div>
 
