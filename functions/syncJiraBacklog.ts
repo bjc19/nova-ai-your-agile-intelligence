@@ -59,9 +59,11 @@ Deno.serve(async (req) => {
     logs.push(`✅ Found ${jiraSelections.length} ACTIVE project selections`);
 
     if (jiraSelections.length === 0) {
+      logs.push('❌ No active Jira project selections found');
       return Response.json({ 
         success: false, 
-        message: 'No active Jira project selections found' 
+        message: 'No active Jira project selections found',
+        logs
       }, { status: 400 });
     }
 
