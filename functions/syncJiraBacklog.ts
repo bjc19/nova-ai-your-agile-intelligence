@@ -1,23 +1,26 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
+  const logs = [];
+  
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
     // Only admins can trigger sync
     if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+      logs.push('❌ User is not admin');
+      return Response.json({ error: 'Unauthorized: Admin access required', logs }, { status: 403 });
     }
 
-    console.log(`🔐 Admin user: ${user.email}`);
+    logs.push(`🔐 Admin user: ${user.email}`);
 
     // Get Jira connections (user-scoped, respects RLS)
     const jiraConnections = await base44.entities.JiraConnection.filter({ 
       is_active: true 
     });
 
-    console.log(`🔍 Found ${jiraConnections.length} active Jira connections`);
+    logs.push(`🔍 Found ${jiraConnections.length} active Jira connections`);
 
     if (jiraConnections.length === 0) {
       return Response.json({ 
