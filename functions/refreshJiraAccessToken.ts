@@ -59,6 +59,10 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Jira OAuth not configured' }, { status: 500 });
       }
 
+      console.log('🔐 Attempting token refresh with Atlassian...');
+      console.log(`📝 Client ID: ${clientId.substring(0, 10)}...`);
+      console.log(`🔑 Refresh token present: ${!!jiraConn.refresh_token}`);
+      
       const refreshResponse = await fetch('https://auth.atlassian.com/oauth/token', {
         method: 'POST',
         headers: {
@@ -71,6 +75,8 @@ Deno.serve(async (req) => {
           refresh_token: jiraConn.refresh_token,
         }),
       });
+      
+      console.log(`📊 Refresh response status: ${refreshResponse.status}`);
 
       if (!refreshResponse.ok) {
         const errorText = await refreshResponse.text();
