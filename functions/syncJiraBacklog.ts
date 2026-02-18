@@ -36,17 +36,20 @@ Deno.serve(async (req) => {
     logs.push(`📋 Connection scopes: ${JSON.stringify(jiraConn.scopes)}`);
     
     // Refresh token if needed before attempting API calls
+    logs.push('🔄 Calling refreshJiraAccessToken...');
     const refreshResult = await base44.functions.invoke('refreshJiraAccessToken', {
       connection_id: jiraConn.id
     });
 
-    if (!refreshResult.data.success && refreshResult.data.requiresReconnection) {
-      logs.push('❌ Token refresh failed - reconnection required');
+    logs.push(`📊 Refresh result: success=${refreshResult.data.success}, status=${refreshResult.status}`);
+
+    if (!refreshResult.data.success) {
+      logs.push('❌ Token refresh failed');
       return Response.json({ 
         success: false, 
         message: refreshResult.data.error || 'Token refresh failed',
         logs,
-        requiresReconnection: true
+        requiresReconnection: refreshResult.data.requiresReconnection
       }, { status: 401 });
     }
 
