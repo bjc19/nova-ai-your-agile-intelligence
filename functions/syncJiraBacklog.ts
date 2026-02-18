@@ -107,17 +107,17 @@ Deno.serve(async (req) => {
 
         // Fetch issues in active sprint
         const issuesUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/search?jql=sprint=${activeSprint.id}&maxResults=100`;
-        console.log(`🔗 Issues URL: ${issuesUrl}`);
-        
+        logs.push(`🔗 Issues URL: ${issuesUrl}`);
+
         const issuesRes = await fetch(issuesUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 
-        console.log(`📊 Issues response: ${issuesRes.status} ${issuesRes.statusText}`);
+        logs.push(`📊 Issues response: ${issuesRes.status} ${issuesRes.statusText}`);
 
         if (!issuesRes.ok) {
           const errorText = await issuesRes.text();
-          console.error(`❌ Could not fetch issues for sprint ${activeSprint.id}: ${errorText}`);
+          logs.push(`❌ Could not fetch issues for sprint ${activeSprint.id}: ${errorText}`);
           continue;
         }
 
