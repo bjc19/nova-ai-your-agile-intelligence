@@ -31,13 +31,6 @@ import {
   Loader2,
   TrendingUp } from
 "lucide-react";
-import { debugLog, getDebugLogs, printDebugReport } from "@/components/hooks/useDebugWorkspaceFlow";
-
-// Exposer la fonction de debug en global pour y accéder depuis la console
-if (typeof window !== 'undefined') {
-  window.getDebugLogs = getDebugLogs;
-  window.printDebugReport = printDebugReport;
-}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -53,50 +46,9 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Handle workspace change
   const handleWorkspaceChange = (workspaceId) => {
-    debugLog('Dashboard.handleWorkspaceChange called', { 
-      receivedValue: workspaceId,
-      type: typeof workspaceId
-    });
-
-    const id = workspaceId === 'null' ? null : (workspaceId === '' ? null : workspaceId);
-
-    debugLog('After normalizing workspaceId', { 
-      normalized: id,
-      isNull: id === null,
-      isEmpty: id === ''
-    });
-
-    setSelectedWorkspaceId(id);
-    debugLog('setState called with setSelectedWorkspaceId', { 
-      newState: id
-    });
-
-    if (id) {
-      sessionStorage.setItem('selectedWorkspaceId', id);
-      debugLog('sessionStorage.setItem executed', { 
-        key: 'selectedWorkspaceId',
-        value: id,
-        verified: sessionStorage.getItem('selectedWorkspaceId') === id
-      });
-    } else {
-      sessionStorage.removeItem('selectedWorkspaceId');
-      debugLog('sessionStorage.removeItem executed', { 
-        key: 'selectedWorkspaceId',
-        verified: !sessionStorage.getItem('selectedWorkspaceId')
-      });
-    }
+    setSelectedWorkspaceId(workspaceId);
   };
-
-  // Load workspace from sessionStorage on mount
-  useEffect(() => {
-    const workspaceId = sessionStorage.getItem('selectedWorkspaceId');
-    if (workspaceId) {
-      debugLog('Dashboard.useEffect: Loaded workspace from sessionStorage', { workspaceId });
-      setSelectedWorkspaceId(workspaceId);
-    }
-  }, []);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -155,25 +107,11 @@ export default function Dashboard() {
   }, [navigate]);
 
   // Fetch analysis history
-   const { data: allAnalysisHistory = [] } = useQuery({
-     queryKey: ['analysisHistory', selectedWorkspaceId],
-     queryFn: async () => {
-       debugLog('Dashboard.queryFn: Fetching analyses', { selectedWorkspaceId });
-       const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
-       debugLog('Dashboard.queryFn: Raw analyses fetched', { count: analyses.length });
-
-       if (selectedWorkspaceId) {
-         const filtered = analyses.filter(a => a.jira_project_selection_id === selectedWorkspaceId);
-         debugLog('Dashboard.queryFn: After filtering', { 
-           workspaceId: selectedWorkspaceId,
-           filteredCount: filtered.length 
-         });
-         return filtered;
-       }
-       return analyses;
-     },
-     enabled: !isLoading
-   });
+  const { data: allAnalysisHistory = [] } = useQuery({
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    enabled: !isLoading
+  });
 
   // Filter analysis history based on selected period
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
@@ -349,10 +287,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                onWorkspaceChange={handleWorkspaceChange}
-                activeWorkspaceId={selectedWorkspaceId}
-                userRole={user?.role} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
