@@ -29,7 +29,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2 } from
+  Loader2,
+  RefreshCw } from
 "lucide-react";
 
 export default function DashboardAdmins() {
@@ -44,6 +45,22 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+      const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+      setGdprSignals(recentMarkers);
+    } catch (error) {
+      console.error("Erreur rafraîchissement données:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -230,6 +247,15 @@ export default function DashboardAdmins() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="text-slate-600 hover:text-slate-700">
+                  <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  Rafraîchir
+                </Button>
               </div>
             </div>
 
@@ -286,9 +312,7 @@ export default function DashboardAdmins() {
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-
-              
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
+             <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
