@@ -29,7 +29,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2 } from
+  Loader2,
+  RefreshCw } from
 "lucide-react";
 
 export default function DashboardAdmins() {
@@ -43,8 +44,7 @@ export default function DashboardAdmins() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-          const [gdprSignals, setGdprSignals] = useState([]);
-          const [isSyncing, setIsSyncing] = useState(false);
+  const [gdprSignals, setGdprSignals] = useState([]);
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -231,27 +231,6 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
-                <Button
-                  onClick={async () => {
-                    setIsSyncing(true);
-                    try {
-                      const res = await base44.functions.invoke('syncJiraBacklog', {});
-                      if (res.data.success) {
-                        window.location.reload();
-                      }
-                    } catch (error) {
-                      console.error('Sync error:', error);
-                    } finally {
-                      setIsSyncing(false);
-                    }
-                  }}
-                  disabled={isSyncing}
-                  className="gap-2"
-                  variant="outline">
-                  <Zap className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Syncing...' : 'Sync Jira'}
-                </Button>
-
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
