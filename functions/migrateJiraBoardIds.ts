@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
         const projectKey = selection.jira_project_key;
         logs.push(`🔄 Fetching board ID for project: ${projectKey}`);
 
-        const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board?projectKeyOrId=${projectKey}`;
+        const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/agile/1.0/board?projectKeyOrId=${projectKey}`;
         
         const boardRes = await fetch(boardUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
