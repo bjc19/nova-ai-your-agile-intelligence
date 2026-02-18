@@ -198,14 +198,12 @@ Deno.serve(async (req) => {
       }
 
       if (existing.length > 0) {
-        console.log('♻️ Reactivating existing project:', projectId);
         await base44.entities.JiraProjectSelection.update(existing[0].id, {
           is_active: true,
           jira_board_id: boardId
         });
       } else {
-        console.log('➕ Creating new project selection:', projectId);
-        const created = await base44.entities.JiraProjectSelection.create({
+        await base44.entities.JiraProjectSelection.create({
           jira_project_id: projectId,
           jira_project_key: project.key,
           jira_project_name: project.name,
@@ -214,7 +212,6 @@ Deno.serve(async (req) => {
           is_active: true,
           selected_date: new Date().toISOString()
         });
-        console.log('✅ Created:', created.id, 'with board ID:', boardId);
       }
     }
 
