@@ -40,7 +40,9 @@ Deno.serve(async (req) => {
 
     // Source 1: GDPR Markers (Slack & Teams)
     try {
-      const gdprMarkers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+      const gdprMarkers = selectedWorkspaceId
+        ? await base44.entities.GDPRMarkers.filter({ slack_workspace_id: selectedWorkspaceId }, '-created_date', 100)
+        : await base44.entities.GDPRMarkers.list('-created_date', 100);
       gdprMarkers.forEach(marker => {
         if (marker.recos && Array.isArray(marker.recos)) {
           marker.recos.forEach(reco => {
