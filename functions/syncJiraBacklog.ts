@@ -134,15 +134,14 @@ Deno.serve(async (req) => {
     
     logs.push(`✅ All required scopes present`);
 
-    const accessToken = refreshedAccessToken;
-    if (!accessToken) {
-     logs.push('❌ No Jira access token');
-     return Response.json({ 
-       success: false, 
-       message: 'No Jira access token',
-       logs
-     }, { status: 400 });
-    }
+if (!accessToken) {
+ logs.push('❌ No Jira access token');
+ return Response.json({ 
+   success: false, 
+   message: 'No Jira access token',
+   logs
+ }, { status: 400 });
+}
 
     // Diagnostic: fetch ALL project selections to check RLS filtering
     const allSelections = await base44.entities.JiraProjectSelection.list();
