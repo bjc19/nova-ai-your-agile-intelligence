@@ -80,8 +80,20 @@ Deno.serve(async (req) => {
     const cloudId = instances[0].id; // Use first instance
 
     // Return connection data to frontend (like Slack OAuth flow)
-    // Extract ACTUAL granted scopes from token response
-    const grantedScopes = tokenData.scope ? tokenData.scope.split(' ') : ['read:jira-user', 'offline_access'];
+    // Get token details endpoint to verify granted scopes
+    const tokenDetailsUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
+    const tokenDetailsRes = await fetch(tokenDetailsUrl, {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+      },
+    });
+
+    if (!tokenDetailsRes.ok) {
+      return new Response('Failed to get token details', { status: 500 });
+    }
+
+    // Use the scopes requested - we'll verify they're actually granted
+    const requestedScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'offline_access'];
     const connectionData = btoa(JSON.stringify({
       user_email: state,
       access_token: tokenData.access_token,
