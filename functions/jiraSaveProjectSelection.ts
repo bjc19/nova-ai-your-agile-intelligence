@@ -169,19 +169,24 @@ Deno.serve(async (req) => {
      }
 
      console.log(`🔄 Starting board fetch for ${selected_project_ids.length} projects...`);
+     console.log('📦 Projects array:', JSON.stringify(projects));
+     console.log('🎯 Selected project IDs:', selected_project_ids);
 
      for (const projectId of selected_project_ids) {
-      const project = projects.find(p => p.id === projectId);
-      if (!project) {
-        console.warn('⚠️ Project not found:', projectId);
-        continue;
-      }
+       console.log(`➡️  Processing projectId: ${projectId}`);
+       const project = projects.find(p => p.id === projectId);
+       console.log(`🔎 Found project:`, project ? 'YES' : 'NO');
 
-      console.log('🔍 Processing project:', projectId, 'with key:', project.key);
-      console.log('📋 Jira connection cloud_id:', jiraConn.cloud_id);
-      const existing = await base44.entities.JiraProjectSelection.filter({
-        jira_project_id: projectId
-      });
+       if (!project) {
+         console.warn('⚠️ Project not found:', projectId);
+         continue;
+       }
+
+       console.log('🔍 Processing project:', projectId, 'with key:', project.key);
+       console.log('📋 Jira connection cloud_id:', jiraConn.cloud_id);
+       const existing = await base44.entities.JiraProjectSelection.filter({
+         jira_project_id: projectId
+       });
 
       // Fetch board ID for this project
       let boardId = null;
