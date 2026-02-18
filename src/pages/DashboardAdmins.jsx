@@ -166,26 +166,7 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  // Build sprintHealth only from real data - NO hardcoded values
-  const realSprintHealth = useQuery({
-    queryKey: ['sprintHealth', selectedWorkspaceId],
-    queryFn: () => selectedWorkspaceId
-      ? base44.entities.SprintHealth.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1)
-      : base44.entities.SprintHealth.list('-created_date', 1),
-    enabled: !isLoading,
-  });
-
-  const latestSprintHealth = realSprintHealth.data?.[0] || null;
-
-  const sprintHealth = latestSprintHealth ? {
-    sprint_name: latestSprintHealth.sprint_name,
-    wip_count: latestSprintHealth.wip_count ?? 0,
-    wip_historical_avg: latestSprintHealth.wip_historical_avg ?? 5,
-    tickets_in_progress_over_3d: latestSprintHealth.tickets_in_progress_over_3d ?? 0,
-    blocked_tickets_over_48h: latestSprintHealth.blocked_tickets_over_48h ?? 0,
-    problematic_tickets: latestSprintHealth.problematic_tickets || [],
-    gdprSignals: gdprSignals,
-  } : null;
+  const sprintHealth = analysisHistory.length > 0 ? analysisHistory[0] : null;
 
   if (isLoading) {
     return (
@@ -241,6 +222,14 @@ export default function DashboardAdmins() {
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="text-slate-600 hover:text-slate-700">
+                  Rafraîchir
+                </Button>
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
@@ -315,56 +304,13 @@ export default function DashboardAdmins() {
 
               {analysisHistory.length > 0 &&
             <MetricsRadarCard
-              metricsData={{
-                velocity: { current: 45, trend: "up", change: 20 },
-                flow_efficiency: { current: 28, target: 55 },
-                cycle_time: { current: 9, target: 4 },
-                throughput: { current: 6, variance: 0.3 },
-                deployment_frequency: { current: 1, target: 3 },
-                data_days: 14
-              }}
-              historicalData={{
-                sprints_count: 1,
-                data_days: 7,
-                is_audit_phase: false,
-                is_new_team: true
-              }}
-              integrationStatus={{
-                jira_connected: true,
-                slack_connected: false,
-                dora_pipeline: false,
-                flow_metrics_available: true
-              }}
-              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
+              analysisHistory={analysisHistory} />
 
             }
 
               {analysisHistory.length > 0 &&
             <RealityMapCard
-              flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
-
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
-
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
-
-                data_days: 30
-              }}
-              flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
-              }}
-              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+              analysisHistory={analysisHistory} />
 
             }
               
