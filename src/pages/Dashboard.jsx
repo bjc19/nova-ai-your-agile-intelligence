@@ -467,7 +467,7 @@ export default function Dashboard() {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
+            <RecentAnalyses analyses={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
             
             {/* Integration Status */}
             <IntegrationStatus />
