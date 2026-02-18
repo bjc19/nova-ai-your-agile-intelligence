@@ -56,15 +56,19 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
          const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
-         const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 10000);
+         // Fetch resolved patterns (same source as Details page "resolved" view)
+         const resolvedPatterns = await base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 10000);
 
          // Filter by workspace if selected
          let workspaceMarkers = allMarkers;
-         let workspaceResolved = resolvedEntities;
+         let workspaceResolved = resolvedPatterns;
 
          if (selectedWorkspaceId) {
            workspaceMarkers = allMarkers.filter(m => m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId);
-           workspaceResolved = resolvedEntities.filter(r => r.workspace_id === selectedWorkspaceId || r.jira_project_selection_id === selectedWorkspaceId);
+           // PatternDetection doesn't have workspace_id either, so align with Details: show count from resolved patterns linked to analyses of this workspace
+           const workspaceAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
+           const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
+           workspaceResolved = resolvedPatterns.filter(p => workspaceAnalysisIds.has(p.analysis_id));
          }
 
          const slackMarkers = workspaceMarkers.filter(m => 
