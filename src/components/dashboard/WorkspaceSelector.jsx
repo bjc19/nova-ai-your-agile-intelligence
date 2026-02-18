@@ -93,7 +93,18 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   return (
     <div className="flex items-center gap-2">
       <Layers className="w-4 h-4 text-slate-400" />
-      <Select value={activeWorkspaceId || ""} onValueChange={onWorkspaceChange}>
+      <Select 
+        value={activeWorkspaceId || ""} 
+        onValueChange={(value) => {
+          console.log("🔍 [WorkspaceSelector] Selection changed to:", value);
+          if (onWorkspaceChange) {
+            try {
+              onWorkspaceChange(value);
+            } catch (err) {
+              console.error("❌ [WorkspaceSelector] Error in onWorkspaceChange callback:", err);
+            }
+          }
+        }}>
         <SelectTrigger className="w-[250px] bg-white border-slate-200">
           <SelectValue placeholder="Sélectionner un workspace" />
         </SelectTrigger>
