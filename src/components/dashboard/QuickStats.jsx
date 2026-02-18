@@ -99,14 +99,15 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
            filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
            filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
            filteredResolved = workspaceResolved.filter(r => {
-             const resolvedDate = new Date(r.data?.resolved_date || r.resolved_date);
+             const resolvedDate = new Date(r.resolved_date || r.created_date);
              return resolvedDate >= startDate && resolvedDate <= endDate;
            });
          }
 
          setGdprSignals([...filteredSlack, ...filteredJira]);
          setTeamsInsights(filteredTeams);
-         setResolvedItems(filteredResolved.map(item => item.item_id));
+         // Store the count of resolved patterns (aligns with Details page "resolved" view)
+         setResolvedItems(filteredResolved.map(item => item.id));
        } catch (error) {
          console.error("Erreur chargement signaux:", error);
        }
