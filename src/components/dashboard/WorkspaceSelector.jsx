@@ -108,13 +108,36 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
       <Select 
         value={activeWorkspaceId || ""} 
         onValueChange={(value) => {
-          console.log("🔍 [WorkspaceSelector] Selection changed to:", value);
+          logCallback('onValueChange', { 
+            selectedValue: value,
+            previousValue: activeWorkspaceId,
+            callbackFunctionExists: !!onWorkspaceChange 
+          });
+          
           if (onWorkspaceChange) {
             try {
-              onWorkspaceChange(value);
+              debugLog('Before calling onWorkspaceChange', { 
+                value,
+                onWorkspaceChangeType: typeof onWorkspaceChange 
+              });
+              const result = onWorkspaceChange(value);
+              debugLog('After calling onWorkspaceChange', { 
+                value,
+                resultType: typeof result,
+                isPromise: result instanceof Promise 
+              });
             } catch (err) {
-              console.error("❌ [WorkspaceSelector] Error in onWorkspaceChange callback:", err);
+              debugLog('ERROR in onWorkspaceChange callback', { 
+                error: err.message,
+                stack: err.stack,
+                value
+              });
             }
+          } else {
+            debugLog('ERROR: onWorkspaceChange is not defined', { 
+              value,
+              props: { onWorkspaceChange, activeWorkspaceId, userRole }
+            });
           }
         }}>
         <SelectTrigger className="w-[250px] bg-white border-slate-200">
