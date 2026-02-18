@@ -24,7 +24,8 @@ import {
   ArrowRight,
   Calendar,
   Clock,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 
 export default function DashboardCommonUsers() {
@@ -37,6 +38,7 @@ export default function DashboardCommonUsers() {
   const [sprintContext, setSprintContext] = useState(null);
   const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
   const [assignedWorkspaceIds, setAssignedWorkspaceIds] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Check authentication and role
   useEffect(() => {
@@ -86,6 +88,25 @@ export default function DashboardCommonUsers() {
     const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId) : assignedWorkspaceIds.includes(analysis.jira_project_selection_id);
     return matchesPeriod && matchesWorkspace;
   });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const currentUser = await base44.auth.me();
+      const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+        user_email: currentUser?.email
+      });
+      const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
+      setAssignedWorkspaceIds(workspaceIds);
+      
+      const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
+      setAllAnalysisHistory(analyses);
+    } catch (error) {
+      console.error("Erreur rafraîchissement données:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const sprintInfo = sprintContext ? {
     name: sprintContext.sprint_name,
@@ -158,6 +179,15 @@ export default function DashboardCommonUsers() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }}
                 />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="text-slate-600 hover:text-slate-700">
+                  <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  Rafraîchir
+                </Button>
               </div>
             </div>
 
