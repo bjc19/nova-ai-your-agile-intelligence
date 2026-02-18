@@ -166,8 +166,7 @@ export default function DashboardAdmins() {
     throughputPerWeek: null
   };
 
-  // SprintHealth comes from real DB only
-  const sprintHealth = null;
+  const sprintHealth = analysisHistory.length > 0 ? analysisHistory[0] : null;
 
   if (isLoading) {
     return (
@@ -223,6 +222,14 @@ export default function DashboardAdmins() {
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="text-slate-600 hover:text-slate-700">
+                  Rafraîchir
+                </Button>
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
@@ -295,7 +302,17 @@ export default function DashboardAdmins() {
 
             }
 
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
+              analysisHistory={analysisHistory} />
 
+            }
+
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
+              analysisHistory={analysisHistory} />
+
+            }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations

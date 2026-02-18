@@ -58,63 +58,13 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
          const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
          const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 10000);
 
-         // Filter markers by workspace if selected
+         // Filter by workspace if selected
          let workspaceMarkers = allMarkers;
+         let workspaceResolved = resolvedEntities;
+
          if (selectedWorkspaceId) {
            workspaceMarkers = allMarkers.filter(m => m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId);
-         }
-
-         let workspaceResolved = resolvedEntities;
-         if (selectedWorkspaceId) {
-           // Build set of valid item IDs for this workspace
-           const workspaceItemIds = new Set();
-
-           // GDPR/Jira/Teams marker-based IDs
-           workspaceMarkers.forEach(m => {
-             workspaceItemIds.add(`gdpr-blocker-${m.id}`);
-             workspaceItemIds.add(`gdpr-risk-${m.id}`);
-             workspaceItemIds.add(`jira-blocker-${m.id}`);
-             workspaceItemIds.add(`jira-risk-${m.id}`);
-             workspaceItemIds.add(`teams-blocker-${m.id}`);
-             workspaceItemIds.add(`teams-risk-${m.id}`);
-           });
-
-           // PatternDetection IDs linked to analyses of this workspace
-           const workspaceAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId });
-           const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
-
-           // Add PatternDetection IDs for analyses in this workspace
-           const patternDetections = await base44.entities.PatternDetection.list('-created_date', 10000);
-           patternDetections.forEach(p => {
-             if (workspaceAnalysisIds.has(p.analysis_id)) {
-               workspaceItemIds.add(p.id);
-             }
-           });
-
-           // For analysis-based resolved items (format "{analysisIndex}-{blockerIndex}"),
-           // we check the resolved item's original_analysis_date against workspace analyses dates
-           const workspaceAnalysisDates = new Set(workspaceAnalyses.map(a => a.created_date?.toString()));
-           resolvedEntities.forEach(r => {
-             const itemId = r.data?.item_id || r.item_id;
-             if (!itemId) return;
-             // Already matched by marker/pattern IDs
-             if (workspaceItemIds.has(itemId)) return;
-             // For "{idx}-{bidx}" format: match by original_analysis_date
-             if (/^\d+-\d+$/.test(itemId)) {
-               const originalDate = r.data?.original_analysis_date;
-               if (originalDate) {
-                 const matchingAnalysis = workspaceAnalyses.find(a =>
-                   a.created_date && Math.abs(new Date(a.created_date) - new Date(originalDate)) < 2000
-                 );
-                 if (matchingAnalysis) workspaceItemIds.add(itemId);
-               }
-             }
-           });
-
-           workspaceResolved = resolvedEntities.filter(r => {
-             const itemId = r.data?.item_id || r.item_id;
-             return workspaceItemIds.has(itemId);
-           });
+           workspaceResolved = resolvedEntities.filter(r => r.workspace_id === selectedWorkspaceId || r.jira_project_selection_id === selectedWorkspaceId);
          }
 
          const slackMarkers = workspaceMarkers.filter(m => 
