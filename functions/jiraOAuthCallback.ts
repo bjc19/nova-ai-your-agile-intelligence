@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
     const cloudId = instances[0].id; // Use first instance
 
     // Return connection data to frontend (like Slack OAuth flow)
-    const requestedScopes = ['read:jira-work', 'manage:jira-project-settings', 'read:jira-user', 'offline_access'];
+    const requestedScopes = ['read:jira-work', 'read:board-scope:jira-software', 'read:project:jira', 'read:sprint:jira-software', 'read:jira-user', 'offline_access'];
     const connectionData = btoa(JSON.stringify({
       user_email: state,
       access_token: tokenData.access_token,
