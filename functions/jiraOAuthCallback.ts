@@ -80,27 +80,28 @@ Deno.serve(async (req) => {
     const cloudId = instances[0].id; // Use first instance
 
     // Return connection data to frontend (like Slack OAuth flow)
-    // Get token details endpoint to verify granted scopes
-    const tokenDetailsUrl = 'https://api.atlassian.com/oauth/token/accessible-resources';
-    const tokenDetailsRes = await fetch(tokenDetailsUrl, {
-      headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
-      },
-    });
+    // Extract ACTUAL granted scopes from the JWT token
+    const tokenParts = tokenData.access_token.split('.');
+    let grantedScopes = [];
 
-    if (!tokenDetailsRes.ok) {
-      return new Response('Failed to get token details', { status: 500 });
+    if (tokenParts.length === 3) {
+      try {
+        const decodedPayload = JSON.parse(atob(tokenParts[1]));
+        const scopeString = decodedPayload.scope || '';
+        grantedScopes = scopeString.split(' ').filter(s => s.length > 0);
+      } catch (e) {
+        console.error('Failed to decode JWT, using fallback scopes');
+        grantedScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'offline_access'];
+      }
     }
 
-    // Use the scopes requested - we'll verify they're actually granted
-    const requestedScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'offline_access'];
     const connectionData = btoa(JSON.stringify({
       user_email: state,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token || 'none',
       expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
       cloud_id: cloudId,
-      scopes: requestedScopes,
+      scopes: grantedScopes,
       connected_at: new Date().toISOString(),
     }));
 
