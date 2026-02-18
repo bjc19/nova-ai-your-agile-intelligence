@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { getCacheService } from "@/components/hooks/useCacheService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -29,8 +30,7 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2,
-  RefreshCw } from
+  Loader2 } from
 "lucide-react";
 
 export default function DashboardAdmins() {
@@ -45,8 +45,6 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const queryClient = useQueryClient();
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -112,24 +110,6 @@ export default function DashboardAdmins() {
     };
     checkAuth();
   }, [navigate]);
-
-  // Handle refresh button
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      if (selectedWorkspaceId) {
-        console.log("Déclenchement analyse pour:", selectedWorkspaceId);
-        await base44.functions.invoke('triggerProjectAnalysis', { projectSelectionId: selectedWorkspaceId });
-        queryClient.invalidateQueries({ queryKey: ['analysisHistory'] });
-      } else {
-        console.warn("Aucun workspace sélectionné");
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'analyse:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
@@ -252,7 +232,7 @@ export default function DashboardAdmins() {
               
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
-                   activeWorkspaceId={selectedWorkspaceId}
+                  activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
 
                 <TimePeriodSelector
@@ -262,15 +242,6 @@ export default function DashboardAdmins() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefresh}
-                  disabled={!selectedWorkspaceId || refreshing}
-                  className="gap-2">
-                  <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                  {refreshing ? 'Analyse...' : 'Actualiser'}
-                </Button>
               </div>
             </div>
 
