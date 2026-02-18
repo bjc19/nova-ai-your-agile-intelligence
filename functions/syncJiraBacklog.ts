@@ -15,6 +15,8 @@ Deno.serve(async (req) => {
       is_active: true 
     });
 
+    console.log(`🔍 Found ${jiraConnections.length} active Jira connections`);
+
     if (jiraConnections.length === 0) {
       return Response.json({ 
         success: false, 
@@ -23,6 +25,7 @@ Deno.serve(async (req) => {
     }
 
     const jiraConn = jiraConnections[0];
+    console.log(`✅ Using Jira connection - Cloud ID: ${jiraConn.cloud_id}, User: ${jiraConn.user_email}`);
     
     // Use the stored Jira access token from the connection
     const accessToken = jiraConn.access_token;
@@ -39,6 +42,13 @@ Deno.serve(async (req) => {
       is_active: true 
     });
 
+    console.log(`🔍 Found ${jiraSelections.length} active Jira project selections`);
+    if (jiraSelections.length > 0) {
+      jiraSelections.forEach((sel, i) => {
+        console.log(`  [${i}] ${sel.jira_project_name} - Board: ${sel.jira_board_id}, Key: ${sel.jira_project_key}`);
+      });
+    }
+
     if (jiraSelections.length === 0) {
       return Response.json({ 
         success: false, 
@@ -52,35 +62,51 @@ Deno.serve(async (req) => {
     for (const selection of jiraSelections) {
       try {
         const projectKey = selection.jira_project_key || selection.jira_project_name;
+        const boardId = selection.jira_board_id;
+        
+        console.log(`📋 Syncing ${projectKey} - Board ID: ${boardId}`);
         
         // Fetch active sprint
-        const boardId = selection.jira_board_id;
-        const sprintRes = await fetch(
-          `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board/${boardId}/sprint?state=active`,
-          { headers: { 'Authorization': `Bearer ${accessToken}` } }
-        );
+        const sprintUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board/${boardId}/sprint?state=active`;
+        console.log(`🔗 Sprint URL: ${sprintUrl}`);
+        
+        const sprintRes = await fetch(sprintUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` } 
+        });
+
+        console.log(`📊 Sprint response: ${sprintRes.status} ${sprintRes.statusText}`);
 
         if (!sprintRes.ok) {
-          console.log(`⚠️ Could not fetch sprints for board ${boardId}`);
+          const errorText = await sprintRes.text();
+          console.error(`❌ Could not fetch sprints for board ${boardId}: ${errorText}`);
           continue;
         }
 
         const sprintData = await sprintRes.json();
         const activeSprint = sprintData.values?.[0];
 
+        console.log(`🏃 Active sprints found: ${sprintData.values?.length || 0}`);
+
         if (!activeSprint) {
           console.log(`⚠️ No active sprint for board ${boardId}`);
           continue;
         }
 
+        console.log(`✨ Sprint found: ${activeSprint.name} (ID: ${activeSprint.id})`);
+
         // Fetch issues in active sprint
-        const issuesRes = await fetch(
-          `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/search?jql=sprint=${activeSprint.id}&maxResults=100`,
-          { headers: { 'Authorization': `Bearer ${accessToken}` } }
-        );
+        const issuesUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/search?jql=sprint=${activeSprint.id}&maxResults=100`;
+        console.log(`🔗 Issues URL: ${issuesUrl}`);
+        
+        const issuesRes = await fetch(issuesUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+
+        console.log(`📊 Issues response: ${issuesRes.status} ${issuesRes.statusText}`);
 
         if (!issuesRes.ok) {
-          console.log(`⚠️ Could not fetch issues for sprint ${activeSprint.id}`);
+          const errorText = await issuesRes.text();
+          console.error(`❌ Could not fetch issues for sprint ${activeSprint.id}: ${errorText}`);
           continue;
         }
 
