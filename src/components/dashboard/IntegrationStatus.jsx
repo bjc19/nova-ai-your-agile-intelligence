@@ -58,12 +58,20 @@ export default function IntegrationStatus({ integrations = {} }) {
 
   useEffect(() => {
     checkConnections();
-    
-    // Debounced focus handler to avoid rate limit (min 30s between focus refetches)
+
+    // Debounced focus handler to avoid rate limit (min 60s between focus refetches)
     let lastFetch = Date.now();
     const handleStorageChange = () => {
-      if (Date.now() - lastFetch > 30000) {
-        lastFetch = Date.now();
+      const now = Date.now();
+      if (now - lastFetch > 60000) { // 60 seconds minimum between fetches
+        lastFetch = now;
+        // Invalidate cache to force fresh fetch on focus
+        const cache = getCacheService();
+        cache.invalidate('slack-conns');
+        cache.invalidate('teams-conns');
+        cache.invalidate('jira-conns');
+        cache.invalidate('trello-conns');
+        cache.invalidate('confluence-conns');
         checkConnections();
       }
     };
