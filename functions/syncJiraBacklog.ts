@@ -33,6 +33,26 @@ Deno.serve(async (req) => {
 
     const jiraConn = jiraConnections[0];
     logs.push(`✅ Using connection: ${jiraConn.cloud_id}`);
+    logs.push(`📋 Connection scopes: ${JSON.stringify(jiraConn.scopes)}`);
+    
+    // CRITICAL: Validate scopes before attempting API calls
+    const requiredScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software'];
+    const storedScopes = jiraConn.scopes || [];
+    const missingScopes = requiredScopes.filter(rs => !storedScopes.includes(rs));
+    
+    if (missingScopes.length > 0) {
+      logs.push(`❌ SCOPE VALIDATION FAILED - Missing scopes: ${JSON.stringify(missingScopes)}`);
+      logs.push(`⚠️ This will cause 401 errors when calling Jira API`);
+      logs.push(`💡 SOLUTION: Disconnect Jira and reconnect, making sure to approve ALL requested permissions`);
+      return Response.json({ 
+        success: false, 
+        message: `Jira connection has incomplete scopes. Missing: ${missingScopes.join(', ')}. Please reconnect Jira.`,
+        logs,
+        scopeError: true
+      }, { status: 403 });
+    }
+    
+    logs.push(`✅ All required scopes present`);
     
     const accessToken = jiraConn.access_token;
     if (!accessToken) {
