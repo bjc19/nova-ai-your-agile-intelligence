@@ -58,13 +58,26 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
          const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
          const resolvedEntities = await base44.entities.ResolvedItem.list('-resolved_date', 10000);
 
-         // Filter by workspace if selected
+         // Filter markers by workspace if selected
          let workspaceMarkers = allMarkers;
-         let workspaceResolved = resolvedEntities;
-
          if (selectedWorkspaceId) {
            workspaceMarkers = allMarkers.filter(m => m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId);
-           workspaceResolved = resolvedEntities.filter(r => r.workspace_id === selectedWorkspaceId || r.jira_project_selection_id === selectedWorkspaceId);
+         }
+
+         // Build the set of valid item IDs for this workspace to filter resolved items
+         const workspaceItemIds = new Set();
+         workspaceMarkers.forEach((m, idx) => {
+           workspaceItemIds.add(`gdpr-blocker-${m.id}`);
+           workspaceItemIds.add(`gdpr-risk-${m.id}`);
+           workspaceItemIds.add(`jira-blocker-${m.id}`);
+           workspaceItemIds.add(`jira-risk-${m.id}`);
+           workspaceItemIds.add(`teams-blocker-${m.id}`);
+           workspaceItemIds.add(`teams-risk-${m.id}`);
+         });
+
+         let workspaceResolved = resolvedEntities;
+         if (selectedWorkspaceId) {
+           workspaceResolved = resolvedEntities.filter(r => workspaceItemIds.has(r.item_id));
          }
 
          const slackMarkers = workspaceMarkers.filter(m => 
