@@ -185,19 +185,26 @@ Deno.serve(async (req) => {
       try {
         const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board?projectKeyOrId=${project.key}`;
         console.log('📡 Fetching boards from:', boardUrl);
-        
+        console.log(`🔐 Using access token (expires: ${jiraConn.expires_at})`);
+
         const boardRes = await fetch(boardUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        
+
+        console.log(`📊 Board response status: ${boardRes.status}`);
+
         if (boardRes.ok) {
           const boardData = await boardRes.json();
+          console.log(`📋 Board response data:`, JSON.stringify(boardData).substring(0, 500));
           if (boardData.values && boardData.values.length > 0) {
             boardId = boardData.values[0].id.toString();
             console.log('✅ Found board ID:', boardId, 'for project:', project.key);
+          } else {
+            console.warn('⚠️ No boards found in response for project', project.key);
           }
         } else {
-          console.warn('⚠️ Could not fetch boards for project', project.key, ':', boardRes.status);
+          const boardErrorText = await boardRes.text();
+          console.warn('⚠️ Could not fetch boards for project', project.key, '- Status:', boardRes.status, '- Error:', boardErrorText.substring(0, 300));
         }
       } catch (boardError) {
         console.warn('⚠️ Error fetching board info:', boardError.message);
