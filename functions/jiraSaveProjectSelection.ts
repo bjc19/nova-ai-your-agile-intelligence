@@ -239,7 +239,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('✅ All projects saved successfully');
+    console.log('✅ All projects saved successfully (end of loop)');
     
     // Synchronize team configuration if multiple projects selected
     if (selected_project_ids.length > 1) {
