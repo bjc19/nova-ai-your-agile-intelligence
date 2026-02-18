@@ -165,10 +165,12 @@ Deno.serve(async (req) => {
         is_active: true
       });
     } else {
-      console.log('✅ Token still valid');
-    }
-    
-    for (const projectId of selected_project_ids) {
+       console.log('✅ Token still valid');
+     }
+
+     console.log(`🔄 Starting board fetch for ${selected_project_ids.length} projects...`);
+
+     for (const projectId of selected_project_ids) {
       const project = projects.find(p => p.id === projectId);
       if (!project) {
         console.warn('⚠️ Project not found:', projectId);
