@@ -105,20 +105,68 @@ Deno.serve(async (req) => {
     
     const jiraConn = jiraConnections[0];
     
-    // Refresh token if needed before using it
-    const refreshResult = await base44.functions.invoke('refreshJiraAccessToken', {
-      connection_id: jiraConn.id
-    });
+    // Refresh token inline if needed
+    const expiresAt = new Date(jiraConn.expires_at);
+    const now = new Date();
+    const timeUntilExpiry = expiresAt.getTime() - now.getTime();
 
-    if (!refreshResult.data.success && refreshResult.data.requiresReconnection) {
-      return Response.json({ 
-        error: refreshResult.data.error || 'Token refresh failed',
-        success: false,
-        requiresReconnection: true
-      }, { status: 401 });
+    let accessToken = jiraConn.access_token;
+
+    if (timeUntilExpiry < 5 * 60 * 1000) {
+      console.log('🔄 Token expiring soon, refreshing...');
+      const clientId = Deno.env.get('JIRA_CLIENT_ID');
+      const clientSecret = Deno.env.get('JIRA_CLIENT_SECRET');
+
+      if (!clientId || !clientSecret) {
+        return Response.json({ error: 'Jira OAuth not configured' }, { status: 500 });
+      }
+
+      if (!jiraConn.refresh_token || jiraConn.refresh_token === 'none') {
+        return Response.json({ 
+          error: 'No refresh token available. Please reconnect Jira.',
+          success: false,
+          requiresReconnection: true
+        }, { status: 401 });
+      }
+
+      const refreshResponse = await fetch('https://auth.atlassian.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: jiraConn.refresh_token,
+        }),
+      });
+
+      if (!refreshResponse.ok) {
+        const errorText = await refreshResponse.text();
+        console.error('❌ Token refresh failed:', errorText);
+        return Response.json({ 
+          error: 'Token refresh failed. Please reconnect Jira.',
+          success: false,
+          requiresReconnection: true
+        }, { status: 401 });
+      }
+
+      const refreshData = await refreshResponse.json();
+      accessToken = refreshData.access_token;
+      const newExpiresAt = new Date(Date.now() + refreshData.expires_in * 1000).toISOString();
+      const newRefreshToken = refreshData.refresh_token || jiraConn.refresh_token;
+
+      await base44.asServiceRole.entities.JiraConnection.update(jiraConn.id, {
+        access_token: accessToken,
+        refresh_token: newRefreshToken,
+        expires_at: newExpiresAt,
+        connection_status_error: false,
+        connection_error_message: null,
+        connection_error_timestamp: null,
+        is_active: true
+      });
+    } else {
+      console.log('✅ Token still valid');
     }
-
-    const accessToken = refreshResult.data.access_token;
     
     for (const projectId of selected_project_ids) {
       const project = projects.find(p => p.id === projectId);
