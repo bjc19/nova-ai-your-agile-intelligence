@@ -89,6 +89,23 @@ Deno.serve(async (req) => {
 
     // Create or reactivate selected projects
     console.log('💾 Processing', selected_project_ids.length, 'selected projects...');
+    
+    // Get Jira connection to fetch board info
+    const jiraConnections = await base44.entities.JiraConnection.filter({
+      is_active: true
+    });
+    
+    if (jiraConnections.length === 0) {
+      console.warn('⚠️ No active Jira connection found');
+      return Response.json({ 
+        error: 'Connexion Jira non trouvée ou inactivée',
+        success: false 
+      }, { status: 400 });
+    }
+    
+    const jiraConn = jiraConnections[0];
+    const accessToken = jiraConn.access_token;
+    
     for (const projectId of selected_project_ids) {
       const project = projects.find(p => p.id === projectId);
       if (!project) {
@@ -101,10 +118,34 @@ Deno.serve(async (req) => {
         jira_project_id: projectId
       });
 
+      // Fetch board ID for this project
+      let boardId = null;
+      try {
+        const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board?projectKeyOrId=${project.key}`;
+        console.log('📡 Fetching boards from:', boardUrl);
+        
+        const boardRes = await fetch(boardUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        
+        if (boardRes.ok) {
+          const boardData = await boardRes.json();
+          if (boardData.values && boardData.values.length > 0) {
+            boardId = boardData.values[0].id.toString();
+            console.log('✅ Found board ID:', boardId, 'for project:', project.key);
+          }
+        } else {
+          console.warn('⚠️ Could not fetch boards for project', project.key, ':', boardRes.status);
+        }
+      } catch (boardError) {
+        console.warn('⚠️ Error fetching board info:', boardError.message);
+      }
+
       if (existing.length > 0) {
         console.log('♻️ Reactivating existing project:', projectId);
         await base44.entities.JiraProjectSelection.update(existing[0].id, {
-          is_active: true
+          is_active: true,
+          jira_board_id: boardId
         });
       } else {
         console.log('➕ Creating new project selection:', projectId);
@@ -113,10 +154,11 @@ Deno.serve(async (req) => {
           jira_project_key: project.key,
           jira_project_name: project.name,
           workspace_name: project.name,
+          jira_board_id: boardId,
           is_active: true,
           selected_date: new Date().toISOString()
         });
-        console.log('✅ Created:', created.id);
+        console.log('✅ Created:', created.id, 'with board ID:', boardId);
       }
     }
 
