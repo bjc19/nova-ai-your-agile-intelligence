@@ -50,9 +50,10 @@ export default function DashboardAdmins() {
   useEffect(() => {
     const fetchSignals = async () => {
       try {
+        const cache = getCacheService();
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const markers = await cache.get('gdpr-markers', () => base44.entities.GDPRMarkers.list('-created_date', 100), 300);
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
