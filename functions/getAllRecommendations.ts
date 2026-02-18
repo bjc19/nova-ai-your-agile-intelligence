@@ -12,16 +12,14 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { selectedWorkspaceId } = body;
 
-    // If no workspace selected, return empty - never mix data across workspaces
-    if (!selectedWorkspaceId) {
-      return Response.json({ success: true, recommendations: [], count: 0, sources: [] });
-    }
-
+    // Fetch from all known sources
     const allRecommendations = [];
 
     // Source 0: Manual Analysis History
     try {
-      const analysisHistory = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 50);
+      const analysisHistory = selectedWorkspaceId
+        ? await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 50)
+        : await base44.entities.AnalysisHistory.list('-created_date', 50);
       analysisHistory.forEach(analysis => {
         if (analysis.analysis_data?.recommendations && Array.isArray(analysis.analysis_data.recommendations)) {
           analysis.analysis_data.recommendations.forEach(reco => {
@@ -40,11 +38,11 @@ Deno.serve(async (req) => {
       console.log('AnalysisHistory fetch skipped:', e.message);
     }
 
-    // Source 1: GDPR Markers - only those linked to this workspace via session_id or tenant_id
-    // Note: GDPRMarkers don't have jira_project_selection_id, so we skip workspace filtering here
-    // and only include them if they were created in the context of this workspace
+    // Source 1: GDPR Markers (Slack & Teams)
     try {
-      const gdprMarkers = await base44.entities.GDPRMarkers.filter({ slack_workspace_id: selectedWorkspaceId }, '-created_date', 100);
+      const gdprMarkers = selectedWorkspaceId
+        ? await base44.entities.GDPRMarkers.filter({ slack_workspace_id: selectedWorkspaceId }, '-created_date', 100)
+        : await base44.entities.GDPRMarkers.list('-created_date', 100);
       gdprMarkers.forEach(marker => {
         if (marker.recos && Array.isArray(marker.recos)) {
           marker.recos.forEach(reco => {
@@ -63,9 +61,11 @@ Deno.serve(async (req) => {
       console.log('GDPR Markers fetch skipped:', e.message);
     }
 
-    // Source 2: Teams Insights - strictly filtered by workspace
+    // Source 2: Teams Insights (legacy, if still exists)
     try {
-      const teamsInsights = await base44.entities.TeamsInsight.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100);
+      const teamsInsights = selectedWorkspaceId
+        ? await base44.entities.TeamsInsight.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100)
+        : await base44.entities.TeamsInsight.list('-created_date', 100);
       teamsInsights.forEach(insight => {
         if (insight.recos && Array.isArray(insight.recos)) {
           insight.recos.forEach(reco => {
