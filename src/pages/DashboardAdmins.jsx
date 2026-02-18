@@ -65,6 +65,7 @@ export default function DashboardAdmins() {
   // Check authentication and role
   useEffect(() => {
     const checkAuth = async () => {
+      const cache = getCacheService();
       const authenticated = await base44.auth.isAuthenticated();
       if (!authenticated) {
         navigate(createPageUrl("Home"));
@@ -81,22 +82,20 @@ export default function DashboardAdmins() {
 
       setUser(currentUser);
 
-      // Load sprint context
-      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      // Load sprint context with cache (5-minute TTL)
+      const activeSprints = await cache.get('active-sprints', () => base44.entities.SprintContext.filter({ is_active: true }), 300);
       if (activeSprints.length > 0) {
         setSprintContext(activeSprints[0]);
       }
 
-      // Check onboarding
-      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      // Check onboarding with cache (10-minute TTL)
+      const teamConfigs = await cache.get('team-configs', () => base44.entities.TeamConfiguration.list(), 600);
       if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
         setShowOnboarding(true);
       }
 
-      // Check multi-project alerts
-      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-        admin_response: "pending"
-      });
+      // Check multi-project alerts with cache (2-minute TTL)
+      const pendingAlerts = await cache.get('pending-alerts', () => base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }), 120);
       if (pendingAlerts.length > 0) {
         const latest = pendingAlerts[pendingAlerts.length - 1];
         setMultiProjectAlert({
