@@ -79,10 +79,10 @@ Deno.serve(async (req) => {
 
     const cloudId = instances[0].id; // Use first instance
 
-    // Return connection data to frontend (like Slack OAuth flow)
     // Extract ACTUAL granted scopes from the JWT token
     const tokenParts = tokenData.access_token.split('.');
     let grantedScopes = [];
+    const requiredScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software'];
 
     if (tokenParts.length === 3) {
       try {
@@ -90,10 +90,46 @@ Deno.serve(async (req) => {
         const scopeString = decodedPayload.scope || '';
         grantedScopes = scopeString.split(' ').filter(s => s.length > 0);
       } catch (e) {
-        console.error('Failed to decode JWT, using fallback scopes');
-        grantedScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'offline_access'];
+        console.error('Failed to decode JWT');
+        grantedScopes = [];
       }
     }
+
+    // CRITICAL: Validate that ALL required scopes are present
+    const missingScopes = requiredScopes.filter(rs => !grantedScopes.includes(rs));
+    
+    if (missingScopes.length > 0) {
+      console.error(`❌ SCOPE VALIDATION FAILED - Missing: ${JSON.stringify(missingScopes)}, Granted: ${JSON.stringify(grantedScopes)}`);
+      return new Response(`
+        <html>
+          <body style="font-family: Arial; padding: 40px; text-align: center; background: #fee;">
+            <h1>❌ Jira Authorization Failed</h1>
+            <p><strong>Missing Required Permissions:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+              ${missingScopes.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+            <p>Please make sure to approve <strong>ALL requested permissions</strong> in the Jira authorization screen.</p>
+            <p>Then try connecting again.</p>
+            <script>
+              window.opener?.postMessage({ 
+                type: 'jira_error',
+                error: 'Missing required scopes: ${missingScopes.join(", ")}'
+              }, '*');
+              setTimeout(() => window.close(), 5000);
+            </script>
+          </body>
+        </html>
+      `, { headers: { 'Content-Type': 'text/html' }, status: 403 });
+    }
+
+    // Add offline_access if present
+    if (grantedScopes.includes('offline_access')) {
+      grantedScopes = [...requiredScopes, 'offline_access'];
+    } else {
+      grantedScopes = requiredScopes;
+    }
+
+    console.log(`✅ SCOPE VALIDATION PASSED - All required scopes granted: ${JSON.stringify(grantedScopes)}`);
 
     const connectionData = btoa(JSON.stringify({
       user_email: state,
