@@ -21,14 +21,17 @@ Deno.serve(async (req) => {
     }
 
     // Construct Atlassian OAuth authorization URL
+    // CRITICAL: These scopes are REQUIRED for syncJiraBacklog to work
+    const requiredScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'offline_access'];
+    
     const authorizationUrl = new URL('https://auth.atlassian.com/authorize');
     authorizationUrl.searchParams.append('audience', 'api.atlassian.com');
     authorizationUrl.searchParams.append('client_id', clientId);
     authorizationUrl.searchParams.append('redirect_uri', redirectUri);
     authorizationUrl.searchParams.append('response_type', 'code');
-    authorizationUrl.searchParams.append('scope', 'read:jira-work read:jira-user read:board-scope:jira-software read:sprint:jira-software offline_access');
+    authorizationUrl.searchParams.append('scope', requiredScopes.join(' '));
     authorizationUrl.searchParams.append('state', customer_id); // Pass customer_id as state
-    authorizationUrl.searchParams.append('prompt', 'consent');
+    authorizationUrl.searchParams.append('prompt', 'consent'); // Force consent screen every time
 
     return Response.json({
       authorizationUrl: authorizationUrl.toString()
