@@ -51,8 +51,8 @@ Deno.serve(async (req) => {
       logs.push(`📊 First selection: ID=${allSelections[0].id}, is_active=${allSelections[0].is_active}`);
     }
 
-    // Get project selections (user-scoped, respects RLS)
-    const jiraSelections = await base44.entities.JiraProjectSelection.filter({ 
+    // Get project selections (admin-scoped for sync operations)
+    const jiraSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({ 
       is_active: true 
     });
 
