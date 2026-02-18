@@ -199,10 +199,15 @@ export default function IntegrationStatus({ integrations = {} }) {
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-500">{t('lastSyncCheck')}</span>
               <button 
-                onClick={checkConnections}
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors"
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  await checkConnections();
+                  setIsRefreshing(false);
+                }}
+                disabled={isRefreshing}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {t('refresh')}
               </button>
             </div>
