@@ -168,12 +168,7 @@ Deno.serve(async (req) => {
        console.log('✅ Token still valid');
      }
 
-     console.error(`BOARD FETCH: Starting for ${selected_project_ids.length} projects`);
-
      for (const projectId of selected_project_ids) {
-       console.error(`BOARD FETCH: Processing projectId ${projectId}`);
-       const project = projects.find(p => p.id === projectId);
-       console.error(`BOARD FETCH: Project found = ${!!project}`);
        const existing = await base44.entities.JiraProjectSelection.filter({
          jira_project_id: projectId
        });
