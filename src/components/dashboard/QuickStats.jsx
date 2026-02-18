@@ -53,12 +53,22 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   useEffect(() => {
      const fetchSignals = async () => {
        try {
+         const cache = getCacheService();
          const sevenDaysAgo = new Date();
          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-         const allMarkers = await base44.entities.GDPRMarkers.list('-created_date', 10000);
+         // Use cache with 5-minute TTL to prevent 429 errors
+         const allMarkers = await cache.get(
+           'gdpr-markers-list',
+           () => base44.entities.GDPRMarkers.list('-created_date', 10000),
+           300
+         );
          // Fetch resolved patterns (same source as Details page "resolved" view)
-         const resolvedPatterns = await base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 10000);
+         const resolvedPatterns = await cache.get(
+           'pattern-detection-resolved',
+           () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 10000),
+           300
+         );
 
          // Filter by workspace if selected
          let workspaceMarkers = allMarkers;
