@@ -46,6 +46,18 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
+  // Track workspace selection changes from sessionStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const workspaceId = sessionStorage.getItem('selectedWorkspaceId');
+      setSelectedWorkspaceId(workspaceId || null);
+    };
+
+    handleStorageChange();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
@@ -54,7 +66,15 @@ export default function Dashboard() {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        let recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        
+        // Filter by workspace if selected
+        if (selectedWorkspaceId) {
+          recentMarkers = recentMarkers.filter(m => 
+            m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId
+          );
+        }
+        
         setGdprSignals(recentMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
@@ -62,7 +82,7 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, []);
+  }, [selectedWorkspaceId]);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
