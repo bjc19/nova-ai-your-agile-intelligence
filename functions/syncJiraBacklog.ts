@@ -74,12 +74,12 @@ Deno.serve(async (req) => {
       try {
         const projectKey = selection.jira_project_key || selection.jira_project_name;
         const boardId = selection.jira_board_id;
-        
-        console.log(`📋 Syncing ${projectKey} - Board ID: ${boardId}`);
-        
+
+        logs.push(`📋 Syncing ${projectKey} - Board ID: ${boardId}`);
+
         // Fetch active sprint
         const sprintUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board/${boardId}/sprint?state=active`;
-        console.log(`🔗 Sprint URL: ${sprintUrl}`);
+        logs.push(`🔗 Sprint URL: ${sprintUrl}`);
         
         const sprintRes = await fetch(sprintUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` } 
