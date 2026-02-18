@@ -31,6 +31,13 @@ import {
   Loader2,
   TrendingUp } from
 "lucide-react";
+import { debugLog, getDebugLogs, printDebugReport } from "@/components/hooks/useDebugWorkspaceFlow";
+
+// Exposer la fonction de debug en global pour y accéder depuis la console
+if (typeof window !== 'undefined') {
+  window.getDebugLogs = getDebugLogs;
+  window.printDebugReport = printDebugReport;
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -41,27 +48,9 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-
-  // Load workspace from sessionStorage on mount
-  useEffect(() => {
-    const workspaceId = sessionStorage.getItem('selectedWorkspaceId');
-    if (workspaceId) setSelectedWorkspaceId(workspaceId);
-  }, []);
-
-  // Handle workspace change
-  const handleWorkspaceChange = (workspaceId) => {
-    const id = workspaceId === 'null' ? null : workspaceId;
-    setSelectedWorkspaceId(id);
-    if (id) {
-      sessionStorage.setItem('selectedWorkspaceId', id);
-    } else {
-      sessionStorage.removeItem('selectedWorkspaceId');
-    }
-  };
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -119,16 +108,10 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history - filtered by workspace if selected
+  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspaceId],
-    queryFn: async () => {
-      const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
-      if (selectedWorkspaceId) {
-        return analyses.filter(a => a.jira_project_selection_id === selectedWorkspaceId);
-      }
-      return analyses;
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -306,10 +289,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                onWorkspaceChange={handleWorkspaceChange}
-                activeWorkspaceId={selectedWorkspaceId}
-                userRole={user?.role} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
