@@ -85,25 +85,25 @@ Deno.serve(async (req) => {
           headers: { 'Authorization': `Bearer ${accessToken}` } 
         });
 
-        console.log(`📊 Sprint response: ${sprintRes.status} ${sprintRes.statusText}`);
+        logs.push(`📊 Sprint response: ${sprintRes.status} ${sprintRes.statusText}`);
 
         if (!sprintRes.ok) {
           const errorText = await sprintRes.text();
-          console.error(`❌ Could not fetch sprints for board ${boardId}: ${errorText}`);
+          logs.push(`❌ Could not fetch sprints for board ${boardId}: ${errorText}`);
           continue;
         }
 
         const sprintData = await sprintRes.json();
         const activeSprint = sprintData.values?.[0];
 
-        console.log(`🏃 Active sprints found: ${sprintData.values?.length || 0}`);
+        logs.push(`🏃 Active sprints found: ${sprintData.values?.length || 0}`);
 
         if (!activeSprint) {
-          console.log(`⚠️ No active sprint for board ${boardId}`);
+          logs.push(`⚠️ No active sprint for board ${boardId}`);
           continue;
         }
 
-        console.log(`✨ Sprint found: ${activeSprint.name} (ID: ${activeSprint.id})`);
+        logs.push(`✨ Sprint found: ${activeSprint.name} (ID: ${activeSprint.id})`);
 
         // Fetch issues in active sprint
         const issuesUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/search?jql=sprint=${activeSprint.id}&maxResults=100`;
