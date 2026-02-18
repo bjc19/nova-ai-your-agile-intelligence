@@ -63,11 +63,9 @@ Deno.serve(async (req) => {
       console.log('GDPR Markers fetch skipped:', e.message);
     }
 
-    // Source 2: Teams Insights (legacy, if still exists)
+    // Source 2: Teams Insights - strictly filtered by workspace
     try {
-      const teamsInsights = selectedWorkspaceId
-        ? await base44.entities.TeamsInsight.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100)
-        : await base44.entities.TeamsInsight.list('-created_date', 100);
+      const teamsInsights = await base44.entities.TeamsInsight.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100);
       teamsInsights.forEach(insight => {
         if (insight.recos && Array.isArray(insight.recos)) {
           insight.recos.forEach(reco => {
