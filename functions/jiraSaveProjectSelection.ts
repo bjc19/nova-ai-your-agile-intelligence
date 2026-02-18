@@ -104,7 +104,21 @@ Deno.serve(async (req) => {
     }
     
     const jiraConn = jiraConnections[0];
-    const accessToken = jiraConn.access_token;
+    
+    // Refresh token if needed before using it
+    const refreshResult = await base44.functions.invoke('refreshJiraAccessToken', {
+      connection_id: jiraConn.id
+    });
+
+    if (!refreshResult.data.success && refreshResult.data.requiresReconnection) {
+      return Response.json({ 
+        error: refreshResult.data.error || 'Token refresh failed',
+        success: false,
+        requiresReconnection: true
+      }, { status: 401 });
+    }
+
+    const accessToken = refreshResult.data.access_token;
     
     for (const projectId of selected_project_ids) {
       const project = projects.find(p => p.id === projectId);

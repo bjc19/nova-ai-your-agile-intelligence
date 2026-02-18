@@ -35,6 +35,24 @@ Deno.serve(async (req) => {
     logs.push(`✅ Using connection: ${jiraConn.cloud_id}`);
     logs.push(`📋 Connection scopes: ${JSON.stringify(jiraConn.scopes)}`);
     
+    // Refresh token if needed before attempting API calls
+    const refreshResult = await base44.functions.invoke('refreshJiraAccessToken', {
+      connection_id: jiraConn.id
+    });
+
+    if (!refreshResult.data.success && refreshResult.data.requiresReconnection) {
+      logs.push('❌ Token refresh failed - reconnection required');
+      return Response.json({ 
+        success: false, 
+        message: refreshResult.data.error || 'Token refresh failed',
+        logs,
+        requiresReconnection: true
+      }, { status: 401 });
+    }
+
+    const refreshedAccessToken = refreshResult.data.access_token;
+    logs.push(`✅ Token refreshed (expires: ${refreshResult.data.expires_at})`);
+    
     // CRITICAL: Validate scopes before attempting API calls
     const requiredScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software'];
     const storedScopes = jiraConn.scopes || [];
@@ -53,15 +71,15 @@ Deno.serve(async (req) => {
     }
     
     logs.push(`✅ All required scopes present`);
-    
-    const accessToken = jiraConn.access_token;
+
+    const accessToken = refreshedAccessToken;
     if (!accessToken) {
-      logs.push('❌ No Jira access token');
-      return Response.json({ 
-        success: false, 
-        message: 'No Jira access token',
-        logs
-      }, { status: 400 });
+     logs.push('❌ No Jira access token');
+     return Response.json({ 
+       success: false, 
+       message: 'No Jira access token',
+       logs
+     }, { status: 400 });
     }
 
     // Diagnostic: fetch ALL project selections to check RLS filtering
