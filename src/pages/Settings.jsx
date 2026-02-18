@@ -286,6 +286,7 @@ export default function Settings() {
           try {
             // Decode connection data
             const connectionData = JSON.parse(atob(event.data.data));
+            console.log('[Jira] Connection data received:', JSON.stringify(connectionData, null, 2));
 
             // Save connection through authenticated endpoint
             const saveResult = await base44.functions.invoke('jiraSaveConnection', connectionData);
