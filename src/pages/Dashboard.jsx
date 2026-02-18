@@ -20,7 +20,6 @@ import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import { getCacheService } from "@/components/hooks/useCacheService";
 
 import {
   Mic,
@@ -46,7 +45,6 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -150,28 +148,6 @@ export default function Dashboard() {
       }
     }
   }, [selectedPeriod]);
-
-  // Refresh workspace data
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      // Invalidate cache and refetch analysis history
-      const cache = getCacheService?.();
-      if (cache) {
-        cache.invalidate('analysisHistory');
-      }
-      // Re-fetch signals
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-      const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-      setGdprSignals(recentMarkers);
-    } catch (error) {
-      console.error("Erreur rafraîchissement données:", error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   // Calculate sprint info from real data
   const calculateDaysRemaining = (endDate) => {
@@ -315,15 +291,7 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="text-slate-600 hover:text-slate-700">
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                Rafraîchir
-              </Button>
+
               </div>
             </div>
 
