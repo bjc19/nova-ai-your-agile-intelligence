@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Database, Layers } from "lucide-react";
+import { debugLog, useDebugWorkspaceFlow } from "@/components/hooks/useDebugWorkspaceFlow";
 
 export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId, userRole }) {
   const [workspaces, setWorkspaces] = useState([]);
