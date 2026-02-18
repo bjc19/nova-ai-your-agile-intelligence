@@ -62,21 +62,31 @@ Deno.serve(async (req) => {
       console.log('🔐 Attempting token refresh with Atlassian...');
       console.log(`📝 Client ID: ${clientId.substring(0, 10)}...`);
       console.log(`🔑 Refresh token present: ${!!jiraConn.refresh_token}`);
+      console.log(`📋 Refresh token starts with: ${jiraConn.refresh_token?.substring(0, 20)}...`);
+      
+      const requestBody = {
+        grant_type: 'refresh_token',
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: jiraConn.refresh_token,
+      };
+      
+      console.log(`📤 Request body keys: ${Object.keys(requestBody).join(', ')}`);
       
       const refreshResponse = await fetch('https://auth.atlassian.com/oauth/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          grant_type: 'refresh_token',
-          client_id: clientId,
-          client_secret: clientSecret,
-          refresh_token: jiraConn.refresh_token,
-        }),
+        body: JSON.stringify(requestBody),
       });
       
       console.log(`📊 Refresh response status: ${refreshResponse.status}`);
+      
+      if (!refreshResponse.ok) {
+        const responseText = await refreshResponse.text();
+        console.log(`❌ Refresh response body: ${responseText.substring(0, 500)}`);
+      }
 
       if (!refreshResponse.ok) {
         const errorText = await refreshResponse.text();
