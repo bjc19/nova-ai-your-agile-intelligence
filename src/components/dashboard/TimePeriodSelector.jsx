@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, subWeeks, subMonths, startOfWeek, endOfWeek, startOfMonth, endOfMonth, getDaysInMonth } from "date-fns";
-import { fr } from "date-fns/locale";
 import {
   Tooltip,
   TooltipContent,
@@ -182,7 +181,7 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
         start = startOfMonth(now);
         end = now;
         const { dayOfMonth, daysInMonth } = calculateCompleteness(start, end);
-        const monthName = format(now, "MMMM", { locale: fr });
+        const monthName = format(now, "MMMM", { locale: require("date-fns/locale/fr") });
         label = `${monthName} (1-${dayOfMonth}) - ${dayOfMonth}/${daysInMonth} jours`;
         break;
 
