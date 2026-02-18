@@ -84,7 +84,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
   useEffect(() => {
     const fetchAllRecommendations = async () => {
       try {
-        const response = await base44.functions.invoke('getAllRecommendations', {});
+        const response = await base44.functions.invoke('getAllRecommendations', { selectedWorkspaceId });
         if (response.data?.recommendations) {
           setAllSourceRecommendations(response.data.recommendations);
         }
@@ -94,7 +94,7 @@ export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, s
     };
 
     fetchAllRecommendations();
-    }, []);
+    }, [selectedWorkspaceId]);
 
     // Extract known names from transcript + recommendations
     const knownNames = new Set();
