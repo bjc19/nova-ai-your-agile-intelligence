@@ -46,17 +46,22 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Track workspace selection changes from sessionStorage
+  // Load workspace from sessionStorage on mount
   useEffect(() => {
-    const handleStorageChange = () => {
-      const workspaceId = sessionStorage.getItem('selectedWorkspaceId');
-      setSelectedWorkspaceId(workspaceId || null);
-    };
-
-    handleStorageChange();
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    const workspaceId = sessionStorage.getItem('selectedWorkspaceId');
+    if (workspaceId) setSelectedWorkspaceId(workspaceId);
   }, []);
+
+  // Handle workspace change
+  const handleWorkspaceChange = (workspaceId) => {
+    const id = workspaceId === 'null' ? null : workspaceId;
+    setSelectedWorkspaceId(id);
+    if (id) {
+      sessionStorage.setItem('selectedWorkspaceId', id);
+    } else {
+      sessionStorage.removeItem('selectedWorkspaceId');
+    }
+  };
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -66,15 +71,7 @@ export default function Dashboard() {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        let recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        
-        // Filter by workspace if selected
-        if (selectedWorkspaceId) {
-          recentMarkers = recentMarkers.filter(m => 
-            m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId
-          );
-        }
-        
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
@@ -82,7 +79,7 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, [selectedWorkspaceId]);
+  }, []);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
@@ -124,18 +121,8 @@ export default function Dashboard() {
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory', selectedWorkspaceId],
-    queryFn: () => {
-      let promise = base44.entities.AnalysisHistory.list('-created_date', 100);
-      
-      if (selectedWorkspaceId) {
-        return promise.then(analyses => 
-          analyses.filter(a => a.jira_project_selection_id === selectedWorkspaceId)
-        );
-      }
-      
-      return promise;
-    },
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
@@ -326,8 +313,8 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-             {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
             }
           </motion.div>
         </div>
@@ -459,15 +446,14 @@ export default function Dashboard() {
             <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName}
-              selectedWorkspaceId={selectedWorkspaceId} />
+              sourceName={latestAnalysis?.sourceName} />
 
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
+            <RecentAnalyses analyses={analysisHistory} />
             
             {/* Integration Status */}
             <IntegrationStatus />
