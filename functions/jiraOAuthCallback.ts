@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       refresh_token: tokenData.refresh_token || 'none',
       expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
       cloud_id: cloudId,
-      scopes: grantedScopes,
+      scopes: requestedScopes,
       connected_at: new Date().toISOString(),
     }));
 
