@@ -17,7 +17,7 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         let selections = [];
         
         // For regular users, load only assigned workspaces
-        if (userRole === 'user') {
+         if (userRole?.toLowerCase?.() === 'user') {
           // Load Jira projects (RLS automatically filters based on WorkspaceMember relation)
           const jiraData = await base44.entities.JiraProjectSelection.filter({ 
             is_active: true 
