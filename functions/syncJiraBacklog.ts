@@ -10,12 +10,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
     }
 
-    // Get active Jira connections
-    const jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({ 
+    // Get Jira connections - try both user and service role
+    let jiraConnections = await base44.entities.JiraConnection.filter({ 
       is_active: true 
     });
 
-    console.log(`🔍 Found ${jiraConnections.length} active Jira connections`);
+    console.log(`🔍 User-scoped: Found ${jiraConnections.length} active Jira connections`);
+
+    if (jiraConnections.length === 0) {
+      jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({ 
+        is_active: true 
+      });
+      console.log(`🔍 Service-scoped: Found ${jiraConnections.length} active Jira connections`);
+    }
 
     if (jiraConnections.length === 0) {
       return Response.json({ 
@@ -27,9 +34,7 @@ Deno.serve(async (req) => {
     const jiraConn = jiraConnections[0];
     console.log(`✅ Using Jira connection - Cloud ID: ${jiraConn.cloud_id}, User: ${jiraConn.user_email}`);
     
-    // Use the stored Jira access token from the connection
     const accessToken = jiraConn.access_token;
-    
     if (!accessToken) {
       return Response.json({ 
         success: false, 
@@ -37,22 +42,21 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Get ALL Jira project selections (debug)
-    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
-    console.log(`🔍 TOTAL JiraProjectSelection found: ${allSelections.length}`);
-    allSelections.forEach((sel, i) => {
-      console.log(`  [${i}] ${sel.jira_project_name} - Board: ${sel.jira_board_id}, is_active: ${sel.is_active}`);
+    // Get Jira project selections - try both user and service role
+    let jiraSelections = await base44.entities.JiraProjectSelection.list();
+    console.log(`🔍 User-scoped: Found ${jiraSelections.length} total JiraProjectSelection`);
+
+    if (jiraSelections.length === 0) {
+      jiraSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
+      console.log(`🔍 Service-scoped: Found ${jiraSelections.length} total JiraProjectSelection`);
+    }
+
+    jiraSelections.forEach((sel, i) => {
+      console.log(`  [${i}] ${sel.jira_project_name} - Board: ${sel.jira_board_id}, is_active: ${sel.is_active}, ID: ${sel.id}`);
     });
 
-    // Get active Jira project selections
-    const jiraSelections = allSelections.filter(s => s.is_active === true);
-
-    console.log(`🔍 Found ${jiraSelections.length} ACTIVE Jira project selections`);
-    if (jiraSelections.length > 0) {
-      jiraSelections.forEach((sel, i) => {
-        console.log(`  [${i}] ${sel.jira_project_name} - Board: ${sel.jira_board_id}, Key: ${sel.jira_project_key}`);
-      });
-    }
+    jiraSelections = jiraSelections.filter(s => s.is_active === true);
+    console.log(`✅ Found ${jiraSelections.length} ACTIVE selections`);
 
     if (jiraSelections.length === 0) {
       return Response.json({ 
