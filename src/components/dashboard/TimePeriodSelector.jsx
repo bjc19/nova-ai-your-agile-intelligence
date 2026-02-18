@@ -57,29 +57,37 @@ export default function TimePeriodSelector({ deliveryMode, onPeriodChange }) {
     { value: "custom", label: "Personnalisée" },
   ];
 
-  // Détection du mode de livraison
+  // Détection du mode de livraison - with 5 min cache to avoid rate limits
   useEffect(() => {
     const detectMode = async () => {
       try {
+        // Check cache first (5 min TTL)
+        const cached = sessionStorage.getItem('_deliveryModeCache');
+        if (cached) {
+          const { mode, ts } = JSON.parse(cached);
+          if (Date.now() - ts < 5 * 60 * 1000) {
+            setDetectedMode(mode);
+            return;
+          }
+        }
+
         let detected = "Autre";
-        const jiraSelections = await base44.entities.JiraProjectSelection.filter({ is_active: true });
-        const trelloSelections = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+        const [jiraSelections, trelloSelections] = await Promise.all([
+          base44.entities.JiraProjectSelection.filter({ is_active: true }),
+          base44.entities.TrelloProjectSelection.filter({ is_active: true })
+        ]);
 
         if (jiraSelections.length > 0) {
           const boardName = jiraSelections[0].board_name?.toLowerCase() || "";
-          if (boardName.includes("scrum") || boardName.includes("sprint")) {
-            detected = "Scrum";
-          } else if (boardName.includes("kanban") || boardName.includes("flow")) {
-            detected = "Kanban";
-          }
+          if (boardName.includes("scrum") || boardName.includes("sprint")) detected = "Scrum";
+          else if (boardName.includes("kanban") || boardName.includes("flow")) detected = "Kanban";
         } else if (trelloSelections.length > 0) {
           const boardName = trelloSelections[0].board_name?.toLowerCase() || "";
-          if (boardName.includes("scrum") || boardName.includes("sprint")) {
-            detected = "Scrum";
-          } else if (boardName.includes("kanban") || boardName.includes("flow")) {
-            detected = "Kanban";
-          }
+          if (boardName.includes("scrum") || boardName.includes("sprint")) detected = "Scrum";
+          else if (boardName.includes("kanban") || boardName.includes("flow")) detected = "Kanban";
         }
+
+        sessionStorage.setItem('_deliveryModeCache', JSON.stringify({ mode: detected, ts: Date.now() }));
         setDetectedMode(detected);
       } catch (error) {
         console.error("Error detecting delivery mode:", error);
