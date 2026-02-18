@@ -124,8 +124,18 @@ export default function Dashboard() {
 
   // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    queryKey: ['analysisHistory', selectedWorkspaceId],
+    queryFn: () => {
+      let promise = base44.entities.AnalysisHistory.list('-created_date', 100);
+      
+      if (selectedWorkspaceId) {
+        return promise.then(analyses => 
+          analyses.filter(a => a.jira_project_selection_id === selectedWorkspaceId)
+        );
+      }
+      
+      return promise;
+    },
     enabled: !isLoading
   });
 
