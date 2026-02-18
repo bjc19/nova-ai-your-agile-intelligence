@@ -459,7 +459,8 @@ export default function Dashboard() {
             <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              sourceName={latestAnalysis?.sourceName}
+              selectedWorkspaceId={selectedWorkspaceId} />
 
           </div>
 
