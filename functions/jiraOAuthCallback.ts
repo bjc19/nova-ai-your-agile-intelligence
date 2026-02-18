@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
         grantedScopes = scopeString.split(' ').filter(s => s.length > 0);
       } catch (e) {
         console.error('Failed to decode JWT, using fallback scopes');
-        grantedScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'read:project:jira', 'offline_access'];
+        grantedScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'offline_access'];
       }
     }
 
