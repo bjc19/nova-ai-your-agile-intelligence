@@ -155,11 +155,25 @@ export default function Dashboard() {
   }, [navigate]);
 
   // Fetch analysis history
-  const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
-  });
+   const { data: allAnalysisHistory = [] } = useQuery({
+     queryKey: ['analysisHistory', selectedWorkspaceId],
+     queryFn: async () => {
+       debugLog('Dashboard.queryFn: Fetching analyses', { selectedWorkspaceId });
+       const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
+       debugLog('Dashboard.queryFn: Raw analyses fetched', { count: analyses.length });
+
+       if (selectedWorkspaceId) {
+         const filtered = analyses.filter(a => a.jira_project_selection_id === selectedWorkspaceId);
+         debugLog('Dashboard.queryFn: After filtering', { 
+           workspaceId: selectedWorkspaceId,
+           filteredCount: filtered.length 
+         });
+         return filtered;
+       }
+       return analyses;
+     },
+     enabled: !isLoading
+   });
 
   // Filter analysis history based on selected period
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
