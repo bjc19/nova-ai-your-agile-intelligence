@@ -282,7 +282,7 @@ export default function Dashboard() {
 
               </div>
               
-              {/* Time Period Selector */}
+              {/* Time Period Selector & Sync Button */}
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
@@ -292,6 +292,28 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
+              
+              <Button
+                onClick={async () => {
+                  setSyncLoading(true);
+                  try {
+                    const response = await base44.functions.invoke('syncJiraBacklog', {});
+                    if (response.data.success) {
+                      sessionStorage.removeItem("selectedPeriod");
+                      setSelectedPeriod(null);
+                      window.location.reload();
+                    }
+                  } catch (error) {
+                    console.error('Sync error:', error);
+                  } finally {
+                    setSyncLoading(false);
+                  }
+                }}
+                disabled={syncLoading}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                <RefreshCw className={`w-4 h-4 mr-2 ${syncLoading ? 'animate-spin' : ''}`} />
+                {syncLoading ? 'Syncing...' : 'SYNC'}
+              </Button>
 
               </div>
             </div>
