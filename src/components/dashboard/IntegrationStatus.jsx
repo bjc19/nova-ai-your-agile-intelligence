@@ -26,6 +26,7 @@ export default function IntegrationStatus({ integrations = {} }) {
   const [trelloConnected, setTrelloConnected] = useState(false);
   const [confluenceConnected, setConfluenceConnected] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const checkConnections = async () => {
     try {
