@@ -169,11 +169,17 @@ Deno.serve(async (req) => {
      }
 
      for (const projectId of selected_project_ids) {
+       const project = projects.find(p => p.id === projectId);
+       if (!project) {
+         console.warn('⚠️ Project not found:', projectId);
+         continue;
+       }
+
        const existing = await base44.entities.JiraProjectSelection.filter({
          jira_project_id: projectId
        });
 
-      // Fetch board ID for this project
+      // Fetch board ID for this project - SIMPLIFIED
       let boardId = null;
       try {
         const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board?projectKeyOrId=${project.key}`;
