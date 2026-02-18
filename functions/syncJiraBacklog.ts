@@ -12,15 +12,14 @@ Deno.serve(async (req) => {
 
     console.log(`🔐 Admin user: ${user.email}`);
 
-    // Use SERVICE ROLE for all queries to bypass RLS restrictions
-    const jiraConnections = await base44.asServiceRole.entities.JiraConnection.filter({ 
+    // Get Jira connections (user-scoped, respects RLS)
+    const jiraConnections = await base44.entities.JiraConnection.filter({ 
       is_active: true 
     });
 
     console.log(`🔍 Found ${jiraConnections.length} active Jira connections`);
 
     if (jiraConnections.length === 0) {
-      console.error('❌ No Jira connections found');
       return Response.json({ 
         success: false, 
         message: 'No active Jira connection found' 
@@ -28,7 +27,7 @@ Deno.serve(async (req) => {
     }
 
     const jiraConn = jiraConnections[0];
-    console.log(`✅ Using connection: ${jiraConn.cloud_id} (${jiraConn.user_email})`);
+    console.log(`✅ Using connection: ${jiraConn.cloud_id}`);
     
     const accessToken = jiraConn.access_token;
     if (!accessToken) {
@@ -38,15 +37,12 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Get all project selections with service role (no RLS filtering)
-    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
-    console.log(`🔍 All selections: ${allSelections.length}`);
-    allSelections.forEach(sel => {
-      console.log(`   - ${sel.jira_project_name} (${sel.jira_project_key}): is_active=${sel.is_active}`);
+    // Get project selections (user-scoped, respects RLS)
+    const jiraSelections = await base44.entities.JiraProjectSelection.filter({ 
+      is_active: true 
     });
 
-    const jiraSelections = allSelections.filter(s => s.is_active === true);
-    console.log(`✅ Active selections: ${jiraSelections.length}`);
+    console.log(`✅ Found ${jiraSelections.length} active project selections`);
 
     if (jiraSelections.length === 0) {
       return Response.json({ 
