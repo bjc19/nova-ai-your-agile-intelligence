@@ -179,22 +179,29 @@ Deno.serve(async (req) => {
          jira_project_id: projectId
        });
 
-      // Fetch board ID for this project - SIMPLIFIED
+      // Fetch board ID for this project
       let boardId = null;
       try {
         const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board?projectKeyOrId=${project.key}`;
+        console.log('🔗 Fetching board for', project.key, 'URL:', boardUrl);
         const boardRes = await fetch(boardUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 
+        console.log('📊 Board response:', boardRes.status);
         if (boardRes.ok) {
           const boardData = await boardRes.json();
+          console.log('📋 Board data values:', boardData.values?.length);
           if (boardData.values && boardData.values.length > 0) {
             boardId = boardData.values[0].id.toString();
+            console.log('✅ Board ID found:', boardId);
           }
+        } else {
+          const errorText = await boardRes.text();
+          console.warn('⚠️ Board fetch failed:', boardRes.status, errorText.substring(0, 200));
         }
       } catch (e) {
-        // Board fetch failed - save without board ID
+        console.error('❌ Board fetch error:', e.message);
       }
 
       if (existing.length > 0) {
