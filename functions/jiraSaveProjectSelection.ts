@@ -175,7 +175,8 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      console.log('🔍 Checking existing for project:', projectId);
+      console.log('🔍 Processing project:', projectId, 'with key:', project.key);
+      console.log('📋 Jira connection cloud_id:', jiraConn.cloud_id);
       const existing = await base44.entities.JiraProjectSelection.filter({
         jira_project_id: projectId
       });
