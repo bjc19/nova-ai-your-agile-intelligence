@@ -67,9 +67,13 @@ export default function IntegrationStatus({ integrations = {} }) {
   useEffect(() => {
     checkConnections();
     
-    // Listen for connection updates from Settings page
+    // Debounced focus handler to avoid rate limit (min 30s between focus refetches)
+    let lastFetch = Date.now();
     const handleStorageChange = () => {
-      checkConnections();
+      if (Date.now() - lastFetch > 30000) {
+        lastFetch = Date.now();
+        checkConnections();
+      }
     };
     window.addEventListener('focus', handleStorageChange);
     return () => window.removeEventListener('focus', handleStorageChange);
