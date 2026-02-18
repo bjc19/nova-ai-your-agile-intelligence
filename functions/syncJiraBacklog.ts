@@ -161,21 +161,22 @@ Deno.serve(async (req) => {
         // Create analysis record
         await base44.asServiceRole.entities.AnalysisHistory.create(analysisData);
         totalSynced++;
-        console.log(`✅ Synced ${activeSprint.name} - ${issues.length} issues`);
+        logs.push(`✅ Synced ${activeSprint.name} - ${issues.length} issues`);
 
-      } catch (error) {
-        console.error(`❌ Error syncing project ${selection.jira_project_key}:`, error.message);
-      }
-    }
+        } catch (error) {
+        logs.push(`❌ Error syncing project ${selection.jira_project_key}: ${error.message}`);
+        }
+        }
 
-    return Response.json({ 
-      success: true, 
-      message: `Synced ${totalSynced} projects`,
-      count: totalSynced
-    });
+        return Response.json({ 
+        success: true, 
+        message: `Synced ${totalSynced} projects`,
+        count: totalSynced,
+        logs
+        });
 
-  } catch (error) {
-    console.error('❌ Sync error:', error.message);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-});
+        } catch (error) {
+        logs.push(`❌ Sync error: ${error.message}`);
+        return Response.json({ error: error.message, logs }, { status: 500 });
+        }
+        });
