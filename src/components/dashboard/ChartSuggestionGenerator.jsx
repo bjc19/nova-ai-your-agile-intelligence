@@ -99,6 +99,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
     if (chartType === 'business_value') {
       if (!businessValueMetric) {
         setShowBusinessValueForm(true);
+        setSelectedChart(chartType);
         return;
       }
       // Si données existent, les utiliser directement
@@ -122,11 +123,11 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
 
     setLoading(true);
     setSelectedChart(chartType);
+    setSuggestion(CHART_TYPES[chartType]);
 
     try {
       const mockData = generateMockChartData(chartType);
       setChartData(mockData);
-      setSuggestion(CHART_TYPES[chartType]);
     } catch (error) {
       console.error("Erreur génération graphique:", error);
     } finally {
