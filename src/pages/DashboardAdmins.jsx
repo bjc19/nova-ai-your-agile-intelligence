@@ -23,11 +23,9 @@ import {
   Mic,
   Sparkles,
   ArrowRight,
-  Zap,
   Calendar,
-  Clock,
-  Loader2 } from
-"lucide-react";
+  Loader2
+} from "lucide-react";
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
@@ -40,23 +38,6 @@ export default function DashboardAdmins() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
-
-  // Fetch GDPR signals
-  useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-    fetchSignals();
-  }, []);
 
   // Check authentication and role
   useEffect(() => {
@@ -69,7 +50,6 @@ export default function DashboardAdmins() {
 
       const currentUser = await base44.auth.me();
 
-      // Role verification - only 'admin' can access
       if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
@@ -114,11 +94,15 @@ export default function DashboardAdmins() {
     enabled: !isLoading
   });
 
-  // Filter analysis history
+  // Filter analysis history by period and workspace
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
+    const matchesPeriod = selectedPeriod
+      ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))
+      : true;
+    const matchesWorkspace = selectedWorkspaceId
+      ? analysis.jira_project_selection_id === selectedWorkspaceId
+      : true;
     return matchesPeriod && matchesWorkspace;
   });
 
@@ -153,7 +137,6 @@ export default function DashboardAdmins() {
 
   const sprintInfo = sprintContext ? {
     name: sprintContext.sprint_name,
-    daysRemaining: Math.max(0, Math.ceil((new Date(sprintContext.end_date) - new Date()) / (1000 * 60 * 60 * 24))),
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : null;
@@ -162,8 +145,8 @@ export default function DashboardAdmins() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>);
-
+      </div>
+    );
   }
 
   return (
@@ -173,13 +156,12 @@ export default function DashboardAdmins() {
         isOpen={showOnboarding}
         onComplete={() => setShowOnboarding(false)} />
 
-
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent" />
         <div className="absolute top-10 left-1/4 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl" />
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl" />
-        
+
         <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -209,7 +191,7 @@ export default function DashboardAdmins() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
@@ -221,42 +203,39 @@ export default function DashboardAdmins() {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
-
               </div>
             </div>
 
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <>
+            {(!selectedPeriod || analysisHistory.length > 0) && (
+              <>
                 <DailyQuote
-                lang={t('language') === 'English' ? 'en' : 'fr'}
-                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                patterns={[]} />
-
+                  lang={t('language') === 'English' ? 'en' : 'fr'}
+                  blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+                  riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+                  patterns={[]} />
                 <QuickStats analysisHistory={analysisHistory} />
               </>
-            }
+            )}
           </motion.div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {multiProjectAlert &&
-        <div className="mb-6">
+        {multiProjectAlert && (
+          <div className="mb-6">
             <MultiProjectAlert
-            detectionData={multiProjectAlert}
-            onConfirm={() => {
-              setMultiProjectAlert(null);
-              window.location.reload();
-            }}
-            onDismiss={() => setMultiProjectAlert(null)} />
-
+              detectionData={multiProjectAlert}
+              onConfirm={() => {
+                setMultiProjectAlert(null);
+                window.location.reload();
+              }}
+              onDismiss={() => setMultiProjectAlert(null)} />
           </div>
-        }
+        )}
 
-        {selectedPeriod && analysisHistory.length === 0 &&
-        <div className="text-center py-16">
+        {selectedPeriod && analysisHistory.length === 0 && (
+          <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
@@ -273,10 +252,10 @@ export default function DashboardAdmins() {
               </Button>
             </Link>
           </div>
-        }
+        )}
 
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
+        {(!selectedPeriod || analysisHistory.length > 0) && (
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
@@ -284,7 +263,6 @@ export default function DashboardAdmins() {
                 sourceUrl={latestAnalysis?.sourceUrl}
                 sourceName={latestAnalysis?.sourceName}
                 selectedWorkspaceId={selectedWorkspaceId} />
-
             </div>
 
             <div className="space-y-6">
@@ -292,7 +270,7 @@ export default function DashboardAdmins() {
               <IntegrationStatus />
             </div>
           </div>
-        }
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -307,12 +285,6 @@ export default function DashboardAdmins() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  
-
-
-
-                </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
                     {t('startAnalysis')}
@@ -324,6 +296,6 @@ export default function DashboardAdmins() {
           </div>
         </motion.div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
