@@ -13,7 +13,6 @@ import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChar
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
@@ -251,7 +250,7 @@ export default function DashboardAdmins() {
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
                 patterns={[]} />
 
-                <QuickStats analysisHistory={analysisHistory} />
+                <QuickStats analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} currentPageName="DashboardAdmins" />
               </>
             }
           </motion.div>
@@ -305,13 +304,10 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-
-               <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
-
-               <KeyRecommendations
-               latestAnalysis={latestAnalysis}
-               sourceUrl={latestAnalysis?.sourceUrl}
-               sourceName={latestAnalysis?.sourceName} />
+              <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
             </div>
 
