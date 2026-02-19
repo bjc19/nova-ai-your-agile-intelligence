@@ -29,8 +29,7 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2,
-  RefreshCw } from
+  Loader2 } from
 "lucide-react";
 
 export default function DashboardAdmins() {
@@ -45,25 +44,8 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [isSyncing, setIsSyncing] = useState(false);
 
-  // Fetch GDPR signals
-  useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-    fetchSignals();
-  }, []);
-
-  // Check authentication and role
+  // Check authentication, role, puis charger toutes les données en une seule fois
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -74,7 +56,6 @@ export default function DashboardAdmins() {
 
       const currentUser = await base44.auth.me();
 
-      // Role verification - only 'admin' can access
       if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
@@ -82,22 +63,23 @@ export default function DashboardAdmins() {
 
       setUser(currentUser);
 
-      // Load sprint context
-      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-      if (activeSprints.length > 0) {
-        setSprintContext(activeSprints[0]);
-      }
+      // Charger toutes les données en parallèle (après avoir confirmé le rôle)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      // Check onboarding
-      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      const [activeSprints, teamConfigs, pendingAlerts, markers] = await Promise.all([
+        base44.entities.SprintContext.filter({ is_active: true }),
+        base44.entities.TeamConfiguration.list(),
+        base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
+        base44.entities.GDPRMarkers.list('-created_date', 100)
+      ]);
+
+      if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
+
       if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
         setShowOnboarding(true);
       }
 
-      // Check multi-project alerts
-      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-        admin_response: "pending"
-      });
       if (pendingAlerts.length > 0) {
         const latest = pendingAlerts[pendingAlerts.length - 1];
         setMultiProjectAlert({
@@ -106,6 +88,9 @@ export default function DashboardAdmins() {
           log_id: latest.id
         });
       }
+
+      const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+      setGdprSignals(recentMarkers);
 
       setIsLoading(false);
     };
@@ -234,8 +219,7 @@ export default function DashboardAdmins() {
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                  userRole={user?.role} />
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
@@ -244,24 +228,6 @@ export default function DashboardAdmins() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    setIsSyncing(true);
-                    try {
-                      const response = await base44.functions.invoke('syncJiraBacklog', {});
-                      console.log('Sync result:', response.data);
-                    } catch (error) {
-                      console.error('Sync error:', error);
-                    } finally {
-                      setIsSyncing(false);
-                    }
-                  }}
-                  disabled={isSyncing}>
-                  <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Syncing...' : 'Sync Now'}
-                </Button>
               </div>
             </div>
 
