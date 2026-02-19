@@ -16,7 +16,6 @@ import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
-import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
 
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
@@ -302,33 +301,6 @@ export default function DashboardAdmins() {
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
-
-            }
-
-              {analysisHistory.length > 0 &&
-            <MetricsRadarCard
-              metricsData={{
-                velocity: { current: 45, trend: "up", change: 20 },
-                flow_efficiency: { current: 28, target: 55 },
-                cycle_time: { current: 9, target: 4 },
-                throughput: { current: 6, variance: 0.3 },
-                deployment_frequency: { current: 1, target: 3 },
-                data_days: 14
-              }}
-              historicalData={{
-                sprints_count: 1,
-                data_days: 7,
-                is_audit_phase: false,
-                is_new_team: true
-              }}
-              integrationStatus={{
-                jira_connected: true,
-                slack_connected: false,
-                dora_pipeline: false,
-                flow_metrics_available: true
-              }}
-              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
             }
 
