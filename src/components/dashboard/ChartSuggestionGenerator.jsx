@@ -44,28 +44,26 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
   const [showBusinessValueForm, setShowBusinessValueForm] = useState(false);
-  const [businessValueMetric, setBusinessValueMetric] = useState(null);
+  const [businessValueMetricsHistory, setBusinessValueMetricsHistory] = useState([]);
 
-  // Charger les données Business Value
+  // Charger l'historique complet des données Business Value
   useEffect(() => {
     if (!selectedWorkspaceId) return;
     
-    const fetchBusinessValueMetric = async () => {
+    const fetchBusinessValueMetricsHistory = async () => {
       try {
         const user = await base44.auth.me();
         const metrics = await base44.entities.BusinessValueMetric.filter({
           workspace_id: selectedWorkspaceId,
           user_email: user.email
-        });
-        if (metrics.length > 0) {
-          setBusinessValueMetric(metrics[0]);
-        }
+        }, '-period_start_date', 100);
+        setBusinessValueMetricsHistory(metrics);
       } catch (err) {
-        console.error("Erreur chargement Business Value:", err);
+        console.error("Erreur chargement Business Value historique:", err);
       }
     };
     
-    fetchBusinessValueMetric();
+    fetchBusinessValueMetricsHistory();
   }, [selectedWorkspaceId]);
 
   // Analyser les données disponibles pour suggérer le meilleur graphique
