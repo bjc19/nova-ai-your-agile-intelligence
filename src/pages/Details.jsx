@@ -102,14 +102,14 @@ export default function Details() {
     queryFn: () => base44.entities.ResolvedItem.list('-resolved_date', 100),
   });
 
-  // Apply period filter to history
+  // Apply period filter to history + MASK analyses without workspace links
   useEffect(() => {
-    let filtered = historyData;
+    let filtered = historyData.filter(a => a.jira_project_selection_id || a.trello_project_selection_id);
     if (selectedPeriod) {
       const startDate = new Date(selectedPeriod.start);
       const endDate = new Date(selectedPeriod.end);
       endDate.setHours(23, 59, 59, 999);
-      filtered = historyData.filter(a => {
+      filtered = filtered.filter(a => {
         const d = new Date(a.created_date);
         return d >= startDate && d <= endDate;
       });
