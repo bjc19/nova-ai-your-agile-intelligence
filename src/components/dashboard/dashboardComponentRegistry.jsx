@@ -48,38 +48,6 @@ export const DASHBOARD_COMPONENTS = {
     }
   },
 
-
-  realityEngine: {
-    id: "realityEngine",
-    name: "Organizational Reality Engine",
-    category: "systemic",
-    priority: 7,
-    
-    show_if: (situation) => {
-      return situation.flow_data_available && (
-        situation.systemic_issues > 0 ||
-        situation.assignee_changes_high ||
-        situation.mention_patterns_concerning
-      );
-    },
-    hide_if: (situation) => {
-      return situation.crisis_mode || !situation.flow_data_available;
-    },
-    
-    relevance_score: (situation) => {
-      let score = 0;
-      if (situation.assignee_changes_high) score += 35;
-      if (situation.mention_patterns_concerning) score += 30;
-      if (situation.blocked_resolution_needed) score += 25;
-      return Math.min(score, 100);
-    },
-    
-    roles: ["admin"],
-    config_by_role: {
-      admin: { showMapping: true, showSignals: true, detailed: true }
-    }
-  },
-
   // PERFORMANCE BLOCKS
   sprintPerformance: {
     id: "sprintPerformance",
