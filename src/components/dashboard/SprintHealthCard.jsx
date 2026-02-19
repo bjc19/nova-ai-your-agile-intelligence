@@ -59,11 +59,11 @@ const statusConfig = {
   }
 };
 
-export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReviewSprint, selectedWorkspaceId = null }) {
-   // CRITICAL: Don't render if workspace selected but has no real sprint data
-   if (selectedWorkspaceId && !sprintHealth) {
-     return null;
-   }
+export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReviewSprint }) {
+  // GUARD: Never render without real sprint data
+  if (!sprintHealth) {
+    return null;
+  }
   const [expanded, setExpanded] = useState(false);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [userResponse, setUserResponse] = useState("");
