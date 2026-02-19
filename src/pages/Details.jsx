@@ -3,19 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { useRoleAccess } from "@/components/dashboard/useRoleAccess";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
-import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, Shield, ChevronDown } from "lucide-react";
+import { ArrowLeft, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, Filter, ChevronDown } from "lucide-react";
 import { anonymizeNamesInText as anonymizeText } from "@/components/nova/anonymizationEngine";
 
-// Anonymize names in text
 const anonymizeNamesInText = (text) => {
   if (!text) return text;
-  
   const namePattern = /\b([A-ZÀ-ÿ][a-zà-ÿ]+)\b/g;
   return text.replace(namePattern, (match) => {
     const commonWords = ['Vous', 'Excellent', 'À', 'Continuez', 'Priorisez', 'You', 'Needs', 'Keep', 'Prioritize', 'Resolved', 'Blockers', 'Risks', 'IST'];
@@ -26,7 +23,7 @@ const anonymizeNamesInText = (text) => {
 
 export default function Details() {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [detailType, setDetailType] = useState(null);
   const [analysisHistory, setAnalysisHistory] = useState([]);
   const [urgencyFilter, setUrgencyFilter] = useState(null);
@@ -35,10 +32,9 @@ export default function Details() {
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [resolvingItemId, setResolvingItemId] = useState(null);
   const [localResolvedIds, setLocalResolvedIds] = useState(new Set());
-
-  // Get the detail type and period from sessionStorage
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
+
   useEffect(() => {
     const stored = sessionStorage.getItem("detailsType");
     if (stored) {
@@ -46,224 +42,98 @@ export default function Details() {
     } else {
       navigate(createPageUrl("Dashboard"));
     }
-    
-    // Load selected period from sessionStorage
+
     const storedPeriod = sessionStorage.getItem("selectedPeriod");
-    if (storedPeriod) {
-      setSelectedPeriod(JSON.parse(storedPeriod));
-    }
+    if (storedPeriod) setSelectedPeriod(JSON.parse(storedPeriod));
+
+    const storedWorkspace = sessionStorage.getItem("selectedWorkspaceId");
+    if (storedWorkspace) setSelectedWorkspaceId(storedWorkspace);
   }, [navigate]);
 
-  // Fetch analysis history
+  // Fetch analysis history - scoped by workspace if set
   const { data: historyData = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    queryKey: ['analysisHistory', selectedWorkspaceId],
+    queryFn: () => selectedWorkspaceId
+      ? base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100)
+      : base44.entities.AnalysisHistory.list('-created_date', 100),
+    enabled: detailType !== null,
   });
 
-  // Fetch all markers and separate by source
-  const { data: allMarkersData = [] } = useQuery({
-    queryKey: ['gdprMarkers'],
-    queryFn: () => base44.entities.GDPRMarkers.list('-created_date', 100),
-  });
-
-  // Fetch PatternDetections with resolved status
-  const { data: resolvedPatterns = [] } = useQuery({
-    queryKey: ['patternDetections', 'resolved'],
-    queryFn: () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 100),
-  });
-
-  // Fetch unresolved PatternDetections
-  const { data: unresolvedPatterns = [] } = useQuery({
-    queryKey: ['patternDetections', 'unresolved'],
-    queryFn: () => base44.entities.PatternDetection.filter({ 
-      status: { $nin: ['resolved', 'dismissed'] } 
-    }, '-created_date', 100),
-  });
-
-  // Fetch resolved items (all sources)
+  // Fetch resolved items
   const { data: resolvedItemsData = [], refetch: refetchResolvedItems } = useQuery({
     queryKey: ['resolvedItems'],
     queryFn: () => base44.entities.ResolvedItem.list('-resolved_date', 100),
   });
 
-  // Separate Slack (GDPR) and Teams markers
-  const gdprMarkersData = allMarkersData.filter(m => 
-    m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
-  );
-  
-  const teamsInsightsData = allMarkersData.filter(m => 
-    m.detection_source === 'teams_daily'
-  );
-
+  // Apply period filter to history
   useEffect(() => {
-    // Filter by selected period if available
     let filtered = historyData;
     if (selectedPeriod) {
       const startDate = new Date(selectedPeriod.start);
       const endDate = new Date(selectedPeriod.end);
       endDate.setHours(23, 59, 59, 999);
-      
-      filtered = historyData.filter(analysis => {
-        const analysisDate = new Date(analysis.created_date);
-        return analysisDate >= startDate && analysisDate <= endDate;
+      filtered = historyData.filter(a => {
+        const d = new Date(a.created_date);
+        return d >= startDate && d <= endDate;
       });
     }
     setAnalysisHistory(filtered);
   }, [historyData, selectedPeriod]);
 
-
-
-  // Calculate data based on type
   const getDetailsData = () => {
     let items = [];
     let icon, color, title;
 
     if (detailType === "blockers") {
-      // Analyses blockers + GDPR blockers (critique/haute) + Teams blockers (critique/haute) + unresolved patterns
-      const allBlockers = analysisHistory.flatMap((analysis, idx) => {
-        const blockers = analysis.analysis_data?.blockers || [];
-        return blockers.map((blocker, bidx) => ({
-          id: `${idx}-${bidx}`,
-          ...blocker,
-          source: 'analysis',
-          analysisTitle: analysis.title,
-          analysisDate: analysis.created_date,
-        }));
-      }).concat(
-        gdprMarkersData
-          .filter(m => m.criticite === 'critique' || m.criticite === 'haute')
-          .map((marker) => ({
-            id: `gdpr-blocker-${marker.id}`,
-            issue: marker.probleme,
-            description: marker.probleme,
-            urgency: marker.criticite === 'critique' ? 'high' : 'medium',
-            source: 'gdpr',
-            marker_id: marker.id,
-            criticite: marker.criticite,
-            recurrence: marker.recurrence,
-            confidence_score: marker.confidence_score,
-            analysisTitle: '#Slack',
-            analysisData: { workshop_type: marker.type },
-            analysisDate: marker.created_date,
+      items = analysisHistory.flatMap((analysis, idx) =>
+        (analysis.analysis_data?.blockers || [])
+          .filter(b => b.urgency)
+          .map((blocker, bidx) => ({
+            id: `${idx}-${bidx}`,
+            ...blocker,
+            source: 'analysis',
+            analysisTitle: analysis.title,
+            analysisDate: analysis.created_date,
           }))
-      ).concat(
-        teamsInsightsData
-          .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
-          .map((marker, idx) => ({
-            id: `teams-blocker-${marker.id}`,
-            issue: marker.probleme,
-            description: marker.probleme,
-            urgency: marker.criticite === 'critique' ? 'high' : 'medium',
-            source: 'teams',
-            criticite: marker.criticite,
-            recurrence: marker.recurrence,
-            confidence_score: marker.confidence_score,
-            analysisTitle: '#Microsoft Teams',
-            analysisData: { workshop_type: marker.type },
-            analysisDate: marker.created_date,
-          }))
-      ).concat(
-        unresolvedPatterns.map((pattern, idx) => ({
-          id: pattern.id,
-          issue: pattern.pattern_name,
-          description: pattern.context,
-          status: pattern.status,
-          urgency: pattern.severity === 'critical' ? 'high' : pattern.severity === 'high' ? 'medium' : 'low',
-          source: 'pattern_detection',
-          confidence_score: pattern.confidence_score,
-          analysisTitle: `Pattern: ${pattern.pattern_name}`,
-          analysisDate: pattern.created_date,
-          pattern_id: pattern.pattern_id,
-        }))
-      );
-      // Filter out already resolved items
-      items = allBlockers.filter(item => !resolvedItemsData.some(resolved => resolved.item_id === item.id));
+      ).filter(item => !resolvedItemsData.some(r => r.item_id === item.id));
       icon = AlertOctagon;
       color = "text-blue-600";
       title = t('detectedBlockersIssues');
+
     } else if (detailType === "risks") {
-      // Analyses risks + GDPR risks (moyenne) + Teams risks (moyenne) + unresolved patterns
-      const allRisks = analysisHistory.flatMap((analysis, idx) => {
-        const risks = analysis.analysis_data?.risks || [];
-        return risks.map((risk, ridx) => ({
-          id: `${idx}-${ridx}`,
-          ...risk,
-          source: 'analysis',
-          analysisTitle: analysis.title,
-          analysisDate: analysis.created_date,
-        }));
-      }).concat(
-        gdprMarkersData
-          .filter(m => m.criticite === 'moyenne')
-          .map((marker) => ({
-            id: `gdpr-risk-${marker.id}`,
-            issue: marker.probleme,
-            description: marker.probleme,
-            urgency: 'medium',
-            source: 'gdpr',
-            marker_id: marker.id,
-            criticite: marker.criticite,
-            recurrence: marker.recurrence,
-            confidence_score: marker.confidence_score,
-            analysisTitle: '#Slack',
-            analysisDate: marker.created_date,
+      items = analysisHistory.flatMap((analysis, idx) =>
+        (analysis.analysis_data?.risks || [])
+          .map((risk, ridx) => ({
+            id: `${idx}-${ridx}`,
+            ...risk,
+            source: 'analysis',
+            analysisTitle: analysis.title,
+            analysisDate: analysis.created_date,
           }))
-      ).concat(
-        teamsInsightsData
-          .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
-          .map((marker, idx) => ({
-            id: `teams-risk-${marker.id}`,
-            issue: marker.probleme,
-            description: marker.probleme,
-            urgency: 'medium',
-            source: 'teams',
-            criticite: marker.criticite,
-            recurrence: marker.recurrence,
-            confidence_score: marker.confidence_score,
-            analysisTitle: '#Microsoft Teams',
-            analysisDate: marker.created_date,
-          }))
-      ).concat(
-        unresolvedPatterns.map((pattern, idx) => ({
-          id: pattern.id,
-          issue: pattern.pattern_name,
-          description: pattern.context,
-          status: pattern.status,
-          urgency: pattern.severity === 'critical' ? 'high' : pattern.severity === 'high' ? 'medium' : 'low',
-          source: 'pattern_detection',
-          confidence_score: pattern.confidence_score,
-          analysisTitle: `Pattern: ${pattern.pattern_name}`,
-          analysisDate: pattern.created_date,
-          pattern_id: pattern.pattern_id,
-        }))
-      );
-      // Filter out already resolved items and keep only high/medium urgency
-      items = allRisks.filter(item => 
-        !resolvedItemsData.some(resolved => resolved.item_id === item.id) &&
+      ).filter(item =>
+        !resolvedItemsData.some(r => r.item_id === item.id) &&
         (item.urgency === 'high' || item.urgency === 'medium')
       );
       icon = ShieldAlert;
       color = "text-amber-600";
       title = t('identifiedRisks');
+
     } else if (detailType === "analyses") {
-      items = analysisHistory.map(analysis => ({
-        id: analysis.id,
-        ...analysis,
-      }));
+      items = analysisHistory.map(a => ({ id: a.id, ...a }));
       icon = TrendingUp;
       color = "text-indigo-600";
       title = t('recentAnalyses');
+
     } else if (detailType === "resolved") {
-      // Fetch PatternDetection records with status: resolved
-      items = resolvedPatterns.map((pattern, idx) => ({
-        id: pattern.id,
-        ...pattern,
-        issue: pattern.pattern_name,
-        description: pattern.context,
+      items = resolvedItemsData.map(item => ({
+        id: item.id,
+        issue: item.title || item.item_id,
+        description: item.title,
         status: "resolved",
-        analysisTitle: `Pattern: ${pattern.pattern_name}`,
-        analysisDate: pattern.resolved_date,
-        source: 'pattern_detection',
+        urgency: item.urgency,
+        analysisTitle: item.source,
+        analysisDate: item.resolved_date || item.created_date,
+        source: item.source,
       }));
       icon = CheckCircle2;
       color = "text-emerald-600";
@@ -275,41 +145,31 @@ export default function Details() {
 
   const { items, icon: Icon, color, title } = getDetailsData();
 
-  // Filter and sort items by urgency and date (most recent first)
-  const filteredItems = (urgencyFilter 
+  const filteredItems = (urgencyFilter
     ? items.filter(item => item.urgency === urgencyFilter)
     : items
   ).filter(item => !localResolvedIds.has(item.id))
    .sort((a, b) => new Date(b.analysisDate || b.created_date) - new Date(a.analysisDate || a.created_date));
 
-
-
-  // Handle marking item as resolved
   const handleMarkResolved = async (item) => {
     setResolvingItemId(item.id);
-    // Optimistically mark as resolved locally
     setLocalResolvedIds(prev => new Set([...prev, item.id]));
-    
     try {
       await base44.functions.invoke('markItemResolved', {
         itemId: item.id,
         source: item.source,
         itemType: detailType === 'blockers' ? 'blocker' : 'risk',
-        title: item.issue || item.description || item.pattern_name || '-',
+        title: item.issue || item.description || '-',
         urgency: item.urgency || 'medium',
         analysisDate: item.analysisDate || item.created_date,
       });
-
-      // Track resolution count for Dashboard sync
       const resolvedCount = parseInt(sessionStorage.getItem('resolvedCount') || '0');
       sessionStorage.setItem('resolvedCount', String(resolvedCount + 1));
-
       toast.success('Item marqué comme résolu');
       refetchResolvedItems();
     } catch (error) {
       console.error('Erreur résolution:', error);
       toast.error('Erreur lors de la mise à jour');
-      // Remove from local resolved if request failed
       setLocalResolvedIds(prev => {
         const updated = new Set(prev);
         updated.delete(item.id);
@@ -320,23 +180,17 @@ export default function Details() {
     }
   };
 
-  // Count items by urgency (only unresolved items)
   const itemsWithUrgency = filteredItems.filter(item => item.urgency);
   const urgencyCounts = itemsWithUrgency.reduce((acc, item) => {
-   acc[item.urgency] = (acc[item.urgency] || 0) + 1;
-   return acc;
+    acc[item.urgency] = (acc[item.urgency] || 0) + 1;
+    return acc;
   }, {});
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Header */}
       <div className="border-b border-slate-200/50">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <Button
               variant="ghost"
               onClick={() => {
@@ -351,7 +205,7 @@ export default function Details() {
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl bg-opacity-10`}>
+                <div className="p-3 rounded-xl bg-slate-100">
                   <Icon className={`w-8 h-8 ${color}`} />
                 </div>
                 <div>
@@ -365,49 +219,21 @@ export default function Details() {
 
               {(detailType === "blockers" || detailType === "risks") && Object.keys(urgencyCounts).length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
-                  <button
-                    onClick={() => setUrgencyFilter(null)}
-                    className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                      !urgencyFilter 
-                        ? "bg-slate-900 text-white" 
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
+                  <button onClick={() => setUrgencyFilter(null)} className={`text-xs px-3 py-1.5 rounded-lg transition-all ${!urgencyFilter ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
                     Tous ({itemsWithUrgency.length})
                   </button>
                   {urgencyCounts.high && (
-                    <button
-                      onClick={() => setUrgencyFilter("high")}
-                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                        urgencyFilter === "high"
-                          ? "bg-red-600 text-white"
-                          : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
-                      }`}
-                    >
+                    <button onClick={() => setUrgencyFilter("high")} className={`text-xs px-3 py-1.5 rounded-lg transition-all ${urgencyFilter === "high" ? "bg-red-600 text-white" : "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"}`}>
                       {t('high')} ({urgencyCounts.high})
                     </button>
                   )}
                   {urgencyCounts.medium && (
-                    <button
-                      onClick={() => setUrgencyFilter("medium")}
-                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                        urgencyFilter === "medium"
-                          ? "bg-amber-600 text-white"
-                          : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
-                      }`}
-                    >
+                    <button onClick={() => setUrgencyFilter("medium")} className={`text-xs px-3 py-1.5 rounded-lg transition-all ${urgencyFilter === "medium" ? "bg-amber-600 text-white" : "bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"}`}>
                       {t('medium')} ({urgencyCounts.medium})
                     </button>
                   )}
                   {urgencyCounts.low && (
-                    <button
-                      onClick={() => setUrgencyFilter("low")}
-                      className={`text-xs px-3 py-1.5 rounded-lg transition-all ${
-                        urgencyFilter === "low"
-                          ? "bg-slate-600 text-white"
-                          : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
+                    <button onClick={() => setUrgencyFilter("low")} className={`text-xs px-3 py-1.5 rounded-lg transition-all ${urgencyFilter === "low" ? "bg-slate-600 text-white" : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"}`}>
                       {t('low')} ({urgencyCounts.low})
                     </button>
                   )}
@@ -418,285 +244,165 @@ export default function Details() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         {filteredItems.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
             <Filter className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-500 text-lg">{t('noItemsFound')}</p>
           </motion.div>
         ) : (
-                  <div className="space-y-4">
-                    {/* Pagination info */}
-                    <div className="text-sm text-slate-500 mb-4">
-                      Page {currentPage + 1} / {Math.ceil(filteredItems.length / itemsPerPage)} • {filteredItems.length} total
-                    </div>
+          <div className="space-y-4">
+            <div className="text-sm text-slate-500 mb-4">
+              Page {currentPage + 1} / {Math.ceil(filteredItems.length / itemsPerPage)} • {filteredItems.length} total
+            </div>
 
-                    {/* Items */}
-                    <div className="space-y-3">
-                    {filteredItems.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((item, index) => {
-              const displayItem = item;
-              
-              return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.05 * index }}
-                className="rounded-xl border border-slate-200 bg-white overflow-hidden"
-              >
-                <div 
-                  onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
-                  className="p-5 hover:bg-slate-50/50 transition-colors cursor-pointer"
+            <div className="space-y-3">
+              {filteredItems.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.05 * index }}
+                  className="rounded-xl border border-slate-200 bg-white overflow-hidden"
                 >
-                  <div className="flex items-start gap-4">
-                  <div className={`p-2 rounded-lg ${
-                    item.source === 'gdpr' ? 'bg-blue-100' : 
-                    item.source === 'teams' ? 'bg-purple-100' : 
-                    'bg-slate-100'
-                  }`}>
-                    {item.source === 'gdpr' ? (
-                      <Shield className={`w-5 h-5 text-blue-600`} />
-                    ) : item.source === 'teams' ? (
-                      <Shield className={`w-5 h-5 text-purple-600`} />
-                    ) : (
-                      <Icon className={`w-5 h-5 ${color}`} />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    {detailType === "analyses" ? (
-                      <>
-                        <h3 className="font-semibold text-slate-900 truncate">
-                          {anonymizeText(item.title)}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge variant="outline" className="text-xs">
-                            {item.blockers_count} {t('blockers')}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {item.risks_count} {t('risks')}
-                          </Badge>
-                          <span className="text-xs text-slate-500">
-                            {new Date(item.created_date).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <h3 className="font-semibold text-slate-900">
-                            {anonymizeText(displayItem.member || displayItem.issue || displayItem.description || "-")}
-                          </h3>
-                          <div className="flex gap-2 flex-wrap justify-end items-center">
-                            {item.urgency && (
-                              <Badge
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setUrgencyFilter(item.urgency);
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}
-                                className={`shrink-0 cursor-pointer hover:opacity-80 transition-opacity text-xs ${
-                                  item.urgency === "high"
-                                    ? "bg-red-50 text-red-700 border-red-200"
-                                    : item.urgency === "medium"
-                                    ? "bg-amber-50 text-amber-700 border-amber-200"
-                                    : "bg-slate-50 text-slate-600 border-slate-200"
-                                }`}
-                              >
-                                {t(item.urgency)}
-                              </Badge>
-                            )}
-                            {item.status === "resolved" && (
-                              <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
-                                {t('resolved')}
-                              </Badge>
-                            )}
-                            {item.status !== "resolved" && (item.urgency === 'high' || item.urgency === 'medium') && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleMarkResolved(item);
-                                }}
-                                disabled={resolvingItemId === item.id}
-                                className="text-xs h-7 px-2 shrink-0"
-                              >
-                                {resolvingItemId === item.id ? 'Mise à jour...' : 'Marquer résolu'}
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                        {item.patterns && item.patterns.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {item.patterns.map((pattern, pidx) => (
-                              <Badge key={pidx} variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-200">
-                                {pattern}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                        <p className="text-sm text-slate-600 mt-2">
-                          {anonymizeNamesInText(anonymizeText(displayItem.issue || displayItem.description || "-"))}
-                        </p>
-                        {item.status === "resolved" ? (
-                          displayItem.impact && (
-                            <p className="text-xs text-slate-500 mt-2">
-                              <strong>Impact:</strong> {anonymizeNamesInText(anonymizeText(displayItem.impact))}
-                            </p>
-                          )
+                  <div
+                    onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
+                    className="p-5 hover:bg-slate-50/50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 rounded-lg bg-slate-100">
+                        <Icon className={`w-5 h-5 ${color}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {detailType === "analyses" ? (
+                          <>
+                            <h3 className="font-semibold text-slate-900 truncate">{anonymizeText(item.title)}</h3>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              <Badge variant="outline" className="text-xs">{item.blockers_count} {t('blockers')}</Badge>
+                              <Badge variant="outline" className="text-xs">{item.risks_count} {t('risks')}</Badge>
+                              <span className="text-xs text-slate-500">{new Date(item.created_date).toLocaleDateString()}</span>
+                            </div>
+                          </>
                         ) : (
                           <>
-                            {displayItem.action && (
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <h3 className="font-semibold text-slate-900">
+                                {anonymizeText(item.member || item.issue || item.description || "-")}
+                              </h3>
+                              <div className="flex gap-2 flex-wrap justify-end items-center">
+                                {item.urgency && (
+                                  <Badge
+                                    variant="outline"
+                                    onClick={(e) => { e.stopPropagation(); setUrgencyFilter(item.urgency); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    className={`shrink-0 cursor-pointer text-xs ${item.urgency === "high" ? "bg-red-50 text-red-700 border-red-200" : item.urgency === "medium" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-slate-50 text-slate-600 border-slate-200"}`}
+                                  >
+                                    {t(item.urgency)}
+                                  </Badge>
+                                )}
+                                {item.status === "resolved" && (
+                                  <Badge className="shrink-0 bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">{t('resolved')}</Badge>
+                                )}
+                                {item.status !== "resolved" && (item.urgency === 'high' || item.urgency === 'medium') && (
+                                  <Button
+                                    size="sm" variant="outline"
+                                    onClick={(e) => { e.stopPropagation(); handleMarkResolved(item); }}
+                                    disabled={resolvingItemId === item.id}
+                                    className="text-xs h-7 px-2 shrink-0"
+                                  >
+                                    {resolvingItemId === item.id ? 'Mise à jour...' : 'Marquer résolu'}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-sm text-slate-600 mt-2">
+                              {anonymizeNamesInText(anonymizeText(item.issue || item.description || "-"))}
+                            </p>
+                            {item.action && (
                               <p className="text-xs text-slate-500 mt-2">
-                                <strong>{t('action')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.action))}
+                                <strong>{t('action')}:</strong> {anonymizeNamesInText(anonymizeText(item.action))}
                               </p>
                             )}
-                            {displayItem.impact && (
+                            {item.impact && (
                               <p className="text-xs text-slate-500 mt-1">
-                                <strong>{t('impact')}:</strong> {anonymizeNamesInText(anonymizeText(displayItem.impact))}
+                                <strong>{t('impact')}:</strong> {anonymizeNamesInText(anonymizeText(item.impact))}
                               </p>
                             )}
+                            <div className="flex items-center gap-2 mt-3 flex-wrap">
+                              <span className="text-xs text-slate-500">{item.analysisTitle}</span>
+                              <span className="text-xs text-slate-400">•</span>
+                              <span className="text-xs text-slate-500">{new Date(item.analysisDate).toLocaleDateString()}</span>
+                            </div>
                           </>
                         )}
-                        <div className="flex items-center gap-2 mt-3 flex-wrap">
-                          <span className={`text-xs ${
-                            item.source === 'gdpr' ? 'text-blue-600 font-medium' : 
-                            item.source === 'teams' ? 'text-purple-600 font-medium' : 
-                            'text-slate-500'
-                          }`}>
-                            {item.analysisData?.workshop_type || item.analysisTitle}
-                          </span>
-                          {item.source === 'gdpr' && (
-                            <>
-                              <span className="text-xs text-slate-400">•</span>
-                              <span className="text-xs text-slate-500">
-                                Récurrence: {item.recurrence}x
-                              </span>
-                              <span className="text-xs text-slate-400">•</span>
-                              <span className="text-xs text-slate-500">
-                                Confiance: {Math.round(item.confidence_score * 100)}%
-                              </span>
-                            </>
-                          )}
-                          <span className={`text-xs ${(item.source === 'gdpr' || item.source === 'teams') ? 'text-slate-400' : ''}`}>
-                            {(item.source === 'gdpr' || item.source === 'teams') ? '•' : '•'} {new Date(item.analysisDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex-shrink-0">
-                    <motion.div
-                      animate={{ rotate: expandedItemId === item.id ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
-                    </motion.div>
-                  </div>
-                  </div>
-                  </div>
-
-                  {/* Expanded Details */}
-                   <motion.div
-                   initial={{ height: 0, opacity: 0 }}
-                   animate={{ height: expandedItemId === item.id ? "auto" : 0, opacity: expandedItemId === item.id ? 1 : 0 }}
-                   transition={{ duration: 0.3 }}
-                   className="overflow-hidden border-t border-slate-100"
-
-                   >
-                   <div className="p-5 bg-slate-50/50 space-y-4">
-                  {/* Root Cause Analysis */}
-                  {(item.root_cause || item.cause) && (
-                    <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Cause Racine</h4>
-                      <p className="text-sm text-slate-600">
-                        {anonymizeNamesInText(anonymizeText(item.root_cause || item.cause))}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* System Impact */}
-                  {(item.impact || item.system_impact) && (
-                    <div>
-                      <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact Système</h4>
-                      <p className="text-sm text-slate-600">
-                        {anonymizeNamesInText(anonymizeText(item.impact || item.system_impact))}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Mitigation/Action or Resolution Impact */}
-                  {(item.action || item.mitigation || item.recommendation) && (
-                      <div>
-                        <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
-                        <ul className="space-y-2">
-                          <li className="text-sm text-slate-600 flex gap-2">
-                            <span className="text-blue-600 font-semibold">•</span>
-                            <span>{anonymizeNamesInText(anonymizeText(item.action || item.mitigation || item.recommendation))}</span>
-                          </li>
-                        </ul>
                       </div>
-                  )}
-
-                  {/* Confidence Score */}
-                  {item.confidence_score && (
-                    <div className="pt-2 border-t border-slate-200">
-                      <span className="text-xs text-slate-500">
-                        Confiance: {Math.round(item.confidence_score * 100)}%
-                      </span>
+                      <div className="flex-shrink-0">
+                        <motion.div animate={{ rotate: expandedItemId === item.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                          <ChevronDown className="w-5 h-5 text-slate-400" />
+                        </motion.div>
+                      </div>
                     </div>
-                  )}
                   </div>
-                  </motion.div>
-                  </motion.div>
-                  );
-                  })}
-              </div>
 
-              {/* Pagination buttons */}
-              {Math.ceil(filteredItems.length / itemsPerPage) > 1 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: expandedItemId === item.id ? "auto" : 0, opacity: expandedItemId === item.id ? 1 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden border-t border-slate-100"
+                  >
+                    <div className="p-5 bg-slate-50/50 space-y-4">
+                      {(item.root_cause || item.cause) && (
+                        <div>
+                          <h4 className="font-semibold text-slate-900 text-sm mb-2">Cause Racine</h4>
+                          <p className="text-sm text-slate-600">{anonymizeNamesInText(anonymizeText(item.root_cause || item.cause))}</p>
+                        </div>
+                      )}
+                      {(item.impact || item.system_impact) && (
+                        <div>
+                          <h4 className="font-semibold text-slate-900 text-sm mb-2">Impact Système</h4>
+                          <p className="text-sm text-slate-600">{anonymizeNamesInText(anonymizeText(item.impact || item.system_impact))}</p>
+                        </div>
+                      )}
+                      {(item.action || item.mitigation || item.recommendation) && (
+                        <div>
+                          <h4 className="font-semibold text-slate-900 text-sm mb-2">Recommandations Contextualisées</h4>
+                          <ul className="space-y-2">
+                            <li className="text-sm text-slate-600 flex gap-2">
+                              <span className="text-blue-600 font-semibold">•</span>
+                              <span>{anonymizeNamesInText(anonymizeText(item.action || item.mitigation || item.recommendation))}</span>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                      {item.confidence_score && (
+                        <div className="pt-2 border-t border-slate-200">
+                          <span className="text-xs text-slate-500">Confiance: {Math.round(item.confidence_score * 100)}%</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+
+            {Math.ceil(filteredItems.length / itemsPerPage) > 1 && (
               <div className="flex justify-center gap-2 mt-6 pt-4 border-t border-slate-200">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-                  disabled={currentPage === 0}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
+                <button onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))} disabled={currentPage === 0} className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                   ← Précédent
                 </button>
                 <div className="flex gap-1 items-center">
                   {Array.from({ length: Math.ceil(filteredItems.length / itemsPerPage) }).map((_, page) => (
-                    <motion.button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`w-8 h-8 rounded-lg transition-all ${
-                        currentPage === page
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
+                    <motion.button key={page} onClick={() => setCurrentPage(page)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} className={`w-8 h-8 rounded-lg transition-all ${currentPage === page ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                       {page + 1}
                     </motion.button>
                   ))}
                 </div>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredItems.length / itemsPerPage) - 1, prev + 1))}
-                  disabled={currentPage === Math.ceil(filteredItems.length / itemsPerPage) - 1}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
+                <button onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredItems.length / itemsPerPage) - 1, prev + 1))} disabled={currentPage === Math.ceil(filteredItems.length / itemsPerPage) - 1} className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                   Suivant →
                 </button>
               </div>
-              )}
-              </div>
-              )}
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
