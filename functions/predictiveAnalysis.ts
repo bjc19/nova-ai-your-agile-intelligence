@@ -14,11 +14,41 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    // Récupérer les données historiques
-    const sprintHealthHistory = await base44.entities.SprintHealth.list('-created_date', 50);
-    const analysisHistory = await base44.entities.AnalysisHistory.list('-created_date', 50);
-    const patternDetections = await base44.entities.PatternDetection.list('-created_date', 100);
+    // Récupérer le workspaceId depuis le body
+    const body = await req.json().catch(() => ({}));
+    const workspaceId = body.workspaceId || null;
+
+    // Récupérer les données historiques filtrées par workspace si fourni
+    let analysisHistory;
+    let sprintHealthHistory;
+
+    if (workspaceId) {
+      analysisHistory = await base44.entities.AnalysisHistory.filter(
+        { jira_project_selection_id: workspaceId }, '-created_date', 50
+      );
+      sprintHealthHistory = await base44.entities.SprintHealth.filter(
+        { jira_project_selection_id: workspaceId }, '-created_date', 50
+      );
+    } else {
+      analysisHistory = await base44.entities.AnalysisHistory.list('-created_date', 50);
+      sprintHealthHistory = await base44.entities.SprintHealth.list('-created_date', 50);
+    }
+
     const resolvedItems = await base44.entities.ResolvedItem.list('-created_date', 100);
+
+    // Pas assez de données réelles → refuser de générer une prédiction fictive
+    if (analysisHistory.length === 0) {
+      return Response.json({
+        success: false,
+        error: 'Données insuffisantes pour générer une analyse prédictive. Effectuez au moins une analyse pour ce workspace.'
+      }, { status: 422 });
+    }
+
+    const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
+    const totalRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0);
+    const avgRiskScore = sprintHealthHistory.length > 0
+      ? (sprintHealthHistory.reduce((sum, s) => sum + (s.risk_score || 0), 0) / sprintHealthHistory.length)
+      : null;
 
     // Préparer le contexte pour l'IA
     const historicalData = {
@@ -35,13 +65,12 @@ Deno.serve(async (req) => {
         source: a.source,
         blockers_count: a.blockers_count,
         risks_count: a.risks_count,
+        workspace: a.workspace_name,
         date: a.analysis_time || a.created_date
       })),
-      patterns: patternDetections.reduce((acc, p) => {
-        acc[p.pattern_name] = (acc[p.pattern_name] || 0) + 1;
-        return acc;
-      }, {}),
-      resolutionRate: resolvedItems.length / (resolvedItems.length + patternDetections.filter(p => p.status !== 'resolved').length) * 100
+      resolutionRate: resolvedItems.length > 0
+        ? (resolvedItems.length / (resolvedItems.length + totalBlockers + totalRisks) * 100)
+        : 0
     };
 
     // Analyse prédictive via IA
