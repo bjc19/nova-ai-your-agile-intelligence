@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Loader2, TrendingUp, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
+import BlockersRisksTrendTable from "./BlockersRisksTrendTable";
 
 export default function AdminDetectedRisks() {
   const [patterns, setPatterns] = useState([]);
