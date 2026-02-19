@@ -50,12 +50,39 @@ export default function Details() {
     if (storedWorkspace) setSelectedWorkspaceId(storedWorkspace);
   }, [navigate]);
 
-  // Fetch analysis history - scoped by workspace if set
+  // Fetch analysis history and markers - scoped by workspace if set
   const { data: historyData = [] } = useQuery({
     queryKey: ['analysisHistory', selectedWorkspaceId],
     queryFn: () => selectedWorkspaceId
       ? base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100)
       : base44.entities.AnalysisHistory.list('-created_date', 100),
+    enabled: detailType !== null,
+  });
+
+  // Fetch GDPRMarkers and TeamsInsights filtered by workspace
+  const { data: gdprMarkersData = [] } = useQuery({
+    queryKey: ['gdprMarkers', selectedWorkspaceId],
+    queryFn: () => selectedWorkspaceId
+      ? base44.entities.GDPRMarkers.filter({
+          $or: [
+            { jira_project_selection_id: selectedWorkspaceId },
+            { trello_project_selection_id: selectedWorkspaceId }
+          ]
+        }, '-created_date', 1000)
+      : base44.entities.GDPRMarkers.list('-created_date', 1000),
+    enabled: detailType !== null,
+  });
+
+  const { data: teamsInsightsData = [] } = useQuery({
+    queryKey: ['teamsInsights', selectedWorkspaceId],
+    queryFn: () => selectedWorkspaceId
+      ? base44.entities.TeamsInsight.filter({
+          $or: [
+            { jira_project_selection_id: selectedWorkspaceId },
+            { trello_project_selection_id: selectedWorkspaceId }
+          ]
+        }, '-created_date', 1000)
+      : base44.entities.TeamsInsight.list('-created_date', 1000),
     enabled: detailType !== null,
   });
 
