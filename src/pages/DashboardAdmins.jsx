@@ -34,17 +34,71 @@ export default function DashboardAdmins() {
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [analysisHistory, setAnalysisHistory] = useState([]);
 
-  // Fetch GDPR signals
+  // Loading states per section
+  const [loadingStates, setLoadingStates] = useState({
+    auth: true,
+    gdpr: true,
+    analysis: true,
+    sprint: true
+  });
+
+  // Auth check
   useEffect(() => {
-    const fetchSignals = async () => {
+    const checkAuth = async () => {
+      try {
+        const authenticated = await base44.auth.isAuthenticated();
+        if (!authenticated) {
+          navigate(createPageUrl("Home"));
+          return;
+        }
+
+        const currentUser = await base44.auth.me();
+        if (currentUser?.role !== 'admin') {
+          navigate(createPageUrl("Home"));
+          return;
+        }
+
+        setUser(currentUser);
+        
+        // Check onboarding & multi-project alerts in parallel
+        const [teamConfigs, pendingAlerts] = await Promise.all([
+          base44.entities.TeamConfiguration.list(),
+          base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" })
+        ]);
+
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
+
+        setLoadingStates(prev => ({ ...prev, auth: false }));
+      } catch (error) {
+        console.error("Auth error:", error);
+        navigate(createPageUrl("Home"));
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
+  // Load GDPR signals
+  useEffect(() => {
+    const loadGdpr = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -52,77 +106,53 @@ export default function DashboardAdmins() {
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
+        console.error("GDPR error:", error);
+      } finally {
+        setLoadingStates(prev => ({ ...prev, gdpr: false }));
       }
     };
-    fetchSignals();
+    loadGdpr();
   }, []);
 
-  // Check authentication and role
+  // Load analysis history
   useEffect(() => {
-    const checkAuth = async () => {
-      const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) {
-        navigate(createPageUrl("Home"));
-        return;
-      }
-
-      const currentUser = await base44.auth.me();
-
-      // Role verification - only 'admin' can access
-      if (currentUser?.role !== 'admin') {
-        navigate(createPageUrl("Home"));
-        return;
-      }
-
-      setUser(currentUser);
-
-      // Load sprint context
-      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-      if (activeSprints.length > 0) {
-        setSprintContext(activeSprints[0]);
-      }
-
-      // Check onboarding
-      const teamConfigs = await base44.entities.TeamConfiguration.list();
-      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-        setShowOnboarding(true);
-      }
-
-      // Check multi-project alerts
-      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-        admin_response: "pending"
-      });
-      if (pendingAlerts.length > 0) {
-        const latest = pendingAlerts[pendingAlerts.length - 1];
-        setMultiProjectAlert({
-          confidence: latest.detection_score,
-          signals: latest.weighted_signals,
-          log_id: latest.id
+    const loadAnalysis = async () => {
+      try {
+        const all = await base44.entities.AnalysisHistory.list('-created_date', 100);
+        const filtered = all.filter((analysis) => {
+          const analysisDate = new Date(analysis.created_date);
+          const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+          const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
+          return matchesPeriod && matchesWorkspace;
         });
+        setAnalysisHistory(filtered);
+      } catch (error) {
+        console.error("Analysis error:", error);
+      } finally {
+        setLoadingStates(prev => ({ ...prev, analysis: false }));
       }
-
-      setIsLoading(false);
     };
-    checkAuth();
-  }, [navigate]);
+    if (!loadingStates.auth) loadAnalysis();
+  }, [selectedPeriod, selectedWorkspaceId, loadingStates.auth]);
 
-  // Fetch analysis history
-  const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
-  });
+  // Load sprint context
+  useEffect(() => {
+    const loadSprint = async () => {
+      try {
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
+        }
+      } catch (error) {
+        console.error("Sprint error:", error);
+      } finally {
+        setLoadingStates(prev => ({ ...prev, sprint: false }));
+      }
+    };
+    if (!loadingStates.auth) loadSprint();
+  }, [loadingStates.auth]);
 
-  // Filter analysis history
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
-    return matchesPeriod && matchesWorkspace;
-  });
-
-  // Check for stored analysis
+  // Stored analysis
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
