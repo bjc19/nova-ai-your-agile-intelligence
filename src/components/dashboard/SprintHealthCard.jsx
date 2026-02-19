@@ -80,13 +80,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
 
   const prodMode = isProduction();
 
-  // En production: afficher seulement si données réelles existent
-  // En développement: utiliser données de demo si absent
-  if (prodMode && !sprintHealth) {
-    return null;
-  }
-
-  // Only use real sprint data - NO defaults
+  // RULE: Always use only real sprint data — no fallback, no defaults ever
   const initialData = sprintHealth;
 
   // Subscribe to real GDPR markers in production
