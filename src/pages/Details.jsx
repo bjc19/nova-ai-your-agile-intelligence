@@ -112,26 +112,45 @@ export default function Details() {
     let icon, color, title;
 
     if (detailType === "blockers") {
-      items = analysisHistory.flatMap((analysis, idx) =>
+      // From analysis data
+      const analysisBlockers = analysisHistory.flatMap((analysis, idx) =>
         (analysis.analysis_data?.blockers || [])
           .filter(b => b.urgency)
           .map((blocker, bidx) => ({
-            id: `${idx}-${bidx}`,
+            id: `analysis-${idx}-${bidx}`,
             ...blocker,
             source: 'analysis',
             analysisTitle: analysis.title,
             analysisDate: analysis.created_date,
           }))
       ).filter(item => !resolvedItemsData.some(r => r.item_id === item.id));
+
+      // From GDPRMarkers (critique/haute = blockers)
+      const gdprBlockers = gdprMarkersData
+        .filter(m => m.criticite === 'critique' || m.criticite === 'haute')
+        .map((marker, idx) => ({
+          id: `gdpr-${idx}`,
+          issue: marker.probleme,
+          description: marker.probleme,
+          action: marker.recos?.[0] || '',
+          urgency: marker.criticite === 'critique' ? 'high' : 'medium',
+          source: 'gdpr',
+          analysisTitle: marker.detection_source,
+          analysisDate: marker.created_date,
+        }))
+        .filter(item => !resolvedItemsData.some(r => r.item_id === item.id));
+
+      items = [...analysisBlockers, ...gdprBlockers];
       icon = AlertOctagon;
       color = "text-blue-600";
       title = t('detectedBlockersIssues');
 
     } else if (detailType === "risks") {
-      items = analysisHistory.flatMap((analysis, idx) =>
+      // From analysis data
+      const analysisRisks = analysisHistory.flatMap((analysis, idx) =>
         (analysis.analysis_data?.risks || [])
           .map((risk, ridx) => ({
-            id: `${idx}-${ridx}`,
+            id: `analysis-${idx}-${ridx}`,
             ...risk,
             source: 'analysis',
             analysisTitle: analysis.title,
@@ -141,6 +160,22 @@ export default function Details() {
         !resolvedItemsData.some(r => r.item_id === item.id) &&
         (item.urgency === 'high' || item.urgency === 'medium')
       );
+
+      // From GDPRMarkers (moyenne/basse = risks)
+      const gdprRisks = gdprMarkersData
+        .filter(m => m.criticite === 'moyenne' || m.criticite === 'basse')
+        .map((marker, idx) => ({
+          id: `gdpr-risk-${idx}`,
+          description: marker.probleme,
+          impact: marker.recos?.[0] || '',
+          urgency: marker.criticite === 'moyenne' ? 'medium' : 'low',
+          source: 'gdpr',
+          analysisTitle: marker.detection_source,
+          analysisDate: marker.created_date,
+        }))
+        .filter(item => !resolvedItemsData.some(r => r.item_id === item.id));
+
+      items = [...analysisRisks, ...gdprRisks];
       icon = ShieldAlert;
       color = "text-amber-600";
       title = t('identifiedRisks');
