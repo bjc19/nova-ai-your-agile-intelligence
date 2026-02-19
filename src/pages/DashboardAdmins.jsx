@@ -362,6 +362,7 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <PredictiveInsights workspaceId={selectedWorkspaceId} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
