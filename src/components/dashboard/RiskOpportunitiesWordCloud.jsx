@@ -32,32 +32,38 @@ export default function RiskOpportunitiesWordCloud({ selectedWorkspaceId, gdprSi
       'velocity': ['vélocité', 'throughput', 'débit', 'livraison', 'sprint velocity']
     };
 
-    // Extraction des risques des signaux
+    // Extraction des risques RÉELS des signaux
     const risks = [];
     gdprSignals.forEach(signal => {
       if (signal.criticite === 'critique' || signal.criticite === 'haute') {
         const text = (signal.probleme || '').toLowerCase();
-        riskKeywords.blockers.forEach(word => {
-          if (text.includes(word)) risks.push({ word: word.toUpperCase(), frequency: Math.random() * 15 + 5, type: 'blocker' });
-        });
-        riskKeywords.communication.forEach(word => {
-          if (text.includes(word)) risks.push({ word: word.toUpperCase(), frequency: Math.random() * 12 + 4, type: 'comm' });
+        
+        // Extraire les mots-clés trouvés dans le texte
+        Object.entries(riskKeywords).forEach(([category, keywords]) => {
+          keywords.forEach(word => {
+            if (text.includes(word)) {
+              risks.push({ word: word.toUpperCase(), frequency: 1, type: category });
+            }
+          });
         });
       }
     });
 
-    // Extraction des opportunités de l'historique d'analyses
+    // Extraction des opportunités RÉELLES de l'historique d'analyses et des recommandations
     const opportunities = [];
     analysisHistory.forEach(analysis => {
-      const text = (analysis.title + ' ' + (analysis.analysis_data?.summary || '')).toLowerCase();
-      opportunityKeywords.optimization.forEach(word => {
-        if (text.includes(word)) opportunities.push({ word: word.toUpperCase(), frequency: Math.random() * 12 + 3, type: 'opt' });
-      });
-      opportunityKeywords.automation.forEach(word => {
-        if (text.includes(word)) opportunities.push({ word: word.toUpperCase(), frequency: Math.random() * 10 + 2, type: 'auto' });
-      });
-      opportunityKeywords.collaboration.forEach(word => {
-        if (text.includes(word)) opportunities.push({ word: word.toUpperCase(), frequency: Math.random() * 11 + 3, type: 'collab' });
+      const text = (
+        (analysis.title || '') + ' ' + 
+        (analysis.analysis_data?.summary || '') + ' ' +
+        (analysis.analysis_data?.recommendations?.join(' ') || '')
+      ).toLowerCase();
+      
+      Object.entries(opportunityKeywords).forEach(([category, keywords]) => {
+        keywords.forEach(word => {
+          if (text.includes(word)) {
+            opportunities.push({ word: word.toUpperCase(), frequency: 1, type: category });
+          }
+        });
       });
     });
 
