@@ -221,9 +221,9 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
+              <XAxis dataKey="period" />
               <YAxis label={{ value: '$ Value', angle: -90, position: 'insideLeft' }} />
-              <Tooltip formatter={(val) => `$${val.toLocaleString()}`} />
+              <Tooltip formatter={(val) => `$${val.toLocaleString('fr-FR')}`} />
               <Legend />
               <Bar dataKey="delivered" fill="#10b981" name="Livré" />
               <Bar dataKey="planned" fill="#d1d5db" name="Planifié" />
