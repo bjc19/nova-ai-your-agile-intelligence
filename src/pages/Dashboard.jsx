@@ -252,7 +252,7 @@ export default function Dashboard() {
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
-                  deliveryMode={sprintInfo.deliveryMode}
+                  deliveryMode={sprintInfo?.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
