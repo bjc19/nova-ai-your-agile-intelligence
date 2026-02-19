@@ -16,7 +16,8 @@ import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
+import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -124,34 +125,43 @@ export default function DashboardAdmins() {
     return matchesPeriod && matchesWorkspace;
   });
 
-  // Check for stored analysis
+  // Sync latestAnalysis with analysisHistory (workspace-filtered data)
   useEffect(() => {
-    const stored = sessionStorage.getItem("novaAnalysis");
-    if (stored) {
-      const parsedAnalysis = JSON.parse(stored);
-      const sourceInfo = sessionStorage.getItem("analysisSource");
-      if (sourceInfo) {
-        const { url, name } = JSON.parse(sourceInfo);
-        parsedAnalysis.sourceUrl = url;
-        parsedAnalysis.sourceName = name;
-      }
-
-      if (selectedPeriod && parsedAnalysis.created_date) {
-        const analysisDate = new Date(parsedAnalysis.created_date);
-        const startDate = new Date(selectedPeriod.start);
-        const endDate = new Date(selectedPeriod.end);
-        endDate.setHours(23, 59, 59, 999);
-
-        if (analysisDate >= startDate && analysisDate <= endDate) {
+    // Priority: use the most recent analysis from analysisHistory (already filtered by workspace)
+    if (analysisHistory.length > 0) {
+      setLatestAnalysis(analysisHistory[0]); // Most recent (sorted by -created_date)
+    } else {
+      // Fallback: check sessionStorage for very recent manual analysis from this session
+      const stored = sessionStorage.getItem("novaAnalysis");
+      if (stored) {
+        const parsedAnalysis = JSON.parse(stored);
+        const sourceInfo = sessionStorage.getItem("analysisSource");
+        if (sourceInfo) {
+          const { url, name } = JSON.parse(sourceInfo);
+          parsedAnalysis.sourceUrl = url;
+          parsedAnalysis.sourceName = name;
+        }
+        
+        // Verify it matches the selected period if one is set
+        if (!selectedPeriod || !parsedAnalysis.created_date) {
           setLatestAnalysis(parsedAnalysis);
         } else {
-          setLatestAnalysis(null);
+          const analysisDate = new Date(parsedAnalysis.created_date);
+          const startDate = new Date(selectedPeriod.start);
+          const endDate = new Date(selectedPeriod.end);
+          endDate.setHours(23, 59, 59, 999);
+          
+          if (analysisDate >= startDate && analysisDate <= endDate) {
+            setLatestAnalysis(parsedAnalysis);
+          } else {
+            setLatestAnalysis(null);
+          }
         }
       } else {
-        setLatestAnalysis(parsedAnalysis);
+        setLatestAnalysis(null);
       }
     }
-  }, [selectedPeriod]);
+  }, [analysisHistory, selectedPeriod]);
 
   const sprintInfo = sprintContext ? {
     name: sprintContext.sprint_name,
@@ -303,9 +313,63 @@ export default function DashboardAdmins() {
               onReviewSprint={() => console.log("Review sprint")} />
 
             }
+
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
+              metricsData={{
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
+              }}
+              historicalData={{
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
+              }}
+              integrationStatus={{
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
+              }}
+              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
+              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
+
+            }
+
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
+              flowData={{
+                assignee_changes: [
+                { person: "Mary", count: 42 },
+                { person: "John", count: 12 }],
+
+                mention_patterns: [
+                { person: "Mary", type: "prioritization", count: 35 },
+                { person: "Dave", type: "unblocking", count: 19 }],
+
+                blocked_resolutions: [
+                { person: "Dave", count: 19 }],
+
+                data_days: 30
+              }}
+              flowMetrics={{
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30
+              }}
+              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+
+            }
               
-              <PredictiveInsights workspaceId={selectedWorkspaceId} />
-              
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -315,7 +379,6 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
               <IntegrationStatus />
             </div>
           </div>
