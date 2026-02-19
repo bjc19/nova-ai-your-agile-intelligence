@@ -49,11 +49,16 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
   };
 
   const handleSubmit = async () => {
+    console.log("🔵 [handleSubmit] START", { valueDelivered, valuePlanned, startDate, endDate, selectedWorkspaceId });
     setError(null);
-    if (!validateValues() || !validatePeriod()) return;
+    if (!validateValues() || !validatePeriod()) {
+      console.log("❌ [handleSubmit] Validation failed");
+      return;
+    }
 
     setLoading(true);
     try {
+      console.log("🔵 [handleSubmit] Getting user...");
       const user = await base44.auth.me();
       if (!user) {
         setError("Veuillez vous connecter pour continuer");
@@ -61,7 +66,16 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
         return;
       }
       
-      await base44.entities.BusinessValueMetric.create({
+      console.log("🔵 [handleSubmit] Creating BusinessValueMetric...", {
+        user_email: user.email,
+        workspace_id: selectedWorkspaceId,
+        value_delivered: parseFloat(valueDelivered),
+        value_planned: parseFloat(valuePlanned),
+        period_start_date: startDate,
+        period_end_date: endDate
+      });
+      
+      const result = await base44.entities.BusinessValueMetric.create({
         user_email: user.email,
         workspace_id: selectedWorkspaceId,
         value_delivered: parseFloat(valueDelivered),
@@ -71,12 +85,15 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
         is_locked: true
       });
       
+      console.log("✅ [handleSubmit] Create successful!", result);
+      
       // Appeler le callback avec un petit délai pour laisser l'UI se mettre à jour
       setTimeout(() => {
+        console.log("🔵 [handleSubmit] Calling onDataSubmitted callback");
         onDataSubmitted();
       }, 300);
     } catch (err) {
-      console.error("Erreur BusinessValue:", err);
+      console.error("❌ [handleSubmit] Erreur BusinessValue:", err);
       setError("Erreur lors de la sauvegarde: " + err.message);
     } finally {
       setLoading(false);
