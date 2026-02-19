@@ -17,7 +17,7 @@ export default function AdminDetectedRisks() {
         setLoading(true);
         const detectedPatterns = await base44.entities.PatternDetection.filter({
           status: ["detected", "acknowledged", "in_progress"]
-        }, '-created_date', 20);
+        }, '-created_date');
         
         setPatterns(detectedPatterns || []);
       } catch (err) {
