@@ -48,34 +48,6 @@ export const DASHBOARD_COMPONENTS = {
     }
   },
 
-  metricsRadar: {
-    id: "metricsRadar",
-    name: "Actionable Metrics Radar",
-    category: "metrics",
-    priority: 8,
-    
-    show_if: (situation) => {
-      return situation.data_points > 7 && 
-             (situation.looking_for_improvements || situation.sprint_day > 3);
-    },
-    hide_if: (situation) => {
-      return situation.crisis_mode || situation.data_points < 5;
-    },
-    
-    relevance_score: (situation) => {
-      let score = 0;
-      if (situation.recommendations_count > 3) score += 35;
-      if (situation.sprint_day > 5) score += 25;
-      if (situation.velocity_improving) score += 20;
-      return Math.min(score, 100);
-    },
-    
-    roles: ["admin", "contributor"],
-    config_by_role: {
-      admin: { showComparison: true, showHistorical: true },
-      contributor: { showComparison: false, showHistorical: true }
-    }
-  },
 
   realityEngine: {
     id: "realityEngine",
