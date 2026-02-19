@@ -39,26 +39,43 @@ Deno.serve(async (req) => {
     testData.pattern_status = pattern.status;
     testData.pattern_created_by = pattern.created_by;
 
-    // Try to update
+    // Try to update with frontend user context
     try {
       const updated = await base44.entities.PatternDetection.update(pattern.id, {
         status: 'acknowledged',
-        notes: 'Test update from backend'
+        notes: 'Test update from frontend user'
       });
 
       return Response.json({
         success: true,
-        message: 'Update successful',
+        message: 'Frontend user update successful',
         ...testData,
         updated: updated
       });
     } catch (updateErr) {
-      return Response.json({
-        success: false,
-        message: 'Update failed',
-        error: updateErr.message,
-        ...testData
-      });
+      // Now try with service role (admin bypass)
+      try {
+        const serviceUpdated = await base44.asServiceRole.entities.PatternDetection.update(pattern.id, {
+          status: 'acknowledged',
+          notes: 'Test update from service role'
+        });
+
+        return Response.json({
+          success: true,
+          message: 'Service role update successful (frontend user RLS failed)',
+          ...testData,
+          serviceUpdated: serviceUpdated,
+          frontendUserError: updateErr.message
+        });
+      } catch (serviceErr) {
+        return Response.json({
+          success: false,
+          message: 'Both frontend user and service role updates failed',
+          frontendError: updateErr.message,
+          serviceError: serviceErr.message,
+          ...testData
+        });
+      }
     }
 
   } catch (error) {
