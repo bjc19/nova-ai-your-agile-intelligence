@@ -321,6 +321,21 @@ export default function DashboardAdmins() {
           </div>
         }
 
+        {/* Detected Risks & Team Health */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <AdminDetectedRisks />
+          </div>
+          <div className="lg:col-span-2">
+            <TeamHealthSummary />
+          </div>
+        </motion.div>
+
+        {/* CTA Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -335,10 +350,10 @@ export default function DashboardAdmins() {
               </div>
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
-                  
-
-
-
+                  <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configurer
+                  </Button>
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
