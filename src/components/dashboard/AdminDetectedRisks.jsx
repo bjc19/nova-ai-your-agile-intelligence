@@ -9,6 +9,8 @@ import BlockersRisksTrendTable from "./BlockersRisksTrendTable";
 
 export default function AdminDetectedRisks() {
   const [patterns, setPatterns] = useState([]);
+  const [gdprSignals, setGdprSignals] = useState([]);
+  const [analysisHistory, setAnalysisHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
@@ -17,23 +19,32 @@ export default function AdminDetectedRisks() {
   const INITIAL_DISPLAY_COUNT = 3;
 
   useEffect(() => {
-    const fetchPatterns = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
+        
+        // Fetch patterns
         const detectedPatterns = await base44.entities.PatternDetection.filter({
           status: ["detected", "acknowledged", "in_progress"]
         }, '-created_date');
-        
         setPatterns(detectedPatterns || []);
+        
+        // Fetch GDPR signals and analysis history for the table
+        const signals = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        setGdprSignals(signals || []);
+        
+        const history = await base44.entities.AnalysisHistory.list('-created_date', 50);
+        setAnalysisHistory(history || []);
+        
       } catch (err) {
-        console.error("Erreur chargement patterns:", err);
+        console.error("Erreur chargement données:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchPatterns();
+    fetchData();
   }, []);
 
   const handleResolve = async (patternId) => {
