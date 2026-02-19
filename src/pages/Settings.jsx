@@ -1142,13 +1142,21 @@ export default function Settings() {
                          Déconnecter
                        </Button>
                        <Button
-                        size="sm"
-                        onClick={() => navigate(createPageUrl("JiraProjectSelector"))}
-                        className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                         size="sm"
+                         onClick={() => navigate(createPageUrl("JiraProjectSelector"))}
+                         className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
 
-                         Sélectionner projets
-                       </Button>
-                     </> :
+                          Sélectionner projets
+                        </Button>
+                        <Button
+                         size="sm"
+                         onClick={handleJiraSyncNow}
+                         disabled={syncingJira}
+                         className="text-xs bg-blue-600 hover:bg-blue-700 text-white">
+
+                          {syncingJira ? "Sync..." : "⟳ Sync Now"}
+                        </Button>
+                       </> :
 
                     <TooltipProvider>
                        <Tooltip>
