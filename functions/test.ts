@@ -19,13 +19,17 @@ Deno.serve(async (req) => {
       timestamp: new Date().toISOString()
     };
 
-    // Try to fetch a PatternDetection record
-    const patterns = await base44.entities.PatternDetection.list(null, 1);
+    // Try to fetch PatternDetection records with status != resolved
+    const patterns = await base44.entities.PatternDetection.filter(
+      { status: ["detected", "acknowledged", "in_progress"] },
+      '-created_date',
+      5
+    );
     
     if (!patterns || patterns.length === 0) {
       return Response.json({ 
         success: false, 
-        message: 'No PatternDetection records found',
+        message: 'No active PatternDetection records found',
         ...testData
       });
     }
