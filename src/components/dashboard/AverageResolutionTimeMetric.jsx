@@ -148,14 +148,18 @@ export default function AverageResolutionTimeMetric({ workspaceId }) {
             <h4 className="text-sm font-medium text-slate-700 mb-3">Résolutions récentes</h4>
             <div className="space-y-2 max-h-40 overflow-y-auto">
               {data.details.slice(-5).reverse().map((item) => (
-                <div key={item.pattern_id} className="flex items-center justify-between p-2 bg-slate-50 rounded border border-slate-200">
-                  <div className="flex-1">
+                <button
+                  key={item.pattern_id}
+                  onClick={() => setSelectedDetail(item)}
+                  className="w-full flex items-center justify-between p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 transition-colors cursor-pointer group"
+                >
+                  <div className="flex-1 text-left">
                     <p className="text-sm font-medium text-slate-900">{item.pattern_name}</p>
                     <p className="text-xs text-slate-500">
                       Résolu le {new Date(item.resolved_date).toLocaleDateString('fr-FR')}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="flex items-center gap-2">
                     <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
                       item.days_to_resolve <= 3 ? 'bg-green-100 text-green-700' :
                       item.days_to_resolve <= 7 ? 'bg-yellow-100 text-yellow-700' :
@@ -163,13 +167,67 @@ export default function AverageResolutionTimeMetric({ workspaceId }) {
                     }`}>
                       {item.days_to_resolve}j
                     </span>
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
         )}
       </Card>
+
+      {/* Detail Modal */}
+      {selectedDetail && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+          >
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">{selectedDetail.pattern_name}</h3>
+              <p className="text-sm text-slate-500 mt-1">Détails de la résolution</p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="p-3 bg-slate-50 rounded">
+                <p className="text-xs text-slate-600 uppercase tracking-wide">Temps de résolution</p>
+                <p className="text-2xl font-bold text-blue-600 mt-1">{selectedDetail.days_to_resolve} jours</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-slate-50 rounded">
+                  <p className="text-xs text-slate-600 uppercase tracking-wide">Sévérité</p>
+                  <p className="text-sm font-semibold text-slate-900 mt-1 capitalize">{selectedDetail.severity}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded">
+                  <p className="text-xs text-slate-600 uppercase tracking-wide">Catégorie</p>
+                  <p className="text-sm font-semibold text-slate-900 mt-1">Anti-pattern</p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded">
+                <p className="text-xs text-slate-600 uppercase tracking-wide">Résolu le</p>
+                <p className="text-sm font-semibold text-slate-900 mt-1">
+                  {new Date(selectedDetail.resolved_date).toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedDetail(null)}
+              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Fermer
+            </button>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }
