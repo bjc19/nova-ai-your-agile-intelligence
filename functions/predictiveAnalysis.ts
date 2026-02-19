@@ -74,15 +74,18 @@ Deno.serve(async (req) => {
     };
 
     // Analyse prédictive via IA
-    const prompt = `Tu es un expert en analyse prédictive agile. Analyse les données historiques suivantes et fournis des prédictions détaillées :
+    const prompt = `Tu es un expert en analyse prédictive agile. Analyse les données historiques RÉELLES suivantes et fournis des prédictions basées UNIQUEMENT sur ces données. Ne génère rien qui ne soit pas fondé sur les données fournies.
 
-Données historiques :
-- ${historicalData.sprints.length} sprints analysés
-- Score de risque moyen : ${(historicalData.sprints.reduce((sum, s) => sum + (s.risk_score || 0), 0) / historicalData.sprints.length).toFixed(1)}
+Workspace analysé : ${workspaceId ? `ID ${workspaceId}` : 'tous les workspaces'}
+Données historiques réelles :
+- ${historicalData.analyses.length} analyses effectuées
+- Total blockers détectés : ${totalBlockers}
+- Total risques détectés : ${totalRisks}
+- ${sprintHealthHistory.length} sprints enregistrés${avgRiskScore !== null ? `, score de risque moyen : ${avgRiskScore.toFixed(1)}` : ''}
 - Taux de résolution : ${historicalData.resolutionRate.toFixed(1)}%
-- Patterns récurrents : ${JSON.stringify(historicalData.patterns)}
-- Tendances WIP : ${historicalData.sprints.map(s => s.wip_count).join(', ')}
-- Tickets bloqués > 48h : ${historicalData.sprints.map(s => s.blocked_tickets_over_48h).join(', ')}
+- Tendances WIP : ${historicalData.sprints.map(s => s.wip_count).filter(Boolean).join(', ') || 'aucune donnée'}
+- Tickets bloqués > 48h : ${historicalData.sprints.map(s => s.blocked_tickets_over_48h).filter(v => v !== undefined).join(', ') || 'aucune donnée'}
+- Sources d'analyses : ${[...new Set(historicalData.analyses.map(a => a.source))].join(', ')}
 
 Fournis une analyse prédictive structurée incluant :
 1. Les goulots d'étranglement probables dans les 2 prochaines semaines
