@@ -194,33 +194,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
     }
   };
 
-  if (showBusinessValueForm && selectedChart === 'business_value') {
-    return (
-      <BusinessValueInputForm
-        selectedWorkspaceId={selectedWorkspaceId}
-        onDataSubmitted={async () => {
-          // Recharger les données Business Value historiques
-          try {
-            const user = await base44.auth.me();
-            const metrics = await base44.entities.BusinessValueMetric.filter({
-              workspace_id: selectedWorkspaceId,
-              user_email: user.email
-            }, '-period_start_date', 100);
-            setBusinessValueMetricsHistory(metrics);
-          } catch (err) {
-            console.error("Erreur recharge Business Value historique:", err);
-          }
-          setShowBusinessValueForm(false);
-          // Régénérer le graphique avec les nouvelles données
-          await generateChart('business_value');
-        }}
-        onCancel={() => {
-          setShowBusinessValueForm(false);
-          setSelectedChart(null);
-        }}
-      />
-    );
-  }
+
 
   if (!selectedWorkspaceId) {
     return (
