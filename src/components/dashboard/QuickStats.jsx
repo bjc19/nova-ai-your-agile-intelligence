@@ -251,28 +251,9 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
    const totalBlockers = lastDayData.blockers;
    const totalRisks = lastDayData.risks;
   
-  // Count ALL items (including resolved) for IST calculation
-  const allGdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-  const allGdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
-
-  const allTeamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
-  const allTeamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne' || i.criticite === 'basse').length;
-
-  const allAnalysisDataBlockers = analysisHistory
-    .flatMap(a => (a.analysis_data?.blockers || []).filter(b => b.urgency))
-    .length;
-  const allAnalysisDataRisks = analysisHistory
-    .flatMap(a => (a.analysis_data?.risks || []))
-    .length;
-
-  const totalAllBlockers = allGdprBlockers + allTeamsBlockers + allAnalysisDataBlockers;
-  const totalAllRisks = allGdprRisks + allTeamsRisks + allAnalysisDataRisks;
-  
+  // IST = Resolved count from last day / Total items ever detected (all data)
   const resolvedBlockers = resolvedItems.length;
-  
-  // Calculate Technical Health Index (IST) = Resolved / (All Problems Ever Detected)
-  // Total = ALL blockers + ALL risks (including those now resolved)
-  const totalInitialProblems = totalAllBlockers + totalAllRisks;
+  const totalInitialProblems = (gdprSignals.length + analysisHistory.flatMap(a => [...(a.analysis_data?.blockers || []), ...(a.analysis_data?.risks || [])]).length);
   const technicalHealthIndex = totalInitialProblems > 0 ? ((resolvedBlockers / totalInitialProblems) * 100).toFixed(0) : 0;
   const healthStatus = technicalHealthIndex >= 50 ? "healthy" : "critical";
   
