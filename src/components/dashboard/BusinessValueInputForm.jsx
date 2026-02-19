@@ -129,10 +129,19 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
       setStartDate("");
       setEndDate("");
       
-      // Appeler le callback avec un petit délai pour laisser l'UI se mettre à jour
-      setTimeout(() => {
-        onDataSubmitted();
-      }, 300);
+      // Actualiser les données du graphique
+      const updatedMetrics = await base44.entities.BusinessValueMetric.filter({
+        workspace_id: selectedWorkspaceId,
+        user_email: user.email
+      });
+      
+      if (updatedMetrics && updatedMetrics.length > 0) {
+        setMetricsData(updatedMetrics);
+        setShowChart(true);
+      }
+      
+      // Appeler le callback
+      onDataSubmitted();
     } catch (err) {
       console.error("Erreur BusinessValue:", err);
       setError("Erreur lors de la sauvegarde: " + err.message);
