@@ -16,6 +16,8 @@ import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
+import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
+import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -41,23 +43,6 @@ export default function DashboardAdmins() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
-
-  // Fetch GDPR signals
-  useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-    fetchSignals();
-  }, []);
 
   // Check authentication and role
   useEffect(() => {
