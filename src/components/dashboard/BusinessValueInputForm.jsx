@@ -37,15 +37,19 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
           user_email: user.email
         });
 
+        console.log("Métriques chargées:", metrics);
+
         if (metrics && metrics.length > 0) {
           setMetricsData(metrics);
           setShowChart(true);
         } else {
           setShowChart(false);
+          setMetricsData([]);
         }
       } catch (err) {
         console.error("Erreur lors du chargement des métriques:", err);
         setShowChart(false);
+        setMetricsData([]);
       } finally {
         setDataLoading(false);
       }
