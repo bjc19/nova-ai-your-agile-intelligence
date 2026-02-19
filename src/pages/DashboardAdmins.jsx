@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
 import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
