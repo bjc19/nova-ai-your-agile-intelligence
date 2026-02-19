@@ -103,7 +103,7 @@ export default function AdminDetectedRisks() {
         </div>
       ) : (
         <div className="space-y-3">
-          {patterns.map((pattern, index) => (
+          {patterns.slice(0, showAllRisks ? patterns.length : INITIAL_DISPLAY_COUNT).map((pattern, index) => (
             <motion.div
               key={pattern.id}
               initial={{ opacity: 0, y: 10 }}
