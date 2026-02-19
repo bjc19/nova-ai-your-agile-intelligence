@@ -111,11 +111,9 @@ export default function Dashboard() {
 
   // Filter analysis history based on selected workspace and period
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    // Filter by workspace
-    if (activeWorkspaceId) {
-      const matchJira = analysis.jira_project_selection_id === activeWorkspaceId;
-      const matchTrello = analysis.jira_project_selection_id === activeWorkspaceId; // stored in same field for trello too
-      if (!matchJira && !matchTrello) return false;
+    // Filter by workspace (jira_project_selection_id is used for both Jira & Trello selections)
+    if (activeWorkspaceId && analysis.jira_project_selection_id !== activeWorkspaceId) {
+      return false;
     }
     // Filter by period
     if (selectedPeriod) {
