@@ -8,13 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
-import QuickStats from "@/components/dashboard/QuickStats";
+import Xstats from "@/components/dashboard/Xstats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
@@ -252,7 +250,7 @@ export default function DashboardAdmins() {
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
                 patterns={[]} />
 
-                <QuickStats analysisHistory={analysisHistory} />
+                <Xstats gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
               </>
             }
           </motion.div>
@@ -306,11 +304,6 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-
-              <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
-
-              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
-
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
