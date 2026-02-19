@@ -306,10 +306,15 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} gdprSignals={gdprSignals} selectedWorkspaceId={selectedWorkspaceId} />
+              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
+              
+              <PredictiveInsights analysisHistory={analysisHistory} gdprSignals={gdprSignals} selectedWorkspaceId={selectedWorkspaceId} />
 
             </div>
 
