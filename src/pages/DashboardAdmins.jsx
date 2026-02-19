@@ -13,13 +13,13 @@ import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChar
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -117,12 +117,12 @@ export default function DashboardAdmins() {
   });
 
   // Filter analysis history
-   const analysisHistory = allAnalysisHistory.filter((analysis) => {
-     const analysisDate = new Date(analysis.created_date);
-     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-     const matchesWorkspace = selectedWorkspaceId ? (analysis.jira_project_selection_id === selectedWorkspaceId || analysis.trello_project_selection_id === selectedWorkspaceId) : true;
-     return matchesPeriod && matchesWorkspace;
-   });
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
+    return matchesPeriod && matchesWorkspace;
+  });
 
   // Check for stored analysis
   useEffect(() => {
@@ -303,14 +303,15 @@ export default function DashboardAdmins() {
               onReviewSprint={() => console.log("Review sprint")} />
 
             }
+              
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
 
                <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
 
-               <SprintPerformanceChart analysisHistory={analysisHistory} />
                <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+               latestAnalysis={latestAnalysis}
+               sourceUrl={latestAnalysis?.sourceUrl}
+               sourceName={latestAnalysis?.sourceName} />
 
             </div>
 
