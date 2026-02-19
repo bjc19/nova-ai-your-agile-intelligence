@@ -29,7 +29,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2 } from
+  Loader2,
+  Settings } from
 "lucide-react";
 
 export default function DashboardAdmins() {
