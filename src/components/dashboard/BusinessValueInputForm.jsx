@@ -55,6 +55,12 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
     setLoading(true);
     try {
       const user = await base44.auth.me();
+      if (!user) {
+        setError("Veuillez vous connecter pour continuer");
+        setLoading(false);
+        return;
+      }
+      
       await base44.entities.BusinessValueMetric.create({
         user_email: user.email,
         workspace_id: selectedWorkspaceId,
@@ -64,8 +70,13 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
         period_end_date: endDate,
         is_locked: true
       });
-      onDataSubmitted();
+      
+      // Appeler le callback avec un petit délai pour laisser l'UI se mettre à jour
+      setTimeout(() => {
+        onDataSubmitted();
+      }, 300);
     } catch (err) {
+      console.error("Erreur BusinessValue:", err);
       setError("Erreur lors de la sauvegarde: " + err.message);
     } finally {
       setLoading(false);
