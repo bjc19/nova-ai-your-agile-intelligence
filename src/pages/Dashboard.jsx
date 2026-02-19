@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
+import QuickStats2 from "@/components/dashboard/QuickStats2";
+import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
@@ -39,7 +41,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -280,12 +281,9 @@ export default function Dashboard() {
               </div>
               
               {/* Time Period Selector */}
-               <div className="flex justify-end gap-3">
-               <WorkspaceSelector 
-                 onWorkspaceChange={(workspaceId) => setSelectedWorkspaceId(workspaceId || null)}
-                 activeWorkspaceId={selectedWorkspaceId}
-               />
-               <TimePeriodSelector
+              <div className="flex justify-end gap-3">
+              <WorkspaceSelector />
+              <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
@@ -297,13 +295,9 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-             {(!selectedPeriod || analysisHistory.length > 0) &&
-             <QuickStats 
-               analysisHistory={analysisHistory} 
-               currentPageName="Dashboard"
-               selectedWorkspaceId={selectedWorkspaceId}
-             />
-             }
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
@@ -343,6 +337,88 @@ export default function Dashboard() {
               </Button>
             </Link>
           </div>
+        }
+
+        {/* Show content only if there are analyses in the period */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Sprint Health Card - Drift Detection */}
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={{
+                sprint_name: "Sprint 14",
+                wip_count: 8,
+                wip_historical_avg: 5,
+                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+                sprint_day: 5,
+                historical_sprints_count: 4,
+                drift_acknowledged: false,
+                problematic_tickets: sprintHealth.problematic_tickets,
+                gdprSignals: gdprSignals
+              }}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
+
+            }
+            
+            {/* Sprint Performance Chart */}
+            <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
+
+          </div>
+
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
+          </div>
+        </div>
+        }
+
+        {(user?.role === 'admin') &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-8">
+
+    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+          </h3>
+          <p className="text-slate-400 max-w-lg">
+            {t('importDataDescription')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl("Settings")}>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Zap className="w-4 h-4 mr-2" />
+              {t('connectSlack')}
+            </Button>
+          </Link>
+          <Link to={createPageUrl("Analysis")}>
+            <Button className="bg-white text-slate-900 hover:bg-slate-100">
+              {t('startAnalysis')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </motion.div>
         }
       </div>
     </div>);
