@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import AnalyticsInsightsBlock from "@/components/dashboard/AnalyticsInsightsBlock";
 
 import {
   Mic,
@@ -309,11 +308,6 @@ export default function DashboardAdmins() {
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
-
-              <AnalyticsInsightsBlock
-              selectedWorkspaceId={selectedWorkspaceId}
-              gdprSignals={gdprSignals.filter(s => !selectedWorkspaceId || s.jira_project_selection_id === selectedWorkspaceId || s.trello_project_selection_id === selectedWorkspaceId)}
-              analysisHistory={analysisHistory} />
 
             </div>
 
