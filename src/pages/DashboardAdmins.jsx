@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -18,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import SectionSkeleton from "@/components/dashboard/SectionSkeleton";
 
 import {
   Mic,
@@ -26,7 +26,8 @@ import {
   ArrowRight,
   Zap,
   Calendar,
-  Clock } from
+  Clock,
+  Loader2 } from
 "lucide-react";
 
 export default function DashboardAdmins() {
@@ -34,71 +35,17 @@ export default function DashboardAdmins() {
   const { t } = useLanguage();
   const [user, setUser] = useState(null);
   const [latestAnalysis, setLatestAnalysis] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [analysisHistory, setAnalysisHistory] = useState([]);
 
-  // Loading states per section
-  const [loadingStates, setLoadingStates] = useState({
-    auth: true,
-    gdpr: true,
-    analysis: true,
-    sprint: true
-  });
-
-  // Auth check
+  // Fetch GDPR signals
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        if (!authenticated) {
-          navigate(createPageUrl("Home"));
-          return;
-        }
-
-        const currentUser = await base44.auth.me();
-        if (currentUser?.role !== 'admin') {
-          navigate(createPageUrl("Home"));
-          return;
-        }
-
-        setUser(currentUser);
-        
-        // Check onboarding & multi-project alerts in parallel
-        const [teamConfigs, pendingAlerts] = await Promise.all([
-          base44.entities.TeamConfiguration.list(),
-          base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" })
-        ]);
-
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
-
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
-          });
-        }
-
-        setLoadingStates(prev => ({ ...prev, auth: false }));
-      } catch (error) {
-        console.error("Auth error:", error);
-        navigate(createPageUrl("Home"));
-      }
-    };
-    checkAuth();
-  }, [navigate]);
-
-  // Load GDPR signals
-  useEffect(() => {
-    const loadGdpr = async () => {
+    const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -106,53 +53,77 @@ export default function DashboardAdmins() {
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
-        console.error("GDPR error:", error);
-      } finally {
-        setLoadingStates(prev => ({ ...prev, gdpr: false }));
+        console.error("Erreur chargement signaux GDPR:", error);
       }
     };
-    loadGdpr();
+    fetchSignals();
   }, []);
 
-  // Load analysis history
+  // Check authentication and role
   useEffect(() => {
-    const loadAnalysis = async () => {
-      try {
-        const all = await base44.entities.AnalysisHistory.list('-created_date', 100);
-        const filtered = all.filter((analysis) => {
-          const analysisDate = new Date(analysis.created_date);
-          const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-          const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
-          return matchesPeriod && matchesWorkspace;
+    const checkAuth = async () => {
+      const authenticated = await base44.auth.isAuthenticated();
+      if (!authenticated) {
+        navigate(createPageUrl("Home"));
+        return;
+      }
+
+      const currentUser = await base44.auth.me();
+
+      // Role verification - only 'admin' can access
+      if (currentUser?.role !== 'admin') {
+        navigate(createPageUrl("Home"));
+        return;
+      }
+
+      setUser(currentUser);
+
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
+      }
+
+      // Check onboarding
+      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+        setShowOnboarding(true);
+      }
+
+      // Check multi-project alerts
+      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+        admin_response: "pending"
+      });
+      if (pendingAlerts.length > 0) {
+        const latest = pendingAlerts[pendingAlerts.length - 1];
+        setMultiProjectAlert({
+          confidence: latest.detection_score,
+          signals: latest.weighted_signals,
+          log_id: latest.id
         });
-        setAnalysisHistory(filtered);
-      } catch (error) {
-        console.error("Analysis error:", error);
-      } finally {
-        setLoadingStates(prev => ({ ...prev, analysis: false }));
       }
-    };
-    if (!loadingStates.auth) loadAnalysis();
-  }, [selectedPeriod, selectedWorkspaceId, loadingStates.auth]);
 
-  // Load sprint context
-  useEffect(() => {
-    const loadSprint = async () => {
-      try {
-        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
-      } catch (error) {
-        console.error("Sprint error:", error);
-      } finally {
-        setLoadingStates(prev => ({ ...prev, sprint: false }));
-      }
+      setIsLoading(false);
     };
-    if (!loadingStates.auth) loadSprint();
-  }, [loadingStates.auth]);
+    checkAuth();
+  }, [navigate]);
 
-  // Stored analysis
+  // Fetch analysis history
+  const { data: allAnalysisHistory = [] } = useQuery({
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    enabled: !isLoading
+  });
+
+  // Filter analysis history
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
+    return matchesPeriod && matchesWorkspace;
+  });
+
+  // Check for stored analysis
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -206,13 +177,12 @@ export default function DashboardAdmins() {
     gdprSignals: gdprSignals
   } : null;
 
-  // Show loading for auth (blocking)
-  if (loadingStates.auth) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <SectionSkeleton height="h-96" />
-      </div>
-    );
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>);
+
   }
 
   return (
@@ -274,13 +244,13 @@ export default function DashboardAdmins() {
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
-                {loadingStates.analysis ? <SectionSkeleton height="h-20" /> : <DailyQuote
+                <DailyQuote
                 lang={t('language') === 'English' ? 'en' : 'fr'}
                 blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                patterns={[]} />}
+                patterns={[]} />
 
-                {loadingStates.analysis ? <SectionSkeleton height="h-32" /> : <QuickStats analysisHistory={analysisHistory} />}
+                <QuickStats analysisHistory={analysisHistory} />
               </>
             }
           </motion.div>
@@ -325,21 +295,24 @@ export default function DashboardAdmins() {
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {loadingStates.sprint ? <SectionSkeleton height="h-64" /> : (sprintHealth && <SprintHealthCard
+              {sprintHealth &&
+            <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />)}
+              onReviewSprint={() => console.log("Review sprint")} />
+
+            }
               
-              {loadingStates.analysis ? <SectionSkeleton height="h-64" /> : <SprintPerformanceChart analysisHistory={analysisHistory} />}
-              {loadingStates.analysis ? <SectionSkeleton height="h-48" /> : <KeyRecommendations
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />}
+              sourceName={latestAnalysis?.sourceName} />
 
             </div>
 
             <div className="space-y-6">
-              {loadingStates.analysis ? <SectionSkeleton height="h-96" /> : <RecentAnalyses analyses={analysisHistory} />}
+              <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>
           </div>
