@@ -46,9 +46,9 @@ export const useTeamContext = (workspaceId) => {
       const contexts = await base44.entities.TeamContext.filter({}, '-updated_date', 1);
       return contexts?.[0] || null;
     },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchInterval: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: 'stale',
     enabled: !!workspaceId
   });
 };
