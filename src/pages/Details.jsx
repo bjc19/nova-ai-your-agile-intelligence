@@ -80,14 +80,19 @@ export default function Details() {
 
   const { data: teamsInsightsData = [] } = useQuery({
     queryKey: ['teamsInsights', selectedWorkspaceId],
-    queryFn: () => selectedWorkspaceId
-      ? base44.entities.TeamsInsight.filter({
-          $or: [
-            { jira_project_selection_id: selectedWorkspaceId },
-            { trello_project_selection_id: selectedWorkspaceId }
-          ]
-        }, '-created_date', 1000)
-      : base44.entities.TeamsInsight.list('-created_date', 1000),
+    queryFn: async () => {
+      const allInsights = selectedWorkspaceId
+        ? await base44.entities.TeamsInsight.filter({
+            $or: [
+              { jira_project_selection_id: selectedWorkspaceId },
+              { trello_project_selection_id: selectedWorkspaceId }
+            ]
+          }, '-created_date', 1000)
+        : await base44.entities.TeamsInsight.list('-created_date', 1000);
+
+      // MASK: Filter out insights without workspace links
+      return allInsights.filter(i => i.jira_project_selection_id || i.trello_project_selection_id);
+    },
     enabled: detailType !== null,
   });
 
