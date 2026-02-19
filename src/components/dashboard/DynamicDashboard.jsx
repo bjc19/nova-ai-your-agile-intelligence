@@ -6,7 +6,6 @@ import { getRelevantComponents, getComponentConfig } from "./dashboardComponentR
 
 // Import all dashboard components
 import SprintHealthCard from "./SprintHealthCard";
-import MetricsRadarCard from "../nova/MetricsRadarCard";
 import RealityMapCard from "../nova/RealityMapCard";
 import SprintPerformanceChart from "./SprintPerformanceChart";
 import KeyRecommendations from "./KeyRecommendations";
