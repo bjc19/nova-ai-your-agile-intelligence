@@ -293,6 +293,14 @@ export default function DashboardAdmins() {
         }
 
         {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="space-y-6">
+          <WorkspaceSelector 
+            selectedWorkspaceId={selectedWorkspaceId}
+            onWorkspaceChange={setSelectedWorkspaceId} />
+        </div>
+        }
+
+        {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {sprintHealth &&
