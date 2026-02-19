@@ -326,25 +326,25 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
                 </Button>
               </div>
             </div>
+
+            <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Réinitialiser les données</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action supprimera toutes les données de Business Value saisies pour ce workspace. Cette action est irréversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="flex gap-3">
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReset} className="bg-red-600 hover:bg-red-700">
+                    Réinitialiser
+                  </AlertDialogAction>
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
-
-        <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Réinitialiser les données</AlertDialogTitle>
-              <AlertDialogDescription>
-                Cette action supprimera toutes les données de Business Value saisies pour ce workspace. Cette action est irréversible.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="flex gap-3">
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={handleReset} className="bg-red-600 hover:bg-red-700">
-                Réinitialiser
-              </AlertDialogAction>
-            </div>
-          </AlertDialogContent>
-        </AlertDialog>
       </Card>
     </motion.div>
   );
