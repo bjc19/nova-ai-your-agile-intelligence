@@ -3,9 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { BarChart3, TrendingUp, Zap, Target, Loader2, Edit2 } from "lucide-react";
+import { BarChart3, TrendingUp, Zap, Target, Loader2, Edit2, Clock } from "lucide-react";
 import { LineChart as RechartsLineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from "recharts";
-import BusinessValueInputForm from "./BusinessValueInputForm";
+import AverageResolutionTimeMetric from "./AverageResolutionTimeMetric";
 
 const CHART_TYPES = {
   flow_efficiency: {
