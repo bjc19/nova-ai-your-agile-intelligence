@@ -169,13 +169,51 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
     }
   };
 
+  if (dataLoading) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="p-6 bg-white">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+          </div>
+        </Card>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="p-6 bg-white">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Saisir la Valeur Business</h3>
-          <p className="text-sm text-slate-500">Entrez la valeur livrée et planifiée pour une période minimale de 1 mois</p>
-        </div>
+        {showChart && metricsData.length > 0 ? (
+          <>
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Métriques de Valeur Business</h3>
+                  <p className="text-sm text-slate-500">Graphique comparatif des valeurs livrées vs planifiées</p>
+                </div>
+                <Button
+                  onClick={() => setShowChart(false)}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Ajouter une métrique
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-lg">
+              <BusinessValueChart data={metricsData} />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Saisir la Valeur Business</h3>
+              <p className="text-sm text-slate-500">Entrez la valeur livrée et planifiée pour une période minimale de 1 mois</p>
+            </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
