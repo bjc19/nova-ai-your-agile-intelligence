@@ -10,15 +10,16 @@ import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
+import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
@@ -120,15 +121,7 @@ export default function DashboardAdmins() {
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId || analysis.trello_project_selection_id === selectedWorkspaceId : true;
-    return matchesPeriod && matchesWorkspace;
-  });
-
-  // Filter GDPR signals by period and workspace
-  const filteredGdprSignals = gdprSignals.filter((signal) => {
-    const signalDate = new Date(signal.created_date);
-    const matchesPeriod = selectedPeriod ? signalDate >= new Date(selectedPeriod.start) && signalDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    const matchesWorkspace = selectedWorkspaceId ? signal.jira_project_selection_id === selectedWorkspaceId || signal.trello_project_selection_id === selectedWorkspaceId : true;
+    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
     return matchesPeriod && matchesWorkspace;
   });
 
@@ -259,8 +252,7 @@ export default function DashboardAdmins() {
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
                 patterns={[]} />
 
-                <QuickStats analysisHistory={analysisHistory} gdprSignals={filteredGdprSignals} />
-                <BlockersRisksTrendTable gdprSignals={filteredGdprSignals} analysisHistory={analysisHistory} />
+                <QuickStats analysisHistory={analysisHistory} />
               </>
             }
           </motion.div>
@@ -314,6 +306,11 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+
+              <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
+
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
