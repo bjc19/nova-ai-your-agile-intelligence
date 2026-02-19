@@ -21,11 +21,9 @@ export default function AdminDetectedRisks({ workspaceId }) {
         status: "resolved",
         resolved_date: new Date().toISOString()
       });
-      
-      setPatterns(prev => prev.filter(p => p.id !== patternId));
+      // React Query invalidate/refetch is automatic via queryClient
     } catch (err) {
       console.error("Erreur résolution pattern:", err);
-      setError(err.message);
     }
   };
 
