@@ -319,9 +319,19 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <AdminDetectedRisks gdprSignals={gdprSignals} />
               <IntegrationStatus />
             </div>
           </div>
+        }
+
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="space-y-6 mt-8">
+          <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+          <PredictiveInsights analysisHistory={analysisHistory} />
+          <ChartSuggestionGenerator analysisHistory={analysisHistory} />
+          <RiskOpportunitiesWordCloud gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+        </div>
         }
 
         <motion.div
