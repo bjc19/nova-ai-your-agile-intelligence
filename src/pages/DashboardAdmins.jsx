@@ -13,6 +13,7 @@ import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChar
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
@@ -39,7 +40,6 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
 
-  // Check authentication and role
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -57,19 +57,16 @@ export default function DashboardAdmins() {
 
       setUser(currentUser);
 
-      // Load sprint context
       const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
       if (activeSprints.length > 0) {
         setSprintContext(activeSprints[0]);
       }
 
-      // Check onboarding
       const teamConfigs = await base44.entities.TeamConfiguration.list();
       if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
         setShowOnboarding(true);
       }
 
-      // Check multi-project alerts
       const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
         admin_response: "pending"
       });
@@ -87,14 +84,12 @@ export default function DashboardAdmins() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
-  // Filter analysis history by period and workspace
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod
@@ -106,7 +101,6 @@ export default function DashboardAdmins() {
     return matchesPeriod && matchesWorkspace;
   });
 
-  // Check for stored analysis
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -123,7 +117,6 @@ export default function DashboardAdmins() {
         const startDate = new Date(selectedPeriod.start);
         const endDate = new Date(selectedPeriod.end);
         endDate.setHours(23, 59, 59, 999);
-
         if (analysisDate >= startDate && analysisDate <= endDate) {
           setLatestAnalysis(parsedAnalysis);
         } else {
@@ -151,7 +144,6 @@ export default function DashboardAdmins() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Onboarding Modal */}
       <TeamConfigOnboarding
         isOpen={showOnboarding}
         onComplete={() => setShowOnboarding(false)} />
@@ -196,7 +188,6 @@ export default function DashboardAdmins() {
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
-
                 <TimePeriodSelector
                   deliveryMode={sprintInfo?.deliveryMode}
                   onPeriodChange={(period) => {
@@ -258,6 +249,7 @@ export default function DashboardAdmins() {
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <PredictiveInsights />
               <KeyRecommendations
                 latestAnalysis={latestAnalysis}
                 sourceUrl={latestAnalysis?.sourceUrl}
