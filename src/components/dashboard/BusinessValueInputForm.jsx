@@ -71,6 +71,12 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
         is_locked: true
       });
       
+      // Réinitialiser le formulaire
+      setValueDelivered("");
+      setValuePlanned("");
+      setStartDate("");
+      setEndDate("");
+      
       // Appeler le callback avec un petit délai pour laisser l'UI se mettre à jour
       setTimeout(() => {
         onDataSubmitted();
