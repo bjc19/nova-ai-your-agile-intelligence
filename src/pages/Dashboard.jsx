@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
-import QuickStats from "@/components/dashboard/QuickStats";
+import Xstats from "@/components/dashboard/Xstats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
@@ -293,9 +293,9 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-             {(!selectedPeriod || analysisHistory.length > 0) &&
-             <QuickStats analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
-             }
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <Xstats gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
