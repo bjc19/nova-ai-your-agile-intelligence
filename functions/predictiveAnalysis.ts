@@ -158,7 +158,10 @@ Fournis une analyse prédictive structurée incluant :
       success: true,
       prediction,
       metadata: {
-        data_points: historicalData.sprints.length + historicalData.analyses.length,
+        workspace_id: workspaceId,
+      analyses_count: historicalData.analyses.length,
+      sprints_count: historicalData.sprints.length,
+      data_points: historicalData.sprints.length + historicalData.analyses.length,
         analysis_timestamp: new Date().toISOString()
       }
     });
