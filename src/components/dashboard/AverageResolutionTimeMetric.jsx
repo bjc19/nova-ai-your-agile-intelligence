@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { Clock, TrendingDown, AlertCircle, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function AverageResolutionTimeMetric({ workspaceId }) {
   const [loading, setLoading] = useState(true);
