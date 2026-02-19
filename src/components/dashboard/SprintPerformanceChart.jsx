@@ -25,28 +25,28 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
         setIsLoading(false);
       }
     };
-    
+
     fetchJiraData();
   }, []);
 
   // Use Jira data if available, otherwise fall back to analysisHistory - NO sample data
-  const chartData = jiraData.length > 0
-    ? jiraData
-    : analysisHistory.length > 0
-    ? analysisHistory.slice(-7).map((item, index) => ({
-        day: language === 'fr' ? `Jour ${index + 1}` : `Day ${index + 1}`,
-        blockers: item.blockers_count || 0,
-        risks: item.risks_count || 0,
-        blockersData: item.analysis_data?.blockers || [],
-        risksData: item.analysis_data?.risks || [],
-      }))
-    : [];
+  const chartData = jiraData.length > 0 ?
+  jiraData :
+  analysisHistory.length > 0 ?
+  analysisHistory.slice(-7).map((item, index) => ({
+    day: language === 'fr' ? `Jour ${index + 1}` : `Day ${index + 1}`,
+    blockers: item.blockers_count || 0,
+    risks: item.risks_count || 0,
+    blockersData: item.analysis_data?.blockers || [],
+    risksData: item.analysis_data?.risks || []
+  })) :
+  [];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload || !payload.length) return null;
-    
+
     const data = payload[0]?.payload;
-    
+
     return (
       <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-4 max-w-xs">
         <p className="font-semibold text-slate-900 mb-2">{label}</p>
@@ -56,32 +56,32 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
               <div className="w-2 h-2 rounded-full bg-blue-500" />
               <span className="text-sm font-medium text-slate-700">{t('blockers')}: {data?.blockers || 0}</span>
             </div>
-            {data?.blockersData?.length > 0 && (
-              <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
-                {data.blockersData.slice(0, 3).map((b, i) => (
-                  <li key={i}>• {b.member}: {b.issue?.substring(0, 40)}{b.issue?.length > 40 ? '...' : ''}</li>
-                ))}
+            {data?.blockersData?.length > 0 &&
+            <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
+                {data.blockersData.slice(0, 3).map((b, i) =>
+              <li key={i}>• {b.member}: {b.issue?.substring(0, 40)}{b.issue?.length > 40 ? '...' : ''}</li>
+              )}
                 {data.blockersData.length > 3 && <li className="text-slate-400">+{data.blockersData.length - 3} {t('more')}</li>}
               </ul>
-            )}
+            }
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full bg-amber-500" />
               <span className="text-sm font-medium text-slate-700">{t('risks')}: {data?.risks || 0}</span>
             </div>
-            {data?.risksData?.length > 0 && (
-              <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
-                {data.risksData.slice(0, 3).map((r, i) => (
-                  <li key={i}>• {r.description?.substring(0, 40)}{r.description?.length > 40 ? '...' : ''}</li>
-                ))}
+            {data?.risksData?.length > 0 &&
+            <ul className="ml-4 text-xs text-slate-500 space-y-0.5">
+                {data.risksData.slice(0, 3).map((r, i) =>
+              <li key={i}>• {r.description?.substring(0, 40)}{r.description?.length > 40 ? '...' : ''}</li>
+              )}
                 {data.risksData.length > 3 && <li className="text-slate-400">+{data.risksData.length - 3} {t('more')}</li>}
               </ul>
-            )}
+            }
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   };
 
   // Calculate trends
@@ -110,81 +110,81 @@ export default function SprintPerformanceChart({ analysisHistory = [] }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <Card className="overflow-hidden">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-slate-900">
-              {t('Evolution des bloquants et des risques')}
-            </CardTitle>
-            <div className="flex items-center gap-2 text-sm">
-              {getTrendIcon(blockerTrend)}
-              <span className={blockerTrend > 0 ? "text-red-600" : blockerTrend < 0 ? "text-emerald-600" : "text-slate-500"}>
-                {getTrendText(blockerTrend)}
-              </span>
-            </div>
-          </div>
-          <p className="text-sm text-slate-500">{t('blockerRiskTrends')}</p>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                <defs>
-                  <linearGradient id="blockerGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis 
-                  dataKey="day" 
-                  axisLine={false} 
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#94a3b8' }}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false}
-                  tick={{ fontSize: 12, fill: '#94a3b8' }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Area
-                  type="monotone"
-                  dataKey="blockers"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  fill="url(#blockerGradient)"
-                  name="Blockers"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="risks"
-                  stroke="#f59e0b"
-                  strokeWidth={2}
-                  fill="url(#riskGradient)"
-                  name="Risks"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="text-sm text-slate-600">{t('blockers')}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <span className="text-sm text-slate-600">{t('risks')}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
+      transition={{ duration: 0.5, delay: 0.2 }}>
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </motion.div>);
+
 }
