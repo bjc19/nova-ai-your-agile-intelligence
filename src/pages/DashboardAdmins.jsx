@@ -302,7 +302,6 @@ export default function DashboardAdmins() {
               onReviewSprint={() => console.log("Review sprint")} />
 
             }
-
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
