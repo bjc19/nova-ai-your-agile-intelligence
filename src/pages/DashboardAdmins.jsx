@@ -304,59 +304,19 @@ export default function DashboardAdmins() {
 
             }
 
-              {analysisHistory.length > 0 &&
+              {analysisHistory.length > 0 && selectedWorkspaceId &&
             <MetricsRadarCard
-              metricsData={{
-                velocity: { current: 45, trend: "up", change: 20 },
-                flow_efficiency: { current: 28, target: 55 },
-                cycle_time: { current: 9, target: 4 },
-                throughput: { current: 6, variance: 0.3 },
-                deployment_frequency: { current: 1, target: 3 },
-                data_days: 14
-              }}
-              historicalData={{
-                sprints_count: 1,
-                data_days: 7,
-                is_audit_phase: false,
-                is_new_team: true
-              }}
-              integrationStatus={{
-                jira_connected: true,
-                slack_connected: false,
-                dora_pipeline: false,
-                flow_metrics_available: true
-              }}
+              workspaceId={selectedWorkspaceId}
+              analysisHistory={analysisHistory}
               onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
               onApplyLever={(lever) => console.log("Apply lever:", lever)} />
-
             }
 
-              {analysisHistory.length > 0 &&
+              {analysisHistory.length > 0 && selectedWorkspaceId &&
             <RealityMapCard
-              flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
-
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
-
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
-
-                data_days: 30
-              }}
-              flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
-              }}
+              workspaceId={selectedWorkspaceId}
+              analysisHistory={analysisHistory}
               onDiscussSignals={() => console.log("Discuss systemic signals")} />
-
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
