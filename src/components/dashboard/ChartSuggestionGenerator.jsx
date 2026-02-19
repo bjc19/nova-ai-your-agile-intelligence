@@ -65,7 +65,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
     if (risksCount > blockersCount) {
       return { key: 'flow_efficiency', reason: 'Beaucoup de risques - réduisez les gaspillages' };
     }
-    return { key: 'business_value', reason: 'Vue d\'ensemble ROI recommandée' };
+    return { key: 'average_resolution_time', reason: 'Mesurez l\'amélioration continue' };
   }, [selectedWorkspaceId, gdprSignals, analysisHistory]);
 
   const generateChart = async (chartType) => {
