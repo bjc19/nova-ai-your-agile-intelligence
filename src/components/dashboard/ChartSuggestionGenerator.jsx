@@ -43,28 +43,6 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
-  const [showBusinessValueForm, setShowBusinessValueForm] = useState(false);
-  const [businessValueMetricsHistory, setBusinessValueMetricsHistory] = useState([]);
-
-  // Charger l'historique complet des données Business Value
-  useEffect(() => {
-    if (!selectedWorkspaceId) return;
-    
-    const fetchBusinessValueMetricsHistory = async () => {
-      try {
-        const user = await base44.auth.me();
-        const metrics = await base44.entities.BusinessValueMetric.filter({
-          workspace_id: selectedWorkspaceId,
-          user_email: user.email
-        }, '-period_start_date', 100);
-        setBusinessValueMetricsHistory(metrics);
-      } catch (err) {
-        console.error("Erreur chargement Business Value historique:", err);
-      }
-    };
-    
-    fetchBusinessValueMetricsHistory();
-  }, [selectedWorkspaceId]);
 
   // Analyser les données disponibles pour suggérer le meilleur graphique
   const bestChartSuggestion = useMemo(() => {
