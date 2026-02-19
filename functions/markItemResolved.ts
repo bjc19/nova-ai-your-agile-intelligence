@@ -19,19 +19,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // If it's a PatternDetection, update it directly
-    if (source === 'pattern_detection') {
-      try {
-        await base44.entities.PatternDetection.update(itemId, {
-          status: 'resolved',
-          resolved_date: new Date().toISOString(),
-        });
-      } catch (error) {
-        console.log(`Cannot update PatternDetection directly (${error.data?.message}). Tracking via ResolvedItem only.`);
-        // RLS may prevent update, but ResolvedItem will track resolution
-      }
-    }
-
     // Create ResolvedItem record for tracking
     await base44.entities.ResolvedItem.create({
       item_id: itemId,
