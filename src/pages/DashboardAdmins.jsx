@@ -206,12 +206,13 @@ export default function DashboardAdmins() {
     gdprSignals: gdprSignals
   } : null;
 
-  if (isLoading) {
+  // Show loading for auth (blocking)
+  if (loadingStates.auth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>);
-
+        <SectionSkeleton height="h-96" />
+      </div>
+    );
   }
 
   return (
