@@ -212,9 +212,9 @@ export default function Dashboard() {
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
                   <p className="text-slate-600 mt-2 text-lg">
-                    {sprintInfo.deliveryMode === "kanban" ?
-                    "Voici votre vue d'ensemble et vos dernières analyses." :
-                    t('sprintOverview')}
+                  {sprintInfo?.deliveryMode === "kanban" ?
+                  "Voici votre vue d'ensemble et vos dernières analyses." :
+                  t('sprintOverview')}
                   </p>
                 </div>
                 
