@@ -90,17 +90,6 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
       setStartDate("");
       setEndDate("");
       
-      // Actualiser les données du graphique
-      const updatedMetrics = await base44.entities.BusinessValueMetric.filter({
-        workspace_id: selectedWorkspaceId,
-        user_email: user.email
-      });
-      
-      if (updatedMetrics && updatedMetrics.length > 0) {
-        setMetricsData(updatedMetrics);
-        setShowChart(true);
-      }
-      
       // Appeler le callback
       onDataSubmitted();
     } catch (err) {
@@ -131,8 +120,6 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
       setStartDate("");
       setEndDate("");
       setShowResetDialog(false);
-      setMetricsData([]);
-      setShowChart(false);
       onDataSubmitted();
     } catch (err) {
       setError("Erreur lors de la réinitialisation: " + err.message);
@@ -141,172 +128,137 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
     }
   };
 
-  if (dataLoading) {
-    return (
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <Card className="p-6 bg-white">
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
-          </div>
-        </Card>
-      </motion.div>
-    );
-  }
-
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="p-6 bg-white">
-        {showChart && metricsData.length > 0 ? (
-          <>
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Métriques de Valeur Business</h3>
-                  <p className="text-sm text-slate-500">Graphique comparatif des valeurs livrées vs planifiées</p>
-                </div>
-                <Button
-                  onClick={() => setShowChart(false)}
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  Ajouter une métrique
-                </Button>
-              </div>
-            </div>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Saisir la Valeur Business</h3>
+          <p className="text-sm text-slate-500">Entrez la valeur livrée et planifiée pour une période minimale de 1 mois</p>
+        </div>
 
-            <div className="bg-slate-50 p-4 rounded-lg">
-              <BusinessValueChart data={metricsData} />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Saisir la Valeur Business</h3>
-              <p className="text-sm text-slate-500">Entrez la valeur livrée et planifiée pour une période minimale de 1 mois</p>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Livrée ($)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={valueDelivered}
-                      onChange={(e) => setValueDelivered(e.target.value)}
-                      className="pl-8"
-                      disabled={loading}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Planifiée ($)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={valuePlanned}
-                      onChange={(e) => setValuePlanned(e.target.value)}
-                      className="pl-8"
-                      disabled={loading}
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <label className="block text-sm font-medium text-slate-700 mb-3">Période d'analyse (minimum 1 mois)</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Date de début</label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                      <Input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="pl-8"
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Date de fin</label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                      <Input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="pl-8"
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                  Soumettre
-                </Button>
-                <Button
-                  onClick={onCancel}
-                  variant="outline"
-                  disabled={loading}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  onClick={() => setShowResetDialog(true)}
-                  variant="ghost"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  disabled={loading}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-
-            <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Réinitialiser les données</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Cette action supprimera toutes les données de Business Value saisies pour ce workspace. Cette action est irréversible.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="flex gap-3">
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleReset} className="bg-red-600 hover:bg-red-700">
-                    Réinitialiser
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            {error}
+          </div>
         )}
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Livrée ($)</label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={valueDelivered}
+                  onChange={(e) => setValueDelivered(e.target.value)}
+                  className="pl-8"
+                  disabled={loading}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Planifiée ($)</label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={valuePlanned}
+                  onChange={(e) => setValuePlanned(e.target.value)}
+                  className="pl-8"
+                  disabled={loading}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <label className="block text-sm font-medium text-slate-700 mb-3">Période d'analyse (minimum 1 mois)</label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-slate-600 mb-1">Date de début</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="pl-8"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-600 mb-1">Date de fin</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="pl-8"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {loading ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+            <Button
+              onClick={onCancel}
+              disabled={loading}
+              variant="outline"
+              className="flex-1"
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={() => setShowResetDialog(true)}
+              disabled={loading}
+              variant="ghost"
+              size="icon"
+              className="text-slate-500 hover:text-red-600"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </Card>
+
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Réinitialiser les données</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action supprimera toutes les métriques de valeur business enregistrées. Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2">
+            <AlertDialogCancel disabled={loading}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReset}
+              disabled={loading}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {loading ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }
