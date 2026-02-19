@@ -333,6 +333,25 @@ export default function DashboardAdmins() {
             </div>
           </div>
         }
+        
+        {/* Detected Risks & Team Health - Below main grid */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <AdminDetectedRisks />
+          </div>
+          <div className="lg:col-span-2">
+            <TeamHealthSummary />
+          </div>
+        </div>
+        }
+        
+        {/* Integration Status - At the end */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8">
+          <IntegrationStatus />
+        </div>
+        }
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
