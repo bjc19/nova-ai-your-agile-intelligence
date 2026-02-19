@@ -101,6 +101,23 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
         setShowBusinessValueForm(true);
         return;
       }
+      // Si données existent, les utiliser directement
+      setLoading(true);
+      setSelectedChart(chartType);
+      try {
+        const chartDataForBusinessValue = [{
+          period: `${businessValueMetric.period_start_date} à ${businessValueMetric.period_end_date}`,
+          delivered: businessValueMetric.value_delivered,
+          planned: businessValueMetric.value_planned
+        }];
+        setChartData(chartDataForBusinessValue);
+        setSuggestion(CHART_TYPES[chartType]);
+      } catch (error) {
+        console.error("Erreur génération graphique Business Value:", error);
+      } finally {
+        setLoading(false);
+      }
+      return;
     }
 
     setLoading(true);
