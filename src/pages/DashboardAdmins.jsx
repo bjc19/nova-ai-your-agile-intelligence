@@ -310,6 +310,13 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              {/* Blockers & Risks Table */}
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+              
+              {/* Predictive Insights */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -319,7 +326,10 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              <IntegrationStatus />
+              {/* Chart Suggestion Generator */}
+              <ChartSuggestionGenerator selectedWorkspaceId={selectedWorkspaceId} analysisHistory={analysisHistory} />
+              {/* Contextual Tool Generator */}
+              <ContextualToolGenerator analysisHistory={analysisHistory} />
             </div>
           </div>
         }
