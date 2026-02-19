@@ -274,13 +274,13 @@ export default function DashboardAdmins() {
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
-                <DailyQuote
+                {loadingStates.analysis ? <SectionSkeleton height="h-20" /> : <DailyQuote
                 lang={t('language') === 'English' ? 'en' : 'fr'}
                 blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                patterns={[]} />
+                patterns={[]} />}
 
-                <QuickStats analysisHistory={analysisHistory} />
+                {loadingStates.analysis ? <SectionSkeleton height="h-32" /> : <QuickStats analysisHistory={analysisHistory} />}
               </>
             }
           </motion.div>
