@@ -422,7 +422,7 @@ Return JSON with: has_issue (bool), criticality (basse/moyenne/haute/critique), 
       const analysisId = generateUUID();
       try {
         await base44.asServiceRole.entities.AnalysisHistory.create({
-          title: `Trello Analysis - ${trelloProject.trello_board_name}`,
+          title: `Trello Analysis - ${trelloProject.board_name}`,
           source: 'trello',
           jira_project_selection_id: projectSelectionId,
           workspace_name: trelloProject.board_name,
