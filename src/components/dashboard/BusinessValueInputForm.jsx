@@ -21,6 +21,41 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
   const [metricsData, setMetricsData] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
 
+  // Charger les données existantes
+  useEffect(() => {
+    const loadMetrics = async () => {
+      setDataLoading(true);
+      try {
+        const user = await base44.auth.me();
+        if (!user) {
+          setDataLoading(false);
+          return;
+        }
+
+        const metrics = await base44.entities.BusinessValueMetric.filter({
+          workspace_id: selectedWorkspaceId,
+          user_email: user.email
+        });
+
+        if (metrics && metrics.length > 0) {
+          setMetricsData(metrics);
+          setShowChart(true);
+        } else {
+          setShowChart(false);
+        }
+      } catch (err) {
+        console.error("Erreur lors du chargement des métriques:", err);
+        setShowChart(false);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    if (selectedWorkspaceId) {
+      loadMetrics();
+    }
+  }, [selectedWorkspaceId]);
+
   const validatePeriod = () => {
     if (!startDate || !endDate) {
       setError("Veuillez sélectionner une période complète");
