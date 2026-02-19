@@ -57,9 +57,10 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
           workspace_id: selectedWorkspaceId,
           user_email: user.email
         }, '-period_start_date', 100);
-        setBusinessValueMetricsHistory(metrics);
+        setBusinessValueMetricsHistory(metrics || []);
       } catch (err) {
         console.error("Erreur chargement Business Value historique:", err);
+        setBusinessValueMetricsHistory([]);
       }
     };
     
@@ -93,9 +94,12 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const generateChart = async (chartType) => {
     if (!selectedWorkspaceId) return;
 
+    console.log("🎯 generateChart clicked:", { chartType, metricsCount: businessValueMetricsHistory.length });
+
     // Pour Business Value, afficher le formulaire si aucune donnée
     if (chartType === 'business_value') {
       if (businessValueMetricsHistory.length === 0) {
+        console.log("✅ No metrics - showing form");
         setShowBusinessValueForm(true);
         setSelectedChart(chartType);
         return;
@@ -135,168 +139,146 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   };
 
   const generateMockChartData = (chartType) => {
-    // Grouper les données par jour
-    const dataByDay = {};
-    const allData = [...gdprSignals, ...analysisHistory];
-    
-    allData.forEach(item => {
-      const date = new Date(item.created_date);
-      const day = date.toLocaleDateString('fr-FR', { weekday: 'short' });
-      if (!dataByDay[day]) {
-        dataByDay[day] = { blockers: 0, risks: 0, analyses: 0 };
-      }
-      dataByDay[day].blockers += (item.criticite === 'critique' || item.criticite === 'haute') ? 1 : 0;
-      dataByDay[day].risks += (item.criticite === 'moyenne' || item.criticite === 'basse') ? 1 : 0;
-      dataByDay[day].analyses += 1;
-    });
-
-    const days = Object.keys(dataByDay).slice(-7);
-    
     switch (chartType) {
       case 'flow_efficiency':
-        return days.map((day) => ({
-          day,
-          efficiency: Math.max(20, 100 - dataByDay[day].risks * 5),
-          target: 70
-        }));
+        return [
+          { week: 'S1', efficiency: 65 },
+          { week: 'S2', efficiency: 72 },
+          { week: 'S3', efficiency: 68 },
+          { week: 'S4', efficiency: 81 }
+        ];
       case 'cycle_time':
-        return days.map((day) => ({
-          day,
-          cycleTime: Math.max(1, 5 - dataByDay[day].blockers * 0.5),
-          average: 4.5
-        }));
+        return [
+          { sprint: 'Sprint 1', time: 8 },
+          { sprint: 'Sprint 2', time: 7.2 },
+          { sprint: 'Sprint 3', time: 6.5 },
+          { sprint: 'Sprint 4', time: 5.8 }
+        ];
       case 'change_failure_rate':
-        return days.map((day) => ({
-          day,
-          cfr: Math.min(30, dataByDay[day].blockers * 3),
-          ideal: 8
-        }));
+        return [
+          { month: 'Jan', rate: 12 },
+          { month: 'Feb', rate: 9 },
+          { month: 'Mar', rate: 7 },
+          { month: 'Apr', rate: 5 }
+        ];
       default:
         return [];
     }
   };
 
   const renderChart = () => {
-    if (!chartData || !selectedChart) return null;
+    if (!chartData) return null;
 
-    const config = CHART_TYPES[selectedChart];
-
-    switch (selectedChart) {
-      case 'flow_efficiency':
-        return (
-          <ResponsiveContainer width="100%" height={250}>
-            <RechartsLineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="efficiency" stroke="#3b82f6" name="Efficacité %" />
-              <Line type="monotone" dataKey="target" stroke="#d1d5db" strokeDasharray="5 5" name="Cible" />
-            </RechartsLineChart>
-          </ResponsiveContainer>
-        );
-      case 'cycle_time':
-        return (
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis label={{ value: 'Jours', angle: -90, position: 'insideLeft' }} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="cycleTime" fill="#a855f7" name="Cycle Time (jours)" />
-              <Bar dataKey="average" fill="#d1d5db" name="Moyenne" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
-      case 'change_failure_rate':
-        return (
-          <ResponsiveContainer width="100%" height={250}>
-            <ComposedChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis label={{ value: '%', angle: -90, position: 'insideLeft' }} />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="cfr" fill="#f59e0b" name="Change Failure Rate" />
-              <Line type="monotone" dataKey="ideal" stroke="#10b981" strokeDasharray="5 5" name="Idéal" />
-            </ComposedChart>
-          </ResponsiveContainer>
-        );
-      case 'business_value':
-        return (
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="period" />
-              <YAxis label={{ value: '$ Value', angle: -90, position: 'insideLeft' }} />
-              <Tooltip formatter={(val) => `$${val.toLocaleString('fr-FR')}`} />
-              <Legend />
-              <Bar dataKey="delivered" fill="#10b981" name="Livré" />
-              <Bar dataKey="planned" fill="#e5e7eb" name="Planifié" />
-              <Bar dataKey="gap" fill="#ef4444" name="Écart" />
-            </BarChart>
-          </ResponsiveContainer>
-        );
-      default:
-        return null;
+    if (selectedChart === 'business_value') {
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="period" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="delivered" fill="#10b981" name="Livrée" />
+            <Bar dataKey="planned" fill="#3b82f6" name="Planifiée" />
+          </BarChart>
+        </ResponsiveContainer>
+      );
     }
-  };
 
-  if (showBusinessValueForm && selectedChart === 'business_value') {
-    return (
-      <BusinessValueInputForm
-        selectedWorkspaceId={selectedWorkspaceId}
-        onDataSubmitted={async () => {
-          // Recharger les données Business Value historiques
-          try {
-            const user = await base44.auth.me();
-            const metrics = await base44.entities.BusinessValueMetric.filter({
-              workspace_id: selectedWorkspaceId,
-              user_email: user.email
-            }, '-period_start_date', 100);
-            setBusinessValueMetricsHistory(metrics);
-          } catch (err) {
-            console.error("Erreur recharge Business Value historique:", err);
-          }
-          setShowBusinessValueForm(false);
-          // Régénérer le graphique avec les nouvelles données
-          await generateChart('business_value');
-        }}
-        onCancel={() => {
-          setShowBusinessValueForm(false);
-          setSelectedChart(null);
-        }}
-      />
-    );
-  }
+    if (selectedChart === 'flow_efficiency') {
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsLineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="week" />
+            <YAxis />
+            <Tooltip />
+            <Line type="monotone" dataKey="efficiency" stroke="#3b82f6" strokeWidth={2} />
+          </RechartsLineChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    if (selectedChart === 'cycle_time') {
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <RechartsLineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="sprint" />
+            <YAxis />
+            <Tooltip />
+            <Line type="monotone" dataKey="time" stroke="#a855f7" strokeWidth={2} name="Cycle Time (jours)" />
+          </RechartsLineChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    if (selectedChart === 'change_failure_rate') {
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="rate" fill="#f59e0b" name="CFR %" />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    return null;
+  };
 
   if (!selectedWorkspaceId) {
     return (
-      <Card className="p-6 bg-slate-50">
-        <p className="text-sm text-slate-500">Sélectionnez un workspace pour générer des graphiques</p>
-      </Card>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="p-6">
+          <div className="flex items-center justify-center h-32">
+            <p className="text-slate-500 text-sm">Sélectionnez un espace de travail pour commencer</p>
+          </div>
+        </Card>
+      </motion.div>
     );
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      {selectedChart && chartData ? (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      {showBusinessValueForm ? (
+        <BusinessValueInputForm
+          selectedWorkspaceId={selectedWorkspaceId}
+          onDataSubmitted={() => {
+            setShowBusinessValueForm(false);
+            setSelectedChart(null);
+            setChartData(null);
+            // Recharger les metrics
+            const refetch = async () => {
+              try {
+                const user = await base44.auth.me();
+                const metrics = await base44.entities.BusinessValueMetric.filter({
+                  workspace_id: selectedWorkspaceId,
+                  user_email: user.email
+                }, '-period_start_date', 100);
+                setBusinessValueMetricsHistory(metrics || []);
+              } catch (err) {
+                console.error("Erreur reloading metrics:", err);
+              }
+            };
+            refetch();
+          }}
+          onCancel={() => {
+            setShowBusinessValueForm(false);
+            setSelectedChart(null);
+          }}
+        />
+      ) : selectedChart ? (
         <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              {suggestion && (
-                <>
-                  <div className={`p-3 rounded-lg bg-gradient-to-br ${suggestion.color}`}>
-                    {suggestion.icon && <suggestion.icon className="w-5 h-5 text-white" />}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900">{suggestion.name}</h3>
-                    <p className="text-sm text-slate-500">{suggestion.description}</p>
-                  </div>
-                </>
-              )}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">
+                {CHART_TYPES[selectedChart].name}
+              </h3>
+              <p className="text-sm text-slate-500">{CHART_TYPES[selectedChart].description}</p>
             </div>
             <Button
               variant="ghost"
