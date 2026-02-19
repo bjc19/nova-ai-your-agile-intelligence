@@ -424,7 +424,7 @@ Return JSON with: has_issue (bool), criticality (basse/moyenne/haute/critique), 
         await base44.asServiceRole.entities.AnalysisHistory.create({
           title: `Trello Analysis - ${trelloProject.board_name}`,
           source: 'trello',
-          jira_project_selection_id: projectSelectionId,
+          trello_project_selection_id: projectSelectionId,
           workspace_name: trelloProject.board_name,
           blockers_count: totalRecordsProcessed,
           risks_count: 0,
