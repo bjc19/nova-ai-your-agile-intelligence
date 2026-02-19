@@ -1,19 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Loader2, TrendingUp, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
-import { useDetectedRisks } from "@/components/hooks/useQueryCache";
 
-export default function AdminDetectedRisks({ workspaceId }) {
+export default function AdminDetectedRisks() {
+  const [patterns, setPatterns] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [showAllRisks, setShowAllRisks] = useState(false);
 
   const INITIAL_DISPLAY_COUNT = 3;
 
-  const { data: patterns = [], isLoading: loading, error } = useDetectedRisks(workspaceId);
+  useEffect(() => {
+    const fetchPatterns = async () => {
+      try {
+        setLoading(true);
+        const detectedPatterns = await base44.entities.PatternDetection.filter({
+          status: ["detected", "acknowledged", "in_progress"]
+        }, '-created_date');
+        
+        setPatterns(detectedPatterns || []);
+      } catch (err) {
+        console.error("Erreur chargement patterns:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPatterns();
+  }, []);
 
   const handleResolve = async (patternId) => {
     try {
@@ -21,9 +41,11 @@ export default function AdminDetectedRisks({ workspaceId }) {
         status: "resolved",
         resolved_date: new Date().toISOString()
       });
-      // React Query invalidate/refetch is automatic via queryClient
+      
+      setPatterns(prev => prev.filter(p => p.id !== patternId));
     } catch (err) {
       console.error("Erreur résolution pattern:", err);
+      setError(err.message);
     }
   };
 

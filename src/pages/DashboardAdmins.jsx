@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -18,6 +19,12 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import ContextualToolGenerator from "@/components/dashboard/ContextualToolGenerator";
+import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
+import TeamHealthSummary from "@/components/dashboard/TeamHealthSummary";
 
 import {
   Mic,
@@ -41,10 +48,26 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
 
-  const loadInitialData = async () => {
-    try {
+  // Fetch GDPR signals
+  useEffect(() => {
+    const fetchSignals = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+    fetchSignals();
+  }, []);
+
+  // Check authentication and role
+  useEffect(() => {
+    const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
       if (!authenticated) {
         navigate(createPageUrl("Home"));
@@ -52,6 +75,8 @@ export default function DashboardAdmins() {
       }
 
       const currentUser = await base44.auth.me();
+
+      // Role verification - only 'admin' can access
       if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
@@ -59,29 +84,23 @@ export default function DashboardAdmins() {
 
       setUser(currentUser);
 
-      // Load all data in parallel
-      const [activeSprints, teamConfigs, pendingAlerts, sevenDaysAgo, analysisHistory, gdprMarkers] = await Promise.all([
-        base44.entities.SprintContext.filter({ is_active: true }),
-        base44.entities.TeamConfiguration.list(),
-        base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
-        (async () => {
-          const date = new Date();
-          date.setDate(date.getDate() - 7);
-          return date;
-        })(),
-        base44.entities.AnalysisHistory.list('-created_date', 100),
-        base44.entities.GDPRMarkers.list('-created_date', 100)
-      ]);
-
-      if (activeSprints?.length > 0) {
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
         setSprintContext(activeSprints[0]);
       }
 
-      if (!teamConfigs?.length || !teamConfigs[0].onboarding_completed) {
+      // Check onboarding
+      const teamConfigs = await base44.entities.TeamConfiguration.list();
+      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
         setShowOnboarding(true);
       }
 
-      if (pendingAlerts?.length > 0) {
+      // Check multi-project alerts
+      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+        admin_response: "pending"
+      });
+      if (pendingAlerts.length > 0) {
         const latest = pendingAlerts[pendingAlerts.length - 1];
         setMultiProjectAlert({
           confidence: latest.detection_score,
@@ -90,23 +109,20 @@ export default function DashboardAdmins() {
         });
       }
 
-      const recentMarkers = gdprMarkers?.filter((m) => new Date(m.created_date) >= sevenDaysAgo) || [];
-      setGdprSignals(recentMarkers);
-      setAllAnalysisHistory(analysisHistory || []);
       setIsLoading(false);
-    } catch (error) {
-      console.error("Erreur chargement dashboard:", error);
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadInitialData();
+    };
+    checkAuth();
   }, [navigate]);
+
+  // Fetch analysis history
+  const { data: allAnalysisHistory = [] } = useQuery({
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    enabled: !isLoading
+  });
 
   // Filter analysis history
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    if (!analysis?.created_date) return false;
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
     const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
@@ -294,6 +310,13 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              {/* Blockers & Risks Table */}
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+              
+              {/* Predictive Insights */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -303,9 +326,31 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              <IntegrationStatus />
+              {/* Chart Suggestion Generator */}
+              <ChartSuggestionGenerator selectedWorkspaceId={selectedWorkspaceId} analysisHistory={analysisHistory} />
+              {/* Contextual Tool Generator */}
+              <ContextualToolGenerator analysisHistory={analysisHistory} />
             </div>
           </div>
+        }
+        
+        {/* Detected Risks & Team Health - Below main grid */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <AdminDetectedRisks />
+          </div>
+          <div className="lg:col-span-2">
+            <TeamHealthSummary />
+          </div>
+        </div>
+        }
+        
+        {/* Integration Status - At the end */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8">
+          <IntegrationStatus />
+        </div>
         }
 
         <motion.div
