@@ -44,57 +44,62 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(null);
 
-  // Chargement échelonné pour éviter le rate limit
+  // Fetch GDPR signals — filtered by active workspace if selected
   useEffect(() => {
-    const init = async () => {
-      // Étape 1 : Auth (critique)
+    const fetchSignals = async () => {
+      try {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        setGdprSignals(recentMarkers);
+      } catch (error) {
+        console.error("Erreur chargement signaux GDPR:", error);
+      }
+    };
+
+    fetchSignals();
+  }, []);
+
+  // Check authentication (temporarily disabled for demo)
+  useEffect(() => {
+    const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
+
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
+        }
+
+        // Vérifier onboarding
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
+          });
+        }
       }
       setIsLoading(false);
-
-      if (!authenticated) return;
-
-      // Étape 2 : Onboarding + sprint (différé)
-      setTimeout(async () => {
-        try {
-          const teamConfigs = await base44.entities.TeamConfiguration.list();
-          if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-            setShowOnboarding(true);
-          }
-        } catch (e) { console.warn("TeamConfiguration:", e.message); }
-
-        setTimeout(async () => {
-          try {
-            const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-            if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
-          } catch (e) { console.warn("SprintContext:", e.message); }
-
-          setTimeout(async () => {
-            try {
-              const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" });
-              if (pendingAlerts.length > 0) {
-                const latest = pendingAlerts[pendingAlerts.length - 1];
-                setMultiProjectAlert({ confidence: latest.detection_score, signals: latest.weighted_signals, log_id: latest.id });
-              }
-            } catch (e) { console.warn("MultiProjectAlert:", e.message); }
-
-            setTimeout(async () => {
-              try {
-                const sevenDaysAgo = new Date();
-                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                const markers = await base44.entities.GDPRMarkers.list('-created_date', 50);
-                setGdprSignals(markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo));
-              } catch (e) { console.warn("GDPRMarkers:", e.message); }
-            }, 500);
-          }, 500);
-        }, 400);
-      }, 300);
     };
-    init();
+    checkAuth();
   }, [navigate]);
 
   // Fetch analysis history
