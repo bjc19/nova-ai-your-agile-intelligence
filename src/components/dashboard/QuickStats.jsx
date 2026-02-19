@@ -274,33 +274,31 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
 
 
   // Helper to generate tooltip for technicalHealth
-  const getTechnicalHealthTooltip = () => {
-    const denominator = totalAllBlockers + totalAllRisks;
-    
-    if (language === 'fr') {
-      return {
-        title: "Indice de Santé Technique (IST)",
-        formula: `Résolus (${resolvedBlockers}) ÷ (Bloquants détectés (${totalAllBlockers}) + Risques (${totalAllRisks})) × 100 = ${technicalHealthIndex}%`,
-        interpretation: technicalHealthIndex >= 50
-          ? `✓ Excellent : ${technicalHealthIndex}% des problèmes détectés ont été résolus.`
-          : `⚠ À améliorer : Seulement ${technicalHealthIndex}% des problèmes détectés ont été résolus.`,
-        tips: technicalHealthIndex >= 50
-          ? "Continuez à résoudre les bloquants et risques détectés."
-          : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
-      };
-    } else {
-      return {
-        title: "Technical Health Index (IST)",
-        formula: `Resolved (${resolvedBlockers}) ÷ (Blockers (${totalAllBlockers}) + Risks (${totalAllRisks})) × 100 = ${technicalHealthIndex}%`,
-        interpretation: technicalHealthIndex >= 50
-          ? `✓ Excellent: ${technicalHealthIndex}% of detected problems have been resolved.`
-          : `⚠ Needs improvement: Only ${technicalHealthIndex}% of detected problems have been resolved.`,
-        tips: technicalHealthIndex >= 50
-          ? "Keep resolving detected blockers and risks."
-          : "Prioritize resolving blockers before adding new tasks.",
-      };
-    }
-  };
+   const getTechnicalHealthTooltip = () => {
+     if (language === 'fr') {
+       return {
+         title: "Indice de Santé Technique (IST)",
+         formula: `Résolus (${resolvedBlockers}) ÷ Total détecté (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
+         interpretation: technicalHealthIndex >= 50
+           ? `✓ Excellent : ${technicalHealthIndex}% des problèmes détectés ont été résolus.`
+           : `⚠ À améliorer : Seulement ${technicalHealthIndex}% des problèmes détectés ont été résolus.`,
+         tips: technicalHealthIndex >= 50
+           ? "Continuez à résoudre les bloquants et risques détectés."
+           : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
+       };
+     } else {
+       return {
+         title: "Technical Health Index (IST)",
+         formula: `Resolved (${resolvedBlockers}) ÷ Total detected (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
+         interpretation: technicalHealthIndex >= 50
+           ? `✓ Excellent: ${technicalHealthIndex}% of detected problems have been resolved.`
+           : `⚠ Needs improvement: Only ${technicalHealthIndex}% of detected problems have been resolved.`,
+         tips: technicalHealthIndex >= 50
+           ? "Keep resolving detected blockers and risks."
+           : "Prioritize resolving blockers before adding new tasks.",
+       };
+     }
+   };
 
   const paginatedStats = stats.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
   const totalPages = Math.ceil(stats.length / itemsPerPage);
