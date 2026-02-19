@@ -314,16 +314,29 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
                 <h4 className="font-semibold text-slate-900">{suggestion?.name}</h4>
                 <p className="text-xs text-slate-500 mt-1">{suggestion?.description}</p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSelectedChart(null);
-                  setChartData(null);
-                }}
-              >
-                Changer
-              </Button>
+              <div className="flex gap-2">
+                {selectedChart === 'business_value' && businessValueMetric && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowBusinessValueForm(true)}
+                    className="gap-2"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Modifier
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedChart(null);
+                    setChartData(null);
+                  }}
+                >
+                  Changer
+                </Button>
+              </div>
             </div>
 
             {loading ? (
