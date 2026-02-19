@@ -10,6 +10,7 @@ import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
+import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
@@ -306,12 +307,14 @@ export default function DashboardAdmins() {
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
 
-               <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
+              <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
 
-               <KeyRecommendations
-               latestAnalysis={latestAnalysis}
-               sourceUrl={latestAnalysis?.sourceUrl}
-               sourceName={latestAnalysis?.sourceName} />
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
+
+              <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
             </div>
 
