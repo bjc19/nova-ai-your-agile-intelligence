@@ -114,8 +114,9 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
      const maxDate = new Date(Math.max(...allSignals.map(d => d.getTime())));
      const minDate = new Date(maxDate);
      minDate.setDate(minDate.getDate() - 4);
+     minDate.setHours(0, 0, 0, 0);
 
-     // Filter signals within this 5-day window
+     // Filter signals within this 5-day window (same logic as BlockersRisksTrendTable)
      const last5DaysSignals = gdprSignals.filter(s => {
        const sDate = new Date(s.created_date);
        sDate.setHours(0, 0, 0, 0);
