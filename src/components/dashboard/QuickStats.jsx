@@ -70,13 +70,16 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
               300
             );
 
+            // MASK: Filter out markers without workspace links (keep only valid workspace-linked data)
+            const validMarkers = allMarkers.filter(m => m.jira_project_selection_id || m.trello_project_selection_id);
+
             // Filter by workspace if selected
-            let workspaceMarkers = allMarkers;
+            let workspaceMarkers = validMarkers;
             let workspaceResolved = resolvedPatterns;
 
             if (selectedWorkspaceId) {
               // DIRECT: Filter GDPRMarkers by jira_project_selection_id or trello_project_selection_id
-              workspaceMarkers = allMarkers.filter(m =>
+              workspaceMarkers = validMarkers.filter(m =>
                 m.jira_project_selection_id === selectedWorkspaceId || 
                 m.trello_project_selection_id === selectedWorkspaceId
               );
