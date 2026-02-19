@@ -293,9 +293,9 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
-            }
+             {(!selectedPeriod || analysisHistory.length > 0) &&
+             <QuickStats analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
+             }
           </motion.div>
         </div>
       </div>
@@ -362,14 +362,9 @@ export default function Dashboard() {
 
             }
             
-            {/* Blockers & Risks Trend Table - Filtered by workspace */}
-            <BlockersRisksTrendTable 
-             gdprSignals={gdprSignals} 
-             analysisHistory={analysisHistory} />
-
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-
+            
             {/* Key Recommendations */}
             <KeyRecommendations
               latestAnalysis={latestAnalysis}
