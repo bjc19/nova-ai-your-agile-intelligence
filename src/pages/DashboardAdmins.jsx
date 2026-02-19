@@ -13,8 +13,11 @@ import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChar
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
+import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
+import RealityMapCard from "@/components/nova/RealityMapCard";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -194,12 +197,10 @@ export default function DashboardAdmins() {
                       <Sparkles className="w-3 h-3 mr-1" />
                       {t('Your Agile Intelligence')}
                     </Badge>
-                    {sprintInfo && (
-                      <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {sprintInfo.name}
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="px-3 py-1 text-xs font-medium bg-indigo-50 border-indigo-200 text-indigo-700">
+                      <Calendar className="w-3 h-3 mr-1" />
+                      {sprintInfo.name}
+                    </Badge>
                   </div>
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
@@ -216,7 +217,7 @@ export default function DashboardAdmins() {
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
 
                 <TimePeriodSelector
-                  deliveryMode={sprintInfo?.deliveryMode}
+                  deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
@@ -278,6 +279,69 @@ export default function DashboardAdmins() {
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={sprintHealth}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
+
+            }
+
+              {analysisHistory.length > 0 &&
+            <MetricsRadarCard
+              metricsData={{
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
+              }}
+              historicalData={{
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
+              }}
+              integrationStatus={{
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
+              }}
+              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
+              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
+
+            }
+
+              {analysisHistory.length > 0 &&
+            <RealityMapCard
+              flowData={{
+                assignee_changes: [
+                { person: "Mary", count: 42 },
+                { person: "John", count: 12 }],
+
+                mention_patterns: [
+                { person: "Mary", type: "prioritization", count: 35 },
+                { person: "Dave", type: "unblocking", count: 19 }],
+
+                blocked_resolutions: [
+                { person: "Dave", count: 19 }],
+
+                data_days: 30
+              }}
+              flowMetrics={{
+                blocked_tickets_over_5d: 12,
+                avg_cycle_time: 8.2,
+                avg_wait_time_percent: 65,
+                reopened_tickets: 8,
+                total_tickets: 100,
+                data_days: 30
+              }}
+              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+
+            }
+              
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
