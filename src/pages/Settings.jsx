@@ -508,6 +508,38 @@ export default function Settings() {
     }
   };
 
+  const handleJiraSyncNow = async () => {
+    setSyncingJira(true);
+    try {
+      const result = await base44.functions.invoke('syncJiraBacklog', {});
+      if (result.data?.success) {
+        toast.success(`Sync Jira réussie : ${result.data.count || 0} projet(s) synchronisé(s)`);
+      } else {
+        toast.error(result.data?.message || 'Erreur lors de la synchronisation Jira');
+      }
+    } catch (error) {
+      toast.error('Erreur sync Jira : ' + error.message);
+    } finally {
+      setSyncingJira(false);
+    }
+  };
+
+  const handleTrelloSyncNow = async () => {
+    setSyncingTrello(true);
+    try {
+      const result = await base44.functions.invoke('triggerProjectAnalysis', {});
+      if (result.data?.success) {
+        toast.success('Sync Trello réussie');
+      } else {
+        toast.error(result.data?.message || 'Erreur lors de la synchronisation Trello');
+      }
+    } catch (error) {
+      toast.error('Erreur sync Trello : ' + error.message);
+    } finally {
+      setSyncingTrello(false);
+    }
+  };
+
   const checkJiraDebug = async () => {
     try {
       const result = await base44.functions.invoke('checkJiraStatus', {});
