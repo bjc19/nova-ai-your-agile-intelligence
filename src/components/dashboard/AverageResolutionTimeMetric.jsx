@@ -185,9 +185,10 @@ export default function AverageResolutionTimeMetric({ workspaceId }) {
       </Card>
 
       {/* Detail Modal */}
-      {selectedDetail && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
+      <AnimatePresence>
+        {selectedDetail && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedDetail(null)}>
+            <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
