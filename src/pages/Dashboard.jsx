@@ -29,8 +29,7 @@ import {
   Calendar,
   Clock,
   Loader2,
-  TrendingUp,
-  RefreshCw } from
+  TrendingUp } from
 "lucide-react";
 
 export default function Dashboard() {
@@ -45,62 +44,57 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [syncLoading, setSyncLoading] = useState(false);
 
-  // Fetch GDPR signals from last 7 days
+  // Chargement échelonné pour éviter le rate limit
   useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-
-    fetchSignals();
-  }, []);
-
-  // Check authentication (temporarily disabled for demo)
-  useEffect(() => {
-    const checkAuth = async () => {
+    const init = async () => {
+      // Étape 1 : Auth (critique)
       const authenticated = await base44.auth.isAuthenticated();
       if (authenticated) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
-
-        // Charger contexte sprint actif
-        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
-
-        // Vérifier onboarding
-        const teamConfigs = await base44.entities.TeamConfiguration.list();
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
-
-        // Vérifier alertes multi-projets en attente
-        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-          admin_response: "pending"
-        });
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
-          });
-        }
       }
       setIsLoading(false);
+
+      if (!authenticated) return;
+
+      // Étape 2 : Onboarding + sprint (différé)
+      setTimeout(async () => {
+        try {
+          const teamConfigs = await base44.entities.TeamConfiguration.list();
+          if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+            setShowOnboarding(true);
+          }
+        } catch (e) { console.warn("TeamConfiguration:", e.message); }
+
+        setTimeout(async () => {
+          try {
+            const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+            if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
+          } catch (e) { console.warn("SprintContext:", e.message); }
+
+          setTimeout(async () => {
+            try {
+              const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" });
+              if (pendingAlerts.length > 0) {
+                const latest = pendingAlerts[pendingAlerts.length - 1];
+                setMultiProjectAlert({ confidence: latest.detection_score, signals: latest.weighted_signals, log_id: latest.id });
+              }
+            } catch (e) { console.warn("MultiProjectAlert:", e.message); }
+
+            setTimeout(async () => {
+              try {
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                const markers = await base44.entities.GDPRMarkers.list('-created_date', 50);
+                setGdprSignals(markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo));
+              } catch (e) { console.warn("GDPRMarkers:", e.message); }
+            }, 500);
+          }, 500);
+        }, 400);
+      }, 300);
     };
-    checkAuth();
+    init();
   }, [navigate]);
 
   // Fetch analysis history
@@ -282,7 +276,7 @@ export default function Dashboard() {
 
               </div>
               
-              {/* Time Period Selector & Sync Button */}
+              {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
@@ -292,28 +286,6 @@ export default function Dashboard() {
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                     console.log("Period changed:", period);
                   }} />
-              
-              <Button
-                onClick={async () => {
-                  setSyncLoading(true);
-                  try {
-                    const response = await base44.functions.invoke('syncJiraBacklog', {});
-                    if (response.data.success) {
-                      sessionStorage.removeItem("selectedPeriod");
-                      setSelectedPeriod(null);
-                      window.location.reload();
-                    }
-                  } catch (error) {
-                    console.error('Sync error:', error);
-                  } finally {
-                    setSyncLoading(false);
-                  }
-                }}
-                disabled={syncLoading}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                <RefreshCw className={`w-4 h-4 mr-2 ${syncLoading ? 'animate-spin' : ''}`} />
-                {syncLoading ? 'Syncing...' : 'SYNC'}
-              </Button>
 
               </div>
             </div>
