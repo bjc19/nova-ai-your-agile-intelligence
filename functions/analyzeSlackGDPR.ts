@@ -247,7 +247,9 @@ Return JSON:
           slack_workspace_id: slackWorkspaceHash,
           confidence_score: analysisResult.confidence,
           detection_source: 'slack_hourly',
-          consent_given: true
+          consent_given: true,
+          jira_project_selection_id: null,
+          trello_project_selection_id: null
         };
 
         markersToCreate.push(marker);
