@@ -135,7 +135,14 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   };
 
   const renderChart = () => {
-    if (!chartData || !selectedChart) return null;
+    if (!selectedChart) return null;
+
+    // Pour Average Resolution Time, afficher le composant dédié
+    if (selectedChart === 'average_resolution_time') {
+      return <AverageResolutionTimeMetric workspaceId={selectedWorkspaceId} />;
+    }
+
+    if (!chartData) return null;
 
     const config = CHART_TYPES[selectedChart];
 
@@ -180,21 +187,6 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
               <Bar dataKey="cfr" fill="#f59e0b" name="Change Failure Rate" />
               <Line type="monotone" dataKey="ideal" stroke="#10b981" strokeDasharray="5 5" name="Idéal" />
             </ComposedChart>
-          </ResponsiveContainer>
-        );
-      case 'business_value':
-        return (
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="period" />
-              <YAxis label={{ value: '$ Value', angle: -90, position: 'insideLeft' }} />
-              <Tooltip formatter={(val) => `$${val.toLocaleString('fr-FR')}`} />
-              <Legend />
-              <Bar dataKey="delivered" fill="#10b981" name="Livré" />
-              <Bar dataKey="planned" fill="#e5e7eb" name="Planifié" />
-              <Bar dataKey="gap" fill="#ef4444" name="Écart" />
-            </BarChart>
           </ResponsiveContainer>
         );
       default:
