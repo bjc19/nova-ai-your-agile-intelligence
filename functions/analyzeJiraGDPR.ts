@@ -181,7 +181,9 @@ Return JSON:
                     criticite: analysisResult.criticality,
                     confidence_score: analysisResult.confidence,
                     detection_source: 'manual_trigger',
-                    consent_given: true
+                    consent_given: true,
+                    jira_project_selection_id: projectSelection.id,
+                    trello_project_selection_id: null
                   });
 
                   // Create PatternDetection records
