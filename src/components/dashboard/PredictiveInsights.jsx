@@ -15,19 +15,19 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 
-export default function PredictiveInsights({ workspaceId }) {
-  const { t } = useLanguage();
-  const [prediction, setPrediction] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function PredictiveInsights({ selectedWorkspaceId }) {
+   const { t } = useLanguage();
+   const [prediction, setPrediction] = useState(null);
+   const [isLoading, setIsLoading] = useState(true);
+   const [error, setError] = useState(null);
 
-  const loadPredictions = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await base44.functions.invoke('predictiveAnalysis', {
-        workspaceId: workspaceId || null
-      });
+   const loadPredictions = async () => {
+     setIsLoading(true);
+     setError(null);
+     try {
+       const response = await base44.functions.invoke('predictiveAnalysis', {
+         workspaceId: selectedWorkspaceId || null
+       });
       if (!response.data.success) {
         setError(response.data.error || 'Données insuffisantes');
         return;
@@ -43,7 +43,7 @@ export default function PredictiveInsights({ workspaceId }) {
 
   useEffect(() => {
     loadPredictions();
-  }, [workspaceId]);
+  }, [selectedWorkspaceId]);
 
   const getImpactColor = (impact) => {
     switch(impact) {
