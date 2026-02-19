@@ -47,16 +47,22 @@ export default function AdminDetectedRisks() {
 
   const handleResolve = async (patternId) => {
     try {
-      const updateData = {
-        status: "resolved",
-        resolved_date: new Date().toISOString()
-      };
+      const pattern = patterns.find(p => p.id === patternId);
+      if (!pattern) return;
 
-      const result = await base44.entities.PatternDetection.update(patternId, updateData);
+      // Call backend to create ResolvedItem record
+      await base44.functions.invoke('markItemResolved', {
+        itemId: patternId,
+        source: 'pattern_detection',
+        itemType: 'risk',
+        title: pattern.pattern_name,
+        urgency: pattern.severity,
+        analysisDate: pattern.created_date
+      });
       
-      if (result) {
-        setPatterns(prev => prev.filter(p => p.id !== patternId));
-      }
+      // Update UI locally
+      setPatterns(prev => prev.filter(p => p.id !== patternId));
+      setError(null);
     } catch (err) {
       console.error("Erreur résolution pattern:", err);
       setError(`Impossible de marquer comme résolu: ${err.message}`);
