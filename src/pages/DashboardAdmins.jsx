@@ -219,7 +219,7 @@ export default function DashboardAdmins() {
                   onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
 
                 <TimePeriodSelector
-                  deliveryMode={sprintInfo.deliveryMode}
+                  deliveryMode={sprintInfo?.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
