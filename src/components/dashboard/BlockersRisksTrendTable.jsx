@@ -170,6 +170,25 @@ export default function BlockersRisksTrendTable({ gdprSignals = [], analysisHist
                     </td>
                   </tr>
                 ))}
+                {/* Totals Row */}
+                <tr className="border-t-2 border-slate-300 bg-slate-100/80 font-semibold">
+                  <td className="py-3 px-4 text-slate-900">Totaux</td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-200">
+                      <span className="font-bold text-blue-900">{trendData.reduce((sum, day) => sum + day.blockers, 0)}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-200">
+                      <span className="font-bold text-amber-900">{trendData.reduce((sum, day) => sum + day.risks, 0)}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-200">
+                      <span className="font-bold text-slate-900">{trendData.reduce((sum, day) => sum + day.total, 0)}</span>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
