@@ -29,12 +29,12 @@ const CHART_TYPES = {
     color: "from-amber-500 to-amber-600",
     metric: "Vitesse ≠ instabilité"
   },
-  business_value: {
-    name: "Business Value",
-    icon: BarChart3,
-    description: "Valeur livrée vs investissement",
+  average_resolution_time: {
+    name: "Temps de Résolution",
+    icon: Clock,
+    description: "Temps moyen de résolution des anti-patterns",
     color: "from-green-500 to-green-600",
-    metric: "Justifier ROI agilité"
+    metric: "Amélioration continue"
   }
 };
 
