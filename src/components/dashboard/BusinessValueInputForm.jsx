@@ -16,48 +16,6 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [showChart, setShowChart] = useState(false);
-  const [metricsData, setMetricsData] = useState([]);
-  const [dataLoading, setDataLoading] = useState(true);
-
-  // Charger les données existantes
-  useEffect(() => {
-    const loadMetrics = async () => {
-      setDataLoading(true);
-      try {
-        const user = await base44.auth.me();
-        if (!user) {
-          setDataLoading(false);
-          return;
-        }
-
-        const metrics = await base44.entities.BusinessValueMetric.filter({
-          workspace_id: selectedWorkspaceId,
-          user_email: user.email
-        });
-
-        console.log("Métriques chargées:", metrics);
-
-        if (metrics && metrics.length > 0) {
-          setMetricsData(metrics);
-          setShowChart(true);
-        } else {
-          setShowChart(false);
-          setMetricsData([]);
-        }
-      } catch (err) {
-        console.error("Erreur lors du chargement des métriques:", err);
-        setShowChart(false);
-        setMetricsData([]);
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    if (selectedWorkspaceId) {
-      loadMetrics();
-    }
-  }, [selectedWorkspaceId]);
 
   const validatePeriod = () => {
     if (!startDate || !endDate) {
