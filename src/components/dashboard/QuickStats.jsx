@@ -255,13 +255,9 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
   const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
   
-  // Count ALL items (including resolved) for IST calculation
-  const allAnalysisBlockers = analysisHistory.flatMap((a) => 
-    (a.analysis_data?.blockers || []).filter((b) => b.urgency)
-  ).length;
-  const allAnalysisRisks = analysisHistory.flatMap((a) => 
-    (a.analysis_data?.risks || [])
-  ).length;
+  // Count ALL items (including resolved) for IST calculation - use direct counts
+  const allAnalysisBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
+  const allAnalysisRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0);
   
   const allSlackBlockers = gdprSignals
     .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
