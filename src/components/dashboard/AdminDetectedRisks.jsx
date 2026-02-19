@@ -178,6 +178,28 @@ export default function AdminDetectedRisks() {
               )}
             </motion.div>
           ))}
+
+          {!showAllRisks && patterns.length > INITIAL_DISPLAY_COUNT && (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={() => setShowAllRisks(true)}
+              className="w-full p-3 mt-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              Afficher tous les risques ({patterns.length - INITIAL_DISPLAY_COUNT} de plus)
+            </motion.button>
+          )}
+
+          {showAllRisks && patterns.length > INITIAL_DISPLAY_COUNT && (
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={() => setShowAllRisks(false)}
+              className="w-full p-3 mt-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Afficher moins
+            </motion.button>
+          )}
         </div>
       )}
     </Card>
