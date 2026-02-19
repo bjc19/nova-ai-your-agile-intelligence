@@ -293,9 +293,9 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-             {(!selectedPeriod || analysisHistory.length > 0) &&
-             <QuickStats analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
-             }
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
