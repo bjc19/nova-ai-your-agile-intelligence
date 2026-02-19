@@ -260,8 +260,6 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(CHART_TYPES).map(([key, type]) => {
               const Icon = type.icon;
-              const isBusinessValue = key === 'business_value';
-              const hasData = isBusinessValue ? businessValueMetricsHistory.length > 0 : true;
 
               return (
                 <motion.button
@@ -269,7 +267,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => generateChart(key)}
-                  disabled={loading || !hasData}
+                  disabled={loading}
                   className={`p-3 rounded-lg border-2 transition-all text-left ${
                     loading
                       ? 'opacity-50 cursor-not-allowed'
