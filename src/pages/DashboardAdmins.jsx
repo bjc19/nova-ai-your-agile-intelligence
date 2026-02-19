@@ -16,7 +16,8 @@ import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
-import RealityMapCard from "@/components/nova/RealityMapCard";
+import MetricsRadarCard from "@/components/nova/MetricsRadarCard";
+
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
@@ -305,33 +306,33 @@ export default function DashboardAdmins() {
             }
 
               {analysisHistory.length > 0 &&
-            <RealityMapCard
-              flowData={{
-                assignee_changes: [
-                { person: "Mary", count: 42 },
-                { person: "John", count: 12 }],
-
-                mention_patterns: [
-                { person: "Mary", type: "prioritization", count: 35 },
-                { person: "Dave", type: "unblocking", count: 19 }],
-
-                blocked_resolutions: [
-                { person: "Dave", count: 19 }],
-
-                data_days: 30
+            <MetricsRadarCard
+              metricsData={{
+                velocity: { current: 45, trend: "up", change: 20 },
+                flow_efficiency: { current: 28, target: 55 },
+                cycle_time: { current: 9, target: 4 },
+                throughput: { current: 6, variance: 0.3 },
+                deployment_frequency: { current: 1, target: 3 },
+                data_days: 14
               }}
-              flowMetrics={{
-                blocked_tickets_over_5d: 12,
-                avg_cycle_time: 8.2,
-                avg_wait_time_percent: 65,
-                reopened_tickets: 8,
-                total_tickets: 100,
-                data_days: 30
+              historicalData={{
+                sprints_count: 1,
+                data_days: 7,
+                is_audit_phase: false,
+                is_new_team: true
               }}
-              onDiscussSignals={() => console.log("Discuss systemic signals")} />
+              integrationStatus={{
+                jira_connected: true,
+                slack_connected: false,
+                dora_pipeline: false,
+                flow_metrics_available: true
+              }}
+              onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
+              onApplyLever={(lever) => console.log("Apply lever:", lever)} />
 
             }
-              
+
+
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
