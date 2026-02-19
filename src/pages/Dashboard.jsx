@@ -15,6 +15,7 @@ import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
@@ -24,10 +25,8 @@ import {
   ArrowRight,
   Zap,
   Calendar,
-  Clock,
-  Loader2,
-  TrendingUp } from
-"lucide-react";
+  Loader2
+} from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -38,29 +37,9 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals from last 7 days
-  useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-
-    fetchSignals();
-  }, []);
-
-  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -68,19 +47,16 @@ export default function Dashboard() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
 
-        // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
         if (activeSprints.length > 0) {
           setSprintContext(activeSprints[0]);
         }
 
-        // Vérifier onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Vérifier alertes multi-projets en attente
         const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
           admin_response: "pending"
         });
@@ -105,21 +81,23 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history by period and workspace
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const startDate = new Date(selectedPeriod.start);
-    const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
-    return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+    const matchesPeriod = selectedPeriod
+      ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))
+      : true;
+    const matchesWorkspace = selectedWorkspaceId
+      ? analysis.jira_project_selection_id === selectedWorkspaceId
+      : true;
+    return matchesPeriod && matchesWorkspace;
+  });
 
-  // Check for stored analysis from session and filter by period
+  // Check for stored analysis
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
       const parsedAnalysis = JSON.parse(stored);
-      // Add source info from sessionStorage if available
       const sourceInfo = sessionStorage.getItem("analysisSource");
       if (sourceInfo) {
         const { url, name } = JSON.parse(sourceInfo);
@@ -127,7 +105,6 @@ export default function Dashboard() {
         parsedAnalysis.sourceName = name;
       }
 
-      // Filter by selected period if one is set
       if (selectedPeriod && parsedAnalysis.created_date) {
         const analysisDate = new Date(parsedAnalysis.created_date);
         const startDate = new Date(selectedPeriod.start);
@@ -145,18 +122,8 @@ export default function Dashboard() {
     }
   }, [selectedPeriod]);
 
-  // Calculate sprint info from real data only
-  const calculateDaysRemaining = (endDate) => {
-    if (!endDate) return 0;
-    const end = new Date(endDate);
-    const now = new Date();
-    const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
-    return Math.max(0, diff);
-  };
-
   const sprintInfo = sprintContext ? {
     name: sprintContext.sprint_name,
-    daysRemaining: calculateDaysRemaining(sprintContext.end_date),
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : null;
@@ -165,31 +132,28 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>);
-
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      {/* Onboarding Modal */}
       <TeamConfigOnboarding
         isOpen={showOnboarding}
         onComplete={() => setShowOnboarding(false)} />
-
 
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent" />
         <div className="absolute top-10 left-1/4 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl" />
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl" />
-        
+
         <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}>
 
-            {/* Welcome Banner */}
             <div className="flex flex-col gap-6 mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -209,83 +173,49 @@ export default function Dashboard() {
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
                   <p className="text-slate-600 mt-2 text-lg">
-                  {sprintInfo?.deliveryMode === "kanban" ?
-                  "Voici votre vue d'ensemble et vos dernières analyses." :
-                  t('sprintOverview')}
+                    {sprintInfo?.deliveryMode === "kanban"
+                      ? "Voici votre vue d'ensemble et vos dernières analyses."
+                      : t('sprintOverview')}
                   </p>
                 </div>
-                
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               </div>
-              
-              {/* Time Period Selector */}
+
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector />
-              <TimePeriodSelector
+                <WorkspaceSelector
+                  activeWorkspaceId={selectedWorkspaceId}
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+                <TimePeriodSelector
                   deliveryMode={sprintInfo?.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
-                    console.log("Period changed:", period);
                   }} />
-
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
-            }
+            {(!selectedPeriod || analysisHistory.length > 0) && (
+              <QuickStats analysisHistory={analysisHistory} />
+            )}
           </motion.div>
         </div>
       </div>
 
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Multi-Project Alert */}
-        {multiProjectAlert &&
-        <div className="mb-6">
+        {multiProjectAlert && (
+          <div className="mb-6">
             <MultiProjectAlert
-            detectionData={multiProjectAlert}
-            onConfirm={() => {
-              setMultiProjectAlert(null);
-              window.location.reload();
-            }}
-            onDismiss={() => setMultiProjectAlert(null)} />
-
+              detectionData={multiProjectAlert}
+              onConfirm={() => {
+                setMultiProjectAlert(null);
+                window.location.reload();
+              }}
+              onDismiss={() => setMultiProjectAlert(null)} />
           </div>
-        }
+        )}
 
-        {/* Empty State for No Data in Period */}
-        {selectedPeriod && analysisHistory.length === 0 &&
-        <div className="text-center py-16">
+        {selectedPeriod && analysisHistory.length === 0 && (
+          <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
@@ -302,70 +232,59 @@ export default function Dashboard() {
               </Button>
             </Link>
           </div>
-        }
+        )}
 
-        {/* Show content only if there are analyses in the period */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
+        {(!selectedPeriod || analysisHistory.length > 0) && (
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-            {/* Sprint Performance Chart */}
-            <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <PredictiveInsights />
+              <KeyRecommendations
+                latestAnalysis={latestAnalysis}
+                sourceUrl={latestAnalysis?.sourceUrl}
+                sourceName={latestAnalysis?.sourceName}
+                selectedWorkspaceId={selectedWorkspaceId} />
+            </div>
 
+            <div className="space-y-6">
+              <RecentAnalyses analyses={analysisHistory} />
+              <IntegrationStatus />
+            </div>
           </div>
+        )}
 
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
-          </div>
-        </div>
-        }
-
-        {(user?.role === 'admin') &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8">
-
-    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <h3 className="text-xl font-semibold text-white mb-2">
-          </h3>
-          <p className="text-slate-400 max-w-lg">
-            {t('importDataDescription')}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to={createPageUrl("Settings")}>
-            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-              <Zap className="w-4 h-4 mr-2" />
-              {t('connectSlack')}
-            </Button>
-          </Link>
-          <Link to={createPageUrl("Analysis")}>
-            <Button className="bg-white text-slate-900 hover:bg-slate-100">
-              {t('startAnalysis')}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
+        {user?.role === 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mt-8">
+            <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div>
+                  <p className="text-slate-400 max-w-lg">
+                    {t('importDataDescription')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link to={createPageUrl("Settings")}>
+                    <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                      <Zap className="w-4 h-4 mr-2" />
+                      {t('connectSlack')}
+                    </Button>
+                  </Link>
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                      {t('startAnalysis')}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
-  </motion.div>
-        }
-      </div>
-    </div>);
-
+  );
 }
