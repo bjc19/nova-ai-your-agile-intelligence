@@ -19,11 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import ContextualToolGenerator from "@/components/dashboard/ContextualToolGenerator";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
-import TeamHealthSummary from "@/components/dashboard/TeamHealthSummary";
 
 import {
   Mic,
@@ -309,13 +304,6 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-              
-              {/* Blockers & Risks Table */}
-              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
-              
-              {/* Predictive Insights */}
-              <PredictiveInsights analysisHistory={analysisHistory} />
-              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -326,22 +314,8 @@ export default function DashboardAdmins() {
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
-              {/* Contextual Tool Generator */}
-              <ContextualToolGenerator analysisHistory={analysisHistory} />
             </div>
           </div>
-        }
-        
-        {/* Detected Risks & Team Health - Below main grid */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <AdminDetectedRisks />
-          </div>
-          <div className="lg:col-span-2">
-            <TeamHealthSummary />
-          </div>
-        </div>
         }
 
         <motion.div
@@ -357,6 +331,12 @@ export default function DashboardAdmins() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
+                <Link to={createPageUrl("Settings")}>
+                  
+
+
+
+                </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
                     {t('startAnalysis')}
