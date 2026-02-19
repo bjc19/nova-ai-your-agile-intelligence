@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
@@ -48,15 +47,19 @@ export default function AdminDetectedRisks() {
 
   const handleResolve = async (patternId) => {
     try {
-      await base44.entities.PatternDetection.update(patternId, {
+      const updateData = {
         status: "resolved",
         resolved_date: new Date().toISOString()
-      });
+      };
+
+      const result = await base44.entities.PatternDetection.update(patternId, updateData);
       
-      setPatterns(prev => prev.filter(p => p.id !== patternId));
+      if (result) {
+        setPatterns(prev => prev.filter(p => p.id !== patternId));
+      }
     } catch (err) {
       console.error("Erreur résolution pattern:", err);
-      setError(err.message);
+      setError(`Impossible de marquer comme résolu: ${err.message}`);
     }
   };
 
