@@ -314,6 +314,10 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <ChartSuggestionGenerator 
+                selectedWorkspaceId={selectedWorkspaceId} 
+                gdprSignals={gdprSignals}
+                analysisHistory={analysisHistory} />
               <IntegrationStatus />
             </div>
           </div>
