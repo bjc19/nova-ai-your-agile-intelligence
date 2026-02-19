@@ -43,7 +43,7 @@ export default function PredictiveInsights({ workspaceId }) {
 
   useEffect(() => {
     loadPredictions();
-  }, []);
+  }, [workspaceId]);
 
   const getImpactColor = (impact) => {
     switch(impact) {
