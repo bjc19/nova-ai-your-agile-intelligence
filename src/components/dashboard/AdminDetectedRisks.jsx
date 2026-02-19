@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
@@ -23,13 +24,11 @@ export default function AdminDetectedRisks() {
       try {
         setLoading(true);
         
-        // Fetch patterns
         const detectedPatterns = await base44.entities.PatternDetection.filter({
           status: ["detected", "acknowledged", "in_progress"]
         }, '-created_date');
         setPatterns(detectedPatterns || []);
         
-        // Fetch GDPR signals and analysis history for the table
         const signals = await base44.entities.GDPRMarkers.list('-created_date', 100);
         setGdprSignals(signals || []);
         
@@ -83,137 +82,145 @@ export default function AdminDetectedRisks() {
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center h-32">
-          <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-        </div>
-      </Card>
+      <div className="space-y-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+          </div>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertCircle className="w-5 h-5 text-orange-600" />
-          <h3 className="text-lg font-semibold text-slate-900">Risques Détectés</h3>
-          <Badge className="ml-auto">{patterns.length}</Badge>
+    <div className="space-y-6">
+      {/* Risques Détectés */}
+      <Card className="p-6">
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertCircle className="w-5 h-5 text-orange-600" />
+            <h3 className="text-lg font-semibold text-slate-900">Risques Détectés</h3>
+            <Badge className="ml-auto">{patterns.length}</Badge>
+          </div>
+          <p className="text-sm text-slate-500">Anti-patterns actifs et en cours de traitement</p>
         </div>
-        <p className="text-sm text-slate-500">Anti-patterns actifs et en cours de traitement</p>
-      </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
-      {patterns.length === 0 ? (
-        <div className="text-center py-8">
-          <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-2" />
-          <p className="text-slate-600">Aucun risque détecté</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {patterns.slice(0, showAllRisks ? patterns.length : INITIAL_DISPLAY_COUNT).map((pattern, index) => (
-            <motion.div
-              key={pattern.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
-            >
-              <button
-                onClick={() => setExpandedId(expandedId === pattern.id ? null : pattern.id)}
-                className="w-full p-4 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors"
+        {patterns.length === 0 ? (
+          <div className="text-center py-8">
+            <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-2" />
+            <p className="text-slate-600">Aucun risque détecté</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {patterns.slice(0, showAllRisks ? patterns.length : INITIAL_DISPLAY_COUNT).map((pattern, index) => (
+              <motion.div
+                key={pattern.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="border border-slate-200 rounded-lg hover:border-slate-300 transition-colors"
               >
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="text-slate-400">
-                    {getStatusIcon(pattern.status)}
-                  </div>
-                  <div className="text-left flex-1">
-                    <h4 className="font-medium text-slate-900 text-sm">{pattern.pattern_name}</h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge className={`${getSeverityColor(pattern.severity)} border text-xs`}>
-                        {pattern.severity}
-                      </Badge>
-                      <span className="text-xs text-slate-500">Score: {Math.round(pattern.confidence_score || 0)}%</span>
-                    </div>
-                  </div>
-                </div>
-                <ChevronDown 
-                  className={`w-4 h-4 text-slate-400 transition-transform ${expandedId === pattern.id ? 'rotate-180' : ''}`}
-                />
-              </button>
-              
-              {expandedId === pattern.id && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="border-t border-slate-200 bg-slate-50 p-4"
+                <button
+                  onClick={() => setExpandedId(expandedId === pattern.id ? null : pattern.id)}
+                  className="w-full p-4 flex items-center justify-between gap-4 hover:bg-slate-50 transition-colors"
                 >
-                  {pattern.context && (
-                    <div className="mb-4">
-                      <p className="text-xs font-medium text-slate-700 mb-1">Contexte</p>
-                      <p className="text-sm text-slate-600">{pattern.context}</p>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="text-slate-400">
+                      {getStatusIcon(pattern.status)}
                     </div>
-                  )}
-                  
-                  {pattern.recommended_actions && pattern.recommended_actions.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-xs font-medium text-slate-700 mb-2">Actions recommandées</p>
-                      <ul className="space-y-1">
-                        {pattern.recommended_actions.map((action, i) => (
-                          <li key={i} className="text-sm text-slate-600 flex gap-2">
-                            <span className="text-slate-400">•</span>
-                            <span>{action}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="text-left flex-1">
+                      <h4 className="font-medium text-slate-900 text-sm">{pattern.pattern_name}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className={`${getSeverityColor(pattern.severity)} border text-xs`}>
+                          {pattern.severity}
+                        </Badge>
+                        <span className="text-xs text-slate-500">Score: {Math.round(pattern.confidence_score || 0)}%</span>
+                      </div>
                     </div>
-                  )}
-                  
-                  {pattern.category && (
-                    <p className="text-xs text-slate-500 mb-3">Catégorie: {pattern.category}</p>
-                  )}
-                  
-                  <Button
-                    onClick={() => handleResolve(pattern.id)}
-                    size="sm"
-                    className="text-green-600 hover:bg-green-50 border border-green-200 bg-white"
-                    variant="outline"
+                  </div>
+                  <ChevronDown 
+                    className={`w-4 h-4 text-slate-400 transition-transform ${expandedId === pattern.id ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                
+                {expandedId === pattern.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="border-t border-slate-200 bg-slate-50 p-4"
                   >
-                    Marquer comme résolu
-                  </Button>
-                </motion.div>
-              )}
-            </motion.div>
-          ))}
+                    {pattern.context && (
+                      <div className="mb-4">
+                        <p className="text-xs font-medium text-slate-700 mb-1">Contexte</p>
+                        <p className="text-sm text-slate-600">{pattern.context}</p>
+                      </div>
+                    )}
+                    
+                    {pattern.recommended_actions && pattern.recommended_actions.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-xs font-medium text-slate-700 mb-2">Actions recommandées</p>
+                        <ul className="space-y-1">
+                          {pattern.recommended_actions.map((action, i) => (
+                            <li key={i} className="text-sm text-slate-600 flex gap-2">
+                              <span className="text-slate-400">•</span>
+                              <span>{action}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {pattern.category && (
+                      <p className="text-xs text-slate-500 mb-3">Catégorie: {pattern.category}</p>
+                    )}
+                    
+                    <Button
+                      onClick={() => handleResolve(pattern.id)}
+                      size="sm"
+                      className="text-green-600 hover:bg-green-50 border border-green-200 bg-white"
+                      variant="outline"
+                    >
+                      Marquer comme résolu
+                    </Button>
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
 
-          {!showAllRisks && patterns.length > INITIAL_DISPLAY_COUNT && (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              onClick={() => setShowAllRisks(true)}
-              className="w-full p-3 mt-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              Afficher tous les risques ({patterns.length - INITIAL_DISPLAY_COUNT} de plus)
-            </motion.button>
-          )}
+            {!showAllRisks && patterns.length > INITIAL_DISPLAY_COUNT && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => setShowAllRisks(true)}
+                className="w-full p-3 mt-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Afficher tous les risques ({patterns.length - INITIAL_DISPLAY_COUNT} de plus)
+              </motion.button>
+            )}
 
-          {showAllRisks && patterns.length > INITIAL_DISPLAY_COUNT && (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              onClick={() => setShowAllRisks(false)}
-              className="w-full p-3 mt-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-            >
-              Afficher moins
-            </motion.button>
-          )}
-        </div>
-      )}
-    </Card>
+            {showAllRisks && patterns.length > INITIAL_DISPLAY_COUNT && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => setShowAllRisks(false)}
+                className="w-full p-3 mt-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Afficher moins
+              </motion.button>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* Tableau Bloquants & Risques */}
+      <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+    </div>
   );
 }
