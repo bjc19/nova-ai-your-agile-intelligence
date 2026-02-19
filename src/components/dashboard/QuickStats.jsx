@@ -21,148 +21,42 @@ import {
 } from "@/components/ui/tooltip";
 import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
 
-export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard", selectedWorkspaceId = null }) {
+export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard", selectedWorkspaceId = null, gdprSignals: propGdprSignals = null }) {
    // CRITICAL: No rendering if no workspace selected OR workspace has zero data
    if (selectedWorkspaceId && analysisHistory.length === 0) {
      return null;
    }
    const { t, language } = useLanguage();
    const navigate = useNavigate();
-  const [gdprSignals, setGdprSignals] = useState([]);
-  const [teamsInsights, setTeamsInsights] = useState([]);
-  const [resolvedItems, setResolvedItems] = useState([]);
-  const [userRole, setUserRole] = useState('user');
-  const [currentPage, setCurrentPage] = useState(0);
-  const [translatedTooltips, setTranslatedTooltips] = useState({});
-  const [lastDayDate, setLastDayDate] = useState(null);
-  const itemsPerPage = 10;
+   const [gdprSignals, setGdprSignals] = useState(propGdprSignals || []);
+   const [teamsInsights, setTeamsInsights] = useState([]);
+   const [resolvedItems, setResolvedItems] = useState([]);
+   const [userRole, setUserRole] = useState('user');
+   const [currentPage, setCurrentPage] = useState(0);
+   const [translatedTooltips, setTranslatedTooltips] = useState({});
+   const [lastDayDate, setLastDayDate] = useState(null);
+   const itemsPerPage = 10;
 
-  // Fetch user role
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const user = await base44.auth.me();
-        setUserRole(user?.app_role || user?.role || 'user');
-      } catch (error) {
-        console.error('Error fetching user role:', error);
-        setUserRole('user');
-      }
-    };
-    fetchUserRole();
-  }, []);
-
-  useEffect(() => {
-     const fetchSignals = async () => {
-          try {
-            const cache = getCacheService();
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-            // Use cache with 5-minute TTL to prevent 429 errors
-            const allMarkers = await cache.get(
-              'gdpr-markers-list',
-              () => base44.entities.GDPRMarkers.list('-created_date', 10000),
-              300
-            );
-            // Fetch resolved patterns (same source as Details page "resolved" view)
-            const resolvedPatterns = await cache.get(
-              'pattern-detection-resolved',
-              () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 10000),
-              300
-            );
-
-            // MASK: Filter out markers without workspace links (keep only valid workspace-linked data)
-            const validMarkers = allMarkers.filter(m => m.jira_project_selection_id || m.trello_project_selection_id);
-
-            // Filter by workspace if selected
-            let workspaceMarkers = validMarkers;
-            let workspaceResolved = resolvedPatterns;
-
-            if (selectedWorkspaceId) {
-              // DIRECT: Filter GDPRMarkers by jira_project_selection_id or trello_project_selection_id
-              workspaceMarkers = validMarkers.filter(m =>
-                m.jira_project_selection_id === selectedWorkspaceId || 
-                m.trello_project_selection_id === selectedWorkspaceId
-              );
-
-              // Filter resolved patterns by workspace via analysis linkage
-              const jiraAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
-              const trelloAnalyses = await base44.entities.AnalysisHistory.filter({ trello_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
-              const workspaceAnalyses = [...jiraAnalyses, ...trelloAnalyses];
-              const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
-              workspaceResolved = resolvedPatterns.filter(p => workspaceAnalysisIds.has(p.analysis_id));
-            }
-
-         const slackMarkers = workspaceMarkers.filter(m => 
-           m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
-         );
-
-         const teamsMarkers = workspaceMarkers.filter(m => 
-           m.detection_source === 'teams_daily'
-         );
-
-         const jiraMarkers = workspaceMarkers.filter(m => 
-           m.detection_source === 'jira_backlog'
-         );
-
-         const selectedPeriod = sessionStorage.getItem("selectedPeriod");
-         let filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-         let filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-         let filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= sevenDaysAgo);
-         let filteredResolved = workspaceResolved;
-
-         if (selectedPeriod) {
-           const period = JSON.parse(selectedPeriod);
-           const startDate = new Date(period.start);
-           const endDate = new Date(period.end);
-           endDate.setHours(23, 59, 59, 999);
-
-           filteredSlack = slackMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
-           filteredTeams = teamsMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
-           filteredJira = jiraMarkers.filter(m => new Date(m.created_date) >= startDate && new Date(m.created_date) <= endDate);
-           filteredResolved = workspaceResolved.filter(r => {
-             const resolvedDate = new Date(r.resolved_date || r.created_date);
-             return resolvedDate >= startDate && resolvedDate <= endDate;
-           });
-         }
-
-         setGdprSignals([...filteredSlack, ...filteredJira]);
-         setTeamsInsights(filteredTeams);
-         // Store the count of resolved patterns (aligns with Details page "resolved" view)
-         setResolvedItems(filteredResolved.map(item => item.id));
+   // Fetch user role
+   useEffect(() => {
+     const fetchUserRole = async () => {
+       try {
+         const user = await base44.auth.me();
+         setUserRole(user?.app_role || user?.role || 'user');
        } catch (error) {
-         console.error("Erreur chargement signaux:", error);
+         console.error('Error fetching user role:', error);
+         setUserRole('user');
        }
      };
+     fetchUserRole();
+   }, []);
 
-     fetchSignals();
-
-     // Debounced focus handler to avoid rate limit (min 60s between focus refetches)
-     let lastFetch = Date.now();
-     const handleFocus = () => {
-       const now = Date.now();
-       if (now - lastFetch > 60000) { // 60 seconds minimum between fetches
-         lastFetch = now;
-         // Invalidate cache to force fresh fetch on focus
-         const cache = getCacheService();
-         cache.invalidate('gdpr-markers-list');
-         cache.invalidate('pattern-detection-resolved');
-         fetchSignals();
-       }
-     };
-     window.addEventListener('focus', handleFocus);
-
-     // Listen for resolved count changes in sessionStorage
-     const handleStorageChange = () => {
-       fetchSignals();
-     };
-     window.addEventListener('storage', handleStorageChange);
-
-     return () => {
-       window.removeEventListener('focus', handleFocus);
-       window.removeEventListener('storage', handleStorageChange);
-     };
-     }, [selectedWorkspaceId]);
+   // Update gdprSignals when propGdprSignals changes
+   useEffect(() => {
+     if (propGdprSignals && propGdprSignals.length > 0) {
+       setGdprSignals(propGdprSignals);
+     }
+   }, [propGdprSignals]);
 
   // Anonymize names in text
   const anonymizeNamesInText = (text) => {
