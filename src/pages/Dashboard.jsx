@@ -297,9 +297,13 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
-            }
+             {(!selectedPeriod || analysisHistory.length > 0) &&
+             <QuickStats 
+               analysisHistory={analysisHistory} 
+               currentPageName="Dashboard"
+               selectedWorkspaceId={selectedWorkspaceId}
+             />
+             }
           </motion.div>
         </div>
       </div>
