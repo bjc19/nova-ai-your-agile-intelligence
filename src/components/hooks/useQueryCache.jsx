@@ -30,9 +30,9 @@ export const useSprintHealth = (workspaceId) => {
       const sprints = await base44.entities.SprintHealth.filter({}, '-updated_date', 50);
       return sprints || [];
     },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-    refetchInterval: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: 'stale',
     enabled: !!workspaceId
   });
 };
