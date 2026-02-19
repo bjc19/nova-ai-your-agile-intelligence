@@ -71,30 +71,10 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const generateChart = async (chartType) => {
     if (!selectedWorkspaceId) return;
 
-    // Pour Business Value, afficher le formulaire si aucune donnée
-    if (chartType === 'business_value') {
-      if (businessValueMetricsHistory.length === 0) {
-        setShowBusinessValueForm(true);
-        setSelectedChart(chartType);
-        return;
-      }
-      // Si données existent, les afficher avec l'historique
-      setLoading(true);
+    // Pour Average Resolution Time, afficher le composant directement
+    if (chartType === 'average_resolution_time') {
       setSelectedChart(chartType);
-      try {
-        const chartDataForBusinessValue = businessValueMetricsHistory.map(metric => ({
-          period: `${metric.period_start_date}`,
-          delivered: metric.value_delivered,
-          planned: metric.value_planned,
-          gap: metric.value_planned - metric.value_delivered
-        })).reverse();
-        setChartData(chartDataForBusinessValue);
-        setSuggestion(CHART_TYPES[chartType]);
-      } catch (error) {
-        console.error("Erreur génération graphique Business Value historique:", error);
-      } finally {
-        setLoading(false);
-      }
+      setSuggestion(CHART_TYPES[chartType]);
       return;
     }
 
