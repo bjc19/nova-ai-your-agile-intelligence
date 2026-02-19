@@ -14,9 +14,9 @@ export const useDetectedRisks = (workspaceId) => {
       }, '-updated_date', 100);
       return patterns || [];
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes (was cacheTime)
-    refetchInterval: 10 * 60 * 1000, // Auto-refresh tous les 10 min
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes pour garder en mémoire
+    refetchOnMount: 'stale', // Refetch si stale au retour
     enabled: !!workspaceId
   });
 };
