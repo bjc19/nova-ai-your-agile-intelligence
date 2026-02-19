@@ -171,15 +171,6 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
           cfr: Math.min(30, dataByDay[day].blockers * 3),
           ideal: 8
         }));
-      case 'business_value':
-        if (businessValueMetric) {
-          return [{
-            period: `${businessValueMetric.period_start_date} à ${businessValueMetric.period_end_date}`,
-            delivered: businessValueMetric.value_delivered,
-            planned: businessValueMetric.value_planned
-          }];
-        }
-        return [];
       default:
         return [];
     }
