@@ -1,39 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Loader2, TrendingUp, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
+import { useDetectedRisks } from "@/components/hooks/useQueryCache";
 
-export default function AdminDetectedRisks() {
-  const [patterns, setPatterns] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function AdminDetectedRisks({ workspaceId }) {
   const [expandedId, setExpandedId] = useState(null);
   const [showAllRisks, setShowAllRisks] = useState(false);
 
   const INITIAL_DISPLAY_COUNT = 3;
 
-  useEffect(() => {
-    const fetchPatterns = async () => {
-      try {
-        setLoading(true);
-        const detectedPatterns = await base44.entities.PatternDetection.filter({
-          status: ["detected", "acknowledged", "in_progress"]
-        }, '-created_date');
-        
-        setPatterns(detectedPatterns || []);
-      } catch (err) {
-        console.error("Erreur chargement patterns:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchPatterns();
-  }, []);
+  const { data: patterns = [], isLoading: loading, error } = useDetectedRisks(workspaceId);
 
   const handleResolve = async (patternId) => {
     try {
