@@ -297,19 +297,16 @@ export default function DashboardAdmins() {
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {sprintHealth &&
-            <SprintHealthCard
+              <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
 
-            }
+              }
 
-
-              
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
-              
               <PredictiveInsights workspaceId={selectedWorkspaceId} />
-              
+
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
