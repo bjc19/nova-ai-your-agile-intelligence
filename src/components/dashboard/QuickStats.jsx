@@ -243,37 +243,22 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const totalBlockers = gdprBlockers + teamsBlockers + analysisDataBlockers;
   const totalRisks = gdprRisks + teamsRisks + analysisDataRisks;
   
-  // Count ALL items (including resolved) for IST calculation - use direct counts
-  const allAnalysisBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
-  const allAnalysisRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0);
-  
-  const allSlackBlockers = gdprSignals
-    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
-    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
+  // Count ALL items (including resolved) for IST calculation
+  const allGdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
+  const allGdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
+
+  const allTeamsBlockers = teamsInsights.filter(i => i.criticite === 'critique' || i.criticite === 'haute').length;
+  const allTeamsRisks = teamsInsights.filter(i => i.criticite === 'moyenne' || i.criticite === 'basse').length;
+
+  const allAnalysisDataBlockers = analysisHistory
+    .flatMap(a => (a.analysis_data?.blockers || []).filter(b => b.urgency))
     .length;
-  const allSlackRisks = gdprSignals
-    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
-    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
+  const allAnalysisDataRisks = analysisHistory
+    .flatMap(a => (a.analysis_data?.risks || []))
     .length;
-  
-  const allJiraBlockers = gdprSignals
-    .filter(s => s.detection_source === 'jira_backlog')
-    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
-    .length;
-  const allJiraRisks = gdprSignals
-    .filter(s => s.detection_source === 'jira_backlog')
-    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
-    .length;
-  
-  const allTeamsBlockers = teamsInsights
-    .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
-    .length;
-  const allTeamsRisks = teamsInsights
-    .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
-    .length;
-  
-  const totalAllBlockers = (allAnalysisBlockers || 0) + allSlackBlockers + allJiraBlockers + allTeamsBlockers;
-  const totalAllRisks = (allAnalysisRisks || 0) + allSlackRisks + allJiraRisks + allTeamsRisks;
+
+  const totalAllBlockers = allGdprBlockers + allTeamsBlockers + allAnalysisDataBlockers;
+  const totalAllRisks = allGdprRisks + allTeamsRisks + allAnalysisDataRisks;
   
   const resolvedBlockers = resolvedItems.length;
   
