@@ -95,24 +95,25 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
 
     // Pour Business Value, afficher le formulaire si aucune donnée
     if (chartType === 'business_value') {
-      if (!businessValueMetric) {
+      if (businessValueMetricsHistory.length === 0) {
         setShowBusinessValueForm(true);
         setSelectedChart(chartType);
         return;
       }
-      // Si données existent, les utiliser directement
+      // Si données existent, les afficher avec l'historique
       setLoading(true);
       setSelectedChart(chartType);
       try {
-        const chartDataForBusinessValue = [{
-          period: `${businessValueMetric.period_start_date} à ${businessValueMetric.period_end_date}`,
-          delivered: businessValueMetric.value_delivered,
-          planned: businessValueMetric.value_planned
-        }];
+        const chartDataForBusinessValue = businessValueMetricsHistory.map(metric => ({
+          period: `${metric.period_start_date}`,
+          delivered: metric.value_delivered,
+          planned: metric.value_planned,
+          gap: metric.value_planned - metric.value_delivered
+        })).reverse();
         setChartData(chartDataForBusinessValue);
         setSuggestion(CHART_TYPES[chartType]);
       } catch (error) {
-        console.error("Erreur génération graphique Business Value:", error);
+        console.error("Erreur génération graphique Business Value historique:", error);
       } finally {
         setLoading(false);
       }
