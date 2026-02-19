@@ -59,6 +59,8 @@ export default function Settings() {
    const [jiraDebugInfo, setJiraDebugInfo] = useState(null);
    const [planLimitations, setPlanLimitations] = useState(null);
    const [loadingLimitations, setLoadingLimitations] = useState(true);
+   const [syncingJira, setSyncingJira] = useState(false);
+   const [syncingTrello, setSyncingTrello] = useState(false);
 
   const loadSlackConnection = async () => {
     try {
