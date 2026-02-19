@@ -200,38 +200,32 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // SAME LOGIC AS SprintHealthCard: critique/haute → blockers, moyenne/basse → risks
-  // Count UNRESOLVED GDPR markers (Slack, Jira, Teams)
-  const gdprBlockers = gdprSignals
-    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
-    .filter(s => !isItemResolved(`gdpr-blocker-${s.id}`))
-    .length;
-  const gdprRisks = gdprSignals
-    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
-    .filter(s => !isItemResolved(`gdpr-risk-${s.id}`))
-    .length;
+  // SAME LOGIC AS BlockersRisksTrendTable: count by criticite (no "resolved" filter here - show ALL items)
+   // Count ALL GDPR markers by criticite (Slack, Jira, Teams)
+   const gdprBlockers = gdprSignals
+     .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
+     .length;
+   const gdprRisks = gdprSignals
+     .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
+     .length;
 
-  const teamsBlockers = teamsInsights
-    .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
-    .filter(i => !isItemResolved(`teams-blocker-${i.id}`))
-    .length;
-  const teamsRisks = teamsInsights
-    .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
-    .filter(i => !isItemResolved(`teams-risk-${i.id}`))
-    .length;
+   const teamsBlockers = teamsInsights
+     .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
+     .length;
+   const teamsRisks = teamsInsights
+     .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
+     .length;
 
-  // Add analysis_data.blockers/risks when available (for complete picture)
-  const analysisDataBlockers = analysisHistory
-    .flatMap(a => (a.analysis_data?.blockers || []).filter(b => b.urgency))
-    .filter((_, idx) => !isItemResolved(`analysis-data-blocker-${idx}`))
-    .length;
-  const analysisDataRisks = analysisHistory
-    .flatMap(a => (a.analysis_data?.risks || []))
-    .filter((_, idx) => !isItemResolved(`analysis-data-risk-${idx}`))
-    .length;
+   // Add analysis_data.blockers/risks (treat analysis blockers as "haute", risks as "moyenne")
+   const analysisDataBlockers = analysisHistory
+     .flatMap(a => (a.analysis_data?.blockers || []).filter(b => b.urgency))
+     .length;
+   const analysisDataRisks = analysisHistory
+     .flatMap(a => (a.analysis_data?.risks || []))
+     .length;
 
-  const totalBlockers = gdprBlockers + teamsBlockers + analysisDataBlockers;
-  const totalRisks = gdprRisks + teamsRisks + analysisDataRisks;
+   const totalBlockers = gdprBlockers + teamsBlockers + analysisDataBlockers;
+   const totalRisks = gdprRisks + teamsRisks + analysisDataRisks;
   
   // Count ALL items (including resolved) for IST calculation
   const allGdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
