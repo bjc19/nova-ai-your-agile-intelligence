@@ -210,39 +210,17 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // Count UNRESOLVED items (for display purposes) - use blockers_count and risks_count directly
-  const analysisBlockers = analysisHistory
-    .filter(a => a.blockers_count && !isItemResolved(`analysis-blocker-${a.id}`))
-    .reduce((sum, a) => sum + (a.blockers_count || 0), 0);
-  const analysisRisks = analysisHistory
-    .filter(a => a.risks_count && !isItemResolved(`analysis-risk-${a.id}`))
-    .reduce((sum, a) => sum + (a.risks_count || 0), 0);
-
-  // Count GDPR markers (Slack): critique/haute → blockers, moyenne → risks - EXCLUDING resolved
-  const slackBlockers = gdprSignals
-    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
+  // SAME LOGIC AS SprintHealthCard: critique/haute → blockers, moyenne/basse → risks
+  // Count UNRESOLVED GDPR markers (Slack, Jira, Teams)
+  const gdprBlockers = gdprSignals
     .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
     .filter(s => !isItemResolved(`gdpr-blocker-${s.id}`))
     .length;
-  const slackRisks = gdprSignals
-    .filter(s => s.detection_source === 'slack_hourly' || s.detection_source === 'slack_daily')
+  const gdprRisks = gdprSignals
     .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
     .filter(s => !isItemResolved(`gdpr-risk-${s.id}`))
     .length;
 
-  // Count Jira markers: critique/haute → blockers, moyenne/basse → risks - EXCLUDING resolved
-  const jiraBlockers = gdprSignals
-    .filter(s => s.detection_source === 'jira_backlog')
-    .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
-    .filter(s => !isItemResolved(`jira-blocker-${s.id}`))
-    .length;
-  const jiraRisks = gdprSignals
-    .filter(s => s.detection_source === 'jira_backlog')
-    .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
-    .filter(s => !isItemResolved(`jira-risk-${s.id}`))
-    .length;
-
-  // Count Teams markers: critique/haute → blockers, moyenne/basse → risks - EXCLUDING resolved
   const teamsBlockers = teamsInsights
     .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
     .filter(i => !isItemResolved(`teams-blocker-${i.id}`))
@@ -252,8 +230,18 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
     .filter(i => !isItemResolved(`teams-risk-${i.id}`))
     .length;
 
-  const totalBlockers = (analysisBlockers || 0) + slackBlockers + jiraBlockers + teamsBlockers;
-  const totalRisks = (analysisRisks || 0) + slackRisks + jiraRisks + teamsRisks;
+  // Add analysis_data.blockers/risks when available (for complete picture)
+  const analysisDataBlockers = analysisHistory
+    .flatMap(a => (a.analysis_data?.blockers || []).filter(b => b.urgency))
+    .filter((_, idx) => !isItemResolved(`analysis-data-blocker-${idx}`))
+    .length;
+  const analysisDataRisks = analysisHistory
+    .flatMap(a => (a.analysis_data?.risks || []))
+    .filter((_, idx) => !isItemResolved(`analysis-data-risk-${idx}`))
+    .length;
+
+  const totalBlockers = gdprBlockers + teamsBlockers + analysisDataBlockers;
+  const totalRisks = gdprRisks + teamsRisks + analysisDataRisks;
   
   // Count ALL items (including resolved) for IST calculation - use direct counts
   const allAnalysisBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
