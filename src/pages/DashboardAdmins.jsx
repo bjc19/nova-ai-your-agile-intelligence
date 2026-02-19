@@ -156,24 +156,6 @@ export default function DashboardAdmins() {
     daysRemaining: Math.max(0, Math.ceil((new Date(sprintContext.end_date) - new Date()) / (1000 * 60 * 60 * 24))),
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
-  } : {
-    name: "Sprint en cours",
-    daysRemaining: 4,
-    deliveryMode: "scrum",
-    throughputPerWeek: null
-  };
-
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 5,
-    historical_sprints_count: 4,
-    drift_acknowledged: false,
-    problematic_tickets: [],
-    gdprSignals: gdprSignals
   } : null;
 
   if (isLoading) {
