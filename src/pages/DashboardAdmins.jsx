@@ -45,56 +45,55 @@ export default function DashboardAdmins() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Check authentication, role, puis charger toutes les données en une seule fois
+  // Chargement unique et séquentiel pour éviter le rate limit
   useEffect(() => {
-    const checkAuth = async () => {
+    const init = async () => {
+      // Étape 1 : Auth (critique)
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) {
-        navigate(createPageUrl("Home"));
-        return;
-      }
+      if (!authenticated) { navigate(createPageUrl("Home")); return; }
 
       const currentUser = await base44.auth.me();
-
-      if (currentUser?.role !== 'admin') {
-        navigate(createPageUrl("Home"));
-        return;
-      }
-
+      if (currentUser?.role !== 'admin') { navigate(createPageUrl("Home")); return; }
       setUser(currentUser);
 
-      // Charger toutes les données en parallèle (après avoir confirmé le rôle)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const [activeSprints, teamConfigs, pendingAlerts, markers] = await Promise.all([
-        base44.entities.SprintContext.filter({ is_active: true }),
-        base44.entities.TeamConfiguration.list(),
-        base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
-        base44.entities.GDPRMarkers.list('-created_date', 100)
-      ]);
-
-      if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
-
-      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-        setShowOnboarding(true);
-      }
-
-      if (pendingAlerts.length > 0) {
-        const latest = pendingAlerts[pendingAlerts.length - 1];
-        setMultiProjectAlert({
-          confidence: latest.detection_score,
-          signals: latest.weighted_signals,
-          log_id: latest.id
-        });
-      }
-
-      const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-      setGdprSignals(recentMarkers);
+      // Étape 2 : Onboarding (critique pour l'affichage)
+      try {
+        const teamConfigs = await base44.entities.TeamConfiguration.list();
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+          setShowOnboarding(true);
+        }
+      } catch (e) { console.warn("TeamConfiguration:", e.message); }
 
       setIsLoading(false);
+
+      // Étape 3 : Données secondaires avec délai pour éviter le rate limit
+      setTimeout(async () => {
+        try {
+          const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+          if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
+        } catch (e) { console.warn("SprintContext:", e.message); }
+
+        setTimeout(async () => {
+          try {
+            const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" });
+            if (pendingAlerts.length > 0) {
+              const latest = pendingAlerts[pendingAlerts.length - 1];
+              setMultiProjectAlert({ confidence: latest.detection_score, signals: latest.weighted_signals, log_id: latest.id });
+            }
+          } catch (e) { console.warn("MultiProjectAlert:", e.message); }
+
+          setTimeout(async () => {
+            try {
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              const markers = await base44.entities.GDPRMarkers.list('-created_date', 50);
+              setGdprSignals(markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo));
+            } catch (e) { console.warn("GDPRMarkers:", e.message); }
+          }, 500);
+        }, 500);
+      }, 300);
     };
-    checkAuth();
+    init();
   }, [navigate]);
 
   // Fetch analysis history
