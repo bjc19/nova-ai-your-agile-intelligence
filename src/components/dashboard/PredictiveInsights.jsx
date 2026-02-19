@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 
-export default function PredictiveInsights() {
+export default function PredictiveInsights({ workspaceId }) {
   const { t } = useLanguage();
   const [prediction, setPrediction] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +25,13 @@ export default function PredictiveInsights() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await base44.functions.invoke('predictiveAnalysis', {});
+      const response = await base44.functions.invoke('predictiveAnalysis', {
+        workspaceId: workspaceId || null
+      });
+      if (!response.data.success) {
+        setError(response.data.error || 'Données insuffisantes');
+        return;
+      }
       setPrediction(response.data.prediction);
     } catch (err) {
       console.error('Error loading predictions:', err);
