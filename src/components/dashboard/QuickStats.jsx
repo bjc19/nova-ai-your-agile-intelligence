@@ -201,19 +201,27 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // SYNC WITH BlockersRisksTrendTable: Show TOTALS (all signals + analysis, like "Totaux" row in table)
+  // SYNC WITH BlockersRisksTrendTable: Show TOTALS over last 5 days (same as "Totaux" row in table)
    const getTotalsData = () => {
-     if (gdprSignals.length === 0 && analysisHistory.length === 0) {
+     // Get data from LAST 5 DAYS ONLY (like BlockersRisksTrendTable)
+     const fiveDaysAgo = new Date();
+     fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 4); // 5 days = today - 4 days
+     fiveDaysAgo.setHours(0, 0, 0, 0);
+
+     const last5DaysSignals = gdprSignals.filter(s => new Date(s.created_date) >= fiveDaysAgo);
+     const last5DaysAnalysis = analysisHistory.filter(a => new Date(a.created_date) >= fiveDaysAgo);
+
+     if (last5DaysSignals.length === 0 && last5DaysAnalysis.length === 0) {
        return { blockers: 0, risks: 0 };
      }
 
-     // Count ALL GDPR signals by criticite
-     const gdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-     const gdprRisks = gdprSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
+     // Count GDPR signals by criticite (last 5 days)
+     const gdprBlockers = last5DaysSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
+     const gdprRisks = last5DaysSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
 
-     // Count ALL analysis blockers/risks
-     const analysisBlockers = analysisHistory.flatMap(a => (a.analysis_data?.blockers || [])).filter(b => b.urgency).length;
-     const analysisRisks = analysisHistory.flatMap(a => (a.analysis_data?.risks || [])).length;
+     // Count analysis blockers/risks (last 5 days)
+     const analysisBlockers = last5DaysAnalysis.flatMap(a => (a.analysis_data?.blockers || [])).filter(b => b.urgency).length;
+     const analysisRisks = last5DaysAnalysis.flatMap(a => (a.analysis_data?.risks || [])).length;
 
      return {
        blockers: gdprBlockers + analysisBlockers,
