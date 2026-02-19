@@ -10,11 +10,9 @@ import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
@@ -118,12 +116,19 @@ export default function DashboardAdmins() {
   });
 
   // Filter analysis history
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
-    return matchesPeriod && matchesWorkspace;
-  });
+   const analysisHistory = allAnalysisHistory.filter((analysis) => {
+     const analysisDate = new Date(analysis.created_date);
+     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+     const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId || analysis.trello_project_selection_id === selectedWorkspaceId : true;
+     return matchesPeriod && matchesWorkspace;
+   });
+
+   // Filter GDPR signals by workspace and period
+   const filteredGdprSignals = gdprSignals.filter((signal) => {
+     const matchesPeriod = selectedPeriod ? new Date(signal.created_date) >= new Date(selectedPeriod.start) && new Date(signal.created_date) <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+     const matchesWorkspace = selectedWorkspaceId ? signal.jira_project_selection_id === selectedWorkspaceId || signal.trello_project_selection_id === selectedWorkspaceId : true;
+     return matchesPeriod && matchesWorkspace;
+   });
 
   // Check for stored analysis
   useEffect(() => {
@@ -306,11 +311,6 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-
-              <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
-
-              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
-
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
