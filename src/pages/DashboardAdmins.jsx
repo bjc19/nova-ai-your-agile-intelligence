@@ -19,9 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import AnalyticsInsightsBlock from "@/components/dashboard/AnalyticsInsightsBlock";
 
 import {
   Mic,
@@ -307,17 +304,10 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-              
-              <BlockersRisksTrendTable analysisHistory={analysisHistory} gdprSignals={gdprSignals} selectedWorkspaceId={selectedWorkspaceId} />
-              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
-              
-              <PredictiveInsights analysisHistory={analysisHistory} gdprSignals={gdprSignals} selectedWorkspaceId={selectedWorkspaceId} />
-              
-              <AnalyticsInsightsBlock selectedWorkspaceId={selectedWorkspaceId} gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
 
             </div>
 
