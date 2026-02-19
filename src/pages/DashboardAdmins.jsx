@@ -357,12 +357,6 @@ export default function DashboardAdmins() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  
-
-
-
-                </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
                     {t('startAnalysis')}
