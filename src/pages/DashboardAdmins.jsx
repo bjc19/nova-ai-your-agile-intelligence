@@ -303,10 +303,6 @@ export default function DashboardAdmins() {
               onReviewSprint={() => console.log("Review sprint")} />
 
             }
-
-
-              
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
               
               <PredictiveInsights workspaceId={selectedWorkspaceId} />
               
@@ -319,6 +315,7 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
               <IntegrationStatus />
             </div>
           </div>
