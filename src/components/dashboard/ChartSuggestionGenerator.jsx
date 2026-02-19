@@ -95,6 +95,14 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const generateChart = async (chartType) => {
     if (!selectedWorkspaceId) return;
 
+    // Pour Business Value, afficher le formulaire si aucune donnée
+    if (chartType === 'business_value') {
+      if (!businessValueMetric) {
+        setShowBusinessValueForm(true);
+        return;
+      }
+    }
+
     setLoading(true);
     setSelectedChart(chartType);
 
