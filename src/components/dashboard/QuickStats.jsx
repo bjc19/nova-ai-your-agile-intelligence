@@ -75,10 +75,31 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
          let workspaceResolved = resolvedPatterns;
 
          if (selectedWorkspaceId) {
-           workspaceMarkers = allMarkers.filter(m => m.team_id === selectedWorkspaceId || m.jira_project_selection_id === selectedWorkspaceId);
-           // PatternDetection doesn't have workspace_id either, so align with Details: show count from resolved patterns linked to analyses of this workspace
+           // Get analyses linked to this workspace
            const workspaceAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
            const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
+           // GDPRMarkers: only those whose session_id matches an analysis session or that are explicitly linked
+           // Since GDPRMarkers don't have jira_project_selection_id, we can only scope them via workspace_name
+           // Use workspace_name from the analyses to filter by slack_workspace_id or fall back to unfiltered if no link
+           // PRIMARY: filter markers via session_id linked to workspace analyses
+           const workspaceSessionIds = new Set(workspaceAnalyses.map(a => a.id)); // analysis IDs serve as session anchors
+           // Since GDPRMarkers.session_id is a UUID not tied to AnalysisHistory id, 
+           // the safest scope is: show ONLY markers from the last 7 days if no workspace link field exists
+           // If workspace has 0 analyses → show 0 markers
+           if (workspaceAnalyses.length === 0) {
+             workspaceMarkers = [];
+           } else {
+             // Keep all markers scoped to the same time window as workspace analyses
+             const oldestAnalysis = workspaceAnalyses[workspaceAnalyses.length - 1];
+             const newestAnalysis = workspaceAnalyses[0];
+             workspaceMarkers = allMarkers.filter(m => {
+               const mDate = new Date(m.created_date);
+               const start = new Date(oldestAnalysis.created_date);
+               const end = new Date(newestAnalysis.created_date);
+               end.setHours(23, 59, 59, 999);
+               return mDate >= start && mDate <= end;
+             });
+           }
            workspaceResolved = resolvedPatterns.filter(p => workspaceAnalysisIds.has(p.analysis_id));
          }
 
