@@ -222,99 +222,101 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
             )}
 
             <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Livrée ($)</label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={valueDelivered}
-                  onChange={(e) => setValueDelivered(e.target.value)}
-                  className="pl-8"
-                  disabled={loading}
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Planifiée ($)</label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={valuePlanned}
-                  onChange={(e) => setValuePlanned(e.target.value)}
-                  className="pl-8"
-                  disabled={loading}
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t pt-4">
-            <label className="block text-sm font-medium text-slate-700 mb-3">Période d'analyse (minimum 1 mois)</label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">Date de début</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="pl-8"
-                    disabled={loading}
-                  />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Livrée ($)</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={valueDelivered}
+                      onChange={(e) => setValueDelivered(e.target.value)}
+                      className="pl-8"
+                      disabled={loading}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Valeur Planifiée ($)</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={valuePlanned}
+                      onChange={(e) => setValuePlanned(e.target.value)}
+                      className="pl-8"
+                      disabled={loading}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">Date de fin</label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="pl-8"
-                    disabled={loading}
-                  />
+
+              <div className="border-t pt-4">
+                <label className="block text-sm font-medium text-slate-700 mb-3">Période d'analyse (minimum 1 mois)</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Date de début</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                      <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="pl-8"
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-slate-500 mb-1">Date de fin</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                      <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="pl-8"
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Soumettre
-            </Button>
-            <Button
-              onClick={onCancel}
-              variant="outline"
-              disabled={loading}
-            >
-              Annuler
-            </Button>
-            <Button
-              onClick={() => setShowResetDialog(true)}
-              variant="ghost"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              disabled={loading}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Soumettre
+                </Button>
+                <Button
+                  onClick={onCancel}
+                  variant="outline"
+                  disabled={loading}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={() => setShowResetDialog(true)}
+                  variant="ghost"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  disabled={loading}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
 
         <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
           <AlertDialogContent>
