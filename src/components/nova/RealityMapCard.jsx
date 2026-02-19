@@ -33,7 +33,7 @@ import {
   calculateFrictionIndex,
 } from "./OrganizationalRealityEngine";
 
-export default function RealityMapCard({ flowData, flowMetrics, onDiscussSignals }) {
+export default function RealityMapCard({ analysisHistory, onDiscussSignals }) {
   const [expandedWaste, setExpandedWaste] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
