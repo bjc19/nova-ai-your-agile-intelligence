@@ -527,12 +527,26 @@ export default function Settings() {
   const handleTrelloSyncNow = async () => {
     setSyncingTrello(true);
     try {
-      const result = await base44.functions.invoke('triggerProjectAnalysis', {});
-      if (result.data?.success) {
-        toast.success('Sync Trello réussie');
-      } else {
-        toast.error(result.data?.message || 'Erreur lors de la synchronisation Trello');
+      const user = await base44.auth.me();
+      const trelloSelections = await base44.entities.TrelloProjectSelection.filter({
+        user_email: user.email,
+        is_active: true
+      });
+
+      if (!trelloSelections || trelloSelections.length === 0) {
+        toast.error('Aucun projet Trello sélectionné. Veuillez sélectionner un projet d\'abord.');
+        return;
       }
+
+      let successCount = 0;
+      for (const selection of trelloSelections) {
+        const result = await base44.functions.invoke('triggerProjectAnalysis', {
+          projectSelectionId: selection.id
+        });
+        if (result.data?.success) successCount++;
+      }
+
+      toast.success(`Sync Trello réussie : ${successCount} tableau(x) synchronisé(s)`);
     } catch (error) {
       toast.error('Erreur sync Trello : ' + error.message);
     } finally {
