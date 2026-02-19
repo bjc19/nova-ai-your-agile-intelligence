@@ -155,11 +155,14 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
           ideal: 8
         }));
       case 'business_value':
-        return days.map((day) => ({
-          day,
-          delivered: Math.max(1000, dataByDay[day].analyses * 500),
-          planned: 1500
-        }));
+        if (businessValueMetric) {
+          return [{
+            period: `${businessValueMetric.period_start_date} à ${businessValueMetric.period_end_date}`,
+            delivered: businessValueMetric.value_delivered,
+            planned: businessValueMetric.value_planned
+          }];
+        }
+        return [];
       default:
         return [];
     }
