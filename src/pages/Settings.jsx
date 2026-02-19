@@ -1276,13 +1276,21 @@ export default function Settings() {
                          Déconnecter
                        </Button>
                        <Button
-                        size="sm"
-                        onClick={() => navigate(createPageUrl("TrelloProjectSelector"))}
-                        className="text-xs bg-sky-600 hover:bg-sky-700 text-white">
+                         size="sm"
+                         onClick={() => navigate(createPageUrl("TrelloProjectSelector"))}
+                         className="text-xs bg-sky-600 hover:bg-sky-700 text-white">
 
-                         Sélectionner projets
-                       </Button>
-                     </> :
+                          Sélectionner projets
+                        </Button>
+                        <Button
+                         size="sm"
+                         onClick={handleTrelloSyncNow}
+                         disabled={syncingTrello}
+                         className="text-xs bg-blue-600 hover:bg-blue-700 text-white">
+
+                          {syncingTrello ? "Sync..." : "⟳ Sync Now"}
+                        </Button>
+                       </> :
 
                     <TooltipProvider>
                        <Tooltip>
