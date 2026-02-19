@@ -62,9 +62,9 @@ export default function RealityMapCard({ analysisHistory, onDiscussSignals }) {
     fetchUserRole();
   }, []);
 
-  // Use provided data only, no fallback
-  const data = flowData;
-  const metrics = flowMetrics;
+  // RULE: Only use real data from analysisHistory — never accept hardcoded props
+  const data = analysisHistory?.length > 0 ? analysisHistory[0]?.analysis_data?.flowData : null;
+  const metrics = analysisHistory?.length > 0 ? analysisHistory[0]?.analysis_data?.flowMetrics : null;
 
   // Safe analysis with null checks
   const decisionAnalysis = data ? analyzeDecisionReality(data) : { canAnalyze: false, message: "Données insuffisantes", decisionMap: [] };
