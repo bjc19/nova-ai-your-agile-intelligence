@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DollarSign, Calendar, Trash2, Loader2, BarChart3 } from "lucide-react";
+import { DollarSign, Calendar, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { differenceInMonths, parseISO } from "date-fns";
-import BusinessValueChart from "./BusinessValueChart";
 
 export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubmitted, onCancel }) {
   const [valueDelivered, setValueDelivered] = useState("");
