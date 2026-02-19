@@ -11,6 +11,9 @@ export default function AdminDetectedRisks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  const [showAllRisks, setShowAllRisks] = useState(false);
+
+  const INITIAL_DISPLAY_COUNT = 3;
 
   useEffect(() => {
     const fetchPatterns = async () => {
