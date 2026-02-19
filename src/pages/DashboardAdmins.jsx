@@ -16,10 +16,10 @@ import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
-
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -42,23 +42,6 @@ export default function DashboardAdmins() {
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
-  const [gdprSignals, setGdprSignals] = useState([]);
-
-  // Fetch GDPR signals
-  useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-    fetchSignals();
-  }, []);
 
   // Check authentication and role
   useEffect(() => {
@@ -164,19 +147,6 @@ export default function DashboardAdmins() {
     deliveryMode: "scrum",
     throughputPerWeek: null
   };
-
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 5,
-    historical_sprints_count: 4,
-    drift_acknowledged: false,
-    problematic_tickets: [],
-    gdprSignals: gdprSignals
-  } : null;
 
   if (isLoading) {
     return (
@@ -296,20 +266,13 @@ export default function DashboardAdmins() {
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {sprintHealth &&
-            <SprintHealthCard
-              sprintHealth={sprintHealth}
-              onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
-
-            }
-
-
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              sourceName={latestAnalysis?.sourceName}
+              selectedWorkspaceId={selectedWorkspaceId} />
+              <PredictiveInsights workspaceId={selectedWorkspaceId} />
 
             </div>
 
