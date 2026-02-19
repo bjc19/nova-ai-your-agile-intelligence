@@ -14,8 +14,6 @@ import IntegrationStatus from "./IntegrationStatus";
 
 const COMPONENT_MAP = {
   sprintHealth: SprintHealthCard,
-  metricsRadar: MetricsRadarCard,
-  realityEngine: RealityMapCard,
   sprintPerformance: SprintPerformanceChart,
   keyRecommendations: KeyRecommendations,
   recentAnalyses: RecentAnalyses,
