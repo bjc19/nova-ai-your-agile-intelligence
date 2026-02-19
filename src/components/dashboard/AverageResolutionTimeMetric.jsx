@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { Clock, TrendingDown, AlertCircle } from "lucide-react";
+import { Clock, TrendingDown, AlertCircle, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AverageResolutionTimeMetric({ workspaceId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
+  const [selectedDetail, setSelectedDetail] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
