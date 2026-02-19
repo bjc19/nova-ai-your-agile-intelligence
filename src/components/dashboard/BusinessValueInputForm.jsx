@@ -70,7 +70,7 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
         return;
       }
       
-      await base44.entities.BusinessValueMetric.create({
+      const payload = {
         user_email: user.email,
         workspace_id: selectedWorkspaceId,
         value_delivered: parseFloat(valueDelivered),
@@ -78,7 +78,11 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
         period_start_date: startDate,
         period_end_date: endDate,
         is_locked: true
-      });
+      };
+      console.log("📦 Payload:", payload);
+      
+      const result = await base44.entities.BusinessValueMetric.create(payload);
+      console.log("✅ Created:", result);
       
       // Réinitialiser le formulaire
       setValueDelivered("");
