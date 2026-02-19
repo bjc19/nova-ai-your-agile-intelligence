@@ -46,6 +46,28 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const [showBusinessValueForm, setShowBusinessValueForm] = useState(false);
   const [businessValueMetric, setBusinessValueMetric] = useState(null);
 
+  // Charger les données Business Value
+  useEffect(() => {
+    if (!selectedWorkspaceId) return;
+    
+    const fetchBusinessValueMetric = async () => {
+      try {
+        const user = await base44.auth.me();
+        const metrics = await base44.entities.BusinessValueMetric.filter({
+          workspace_id: selectedWorkspaceId,
+          user_email: user.email
+        });
+        if (metrics.length > 0) {
+          setBusinessValueMetric(metrics[0]);
+        }
+      } catch (err) {
+        console.error("Erreur chargement Business Value:", err);
+      }
+    };
+    
+    fetchBusinessValueMetric();
+  }, [selectedWorkspaceId]);
+
   // Analyser les données disponibles pour suggérer le meilleur graphique
   const bestChartSuggestion = useMemo(() => {
     if (!selectedWorkspaceId || (gdprSignals.length === 0 && analysisHistory.length === 0)) {
