@@ -9,10 +9,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
-    }
-
     const body = await req.json();
     const { patternId } = body;
 
@@ -20,7 +16,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing patternId' }, { status: 400 });
     }
 
-    await base44.asServiceRole.entities.PatternDetection.update(patternId, {
+    await base44.entities.PatternDetection.update(patternId, {
       status: 'resolved',
       resolved_date: new Date().toISOString()
     });
