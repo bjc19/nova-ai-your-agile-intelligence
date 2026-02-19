@@ -44,9 +44,8 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState(null);
 
-  // Fetch GDPR signals — filtered by active workspace if selected
+  // Fetch GDPR signals from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
       try {
@@ -109,22 +108,14 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected workspace and period
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    // Filter by workspace (jira_project_selection_id is used for both Jira & Trello selections)
-    if (activeWorkspaceId && analysis.jira_project_selection_id !== activeWorkspaceId) {
-      return false;
-    }
-    // Filter by period
-    if (selectedPeriod) {
-      const analysisDate = new Date(analysis.created_date);
-      const startDate = new Date(selectedPeriod.start);
-      const endDate = new Date(selectedPeriod.end);
-      endDate.setHours(23, 59, 59, 999);
-      if (analysisDate < startDate || analysisDate > endDate) return false;
-    }
-    return true;
-  });
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -157,7 +148,7 @@ export default function Dashboard() {
     }
   }, [selectedPeriod]);
 
-  // Calculate sprint info from real data
+  // Calculate sprint info from real data only
   const calculateDaysRemaining = (endDate) => {
     if (!endDate) return 0;
     const end = new Date(endDate);
@@ -171,40 +162,6 @@ export default function Dashboard() {
     daysRemaining: calculateDaysRemaining(sprintContext.end_date),
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
-  } : {
-    name: null, // Will be set below based on delivery mode
-    daysRemaining: 4,
-    deliveryMode: "scrum",
-    throughputPerWeek: null
-  };
-
-  // Set generic name for dummy data based on delivery mode
-  if (!sprintContext) {
-    sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
-  }
-
-  // Simulated sprint health data (will come from Jira integration)
-  // Only show simulated data if there are analyses in the period
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    sprint_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    risk_score: analysisHistory.length > 0 ?
-    Math.min(100, analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) * 15 +
-    analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) * 10) :
-    45,
-    status: analysisHistory.length > 0 &&
-    analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) >= 3 ?
-    "at_risk" : "healthy",
-    wip_count: 6,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: analysisHistory.length > 0 ? Math.min(3, analysisHistory[0]?.blockers_count || 0) : 1,
-    blocked_tickets_over_48h: analysisHistory.length > 0 ? Math.min(2, analysisHistory[0]?.risks_count || 0) : 0,
-    alert_sent: false,
-    recommendations: latestAnalysis?.recommendations?.slice(0, 1) || ["Réduire le WIP et prioriser les tickets bloqués"],
-    problematic_tickets: [
-    { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
-    { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }]
-
   } : null;
 
   if (isLoading) {
@@ -291,11 +248,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector
-                userRole={user?.role}
-                activeWorkspaceId={activeWorkspaceId}
-                onWorkspaceChange={(id) => setActiveWorkspaceId(id || null)}
-              />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
