@@ -325,24 +325,21 @@ export default function DashboardAdmins() {
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {sprintHealth &&
-            <SprintHealthCard
+              {loadingStates.sprint ? <SectionSkeleton height="h-64" /> : (sprintHealth && <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
-
-            }
+              onReviewSprint={() => console.log("Review sprint")} />)}
               
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
-              <KeyRecommendations
+              {loadingStates.analysis ? <SectionSkeleton height="h-64" /> : <SprintPerformanceChart analysisHistory={analysisHistory} />}
+              {loadingStates.analysis ? <SectionSkeleton height="h-48" /> : <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              sourceName={latestAnalysis?.sourceName} />}
 
             </div>
 
             <div className="space-y-6">
-              <RecentAnalyses analyses={analysisHistory} />
+              {loadingStates.analysis ? <SectionSkeleton height="h-96" /> : <RecentAnalyses analyses={analysisHistory} />}
               <IntegrationStatus />
             </div>
           </div>
