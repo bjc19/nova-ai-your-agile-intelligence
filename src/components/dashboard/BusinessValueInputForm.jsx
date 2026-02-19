@@ -170,6 +170,8 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
       setStartDate("");
       setEndDate("");
       setShowResetDialog(false);
+      setMetricsData([]);
+      setShowChart(false);
       onDataSubmitted();
     } catch (err) {
       setError("Erreur lors de la réinitialisation: " + err.message);
