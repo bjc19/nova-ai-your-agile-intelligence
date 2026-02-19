@@ -49,8 +49,17 @@ export default function BusinessValueInputForm({ selectedWorkspaceId, onDataSubm
   };
 
   const handleSubmit = async () => {
+    console.log("🔵 SUBMIT CLICKED", { valueDelivered, valuePlanned, startDate, endDate });
     setError(null);
-    if (!validateValues() || !validatePeriod()) return;
+    
+    const valuesValid = validateValues();
+    const periodValid = validatePeriod();
+    console.log("✅ Validation results:", { valuesValid, periodValid });
+    
+    if (!valuesValid || !periodValid) {
+      console.log("❌ Validation failed, returning");
+      return;
+    }
 
     setLoading(true);
     try {
