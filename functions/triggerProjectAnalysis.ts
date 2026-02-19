@@ -434,7 +434,7 @@ Return JSON with: has_issue (bool), criticality (basse/moyenne/haute/critique), 
             analyzed_at: new Date().toISOString(),
             total_cards_scanned: 0
           },
-          transcript_preview: `Analysis of Trello board ${trelloProject.trello_board_name}`,
+          transcript_preview: `Analysis of Trello board ${trelloProject.board_name}`,
           contributing_sources: [{
             source: 'trello',
             confidence: 0.95,
