@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
-import Xstats from "@/components/dashboard/Xstats";
+import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
@@ -250,7 +251,7 @@ export default function DashboardAdmins() {
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
                 patterns={[]} />
 
-                <Xstats gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+                <QuickStats analysisHistory={analysisHistory} />
               </>
             }
           </motion.div>
@@ -305,11 +306,13 @@ export default function DashboardAdmins() {
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+               latestAnalysis={latestAnalysis}
+               sourceUrl={latestAnalysis?.sourceUrl}
+               sourceName={latestAnalysis?.sourceName} />
 
-            </div>
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
+
+              </div>
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
