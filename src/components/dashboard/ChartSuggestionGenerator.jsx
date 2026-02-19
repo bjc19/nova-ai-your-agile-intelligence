@@ -85,31 +85,46 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   };
 
   const generateMockChartData = (chartType) => {
-    const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    // Grouper les données par jour
+    const dataByDay = {};
+    const allData = [...gdprSignals, ...analysisHistory];
+    
+    allData.forEach(item => {
+      const date = new Date(item.created_date);
+      const day = date.toLocaleDateString('fr-FR', { weekday: 'short' });
+      if (!dataByDay[day]) {
+        dataByDay[day] = { blockers: 0, risks: 0, analyses: 0 };
+      }
+      dataByDay[day].blockers += (item.criticite === 'critique' || item.criticite === 'haute') ? 1 : 0;
+      dataByDay[day].risks += (item.criticite === 'moyenne' || item.criticite === 'basse') ? 1 : 0;
+      dataByDay[day].analyses += 1;
+    });
+
+    const days = Object.keys(dataByDay).slice(-7);
     
     switch (chartType) {
       case 'flow_efficiency':
-        return days.map((day, i) => ({
+        return days.map((day) => ({
           day,
-          efficiency: 45 + Math.random() * 30,
+          efficiency: Math.max(20, 100 - dataByDay[day].risks * 5),
           target: 70
         }));
       case 'cycle_time':
-        return days.map((day, i) => ({
+        return days.map((day) => ({
           day,
-          cycleTime: 3 + Math.random() * 4,
+          cycleTime: Math.max(1, 5 - dataByDay[day].blockers * 0.5),
           average: 4.5
         }));
       case 'change_failure_rate':
-        return days.map((day, i) => ({
+        return days.map((day) => ({
           day,
-          cfr: 5 + Math.random() * 15,
+          cfr: Math.min(30, dataByDay[day].blockers * 3),
           ideal: 8
         }));
       case 'business_value':
-        return days.map((day, i) => ({
+        return days.map((day) => ({
           day,
-          delivered: 1000 + Math.random() * 2000,
+          delivered: Math.max(1000, dataByDay[day].analyses * 500),
           planned: 1500
         }));
       default:
