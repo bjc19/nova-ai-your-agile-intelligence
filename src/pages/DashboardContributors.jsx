@@ -149,16 +149,9 @@ export default function DashboardContributors() {
     throughputPerWeek: null
   };
 
-  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
-    sprint_name: "Sprint 14",
-    wip_count: 8,
-    wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-    sprint_day: 5,
-    historical_sprints_count: 4,
-    drift_acknowledged: false,
-    problematic_tickets: [],
+  // sprintHealth is loaded from real SprintHealth entity, not hardcoded
+  const sprintHealth = sprintContext ? {
+    sprint_name: sprintContext.sprint_name,
     gdprSignals: gdprSignals
   } : null;
 
