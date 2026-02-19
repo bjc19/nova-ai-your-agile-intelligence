@@ -259,7 +259,8 @@ export default function DashboardAdmins() {
                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
                 patterns={[]} />
 
-                <QuickStats analysisHistory={analysisHistory} />
+                <QuickStats analysisHistory={analysisHistory} gdprSignals={filteredGdprSignals} />
+                <BlockersRisksTrendTable gdprSignals={filteredGdprSignals} analysisHistory={analysisHistory} />
               </>
             }
           </motion.div>
