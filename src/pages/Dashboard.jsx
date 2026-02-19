@@ -348,7 +348,13 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Sprint Health Card - Drift Detection */}
+              {/* Blockers & Risks Trend Table */}
+            <BlockersRisksTrendTable
+              gdprSignals={gdprSignals}
+              analysisHistory={analysisHistory}
+            />
+
+            {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
               sprintHealth={{
