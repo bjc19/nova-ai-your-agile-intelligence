@@ -235,6 +235,22 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
     }
   };
 
+  if (showBusinessValueForm && selectedChart === 'business_value') {
+    return (
+      <BusinessValueInputForm
+        selectedWorkspaceId={selectedWorkspaceId}
+        onDataSubmitted={() => {
+          setShowBusinessValueForm(false);
+          generateChart('business_value');
+        }}
+        onCancel={() => {
+          setShowBusinessValueForm(false);
+          setSelectedChart(null);
+        }}
+      />
+    );
+  }
+
   if (!selectedWorkspaceId) {
     return (
       <Card className="p-6 bg-slate-50">
