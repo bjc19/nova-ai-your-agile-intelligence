@@ -201,32 +201,55 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // SAME LOGIC AS BlockersRisksTrendTable: count by criticite (no "resolved" filter here - show ALL items)
-   // Count ALL GDPR markers by criticite (Slack, Jira, Teams)
-   const gdprBlockers = gdprSignals
-     .filter(s => s.criticite === 'critique' || s.criticite === 'haute')
-     .length;
-   const gdprRisks = gdprSignals
-     .filter(s => s.criticite === 'moyenne' || s.criticite === 'basse')
-     .length;
+  // SYNC WITH BlockersRisksTrendTable: Show ONLY LAST DAY's data (same as trend table's last row)
+   const getLastDayData = () => {
+     if (gdprSignals.length === 0 && analysisHistory.length === 0) {
+       return { blockers: 0, risks: 0 };
+     }
 
-   const teamsBlockers = teamsInsights
-     .filter(i => i.criticite === 'critique' || i.criticite === 'haute')
-     .length;
-   const teamsRisks = teamsInsights
-     .filter(i => i.criticite === 'moyenne' || i.criticite === 'basse')
-     .length;
+     // Get all signals with dates (same logic as BlockersRisksTrendTable)
+     const allSignals = [
+       ...gdprSignals.map(s => ({
+         date: new Date(s.created_date),
+         criticite: s.criticite,
+         type: 'gdpr'
+       })),
+       ...analysisHistory.flatMap(a => [
+         ...(a.analysis_data?.blockers || []).map(b => ({
+           date: new Date(a.created_date),
+           criticite: 'critique',
+           type: 'analysis_blocker'
+         })),
+         ...(a.analysis_data?.risks || []).map(r => ({
+           date: new Date(a.created_date),
+           criticite: 'moyenne',
+           type: 'analysis_risk'
+         }))
+       ])
+     ];
 
-   // Add analysis_data.blockers/risks (treat analysis blockers as "haute", risks as "moyenne")
-   const analysisDataBlockers = analysisHistory
-     .flatMap(a => (a.analysis_data?.blockers || []).filter(b => b.urgency))
-     .length;
-   const analysisDataRisks = analysisHistory
-     .flatMap(a => (a.analysis_data?.risks || []))
-     .length;
+     if (allSignals.length === 0) return { blockers: 0, risks: 0 };
 
-   const totalBlockers = gdprBlockers + teamsBlockers + analysisDataBlockers;
-   const totalRisks = gdprRisks + teamsRisks + analysisDataRisks;
+     // Get last day
+     const maxDate = new Date(Math.max(...allSignals.map(s => s.date.getTime())));
+     maxDate.setHours(0, 0, 0, 0);
+
+     // Filter signals for last day only
+     const lastDaySignals = allSignals.filter(s => {
+       const sDate = new Date(s.date);
+       sDate.setHours(0, 0, 0, 0);
+       return sDate.getTime() === maxDate.getTime();
+     });
+
+     const blockers = lastDaySignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
+     const risks = lastDaySignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
+
+     return { blockers, risks };
+   };
+
+   const lastDayData = getLastDayData();
+   const totalBlockers = lastDayData.blockers;
+   const totalRisks = lastDayData.risks;
   
   // Count ALL items (including resolved) for IST calculation
   const allGdprBlockers = gdprSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
