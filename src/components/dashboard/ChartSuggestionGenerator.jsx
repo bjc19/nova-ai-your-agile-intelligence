@@ -247,9 +247,23 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
     return (
       <BusinessValueInputForm
         selectedWorkspaceId={selectedWorkspaceId}
-        onDataSubmitted={() => {
+        onDataSubmitted={async () => {
+          // Recharger les données Business Value
+          try {
+            const user = await base44.auth.me();
+            const metrics = await base44.entities.BusinessValueMetric.filter({
+              workspace_id: selectedWorkspaceId,
+              user_email: user.email
+            });
+            if (metrics.length > 0) {
+              setBusinessValueMetric(metrics[0]);
+            }
+          } catch (err) {
+            console.error("Erreur recharge Business Value:", err);
+          }
           setShowBusinessValueForm(false);
-          generateChart('business_value');
+          // Régénérer le graphique avec les nouvelles données
+          await generateChart('business_value');
         }}
         onCancel={() => {
           setShowBusinessValueForm(false);
