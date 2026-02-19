@@ -75,8 +75,10 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
          let workspaceResolved = resolvedPatterns;
 
          if (selectedWorkspaceId) {
-           // Get analyses linked to this workspace
-           const workspaceAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
+           // Get analyses linked to this workspace - check both Jira and Trello
+           const jiraAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
+           const trelloAnalyses = await base44.entities.AnalysisHistory.filter({ trello_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
+           const workspaceAnalyses = [...jiraAnalyses, ...trelloAnalyses];
            const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
            // GDPRMarkers: only those whose session_id matches an analysis session or that are explicitly linked
            // Since GDPRMarkers don't have jira_project_selection_id, we can only scope them via workspace_name
