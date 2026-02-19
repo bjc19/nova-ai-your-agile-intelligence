@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -42,26 +41,10 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
 
-  // Fetch GDPR signals
-  useEffect(() => {
-    const fetchSignals = async () => {
-      try {
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        setGdprSignals(recentMarkers);
-      } catch (error) {
-        console.error("Erreur chargement signaux GDPR:", error);
-      }
-    };
-    fetchSignals();
-  }, []);
-
-  // Check authentication and role
-  useEffect(() => {
-    const checkAuth = async () => {
+  const loadInitialData = async () => {
+    try {
       const authenticated = await base44.auth.isAuthenticated();
       if (!authenticated) {
         navigate(createPageUrl("Home"));
@@ -69,8 +52,6 @@ export default function DashboardAdmins() {
       }
 
       const currentUser = await base44.auth.me();
-
-      // Role verification - only 'admin' can access
       if (currentUser?.role !== 'admin') {
         navigate(createPageUrl("Home"));
         return;
@@ -78,23 +59,29 @@ export default function DashboardAdmins() {
 
       setUser(currentUser);
 
-      // Load sprint context
-      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-      if (activeSprints.length > 0) {
+      // Load all data in parallel
+      const [activeSprints, teamConfigs, pendingAlerts, sevenDaysAgo, analysisHistory, gdprMarkers] = await Promise.all([
+        base44.entities.SprintContext.filter({ is_active: true }),
+        base44.entities.TeamConfiguration.list(),
+        base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" }),
+        (async () => {
+          const date = new Date();
+          date.setDate(date.getDate() - 7);
+          return date;
+        })(),
+        base44.entities.AnalysisHistory.list('-created_date', 100),
+        base44.entities.GDPRMarkers.list('-created_date', 100)
+      ]);
+
+      if (activeSprints?.length > 0) {
         setSprintContext(activeSprints[0]);
       }
 
-      // Check onboarding
-      const teamConfigs = await base44.entities.TeamConfiguration.list();
-      if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
+      if (!teamConfigs?.length || !teamConfigs[0].onboarding_completed) {
         setShowOnboarding(true);
       }
 
-      // Check multi-project alerts
-      const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-        admin_response: "pending"
-      });
-      if (pendingAlerts.length > 0) {
+      if (pendingAlerts?.length > 0) {
         const latest = pendingAlerts[pendingAlerts.length - 1];
         setMultiProjectAlert({
           confidence: latest.detection_score,
@@ -103,17 +90,19 @@ export default function DashboardAdmins() {
         });
       }
 
+      const recentMarkers = gdprMarkers?.filter((m) => new Date(m.created_date) >= sevenDaysAgo) || [];
+      setGdprSignals(recentMarkers);
+      setAllAnalysisHistory(analysisHistory || []);
       setIsLoading(false);
-    };
-    checkAuth();
-  }, [navigate]);
+    } catch (error) {
+      console.error("Erreur chargement dashboard:", error);
+      setIsLoading(false);
+    }
+  };
 
-  // Fetch analysis history
-  const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
-  });
+  useEffect(() => {
+    loadInitialData();
+  }, [navigate]);
 
   // Filter analysis history
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
