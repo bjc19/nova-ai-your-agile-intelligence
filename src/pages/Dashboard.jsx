@@ -294,13 +294,17 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
-            }
-          </motion.div>
-        </div>
-      </div>
+            {/* Quick Stats 2 - From Table Data */}
+             {(!selectedPeriod || analysisHistory.length > 0 || gdprSignals.length > 0) &&
+             <QuickStats2 
+               gdprSignals={gdprSignals}
+               analysisHistory={analysisHistory}
+               currentPageName="Dashboard"
+             />
+             }
+            </motion.div>
+            </div>
+            </div>
 
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
