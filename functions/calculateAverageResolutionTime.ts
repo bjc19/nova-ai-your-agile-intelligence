@@ -30,12 +30,12 @@ Deno.serve(async (req) => {
     const dailyData = {};
 
     resolvedPatterns.forEach((pattern) => {
-      if (pattern.created_date && pattern.resolved_date) {
-        const createdDate = new Date(pattern.created_date);
+      if (pattern.resolved_date) {
+        const createdDate = new Date(pattern.created_date || pattern.resolved_date);
         const resolvedDate = new Date(pattern.resolved_date);
-        const daysToResolve = Math.round(
+        const daysToResolve = Math.max(0, Math.round(
           (resolvedDate - createdDate) / (1000 * 60 * 60 * 24)
-        );
+        ));
 
         resolutionTimes.push({
           pattern_id: pattern.id,
