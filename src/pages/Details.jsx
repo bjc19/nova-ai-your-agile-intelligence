@@ -62,14 +62,19 @@ export default function Details() {
   // Fetch GDPRMarkers and TeamsInsights filtered by workspace
   const { data: gdprMarkersData = [] } = useQuery({
     queryKey: ['gdprMarkers', selectedWorkspaceId],
-    queryFn: () => selectedWorkspaceId
-      ? base44.entities.GDPRMarkers.filter({
-          $or: [
-            { jira_project_selection_id: selectedWorkspaceId },
-            { trello_project_selection_id: selectedWorkspaceId }
-          ]
-        }, '-created_date', 1000)
-      : base44.entities.GDPRMarkers.list('-created_date', 1000),
+    queryFn: async () => {
+      const allMarkers = selectedWorkspaceId
+        ? await base44.entities.GDPRMarkers.filter({
+            $or: [
+              { jira_project_selection_id: selectedWorkspaceId },
+              { trello_project_selection_id: selectedWorkspaceId }
+            ]
+          }, '-created_date', 1000)
+        : await base44.entities.GDPRMarkers.list('-created_date', 1000);
+
+      // MASK: Filter out markers without workspace links
+      return allMarkers.filter(m => m.jira_project_selection_id || m.trello_project_selection_id);
+    },
     enabled: detailType !== null,
   });
 
