@@ -309,6 +309,13 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              {/* Blockers & Risks Table */}
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+              
+              {/* Predictive Insights */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -319,8 +326,22 @@ export default function DashboardAdmins() {
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
+              {/* Contextual Tool Generator */}
+              <ContextualToolGenerator analysisHistory={analysisHistory} />
             </div>
           </div>
+        }
+        
+        {/* Detected Risks & Team Health - Below main grid */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <AdminDetectedRisks />
+          </div>
+          <div className="lg:col-span-2">
+            <TeamHealthSummary />
+          </div>
+        </div>
         }
 
         <motion.div
