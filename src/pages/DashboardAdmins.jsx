@@ -19,12 +19,12 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import RiskOpportunitiesWordCloud from "@/components/dashboard/RiskOpportunitiesWordCloud";
-import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
 import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import ContextualToolGenerator from "@/components/dashboard/ContextualToolGenerator";
+import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
 import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
-import SectionSkeleton from "@/components/dashboard/SectionSkeleton";
+import TeamHealthSummary from "@/components/dashboard/TeamHealthSummary";
 
 import {
   Mic,
@@ -310,6 +310,13 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              {/* Blockers & Risks Table */}
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+              
+              {/* Predictive Insights */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -319,18 +326,30 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              <AdminDetectedRisks gdprSignals={gdprSignals} />
-              <IntegrationStatus />
+              {/* Chart Suggestion Generator */}
+              <ChartSuggestionGenerator selectedWorkspaceId={selectedWorkspaceId} analysisHistory={analysisHistory} />
+              {/* Contextual Tool Generator */}
+              <ContextualToolGenerator analysisHistory={analysisHistory} />
             </div>
           </div>
         }
-
+        
+        {/* Detected Risks & Team Health - Below main grid */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="space-y-6 mt-8">
-          <BlockersRisksTrendTable analysisHistory={analysisHistory} />
-          <PredictiveInsights analysisHistory={analysisHistory} />
-          <ChartSuggestionGenerator analysisHistory={analysisHistory} />
-          <RiskOpportunitiesWordCloud gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <AdminDetectedRisks />
+          </div>
+          <div className="lg:col-span-2">
+            <TeamHealthSummary />
+          </div>
+        </div>
+        }
+        
+        {/* Integration Status - At the end */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8">
+          <IntegrationStatus />
         </div>
         }
 
