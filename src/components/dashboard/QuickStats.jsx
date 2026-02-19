@@ -203,6 +203,9 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
     if (detailType) {
       sessionStorage.setItem("detailsType", detailType);
       sessionStorage.setItem("previousDashboard", currentPageName);
+      if (selectedWorkspaceId) {
+        sessionStorage.setItem("selectedWorkspaceId", selectedWorkspaceId);
+      }
       navigate(createPageUrl("Details"));
     }
   };
