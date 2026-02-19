@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import React from 'react';
 
 // Hook pour les patterns détectés avec caching 10 min
 export const useDetectedRisks = (workspaceId) => {
