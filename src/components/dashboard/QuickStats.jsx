@@ -210,17 +210,13 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // Count UNRESOLVED items (for display purposes)
-  const analysisBlockers = analysisHistory.flatMap((a, idx) => 
-    (a.analysis_data?.blockers || []).filter((b, bidx) => 
-      b.urgency && !isItemResolved(`${idx}-${bidx}`)
-    )
-  ).length;
-  const analysisRisks = analysisHistory.flatMap((a, idx) => 
-    (a.analysis_data?.risks || []).filter((r, ridx) => 
-      !isItemResolved(`${idx}-${ridx}`)
-    )
-  ).length;
+  // Count UNRESOLVED items (for display purposes) - use blockers_count and risks_count directly
+  const analysisBlockers = analysisHistory
+    .filter(a => a.blockers_count && !isItemResolved(`analysis-blocker-${a.id}`))
+    .reduce((sum, a) => sum + (a.blockers_count || 0), 0);
+  const analysisRisks = analysisHistory
+    .filter(a => a.risks_count && !isItemResolved(`analysis-risk-${a.id}`))
+    .reduce((sum, a) => sum + (a.risks_count || 0), 0);
 
   // Count GDPR markers (Slack): critique/haute → blockers, moyenne → risks - EXCLUDING resolved
   const slackBlockers = gdprSignals
