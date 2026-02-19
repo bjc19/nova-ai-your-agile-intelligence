@@ -9,8 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
-import QuickStats2 from "@/components/dashboard/QuickStats2";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
@@ -294,17 +292,13 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Stats 2 - From Table Data */}
-             {(!selectedPeriod || analysisHistory.length > 0 || gdprSignals.length > 0) &&
-             <QuickStats2 
-               gdprSignals={gdprSignals}
-               analysisHistory={analysisHistory}
-               currentPageName="Dashboard"
-             />
-             }
-            </motion.div>
-            </div>
-            </div>
+            {/* Quick Stats - Only show if data in period */}
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
+          </motion.div>
+        </div>
+      </div>
 
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -348,13 +342,7 @@ export default function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Blockers & Risks Trend Table */}
-            <BlockersRisksTrendTable
-              gdprSignals={gdprSignals}
-              analysisHistory={analysisHistory}
-            />
-
-            {/* Sprint Health Card - Drift Detection */}
+              {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
             <SprintHealthCard
               sprintHealth={{
