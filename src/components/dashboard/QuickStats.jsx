@@ -52,58 +52,42 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
 
   useEffect(() => {
      const fetchSignals = async () => {
-       try {
-         const cache = getCacheService();
-         const sevenDaysAgo = new Date();
-         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          try {
+            const cache = getCacheService();
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-         // Use cache with 5-minute TTL to prevent 429 errors
-         const allMarkers = await cache.get(
-           'gdpr-markers-list',
-           () => base44.entities.GDPRMarkers.list('-created_date', 10000),
-           300
-         );
-         // Fetch resolved patterns (same source as Details page "resolved" view)
-         const resolvedPatterns = await cache.get(
-           'pattern-detection-resolved',
-           () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 10000),
-           300
-         );
+            // Use cache with 5-minute TTL to prevent 429 errors
+            const allMarkers = await cache.get(
+              'gdpr-markers-list',
+              () => base44.entities.GDPRMarkers.list('-created_date', 10000),
+              300
+            );
+            // Fetch resolved patterns (same source as Details page "resolved" view)
+            const resolvedPatterns = await cache.get(
+              'pattern-detection-resolved',
+              () => base44.entities.PatternDetection.filter({ status: 'resolved' }, '-resolved_date', 10000),
+              300
+            );
 
-         // Filter by workspace if selected
-         let workspaceMarkers = allMarkers;
-         let workspaceResolved = resolvedPatterns;
+            // Filter by workspace if selected
+            let workspaceMarkers = allMarkers;
+            let workspaceResolved = resolvedPatterns;
 
-         if (selectedWorkspaceId) {
-           // Get analyses linked to this workspace - check both Jira and Trello
-           const jiraAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
-           const trelloAnalyses = await base44.entities.AnalysisHistory.filter({ trello_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
-           const workspaceAnalyses = [...jiraAnalyses, ...trelloAnalyses];
-           const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
-           // GDPRMarkers: only those whose session_id matches an analysis session or that are explicitly linked
-           // Since GDPRMarkers don't have jira_project_selection_id, we can only scope them via workspace_name
-           // Use workspace_name from the analyses to filter by slack_workspace_id or fall back to unfiltered if no link
-           // PRIMARY: filter markers via session_id linked to workspace analyses
-           const workspaceSessionIds = new Set(workspaceAnalyses.map(a => a.id)); // analysis IDs serve as session anchors
-           // Since GDPRMarkers.session_id is a UUID not tied to AnalysisHistory id, 
-           // the safest scope is: show ONLY markers from the last 7 days if no workspace link field exists
-           // If workspace has 0 analyses → show 0 markers
-           if (workspaceAnalyses.length === 0) {
-             workspaceMarkers = [];
-           } else {
-             // Keep all markers scoped to the same time window as workspace analyses
-             const oldestAnalysis = workspaceAnalyses[workspaceAnalyses.length - 1];
-             const newestAnalysis = workspaceAnalyses[0];
-             workspaceMarkers = allMarkers.filter(m => {
-               const mDate = new Date(m.created_date);
-               const start = new Date(oldestAnalysis.created_date);
-               const end = new Date(newestAnalysis.created_date);
-               end.setHours(23, 59, 59, 999);
-               return mDate >= start && mDate <= end;
-             });
-           }
-           workspaceResolved = resolvedPatterns.filter(p => workspaceAnalysisIds.has(p.analysis_id));
-         }
+            if (selectedWorkspaceId) {
+              // DIRECT: Filter GDPRMarkers by jira_project_selection_id or trello_project_selection_id
+              workspaceMarkers = allMarkers.filter(m =>
+                m.jira_project_selection_id === selectedWorkspaceId || 
+                m.trello_project_selection_id === selectedWorkspaceId
+              );
+
+              // Filter resolved patterns by workspace via analysis linkage
+              const jiraAnalyses = await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
+              const trelloAnalyses = await base44.entities.AnalysisHistory.filter({ trello_project_selection_id: selectedWorkspaceId }, '-created_date', 1000);
+              const workspaceAnalyses = [...jiraAnalyses, ...trelloAnalyses];
+              const workspaceAnalysisIds = new Set(workspaceAnalyses.map(a => a.id));
+              workspaceResolved = resolvedPatterns.filter(p => workspaceAnalysisIds.has(p.analysis_id));
+            }
 
          const slackMarkers = workspaceMarkers.filter(m => 
            m.detection_source === 'slack_hourly' || m.detection_source === 'slack_daily' || m.detection_source === 'manual_trigger'
