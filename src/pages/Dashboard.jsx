@@ -19,14 +19,7 @@ import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 
-import {
-  Mic,
-  Sparkles,
-  ArrowRight,
-  Zap,
-  Calendar,
-  Loader2
-} from "lucide-react";
+import { Mic, Sparkles, ArrowRight, Zap, Calendar, Loader2 } from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -48,25 +41,15 @@ export default function Dashboard() {
         setUser(currentUser);
 
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
+        if (activeSprints.length > 0) setSprintContext(activeSprints[0]);
 
         const teamConfigs = await base44.entities.TeamConfiguration.list();
-        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
-          setShowOnboarding(true);
-        }
+        if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) setShowOnboarding(true);
 
-        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-          admin_response: "pending"
-        });
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({ admin_response: "pending" });
         if (pendingAlerts.length > 0) {
           const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
-          });
+          setMultiProjectAlert({ confidence: latest.detection_score, signals: latest.weighted_signals, log_id: latest.id });
         }
       }
       setIsLoading(false);
@@ -74,14 +57,12 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history
   const { data: allAnalysisHistory = [] } = useQuery({
     queryKey: ['analysisHistory'],
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
 
-  // Filter analysis history by period and workspace
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod
@@ -93,7 +74,6 @@ export default function Dashboard() {
     return matchesPeriod && matchesWorkspace;
   });
 
-  // Check for stored analysis
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -104,29 +84,20 @@ export default function Dashboard() {
         parsedAnalysis.sourceUrl = url;
         parsedAnalysis.sourceName = name;
       }
-
       if (selectedPeriod && parsedAnalysis.created_date) {
-        const analysisDate = new Date(parsedAnalysis.created_date);
-        const startDate = new Date(selectedPeriod.start);
-        const endDate = new Date(selectedPeriod.end);
-        endDate.setHours(23, 59, 59, 999);
-
-        if (analysisDate >= startDate && analysisDate <= endDate) {
-          setLatestAnalysis(parsedAnalysis);
-        } else {
-          setLatestAnalysis(null);
-        }
+        const d = new Date(parsedAnalysis.created_date);
+        const start = new Date(selectedPeriod.start);
+        const end = new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999));
+        setLatestAnalysis(d >= start && d <= end ? parsedAnalysis : null);
       } else {
         setLatestAnalysis(parsedAnalysis);
       }
     }
   }, [selectedPeriod]);
 
-  const sprintInfo = sprintContext ? {
-    name: sprintContext.sprint_name,
-    deliveryMode: sprintContext.delivery_mode,
-    throughputPerWeek: sprintContext.throughput_per_week
-  } : null;
+  const sprintInfo = sprintContext
+    ? { name: sprintContext.sprint_name, deliveryMode: sprintContext.delivery_mode }
+    : null;
 
   if (isLoading) {
     return (
@@ -138,9 +109,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <TeamConfigOnboarding
-        isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)} />
+      <TeamConfigOnboarding isOpen={showOnboarding} onComplete={() => setShowOnboarding(false)} />
 
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
@@ -149,11 +118,7 @@ export default function Dashboard() {
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl" />
 
         <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}>
-
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <div className="flex flex-col gap-6 mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -173,9 +138,7 @@ export default function Dashboard() {
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
                   <p className="text-slate-600 mt-2 text-lg">
-                    {sprintInfo?.deliveryMode === "kanban"
-                      ? "Voici votre vue d'ensemble et vos dernières analyses."
-                      : t('sprintOverview')}
+                    {sprintInfo?.deliveryMode === "kanban" ? "Voici votre vue d'ensemble et vos dernières analyses." : t('sprintOverview')}
                   </p>
                 </div>
               </div>
@@ -183,7 +146,11 @@ export default function Dashboard() {
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+                  onWorkspaceChange={(id) => {
+                    setSelectedWorkspaceId(id);
+                    if (id) sessionStorage.setItem("selectedWorkspaceId", id);
+                    else sessionStorage.removeItem("selectedWorkspaceId");
+                  }} />
                 <TimePeriodSelector
                   deliveryMode={sprintInfo?.deliveryMode}
                   onPeriodChange={(period) => {
@@ -194,7 +161,7 @@ export default function Dashboard() {
             </div>
 
             {(!selectedPeriod || analysisHistory.length > 0) && (
-              <QuickStats analysisHistory={analysisHistory} />
+              <QuickStats analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
             )}
           </motion.div>
         </div>
@@ -206,10 +173,7 @@ export default function Dashboard() {
           <div className="mb-6">
             <MultiProjectAlert
               detectionData={multiProjectAlert}
-              onConfirm={() => {
-                setMultiProjectAlert(null);
-                window.location.reload();
-              }}
+              onConfirm={() => { setMultiProjectAlert(null); window.location.reload(); }}
               onDismiss={() => setMultiProjectAlert(null)} />
           </div>
         )}
@@ -219,9 +183,7 @@ export default function Dashboard() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette période
-            </h3>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">Aucune analyse pour cette période</h3>
             <p className="text-slate-600 mb-6">
               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
             </p>
@@ -245,7 +207,6 @@ export default function Dashboard() {
                 sourceName={latestAnalysis?.sourceName}
                 selectedWorkspaceId={selectedWorkspaceId} />
             </div>
-
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
@@ -254,17 +215,11 @@ export default function Dashboard() {
         )}
 
         {user?.role === 'admin' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-8">
             <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div>
-                  <p className="text-slate-400 max-w-lg">
-                    {t('importDataDescription')}
-                  </p>
+                  <p className="text-slate-400 max-w-lg">{t('importDataDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Link to={createPageUrl("Settings")}>
