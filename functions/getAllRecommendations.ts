@@ -12,14 +12,26 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { selectedWorkspaceId } = body;
 
-    // Fetch from all known sources
+    // STRICT: No workspace selected = no recommendations
+    if (!selectedWorkspaceId) {
+      return Response.json({
+        success: true,
+        recommendations: [],
+        count: 0,
+        sources: [],
+        message: 'No workspace selected'
+      });
+    }
+
     const allRecommendations = [];
 
-    // Source 0: Manual Analysis History
+    // Source 0: AnalysisHistory - filter strictly by workspace
     try {
-      const analysisHistory = selectedWorkspaceId
-        ? await base44.entities.AnalysisHistory.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 50)
-        : await base44.entities.AnalysisHistory.list('-created_date', 50);
+      const analysisHistory = await base44.entities.AnalysisHistory.filter(
+        { jira_project_selection_id: selectedWorkspaceId },
+        '-created_date',
+        50
+      );
       analysisHistory.forEach(analysis => {
         if (analysis.analysis_data?.recommendations && Array.isArray(analysis.analysis_data.recommendations)) {
           analysis.analysis_data.recommendations.forEach(reco => {
@@ -29,7 +41,8 @@ Deno.serve(async (req) => {
               text: recoText,
               priority: 'medium',
               createdDate: analysis.created_date,
-              entityType: 'AnalysisHistory'
+              entityType: 'AnalysisHistory',
+              workspaceId: selectedWorkspaceId
             });
           });
         }
@@ -38,11 +51,13 @@ Deno.serve(async (req) => {
       console.log('AnalysisHistory fetch skipped:', e.message);
     }
 
-    // Source 1: GDPR Markers (Slack & Teams)
+    // Source 1: GDPRMarkers - filter by workspace
     try {
-      const gdprMarkers = selectedWorkspaceId
-        ? await base44.entities.GDPRMarkers.filter({ slack_workspace_id: selectedWorkspaceId }, '-created_date', 100)
-        : await base44.entities.GDPRMarkers.list('-created_date', 100);
+      const gdprMarkers = await base44.entities.GDPRMarkers.filter(
+        { slack_workspace_id: selectedWorkspaceId },
+        '-created_date',
+        100
+      );
       gdprMarkers.forEach(marker => {
         if (marker.recos && Array.isArray(marker.recos)) {
           marker.recos.forEach(reco => {
@@ -52,7 +67,8 @@ Deno.serve(async (req) => {
               priority: marker.criticite === 'critique' || marker.criticite === 'haute' ? 'high' : 'medium',
               criticite: marker.criticite,
               createdDate: marker.created_date,
-              entityType: 'GDPRMarkers'
+              entityType: 'GDPRMarkers',
+              workspaceId: selectedWorkspaceId
             });
           });
         }
@@ -61,11 +77,13 @@ Deno.serve(async (req) => {
       console.log('GDPR Markers fetch skipped:', e.message);
     }
 
-    // Source 2: Teams Insights (legacy, if still exists)
+    // Source 2: TeamsInsight - filter by workspace
     try {
-      const teamsInsights = selectedWorkspaceId
-        ? await base44.entities.TeamsInsight.filter({ jira_project_selection_id: selectedWorkspaceId }, '-created_date', 100)
-        : await base44.entities.TeamsInsight.list('-created_date', 100);
+      const teamsInsights = await base44.entities.TeamsInsight.filter(
+        { jira_project_selection_id: selectedWorkspaceId },
+        '-created_date',
+        100
+      );
       teamsInsights.forEach(insight => {
         if (insight.recos && Array.isArray(insight.recos)) {
           insight.recos.forEach(reco => {
@@ -75,7 +93,8 @@ Deno.serve(async (req) => {
               priority: insight.criticite === 'critique' || insight.criticite === 'haute' ? 'high' : 'medium',
               criticite: insight.criticite,
               createdDate: insight.created_date,
-              entityType: 'TeamsInsight'
+              entityType: 'TeamsInsight',
+              workspaceId: selectedWorkspaceId
             });
           });
         }
@@ -84,30 +103,8 @@ Deno.serve(async (req) => {
       console.log('Teams Insights fetch skipped:', e.message);
     }
 
-    // ADD NEW SOURCES HERE - JIRA, ZOOM, AZURE, etc
-    // Example for future Jira integration:
-    // try {
-    //   const jiraInsights = await base44.entities.JiraInsight.list('-created_date', 100);
-    //   jiraInsights.forEach(insight => {
-    //     if (insight.recommendations && Array.isArray(insight.recommendations)) {
-    //       insight.recommendations.forEach(rec => {
-    //         allRecommendations.push({
-    //           source: 'jira',
-    //           text: rec.text || rec,
-    //           priority: rec.priority || 'medium',
-    //           criticite: rec.criticite,
-    //           createdDate: insight.created_date,
-    //           entityType: 'JiraInsight'
-    //         });
-    //       });
-    //     }
-    //   });
-    // } catch (e) {
-    //   console.log('Jira Insights fetch skipped:', e.message);
-    // }
-
     // Sort by creation date (newest first)
-    allRecommendations.sort((a, b) => 
+    allRecommendations.sort((a, b) =>
       new Date(b.createdDate) - new Date(a.createdDate)
     );
 
@@ -115,7 +112,8 @@ Deno.serve(async (req) => {
       success: true,
       recommendations: allRecommendations,
       count: allRecommendations.length,
-      sources: [...new Set(allRecommendations.map(r => r.source))]
+      sources: [...new Set(allRecommendations.map(r => r.source))],
+      workspaceId: selectedWorkspaceId
     });
   } catch (error) {
     return Response.json(
