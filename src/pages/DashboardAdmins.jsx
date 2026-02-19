@@ -19,6 +19,10 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
+import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
+import RiskOpportunitiesWordCloud from "@/components/dashboard/RiskOpportunitiesWordCloud";
 
 import {
   Mic,
