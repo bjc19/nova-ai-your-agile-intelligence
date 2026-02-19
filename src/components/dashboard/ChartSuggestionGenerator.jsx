@@ -134,7 +134,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
               <Legend />
               <Line type="monotone" dataKey="efficiency" stroke="#3b82f6" name="Efficacité %" />
               <Line type="monotone" dataKey="target" stroke="#d1d5db" strokeDasharray="5 5" name="Cible" />
-            </LineChart>
+            </RechartsLineChart>
           </ResponsiveContainer>
         );
       case 'cycle_time':
