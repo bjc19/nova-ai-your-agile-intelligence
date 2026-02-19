@@ -37,8 +37,9 @@ export default function AdminDetectedRisks() {
 
   const handleResolve = async (patternId) => {
     try {
-      const response = await base44.functions.invoke('resolvePatternDetection', {
-        patternId
+      await base44.entities.PatternDetection.update(patternId, {
+        status: "resolved",
+        resolved_date: new Date().toISOString()
       });
       
       setPatterns(prev => prev.filter(p => p.id !== patternId));
