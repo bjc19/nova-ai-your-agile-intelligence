@@ -35,6 +35,9 @@ Deno.serve(async (req) => {
     }
 
     const pattern = patterns[0];
+    
+    // Log the full record to see its structure
+    console.log('🔵 Full pattern record:', JSON.stringify(pattern, null, 2));
     testData.pattern_id = pattern.id;
     testData.pattern_status = pattern.status;
     testData.pattern_created_by = pattern.created_by;
