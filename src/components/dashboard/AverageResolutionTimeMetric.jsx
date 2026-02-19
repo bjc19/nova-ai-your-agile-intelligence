@@ -229,15 +229,16 @@ export default function AverageResolutionTimeMetric({ workspaceId }) {
               </div>
             </div>
 
-            <button
-              onClick={() => setSelectedDetail(null)}
-              className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-            >
-              Fermer
-            </button>
-          </motion.div>
-        </div>
-      )}
+              <button
+                onClick={() => setSelectedDetail(null)}
+                className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Fermer
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
