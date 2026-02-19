@@ -452,7 +452,7 @@ Return JSON with: has_issue (bool), criticality (basse/moyenne/haute/critique), 
 
       return Response.json({
         success: true,
-        message: `Trello analysis completed - ${trelloProject.trello_board_name}`,
+        message: `Trello analysis completed - ${trelloProject.board_name}`,
         recordsProcessed: totalRecordsProcessed,
         analysisId: analysisId
       });
