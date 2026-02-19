@@ -308,6 +308,27 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              {/* Blockers & Risks Table */}
+              <BlockersRisksTrendTable 
+                gdprSignals={gdprSignals}
+                analysisHistory={analysisHistory} />
+              
+              {/* Intelligent Charts & Word Cloud Container */}
+              <div className="space-y-6">
+                <ChartSuggestionGenerator 
+                  selectedWorkspaceId={selectedWorkspaceId}
+                  gdprSignals={gdprSignals}
+                  analysisHistory={analysisHistory} />
+                
+                <RiskOpportunitiesWordCloud
+                  gdprSignals={gdprSignals}
+                  analysisHistory={analysisHistory} />
+              </div>
+              
+              {/* Predictive Analysis */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
