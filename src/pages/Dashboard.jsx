@@ -14,7 +14,6 @@ import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
@@ -44,7 +43,7 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals from last 7 days (filtered by workspace)
+  // Fetch GDPR signals from last 7 days
   useEffect(() => {
     const fetchSignals = async () => {
       try {
@@ -52,16 +51,7 @@ export default function Dashboard() {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        let recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
-        
-        // Filter by selected workspace if one is chosen
-        if (selectedWorkspaceId) {
-          recentMarkers = recentMarkers.filter((m) => 
-            m.jira_project_selection_id === selectedWorkspaceId || 
-            m.trello_project_selection_id === selectedWorkspaceId
-          );
-        }
-        
+        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
@@ -69,7 +59,7 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, [selectedWorkspaceId]);
+  }, []);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
@@ -116,25 +106,14 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period and workspace
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    // Filter by period
-    if (selectedPeriod) {
-      const analysisDate = new Date(analysis.created_date);
-      const startDate = new Date(selectedPeriod.start);
-      const endDate = new Date(selectedPeriod.end);
-      endDate.setHours(23, 59, 59, 999);
-      if (!(analysisDate >= startDate && analysisDate <= endDate)) return false;
-    }
-    
-    // Filter by workspace
-    if (selectedWorkspaceId) {
-      return analysis.jira_project_selection_id === selectedWorkspaceId ||
-             analysis.trello_project_selection_id === selectedWorkspaceId;
-    }
-    
-    return true;
-  });
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -383,9 +362,14 @@ export default function Dashboard() {
 
             }
             
+            {/* Blockers & Risks Trend Table - Filtered by workspace */}
+            <BlockersRisksTrendTable 
+             gdprSignals={gdprSignals} 
+             analysisHistory={analysisHistory} />
+
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
+
             {/* Key Recommendations */}
             <KeyRecommendations
               latestAnalysis={latestAnalysis}
