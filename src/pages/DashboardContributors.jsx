@@ -252,13 +252,6 @@ export default function DashboardContributors() {
                 />
               )}
 
-              {analysisHistory.length > 0 && (
-                <MetricsRadarCard
-                  analysisHistory={analysisHistory}
-                  onDiscussWithCoach={(lever) => console.log("Discuss lever:", lever)}
-                  onApplyLever={(lever) => console.log("Apply lever:", lever)}
-                />
-              )}
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
               <KeyRecommendations
