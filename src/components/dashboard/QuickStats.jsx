@@ -34,6 +34,7 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const [userRole, setUserRole] = useState('user');
   const [currentPage, setCurrentPage] = useState(0);
   const [translatedTooltips, setTranslatedTooltips] = useState({});
+  const [lastDayDate, setLastDayDate] = useState(null);
   const itemsPerPage = 10;
 
   // Fetch user role
