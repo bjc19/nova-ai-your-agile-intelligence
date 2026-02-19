@@ -234,7 +234,8 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
               <Tooltip formatter={(val) => `$${val.toLocaleString('fr-FR')}`} />
               <Legend />
               <Bar dataKey="delivered" fill="#10b981" name="Livré" />
-              <Bar dataKey="planned" fill="#d1d5db" name="Planifié" />
+              <Bar dataKey="planned" fill="#e5e7eb" name="Planifié" />
+              <Bar dataKey="gap" fill="#ef4444" name="Écart" />
             </BarChart>
           </ResponsiveContainer>
         );
@@ -248,18 +249,16 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
       <BusinessValueInputForm
         selectedWorkspaceId={selectedWorkspaceId}
         onDataSubmitted={async () => {
-          // Recharger les données Business Value
+          // Recharger les données Business Value historiques
           try {
             const user = await base44.auth.me();
             const metrics = await base44.entities.BusinessValueMetric.filter({
               workspace_id: selectedWorkspaceId,
               user_email: user.email
-            });
-            if (metrics.length > 0) {
-              setBusinessValueMetric(metrics[0]);
-            }
+            }, '-period_start_date', 100);
+            setBusinessValueMetricsHistory(metrics);
           } catch (err) {
-            console.error("Erreur recharge Business Value:", err);
+            console.error("Erreur recharge Business Value historique:", err);
           }
           setShowBusinessValueForm(false);
           // Régénérer le graphique avec les nouvelles données
@@ -282,87 +281,89 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="h-full flex flex-col"
-    >
-      <Card className="p-6 flex-1 flex flex-col">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">Générateur de Graphiques Intelligents</h3>
-          {bestChartSuggestion && (
-            <p className="text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded">
-              💡 {bestChartSuggestion.reason}
-            </p>
-          )}
-        </div>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      {selectedChart && chartData ? (
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              {suggestion && (
+                <>
+                  <div className={`p-3 rounded-lg bg-gradient-to-br ${suggestion.color}`}>
+                    {suggestion.icon && <suggestion.icon className="w-5 h-5 text-white" />}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{suggestion.name}</h3>
+                    <p className="text-sm text-slate-500">{suggestion.description}</p>
+                  </div>
+                </>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedChart(null);
+                setChartData(null);
+              }}
+              className="text-slate-500 hover:text-slate-700">
+              ✕
+            </Button>
+          </div>
 
-        {!selectedChart ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            </div>
+          ) : (
+            renderChart()
+          )}
+
+          {suggestion && (
+            <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-sm text-slate-700">
+                <span className="font-semibold">💡 Insight:</span> {suggestion.metric}
+              </p>
+            </div>
+          )}
+        </Card>
+      ) : (
+        <Card className="p-6">
+          <div className="mb-4">
+            <h3 className="font-semibold text-slate-900 mb-2">Générer un graphique</h3>
+            <p className="text-sm text-slate-500 mb-4">Visualisez vos métriques clés</p>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
-            {Object.entries(CHART_TYPES).map(([key, config]) => {
-              const Icon = config.icon;
-              const isRecommended = bestChartSuggestion?.key === key;
+            {Object.entries(CHART_TYPES).map(([key, type]) => {
+              const Icon = type.icon;
+              const isBusinessValue = key === 'business_value';
+              const hasData = isBusinessValue ? businessValueMetricsHistory.length > 0 : true;
 
               return (
                 <motion.button
                   key={key}
                   whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => generateChart(key)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    isRecommended
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 mb-2 ${isRecommended ? 'text-blue-600' : 'text-slate-600'}`} />
-                  <div className="text-sm font-semibold text-slate-900">{config.name}</div>
-                  <div className="text-xs text-slate-500">{config.metric}</div>
+                  disabled={loading || !hasData}
+                  className={`p-3 rounded-lg border-2 transition-all text-left ${
+                    loading
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:border-blue-500 hover:bg-blue-50 border-slate-200'
+                  }`}>
+                  <div className="flex items-start gap-2">
+                    <Icon className="w-4 h-4 text-blue-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">{type.name}</p>
+                      <p className="text-xs text-slate-500">{type.description}</p>
+                    </div>
+                  </div>
                 </motion.button>
               );
             })}
           </div>
-        ) : (
-          <div className="flex-1 flex flex-col">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h4 className="font-semibold text-slate-900">{suggestion?.name}</h4>
-                <p className="text-xs text-slate-500 mt-1">{suggestion?.description}</p>
-              </div>
-              <div className="flex gap-2">
-                {selectedChart === 'business_value' && businessValueMetric && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowBusinessValueForm(true)}
-                    className="gap-2"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                    Modifier
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedChart(null);
-                    setChartData(null);
-                  }}
-                >
-                  Changer
-                </Button>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-              </div>
-            ) : (
-              renderChart()
-            )}
-          </div>
-        )}
-      </Card>
+        </Card>
+      )}
     </motion.div>
   );
 }
