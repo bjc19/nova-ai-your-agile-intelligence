@@ -44,7 +44,7 @@ export default function Dashboard() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals from last 7 days
+  // Fetch GDPR signals from last 7 days (filtered by workspace)
   useEffect(() => {
     const fetchSignals = async () => {
       try {
@@ -52,7 +52,16 @@ export default function Dashboard() {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
         const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        let recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
+        
+        // Filter by selected workspace if one is chosen
+        if (selectedWorkspaceId) {
+          recentMarkers = recentMarkers.filter((m) => 
+            m.jira_project_selection_id === selectedWorkspaceId || 
+            m.trello_project_selection_id === selectedWorkspaceId
+          );
+        }
+        
         setGdprSignals(recentMarkers);
       } catch (error) {
         console.error("Erreur chargement signaux GDPR:", error);
@@ -60,7 +69,7 @@ export default function Dashboard() {
     };
 
     fetchSignals();
-  }, []);
+  }, [selectedWorkspaceId]);
 
   // Check authentication (temporarily disabled for demo)
   useEffect(() => {
