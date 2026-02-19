@@ -19,6 +19,8 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
+import TeamHealthSummary from "@/components/dashboard/TeamHealthSummary";
 
 import {
   Mic,
