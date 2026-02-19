@@ -81,9 +81,9 @@ export const useAntiPatterns = () => {
       );
       return patterns || [];
     },
-    staleTime: 60 * 60 * 1000, // 1 heure (moins souvent changé)
-    gcTime: 90 * 60 * 1000,
-    refetchInterval: 60 * 60 * 1000
+    staleTime: 60 * 60 * 1000,
+    gcTime: 120 * 60 * 1000, // Plus long car change rarement
+    refetchOnMount: 'stale'
   });
 };
 
