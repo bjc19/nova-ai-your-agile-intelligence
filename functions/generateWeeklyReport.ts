@@ -17,10 +17,42 @@ Deno.serve(async (req) => {
     const weekStart = new Date(weekEnd);
     weekStart.setDate(weekStart.getDate() - 6); // Lundi
 
-    // Récupérer les analyses de la semaine
-    const analyses = await base44.entities.AnalysisHistory.filter({
-      created_by: user.email
-    });
+    // Identifier le workspace principal actif (Jira ou Trello)
+    const [activeJiraWorkspaces, activeTrelloWorkspaces] = await Promise.all([
+      base44.entities.JiraProjectSelection.filter({ is_active: true }),
+      base44.entities.TrelloProjectSelection.filter({ is_active: true }),
+    ]);
+
+    let activeWorkspaceId = null;
+    let activeWorkspaceType = null;
+    let activeWorkspaceName = null;
+
+    if (activeJiraWorkspaces?.length > 0) {
+      const sorted = activeJiraWorkspaces.sort((a, b) =>
+        new Date(b.selected_date || b.created_date) - new Date(a.selected_date || a.created_date)
+      );
+      activeWorkspaceId = sorted[0].id;
+      activeWorkspaceType = 'jira';
+      activeWorkspaceName = sorted[0].workspace_name || sorted[0].jira_project_name;
+    } else if (activeTrelloWorkspaces?.length > 0) {
+      const sorted = activeTrelloWorkspaces.sort((a, b) =>
+        new Date(b.connected_at || b.created_date) - new Date(a.connected_at || a.created_date)
+      );
+      activeWorkspaceId = sorted[0].id;
+      activeWorkspaceType = 'trello';
+      activeWorkspaceName = sorted[0].board_name;
+    }
+
+    // Récupérer les analyses filtrées par workspace actif
+    let analyses = [];
+    if (activeWorkspaceId) {
+      const wsFilter = activeWorkspaceType === 'jira'
+        ? { jira_project_selection_id: activeWorkspaceId }
+        : { trello_project_selection_id: activeWorkspaceId };
+      analyses = await base44.entities.AnalysisHistory.filter(wsFilter);
+    } else {
+      analyses = await base44.entities.AnalysisHistory.filter({ created_by: user.email });
+    }
 
     const weekAnalyses = analyses.filter(a => {
       const analyzeDate = new Date(a.created_date);
