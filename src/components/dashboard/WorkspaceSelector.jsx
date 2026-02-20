@@ -180,5 +180,6 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         </SelectContent>
       </Select>
     </div>
+    </>
   );
 }
