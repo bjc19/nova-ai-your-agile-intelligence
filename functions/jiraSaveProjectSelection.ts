@@ -92,8 +92,9 @@ Deno.serve(async (req) => {
     
     // Get Jira connection to fetch board info
     const jiraConnections = await base44.entities.JiraConnection.filter({
-      is_active: true
-    });
+  user_email: user.email,
+  is_active: true
+});
     
     if (jiraConnections.length === 0) {
       console.warn('⚠️ No active Jira connection found');
