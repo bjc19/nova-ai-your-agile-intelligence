@@ -53,6 +53,7 @@ import AgileCoach from './pages/AgileCoach';
 import Analysis from './pages/Analysis';
 import AntiPatterns from './pages/AntiPatterns';
 import ChooseAccess from './pages/ChooseAccess';
+import Dashboard from './pages/Dashboard';
 import DashboardCommonUsers from './pages/DashboardCommonUsers';
 import DashboardContributors from './pages/DashboardContributors';
 import Demo from './pages/Demo';
@@ -69,7 +70,6 @@ import TeamManagement from './pages/TeamManagement';
 import TrelloProjectSelector from './pages/TrelloProjectSelector';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import Dashboard from './pages/Dashboard';
 import DashboardAdmins from './pages/DashboardAdmins';
 import __Layout from './Layout.jsx';
 
@@ -81,6 +81,7 @@ export const PAGES = {
     "Analysis": Analysis,
     "AntiPatterns": AntiPatterns,
     "ChooseAccess": ChooseAccess,
+    "Dashboard": Dashboard,
     "DashboardCommonUsers": DashboardCommonUsers,
     "DashboardContributors": DashboardContributors,
     "Demo": Demo,
@@ -97,7 +98,6 @@ export const PAGES = {
     "TrelloProjectSelector": TrelloProjectSelector,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "Dashboard": Dashboard,
     "DashboardAdmins": DashboardAdmins,
 }
 
