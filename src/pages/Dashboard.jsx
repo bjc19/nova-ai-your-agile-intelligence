@@ -31,8 +31,7 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2,
-  TrendingUp } from
+  Loader2 } from
 "lucide-react";
 
 export default function Dashboard() {
@@ -68,7 +67,7 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication (temporarily disabled for demo)
+  // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -76,19 +75,19 @@ export default function Dashboard() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
 
-        // Charger contexte sprint actif
+        // Load sprint context
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
         if (activeSprints.length > 0) {
           setSprintContext(activeSprints[0]);
         }
 
-        // Vérifier onboarding
+        // Check onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Vérifier alertes multi-projets en attente
+        // Check multi-project alerts
         const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
           admin_response: "pending"
         });
@@ -113,14 +112,24 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history based on selected period and workspace
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const startDate = new Date(selectedPeriod.start);
-    const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
-    return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+    
+    let matchesWorkspace = true;
+    if (selectedWorkspaceId && selectedWorkspaceType) {
+      if (selectedWorkspaceType === 'jira') {
+        matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
+      } else if (selectedWorkspaceType === 'trello') {
+        matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
+      }
+    } else if (selectedWorkspaceId) {
+      matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
+    }
+
+    return matchesPeriod && matchesWorkspace;
+  });
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -168,7 +177,7 @@ export default function Dashboard() {
     deliveryMode: sprintContext.delivery_mode,
     throughputPerWeek: sprintContext.throughput_per_week
   } : {
-    name: null, // Will be set below based on delivery mode
+    name: null,
     daysRemaining: 4,
     deliveryMode: "scrum",
     throughputPerWeek: null
@@ -179,28 +188,18 @@ export default function Dashboard() {
     sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
   }
 
-  // Simulated sprint health data (will come from Jira integration)
-  // Only show simulated data if there are analyses in the period
+  // Sprint health data based on real analysis history
   const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
     sprint_name: "Sprint 14",
-    sprint_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    risk_score: analysisHistory.length > 0 ?
-    Math.min(100, analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) * 15 +
-    analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) * 10) :
-    45,
-    status: analysisHistory.length > 0 &&
-    analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) >= 3 ?
-    "at_risk" : "healthy",
-    wip_count: 6,
+    wip_count: 8,
     wip_historical_avg: 5,
-    tickets_in_progress_over_3d: analysisHistory.length > 0 ? Math.min(3, analysisHistory[0]?.blockers_count || 0) : 1,
-    blocked_tickets_over_48h: analysisHistory.length > 0 ? Math.min(2, analysisHistory[0]?.risks_count || 0) : 0,
-    alert_sent: false,
-    recommendations: latestAnalysis?.recommendations?.slice(0, 1) || ["Réduire le WIP et prioriser les tickets bloqués"],
-    problematic_tickets: [
-    { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
-    { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }]
-
+    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+    sprint_day: 5,
+    historical_sprints_count: 4,
+    drift_acknowledged: false,
+    problematic_tickets: [],
+    gdprSignals: gdprSignals
   } : null;
 
   if (isLoading) {
@@ -248,184 +247,106 @@ export default function Dashboard() {
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
-                  <p className="text-slate-600 mt-2 text-lg">
-                    {sprintInfo.deliveryMode === "kanban" ?
-                    "Voici votre vue d'ensemble et vos dernières analyses." :
-                    t('sprintOverview')}
-                  </p>
+                  <p className="text-slate-500 mt-2">{t('sprintOverview')}</p>
                 </div>
-                
-                
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-              </div>
-              
-              {/* Time Period Selector */}
-              <div className="flex justify-end gap-3">
-              <WorkspaceSelector />
-              <TimePeriodSelector
-                  deliveryMode={sprintInfo.deliveryMode}
-                  onPeriodChange={(period) => {
-                    setSelectedPeriod(period);
-                    sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
-                    console.log("Period changed:", period);
-                  }} />
-
+                <div className="flex flex-col items-start md:items-end gap-2">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 border border-blue-200">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-900">
+                      {sprintInfo.daysRemaining} {t('daysLeftInSprint')}
+                    </span>
+                  </div>
+                  <Link to={createPageUrl("Analysis")}>
+                    <Button size="sm" className="gap-2">
+                      <Mic className="w-4 h-4" />
+                      {t('newAnalysis')}
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
-
-            {/* Quick Stats - Only show if data in period */}
-            {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
-            }
           </motion.div>
         </div>
       </div>
 
-      {/* Main Dashboard Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Multi-Project Alert */}
-        {multiProjectAlert &&
-        <div className="mb-6">
-            <MultiProjectAlert
-            detectionData={multiProjectAlert}
-            onConfirm={() => {
-              setMultiProjectAlert(null);
-              window.location.reload();
+       {/* Multi-Project Alert */}
+       {multiProjectAlert && (
+        <MultiProjectAlert
+          confidence={multiProjectAlert.confidence}
+          signals={multiProjectAlert.signals}
+          onConfirm={() => setMultiProjectAlert(null)}
+          onDismiss={() => setMultiProjectAlert(null)}
+          logId={multiProjectAlert.log_id}
+        />
+      )}
+
+      {/* Selectors */}
+      <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between border-b border-slate-200/50">
+        <div className="flex flex-col md:flex-row gap-3">
+          <TimePeriodSelector onPeriodChange={setSelectedPeriod} />
+          <WorkspaceSelector 
+            onWorkspaceChange={(id, type) => {
+              setSelectedWorkspaceId(id);
+              setSelectedWorkspaceType(type);
             }}
-            onDismiss={() => setMultiProjectAlert(null)} />
+          />
+        </div>
+      </div>
 
-          </div>
-        }
-
-        {/* Empty State for No Data in Period */}
-        {selectedPeriod && analysisHistory.length === 0 &&
-        <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-              <Calendar className="w-8 h-8 text-slate-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette période
-            </h3>
-            <p className="text-slate-600 mb-6">
-              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
-            </p>
-            <Link to={createPageUrl("Analysis")}>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
-                <Mic className="w-4 h-4 mr-2" />
-                Créer une analyse
-              </Button>
-            </Link>
-          </div>
-        }
-
-        {/* Show content only if there are analyses in the period */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {(!selectedPeriod || analysisHistory.length > 0) && (
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              {/* Sprint Health Card - Drift Detection */}
-              {sprintHealth &&
-            <SprintHealthCard
-              sprintHealth={{
-                sprint_name: "Sprint 14",
-                wip_count: 8,
-                wip_historical_avg: 5,
-                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-                sprint_day: 5,
-                historical_sprints_count: 4,
-                drift_acknowledged: false,
-                problematic_tickets: sprintHealth.problematic_tickets,
-                gdprSignals: gdprSignals
-              }}
-              onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
+              {/* Quick Stats */}
+              <QuickStats analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
 
-            }
-            
-            {/* Sprint Performance Chart */}
-            <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              {/* Sprint Health */}
+              {sprintHealth && (
+                <SprintHealthCard
+                  sprintHealth={sprintHealth}
+                  onAcknowledge={() => console.log("Drift acknowledged")}
+                  onReviewSprint={() => console.log("Review sprint")}
+                />
+              )}
 
+              {/* Sprint Performance Chart */}
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+
+              {/* Key Recommendations */}
+              <KeyRecommendations
+                latestAnalysis={latestAnalysis}
+                sourceUrl={latestAnalysis?.sourceUrl}
+                sourceName={latestAnalysis?.sourceName}
+              />
+
+              {/* Blockers & Risks Trend Table */}
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+
+              {/* Chart Suggestion Generator */}
+              <ChartSuggestionGenerator analysisHistory={analysisHistory} />
+
+              {/* Predictive Insights */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+            </div>
+
+            <div className="space-y-6">
+              {/* Pattern Detection Word Cloud */}
+              <PatternDetectionWordCloud analysisHistory={analysisHistory} />
+
+              {/* Recent Analyses */}
+              <RecentAnalyses analyses={analysisHistory} />
+
+              {/* Integration Status */}
+              <IntegrationStatus />
+
+              {/* Daily Quote */}
+              <DailyQuote teamContext={null} />
+            </div>
           </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
-          </div>
-        </div>
-        }
-
-        {(user?.role === 'admin') &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-8">
-
-    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-        <div>
-          <h3 className="text-xl font-semibold text-white mb-2">
-          </h3>
-          <p className="text-slate-400 max-w-lg">
-            {t('importDataDescription')}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to={createPageUrl("Settings")}>
-            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-              <Zap className="w-4 h-4 mr-2" />
-              {t('connectSlack')}
-            </Button>
-          </Link>
-          <Link to={createPageUrl("Analysis")}>
-            <Button className="bg-white text-slate-900 hover:bg-slate-100">
-              {t('startAnalysis')}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
+        )}
       </div>
     </div>
-  </motion.div>
-        }
-      </div>
-    </div>);
-
+  );
 }
