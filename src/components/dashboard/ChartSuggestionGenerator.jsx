@@ -83,12 +83,33 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
     setLoading(true);
     setSelectedChart(chartType);
     setSuggestion(CHART_TYPES[chartType]);
+    setMetricsError(null);
 
     try {
-      const mockData = generateMockChartData(chartType);
-      setChartData(mockData);
+      // Récupérer les données réelles depuis MetricsHistory
+      const metricsResponse = await base44.entities.MetricsHistory.filter({
+        workspace_id: selectedWorkspaceId
+      }, '-metric_date', 7); // Les 7 derniers jours
+
+      if (metricsResponse && metricsResponse.length > 0) {
+        // Utiliser les données réelles
+        const realData = metricsResponse.map(metric => ({
+          day: new Date(metric.metric_date).toLocaleDateString('fr-FR', { weekday: 'short' }),
+          date: metric.metric_date,
+          ...metric
+        }));
+        setChartData(realData);
+      } else {
+        // Fallback sur les données générées si aucune donnée réelle
+        const mockData = generateMockChartData(chartType);
+        setChartData(mockData);
+      }
     } catch (error) {
       console.error("Erreur génération graphique:", error);
+      setMetricsError(error.message);
+      // Fallback sur mock data en cas d'erreur
+      const mockData = generateMockChartData(chartType);
+      setChartData(mockData);
     } finally {
       setLoading(false);
     }
