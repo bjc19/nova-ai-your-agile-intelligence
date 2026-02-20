@@ -43,6 +43,8 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
   const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [suggestion, setSuggestion] = useState(null);
+  const [metricsLoading, setMetricsLoading] = useState(false);
+  const [metricsError, setMetricsError] = useState(null);
 
   // Analyser les données disponibles pour suggérer le meilleur graphique
   const bestChartSuggestion = useMemo(() => {
