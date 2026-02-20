@@ -58,10 +58,15 @@ export default function PatternDetectionWordCloud({ selectedWorkspaceId, selecte
   });
 
   const sortedPatterns = Object.entries(patternCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 12);
+    .filter(([_, count]) => count >= 5) // Only show patterns with 5+ occurrences
+    .sort((a, b) => b[1] - a[1]);
+
+  if (sortedPatterns.length === 0) {
+    return null;
+  }
 
   const maxCount = Math.max(...sortedPatterns.map(p => p[1]));
+  const minCount = Math.min(...sortedPatterns.map(p => p[1]));
 
   return (
     <motion.div
