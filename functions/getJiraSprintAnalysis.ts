@@ -22,17 +22,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Fetch Project Context
-    const jiraProjectSelection = await base44.asServiceRole.entities.JiraProjectSelection.get(jiraProjectSelectionId);
-    
-    if (!jiraProjectSelection) {
-      return new Response(JSON.stringify({ error: 'Jira project selection not found' }), { 
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    // 2. Fetch Project Context & Jira Connection
+        const jiraProjectSelection = await base44.asServiceRole.entities.JiraProjectSelection.get(jiraProjectSelectionId);
 
-    const { jira_cloud_id, jira_board_id, jira_project_key } = jiraProjectSelection;
+        if (!jiraProjectSelection) {
+          return new Response(JSON.stringify({ error: 'Jira project selection not found' }), { 
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+
+        const { jira_cloud_id, jira_board_id, jira_project_key } = jiraProjectSelection;
+
+        // If cloud_id is missing, fetch it from JiraConnection
+        let finalCloudId = jira_cloud_id;
+        if (!finalCloudId) {
+          const jiraConns = await base44.asServiceRole.entities.JiraConnection.filter({
+            user_email: user.email,
+            is_active: true
+          }, '-created_date', 1);
+
+          if (jiraConns && jiraConns.length > 0) {
+            finalCloudId = jiraConns[0].cloud_id;
+          }
+        }
 
     if (!jira_cloud_id || !jira_board_id) {
       return new Response(JSON.stringify({ error: 'Missing Jira cloud_id or board_id' }), { 
