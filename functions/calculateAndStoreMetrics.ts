@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
+  let bodyData;
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -9,7 +10,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin or Contributor access required' }, { status: 403 });
     }
 
-    const { workspaceId, workspaceType, days = 30 } = await req.json();
+    bodyData = await req.json();
+    const { workspaceId, workspaceType, days = 30 } = bodyData;
     
     if (!workspaceId || !workspaceType) {
       return Response.json({ error: 'workspaceId and workspaceType are required' }, { status: 400 });
