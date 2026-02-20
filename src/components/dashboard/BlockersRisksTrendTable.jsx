@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/LanguageContext";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-export default function BlockersRisksTrendTable({ gdprSignals = [], analysisHistory = [], jiraIssues = [], jiraStats = null, jiraLoading = false }) {
+export default function BlockersRisksTrendTable({ gdprSignals = [], analysisHistory = [] }) {
   const { t, language } = useLanguage();
   const [viewMode, setViewMode] = useState('table');
 
-  // Build 5-day trend from REAL data (including Jira if available)
+  // Build 5-day trend from REAL data
   const trendData = useMemo(() => {
-    if (gdprSignals.length === 0 && analysisHistory.length === 0 && jiraIssues.length === 0) {
+    if (gdprSignals.length === 0 && analysisHistory.length === 0) {
       return [];
     }
 
@@ -34,18 +34,7 @@ export default function BlockersRisksTrendTable({ gdprSignals = [], analysisHist
           criticite: 'moyenne',
           type: 'analysis_risk'
         }))
-      ]),
-      // Add Jira blockers/risks (current date)
-      ...jiraIssues.filter(i => i.is_blocker).map(i => ({
-        date: new Date(),
-        criticite: 'critique',
-        type: 'jira_blocker'
-      })),
-      ...jiraIssues.filter(i => i.is_risk).map(i => ({
-        date: new Date(),
-        criticite: 'moyenne',
-        type: 'jira_risk'
-      }))
+      ])
     ];
 
     if (allSignals.length === 0) return [];

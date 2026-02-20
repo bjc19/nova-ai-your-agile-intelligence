@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Loader2, TrendingUp, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import BlockersRisksTrendTable from "./BlockersRisksTrendTable";
-import { useJiraIssuesWithPolling } from "@/components/hooks/useJiraIssuesWithPolling";
 
-export default function AdminDetectedRisks({ selectedWorkspaceId = null, selectedWorkspaceType = null }) {
+export default function AdminDetectedRisks() {
   const [patterns, setPatterns] = useState([]);
   const [gdprSignals, setGdprSignals] = useState([]);
   const [analysisHistory, setAnalysisHistory] = useState([]);
@@ -16,32 +15,8 @@ export default function AdminDetectedRisks({ selectedWorkspaceId = null, selecte
   const [error, setError] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
   const [showAllRisks, setShowAllRisks] = useState(false);
-  const [jiraProjectKey, setJiraProjectKey] = useState(null);
 
   const INITIAL_DISPLAY_COUNT = 3;
-
-  // Fetch Jira project key if Jira workspace is selected
-  useEffect(() => {
-    const fetchJiraProjectKey = async () => {
-      if (selectedWorkspaceType === 'jira' && selectedWorkspaceId) {
-        try {
-          const workspace = await base44.entities.JiraProjectSelection.get(selectedWorkspaceId);
-          if (workspace) {
-            setJiraProjectKey(workspace.jira_project_key);
-          }
-        } catch (err) {
-          console.error("Erreur récupération clé projet Jira:", err);
-        }
-      } else {
-        setJiraProjectKey(null);
-      }
-    };
-    fetchJiraProjectKey();
-  }, [selectedWorkspaceId, selectedWorkspaceType]);
-
-  // Use Jira issues if available
-  const { issues: jiraIssues = [], statistics: jiraStats = null, loading: jiraLoading } = 
-    useJiraIssuesWithPolling(jiraProjectKey, 'all', 30);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -253,14 +228,8 @@ export default function AdminDetectedRisks({ selectedWorkspaceId = null, selecte
         )}
       </Card>
 
-      {/* Tableau Bloquants & Risques - avec données Jira si disponibles */}
-      <BlockersRisksTrendTable 
-        gdprSignals={gdprSignals} 
-        analysisHistory={analysisHistory}
-        jiraIssues={jiraIssues}
-        jiraStats={jiraStats}
-        jiraLoading={jiraLoading}
-      />
+      {/* Tableau Bloquants & Risques */}
+      <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
     </div>
   );
 }

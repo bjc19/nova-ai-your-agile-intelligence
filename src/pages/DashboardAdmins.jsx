@@ -334,20 +334,6 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {/* Detected Risks & Blockers from all sources */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8">
-          <AdminDetectedRisks 
-            selectedWorkspaceId={selectedWorkspaceId}
-            selectedWorkspaceType={selectedWorkspaceType}
-          />
-        </motion.div>
-        }
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
