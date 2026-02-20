@@ -261,10 +261,10 @@ export const translations = {
     fromYesterday: "from yesterday",
     noChange: "No change",
     more: "more",
-    totalBlockers: "Total Blockers",
-    risksIdentified: "Risks Identified",
+    totalBlockers: "Detected Blockers (source: analyses)",
+    risksIdentified: "Detected Risks (source: analyses)",
     analysesRun: "Analyses Run",
-    resolved: "Resolved",
+    resolved: "Resolved Items",
     technicalHealth: "Technical Health",
     
     // Settings
