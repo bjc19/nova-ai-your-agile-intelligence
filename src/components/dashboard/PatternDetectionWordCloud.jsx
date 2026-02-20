@@ -81,7 +81,10 @@ export default function PatternDetectionWordCloud({ selectedWorkspaceId, selecte
         <CardContent>
           <div className="flex flex-wrap gap-3 justify-center py-6">
             {sortedPatterns.map(([pattern, count], idx) => {
-              const size = 0.8 + (count / maxCount) * 0.6;
+              // Scale from 0.85rem to 2.5rem based on count
+              const normalizedCount = (count - minCount) / (maxCount - minCount);
+              const size = 0.85 + normalizedCount * 1.65;
+              
               const colors = [
                 "bg-red-100 text-red-700",
                 "bg-orange-100 text-orange-700",
@@ -94,11 +97,11 @@ export default function PatternDetectionWordCloud({ selectedWorkspaceId, selecte
               return (
                 <motion.div
                   key={idx}
-                  whileHover={{ scale: 1.1 }}
-                  className={`px-3 py-1 rounded-full font-medium transition-all ${colors[idx % colors.length]}`}
+                  whileHover={{ scale: 1.15 }}
+                  className={`px-4 py-2 rounded-full font-semibold transition-all cursor-pointer ${colors[idx % colors.length]}`}
                   style={{ fontSize: `${size}rem` }}
                 >
-                  {pattern} <span className="text-xs opacity-70">({count})</span>
+                  {pattern} <span className="text-xs opacity-60 font-normal">×{count}</span>
                 </motion.div>
               );
             })}
