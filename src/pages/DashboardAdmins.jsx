@@ -342,10 +342,7 @@ export default function DashboardAdmins() {
 
             <ChartSuggestionGenerator analysisHistory={analysisHistory} />
             <AdminDetectedRisks analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
-            <RiskOpportunitiesWordCloud 
-              selectedWorkspaceId={selectedWorkspaceId}
-              analysisHistory={analysisHistory}
-              gdprSignals={gdprSignals} />
+            <RiskOpportunitiesWordCloud analysisHistory={analysisHistory} />
             <IntegrationStatus />
           </div>
         }
