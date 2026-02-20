@@ -15,10 +15,39 @@ Deno.serve(async (req) => {
     const monthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const monthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
 
-    // Récupérer les analyses du mois
-    const analyses = await base44.entities.AnalysisHistory.filter({
-      created_by: user.email
-    });
+    // Identifier le workspace principal actif (Jira ou Trello)
+    const [activeJiraWorkspaces, activeTrelloWorkspaces] = await Promise.all([
+      base44.entities.JiraProjectSelection.filter({ is_active: true }),
+      base44.entities.TrelloProjectSelection.filter({ is_active: true }),
+    ]);
+
+    let activeWorkspaceId = null;
+    let activeWorkspaceType = null;
+
+    if (activeJiraWorkspaces?.length > 0) {
+      const sorted = activeJiraWorkspaces.sort((a, b) =>
+        new Date(b.selected_date || b.created_date) - new Date(a.selected_date || a.created_date)
+      );
+      activeWorkspaceId = sorted[0].id;
+      activeWorkspaceType = 'jira';
+    } else if (activeTrelloWorkspaces?.length > 0) {
+      const sorted = activeTrelloWorkspaces.sort((a, b) =>
+        new Date(b.connected_at || b.created_date) - new Date(a.connected_at || a.created_date)
+      );
+      activeWorkspaceId = sorted[0].id;
+      activeWorkspaceType = 'trello';
+    }
+
+    // Récupérer les analyses filtrées par workspace actif
+    let analyses = [];
+    if (activeWorkspaceId) {
+      const wsFilter = activeWorkspaceType === 'jira'
+        ? { jira_project_selection_id: activeWorkspaceId }
+        : { trello_project_selection_id: activeWorkspaceId };
+      analyses = await base44.entities.AnalysisHistory.filter(wsFilter);
+    } else {
+      analyses = await base44.entities.AnalysisHistory.filter({ created_by: user.email });
+    }
 
     const monthAnalyses = analyses.filter(a => {
       const analyzeDate = new Date(a.created_date);
