@@ -28,7 +28,7 @@ export function adaptMessage(messageKey, userRole, context = {}) {
       user: "Réunions Suivies"
     },
     resolved: {
-      admin: "Résolus  (sources:vos validations)",
+      admin: "Résolus (sources:vos validations)",
       contributor: "Problèmes Résolus",
       user: "Succès Réalisés"
     },
