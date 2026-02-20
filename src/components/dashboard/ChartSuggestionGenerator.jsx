@@ -207,7 +207,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
               <YAxis label={{ value: '%', angle: -90, position: 'insideLeft' }} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="cfr" fill="#f59e0b" name="Change Failure Rate" />
+              <Bar dataKey="change_failure_rate" fill="#f59e0b" name="Change Failure Rate" />
               <Line type="monotone" dataKey="ideal" stroke="#10b981" strokeDasharray="5 5" name="Idéal" />
             </ComposedChart>
           </ResponsiveContainer>
