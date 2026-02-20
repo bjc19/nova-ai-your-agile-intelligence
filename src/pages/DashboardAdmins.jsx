@@ -4,8 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -21,6 +19,12 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
+import AnalyticsInsightsBlock from "@/components/dashboard/AnalyticsInsightsBlock";
+import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
+import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
+import PatternDetectionWordCloud from "@/components/dashboard/PatternDetectionWordCloud";
 
 import {
   Mic,
@@ -235,9 +239,6 @@ export default function DashboardAdmins() {
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
-                  <p className="text-slate-500 mt-1 text-sm capitalize">
-                    {format(new Date(), "EEEE d MMMM", { locale: fr })}
-                  </p>
                   <p className="text-slate-600 mt-2 text-lg">
                     {t('sprintOverview')}
                   </p>
@@ -328,7 +329,21 @@ export default function DashboardAdmins() {
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              sourceName={latestAnalysis?.sourceName}
+              selectedWorkspaceId={selectedWorkspaceId}
+              selectedWorkspaceType={selectedWorkspaceType} />
+
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <AdminDetectedRisks selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <BlockersRisksTrendTable selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <ChartSuggestionGenerator analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
+
+              <PatternDetectionWordCloud selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <AnalyticsInsightsBlock selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
 
             </div>
 
