@@ -14,6 +14,7 @@ import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
@@ -332,6 +333,20 @@ export default function DashboardAdmins() {
               <IntegrationStatus />
             </div>
           </div>
+        }
+
+        {/* Detected Risks & Blockers from all sources */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-8">
+          <AdminDetectedRisks 
+            selectedWorkspaceId={selectedWorkspaceId}
+            selectedWorkspaceType={selectedWorkspaceType}
+          />
+        </motion.div>
         }
 
         <motion.div
