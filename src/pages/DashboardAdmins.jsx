@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import JiraSprintAnalysisDisplay from "@/components/dashboard/JiraSprintAnalysisDisplay";
 
 import {
   Mic,
@@ -330,7 +329,6 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              <JiraSprintAnalysisDisplay selectedWorkspaceId={selectedWorkspaceId} />
               <IntegrationStatus />
             </div>
           </div>
