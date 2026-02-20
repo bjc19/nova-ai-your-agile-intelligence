@@ -330,6 +330,7 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <JiraSprintAnalysisDisplay selectedWorkspaceId={selectedWorkspaceId} />
               <IntegrationStatus />
             </div>
           </div>
