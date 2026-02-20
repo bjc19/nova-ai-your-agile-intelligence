@@ -329,7 +329,21 @@ export default function DashboardAdmins() {
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              sourceName={latestAnalysis?.sourceName}
+              selectedWorkspaceId={selectedWorkspaceId}
+              selectedWorkspaceType={selectedWorkspaceType} />
+
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <AdminDetectedRisks selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <BlockersRisksTrendTable selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <ChartSuggestionGenerator analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
+
+              <PatternDetectionWordCloud selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
+
+              <AnalyticsInsightsBlock selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
 
             </div>
 
