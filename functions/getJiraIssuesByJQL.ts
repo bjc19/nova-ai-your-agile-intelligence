@@ -94,9 +94,9 @@ Deno.serve(async (req) => {
 
     console.log('Executing JQL:', jql);
 
-    // Exécuter la requête JQL
+    // Exécuter la requête JQL - utiliser le nouvel endpoint
     const issuesResponse = await fetch(
-      `https://api.atlassian.com/ex/jira/${connection.cloud_id}/rest/api/3/search?jql=${encodeURIComponent(jql)}&maxResults=100&fields=key,summary,status,priority,assignee,updated,created,labels,customfield_10036`,
+      `https://api.atlassian.com/ex/jira/${connection.cloud_id}/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=100&fields=key,summary,status,priority,assignee,updated,created,labels,customfield_10036`,
       {
         headers: {
           'Authorization': `Bearer ${connection.access_token}`,
