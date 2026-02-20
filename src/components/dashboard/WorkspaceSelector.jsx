@@ -8,7 +8,9 @@ import WorkspaceChangeAlert from "./WorkspaceChangeAlert";
 
 const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
     const [selectedValue, setSelectedValue] = useState(activeWorkspaceId || null);
-    const [workspaces, setWorkspaces] = useState([]);
+    const [jiraWorkspaces, setJiraWorkspaces] = useState([]);
+    const [trelloWorkspaces, setTrelloWorkspaces] = useState([]);
+    const [activeSource, setActiveSource] = useState(null);
     const [loading, setLoading] = useState(true);
     const [alertWorkspace, setAlertWorkspace] = useState(null);
     const [selectedWorkspaceName, setSelectedWorkspaceName] = useState('Sélectionner un workspace');
@@ -17,20 +19,24 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
         return type === 'jira' ? '🔷' : '🔵';
     };
 
-    const getWorkspaceName = (ws) => {
-        return ws.type === 'jira' ? ws.jira_project_name : ws.board_name || 'Unnamed Workspace';
+    const getWorkspaceName = (ws, type) => {
+        return type === 'jira' ? ws.jira_project_name : ws.board_name || 'Unnamed Workspace';
     };
 
     const handleValueChange = (value) => {
-        debugLog('handleValueChange', { value });
+        debugLog('handleValueChange', { value, activeSource });
         setSelectedValue(value);
-        const ws = workspaces.find((w) => w.id === value);
+        
+        const ws = activeSource === 'jira' 
+            ? jiraWorkspaces.find((w) => w.id === value)
+            : trelloWorkspaces.find((w) => w.id === value);
         
         if (ws) {
-            setSelectedWorkspaceName(getWorkspaceName(ws));
-            setAlertWorkspace({ id: value, type: ws.type });
+            const name = getWorkspaceName(ws, activeSource);
+            setSelectedWorkspaceName(name);
+            setAlertWorkspace({ id: value, type: activeSource });
             if (onWorkspaceChange) {
-                onWorkspaceChange(value, ws.type);
+                onWorkspaceChange(value, activeSource);
             }
         }
     };
@@ -43,19 +49,26 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
                 const jiraProjects = await base44.entities.JiraProjectSelection.filter({ is_active: true });
                 const trelloProjects = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
                 
-                const allWorkspaces = [
-                    ...jiraProjects.map(p => ({ ...p, type: 'jira' })),
-                    ...trelloProjects.map(p => ({ ...p, type: 'trello' }))
-                ];
-                
-                setWorkspaces(allWorkspaces);
+                setJiraWorkspaces(jiraProjects || []);
+                setTrelloWorkspaces(trelloProjects || []);
                 debugLog('WorkspaceSelector', { step: 'workspaces loaded', jira: jiraProjects.length, trello: trelloProjects.length });
                 
-                // Set initial workspace name
-                if (activeWorkspaceId) {
-                    const initialWs = allWorkspaces.find((w) => w.id === activeWorkspaceId);
+                // Détermine la source active en fonction de ce qui est connecté
+                let sourceActive = null;
+                if (jiraProjects && jiraProjects.length > 0) {
+                    sourceActive = 'jira';
+                } else if (trelloProjects && trelloProjects.length > 0) {
+                    sourceActive = 'trello';
+                }
+                
+                setActiveSource(sourceActive);
+                
+                // Set initial workspace name basé sur la source active
+                if (activeWorkspaceId && sourceActive) {
+                    const workspaces = sourceActive === 'jira' ? jiraProjects : trelloProjects;
+                    const initialWs = workspaces.find((w) => w.id === activeWorkspaceId);
                     if (initialWs) {
-                        setSelectedWorkspaceName(getWorkspaceName(initialWs));
+                        setSelectedWorkspaceName(getWorkspaceName(initialWs, sourceActive));
                     } else {
                         setSelectedValue(null);
                     }
