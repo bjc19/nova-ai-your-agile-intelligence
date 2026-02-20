@@ -323,7 +323,9 @@ export default function DashboardAdmins() {
             <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
+              onReviewSprint={() => console.log("Review sprint")}
+              selectedWorkspaceId={selectedWorkspaceId}
+              selectedWorkspaceType={selectedWorkspaceType} />
 
             }
               
