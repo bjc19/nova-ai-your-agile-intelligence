@@ -19,7 +19,9 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PatternDetectionWordCloud from "@/components/dashboard/PatternDetectionWordCloud";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
+import AnalyticsInsightsBlock from "@/components/dashboard/AnalyticsInsightsBlock";
 
 import {
   Mic,
@@ -316,8 +318,9 @@ export default function DashboardAdmins() {
             <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
-
+              onReviewSprint={() => console.log("Review sprint")}
+              selectedWorkspaceId={selectedWorkspaceId}
+              selectedWorkspaceType={selectedWorkspaceType} />
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
@@ -326,12 +329,17 @@ export default function DashboardAdmins() {
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
 
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
+
+              <AdminDetectedRisks />
+
+              <AnalyticsInsightsBlock
+                selectedWorkspaceId={selectedWorkspaceId}
+                gdprSignals={gdprSignals}
+                analysisHistory={analysisHistory} />
             </div>
 
             <div className="space-y-6">
-              <PatternDetectionWordCloud 
-                selectedWorkspaceId={selectedWorkspaceId}
-                selectedWorkspaceType={selectedWorkspaceType} />
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>
