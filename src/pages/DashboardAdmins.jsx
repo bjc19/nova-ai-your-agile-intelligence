@@ -19,10 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
-import AnalyticsInsightsBlock from "@/components/dashboard/AnalyticsInsightsBlock";
-import PatternDetectionWordCloud from "@/components/dashboard/PatternDetectionWordCloud";
 
 import {
   Mic,
@@ -332,9 +328,6 @@ export default function DashboardAdmins() {
             </div>
 
             <div className="space-y-6">
-              <PatternDetectionWordCloud 
-                selectedWorkspaceId={selectedWorkspaceId}
-                selectedWorkspaceType={selectedWorkspaceType} />
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>
