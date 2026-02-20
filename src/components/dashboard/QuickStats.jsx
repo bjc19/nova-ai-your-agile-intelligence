@@ -35,6 +35,7 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
    const [currentPage, setCurrentPage] = useState(0);
    const [translatedTooltips, setTranslatedTooltips] = useState({});
    const [lastDayDate, setLastDayDate] = useState(null);
+   const [teamContext, setTeamContext] = useState(null);
    const itemsPerPage = 10;
 
    // Fetch user role
@@ -57,6 +58,21 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
        setGdprSignals(propGdprSignals);
      }
    }, [propGdprSignals]);
+
+   // Fetch TeamContext for team health
+   useEffect(() => {
+     const fetchTeamHealth = async () => {
+       try {
+         const contexts = await base44.entities.TeamContext.list(null, 1);
+         if (contexts?.length > 0) {
+           setTeamContext(contexts[0]);
+         }
+       } catch (error) {
+         console.error('Error fetching team context:', error);
+       }
+     };
+     fetchTeamHealth();
+   }, []);
 
   // Anonymize names in text
   const anonymizeNamesInText = (text) => {
@@ -146,11 +162,22 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
    const totalBlockers = totalsData.blockers;
    const totalRisks = totalsData.risks;
   
-  // IST = Resolved count from last day / Total items ever detected (all data)
-  const resolvedBlockers = resolvedItems.length;
-  const totalInitialProblems = (gdprSignals.length + analysisHistory.flatMap(a => [...(a.analysis_data?.blockers || []), ...(a.analysis_data?.risks || [])]).length);
-  const technicalHealthIndex = totalInitialProblems > 0 ? ((resolvedBlockers / totalInitialProblems) * 100).toFixed(0) : 0;
-  const healthStatus = technicalHealthIndex >= 50 ? "healthy" : "critical";
+  // Team Health Index calculation based on TeamContext
+  const calculateTeamHealth = () => {
+    if (!teamContext) return 0;
+    let score = 0;
+    if (teamContext.communication_tone === 'constructive') score += 30;
+    else if (teamContext.communication_tone === 'neutral') score += 15;
+    if (teamContext.engagement_level === 'high') score += 25;
+    else if (teamContext.engagement_level === 'moderate') score += 12;
+    const retroRate = teamContext.retro_actions_completed_rate || 0;
+    score += (retroRate / 100) * 25;
+    if (teamContext.conversation_balance === 'balanced') score += 20;
+    else if (teamContext.conversation_balance === 'dominated') score += 8;
+    return Math.round(score);
+  };
+  const teamHealthScore = teamContext ? calculateTeamHealth() : 0;
+  const healthStatus = teamHealthScore >= 60 ? "healthy" : teamHealthScore >= 40 ? "moderate" : "critical";
   
   // Only show stats if we have real data
   const hasRealData = gdprSignals.length > 0 || analysisHistory.length > 0 || resolvedItems.length > 0;
@@ -173,125 +200,117 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
        textColor: "text-amber-600",
      },
      {
-       labelKey: "resolved",
-       value: resolvedBlockers,
-       icon: CheckCircle2,
-       color: "from-emerald-500 to-emerald-600",
-       bgColor: "bg-emerald-500/10",
-       textColor: "text-emerald-600",
-     },
-     {
-       labelKey: "technicalHealth",
-       value: technicalHealthIndex,
+       labelKey: "teamHealth",
+       value: teamHealthScore,
        icon: Activity,
-       color: healthStatus === "healthy" ? "from-green-500 to-green-600" : "from-red-500 to-red-600",
-       bgColor: healthStatus === "healthy" ? "bg-green-500/10" : "bg-red-500/10",
-       textColor: healthStatus === "healthy" ? "text-green-600" : "text-red-600",
+       color: healthStatus === "healthy" ? "from-green-500 to-green-600" : healthStatus === "moderate" ? "from-yellow-500 to-yellow-600" : "from-red-500 to-red-600",
+       bgColor: healthStatus === "healthy" ? "bg-green-500/10" : healthStatus === "moderate" ? "bg-yellow-500/10" : "bg-red-500/10",
+       textColor: healthStatus === "healthy" ? "text-green-600" : healthStatus === "moderate" ? "text-yellow-600" : "text-red-600",
      },
    ] : [];
 
 
 
 
-
+ 
   // Helper to generate tooltip for technicalHealth
    const getTechnicalHealthTooltip = () => {
      if (language === 'fr') {
        return {
          title: "Indice de Santé Technique (IST)",
-         formula: `Résolus (${resolvedBlockers}) ÷ Total détecté (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
-         interpretation: technicalHealthIndex >= 50
-           ? `✓ Excellent : ${technicalHealthIndex}% des problèmes détectés ont été résolus.`
-           : `⚠ À améliorer : Seulement ${technicalHealthIndex}% des problèmes détectés ont été résolus.`,
-         tips: technicalHealthIndex >= 50
+         formula: `Résolus (${resolvedItems.length}) ÷ Total détecté (${gdprSignals.length + analysisHistory.flatMap(a => [...(a.analysis_data?.blockers || []), ...(a.analysis_data?.risks || [])]).length}) × 100`,
+         interpretation: teamHealthScore >= 50
+           ? `✓ Excellent : ${teamHealthScore}% des problèmes détectés ont été résolus.`
+           : `⚠ À améliorer : Seulement ${teamHealthScore}% des problèmes détectés ont été résolus.`,
+         tips: teamHealthScore >= 50
            ? "Continuez à résoudre les bloquants et risques détectés."
            : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
        };
      } else {
        return {
          title: "Technical Health Index (IST)",
-         formula: `Resolved (${resolvedBlockers}) ÷ Total detected (${totalInitialProblems}) × 100 = ${technicalHealthIndex}%`,
-         interpretation: technicalHealthIndex >= 50
-           ? `✓ Excellent: ${technicalHealthIndex}% of detected problems have been resolved.`
-           : `⚠ Needs improvement: Only ${technicalHealthIndex}% of detected problems have been resolved.`,
-         tips: technicalHealthIndex >= 50
+         formula: `Resolved (${resolvedItems.length}) ÷ Total detected (${gdprSignals.length + analysisHistory.flatMap(a => [...(a.analysis_data?.blockers || []), ...(a.analysis_data?.risks || [])]).length}) × 100`,
+         interpretation: teamHealthScore >= 50
+           ? `✓ Excellent: ${teamHealthScore}% of detected problems have been resolved.`
+           : `⚠ Needs improvement: Only ${teamHealthScore}% of detected problems have been resolved.`,
+         tips: teamHealthScore >= 50
            ? "Keep resolving detected blockers and risks."
            : "Prioritize resolving blockers before adding new tasks.",
        };
      }
    };
 
-  const paginatedStats = stats.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
-  const totalPages = Math.ceil(stats.length / itemsPerPage);
+   const paginatedStats = stats.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+   const totalPages = Math.ceil(stats.length / itemsPerPage);
 
-  if (!hasRealData) {
-    return null; // Don't render if no real data
-  }
+   if (!hasRealData) {
+     return null; // Don't render if no real data
+   }
 
-  return (
-     <TooltipProvider>
-       <div className="space-y-4">
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {paginatedStats.map((stat, index) => {
-             const isHealthCard = stat.labelKey === "technicalHealth";
-             const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
+   return (
+      <TooltipProvider>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           {paginatedStats.map((stat, index) => {
+              const isHealthCard = stat.labelKey === "teamHealth";
+              const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
 
-             return (
-               <motion.div
-                 key={stat.labelKey}
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ duration: 0.4, delay: 0.1 * index }}
-                 onClick={() => handleStatClick(stat.labelKey)}
-                 className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
-               >
-                 <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
-                 <div className="relative">
-                   <div className="flex items-center gap-2 mb-3">
-                     <div className={`inline-flex p-2 rounded-xl ${stat.bgColor}`}>
-                       <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
-                     </div>
-                     {isHealthCard && (
-                       <Tooltip>
-                         <TooltipTrigger asChild>
-                           <HelpCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
-                         </TooltipTrigger>
-                         <TooltipContent className="max-w-xs" side="top">
-                           <div className="space-y-2 text-xs">
-                             <p className="font-semibold text-slate-100">{healthTooltip?.title}</p>
-                             <p className="text-slate-300">{healthTooltip?.formula}</p>
-                             <p className="text-slate-300 italic">{healthTooltip?.interpretation}</p>
-                             <p className="text-slate-400 border-t border-slate-600 pt-2">{healthTooltip?.tips}</p>
-                           </div>
-                         </TooltipContent>
-                       </Tooltip>
-                     )}
-                   </div>
-                   <p className="text-3xl font-bold text-slate-900">{stat.value}{isHealthCard ? '%' : (stat.suffix || '')}</p>
-                   <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
-                 </div>
-               </motion.div>
-             );
-           })}
-        </div>
+              return (
+                <motion.div
+                  key={stat.labelKey}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.1 * index }}
+                  onClick={() => handleStatClick(stat.labelKey)}
+                  className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
+                >
+                  <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className={`inline-flex p-2 rounded-xl ${stat.bgColor}`}>
+                        <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
+                      </div>
+                      {isHealthCard && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs" side="top">
+                            <div className="space-y-2 text-xs">
+                              <p className="font-semibold text-slate-100">{healthTooltip?.title}</p>
+                              <p className="text-slate-300">{healthTooltip?.formula}</p>
+                              <p className="text-slate-300 italic">{healthTooltip?.interpretation}</p>
+                              <p className="text-slate-400 border-t border-slate-600 pt-2">{healthTooltip?.tips}</p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <p className="text-3xl font-bold text-slate-900">{stat.value}{isHealthCard ? '%' : (stat.suffix || '')}</p>
+                    <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+           </div>
 
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2">
-            {Array.from({ length: totalPages }).map((_, page) => (
-              <motion.button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  currentPage === page ? 'bg-slate-900 w-8' : 'bg-slate-300 hover:bg-slate-400'
-                }`}
-                aria-label={`Page ${page + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </TooltipProvider>
-  );
-}
+           {totalPages > 1 && (
+             <div className="flex justify-center items-center gap-2">
+               {Array.from({ length: totalPages }).map((_, page) => (
+                 <motion.button
+                   key={page}
+                   onClick={() => setCurrentPage(page)}
+                   whileHover={{ scale: 1.1 }}
+                   whileTap={{ scale: 0.95 }}
+                   className={`w-2 h-2 rounded-full transition-all ${
+                     currentPage === page ? 'bg-slate-900 w-8' : 'bg-slate-300 hover:bg-slate-400'
+                   }`}
+                   aria-label={`Page ${page + 1}`}
+                 />
+               ))}
+             </div>
+           )}
+         </div>
+       </TooltipProvider>
+     );
+   }
