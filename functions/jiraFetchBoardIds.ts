@@ -9,12 +9,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get active Jira connection
-    const allConnections = await base44.asServiceRole.entities.JiraConnection.list();
-    const connections = allConnections.filter(c => 
-      c.data.user_email === user.email && 
-      c.data.is_active === true
-    );
+    // Get active Jira connection - use user-scoped to respect RLS
+    const connections = await base44.entities.JiraConnection.list();
 
     if (!connections || connections.length === 0) {
       return Response.json({ error: 'No active Jira connection' }, { status: 400 });
@@ -28,11 +24,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid Jira connection' }, { status: 400 });
     }
 
-    // Get all active project selections
-    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
+    // Get all active project selections - use user-scoped to respect RLS
+    const allSelections = await base44.entities.JiraProjectSelection.list();
     const projectSelections = allSelections.filter(s =>
-      s.data.is_active === true &&
-      s.created_by === user.email
+      s.data.is_active === true
     );
 
     if (!projectSelections || projectSelections.length === 0) {
@@ -98,7 +93,7 @@ Deno.serve(async (req) => {
         const boardId = boards[0].id;
 
         // Update JiraProjectSelection with board_id
-        await base44.asServiceRole.entities.JiraProjectSelection.update(selection.id, {
+        await base44.entities.JiraProjectSelection.update(selection.id, {
           jira_board_id: boardId.toString()
         });
 
