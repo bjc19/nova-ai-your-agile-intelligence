@@ -109,10 +109,16 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
       }
     });
 
-    // Fetch initial GDPR signals with cache
+    // Fetch initial GDPR signals with cache, filtered by workspace
+    const fetchFn = selectedWorkspaceId && selectedWorkspaceType === 'jira'
+      ? () => base44.entities.GDPRMarkers.filter({ jira_project_selection_id: selectedWorkspaceId })
+      : selectedWorkspaceId && selectedWorkspaceType === 'trello'
+      ? () => base44.entities.GDPRMarkers.filter({ trello_project_selection_id: selectedWorkspaceId })
+      : () => base44.entities.GDPRMarkers.list('-created_date', 100);
+
     cache.get(
-      'gdpr-markers-sprint',
-      () => base44.entities.GDPRMarkers.list('-created_date', 100),
+      `gdpr-markers-sprint-${selectedWorkspaceId || 'all'}`,
+      fetchFn,
       300
     ).then((signals) => setLiveGdprSignals(signals)).
     catch((err) => console.error("Error fetching GDPR signals:", err));
