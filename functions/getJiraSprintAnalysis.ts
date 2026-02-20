@@ -109,26 +109,20 @@ Deno.serve(async (req) => {
       high_priority: 0
     };
 
-    if (analysisResult?.data?.problematic_issues) {
-      formattedIssues = analysisResult.data.problematic_issues.map(issue => ({
-        key: issue.key,
-        summary: issue.summary,
-        status: issue.status,
-        priority: issue.priority,
-        assignee: issue.assignee,
-        days_in_status: issue.days_in_status,
-        issue_type: issue.type,
-        url: `https://jira.atlassian.net/browse/${issue.key}`,
-        category: issue.blocker ? 'blocker' : issue.risk ? 'risk' : 'stagnant'
+    if (analysisResult?.data?.risks && Array.isArray(analysisResult.data.risks)) {
+      formattedIssues = analysisResult.data.risks.map(risk => ({
+        key: risk.item_ref,
+        summary: risk.summary,
+        severity: risk.severity,
+        type: risk.type,
+        url: `https://jira.atlassian.net/browse/${risk.item_ref}`,
+        category: risk.type === 'blocked' ? 'blocker' : 'risk'
       }));
 
       // Count by category
       formattedIssues.forEach(issue => {
         if (issue.category === 'blocker') stats.blockers++;
         else if (issue.category === 'risk') stats.risks++;
-        else if (issue.category === 'stagnant') stats.stagnant++;
-        
-        if (issue.priority === 'Highest' || issue.priority === 'High') stats.high_priority++;
       });
     }
 
