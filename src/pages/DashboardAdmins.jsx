@@ -19,11 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
-import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
-import PatternDetectionWordCloud from "@/components/dashboard/PatternDetectionWordCloud";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
 
 import {
   Mic,
@@ -247,7 +242,7 @@ export default function DashboardAdmins() {
               <div className="flex justify-end gap-3">
                  <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  activeWorkspaceType={selectedWorkspaceType}
+                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
                   onWorkspaceChange={(id, type) => {
                     setSelectedWorkspaceId(id);
                     setSelectedWorkspaceType(type);
@@ -314,15 +309,14 @@ export default function DashboardAdmins() {
         }
 
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="space-y-6">
-          {/* Main Grid */}
-          <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {sprintHealth &&
             <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
+
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
@@ -335,52 +329,40 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <IntegrationStatus />
             </div>
           </div>
+        }
 
-          {/* Predictive & Analytics Section */}
-          <div className="grid lg:grid-cols-2 gap-6">
-            <PredictiveInsights analysisHistory={analysisHistory} />
-            <BlockersRisksTrendTable analysisHistory={analysisHistory} />
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-8">
+          <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <p className="text-slate-400 max-w-lg">
+                  {t('importDataDescription')}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Link to={createPageUrl("Settings")}>
+                  
 
-          {/* Charts & Intelligence Section */}
-          <ChartSuggestionGenerator analysisHistory={analysisHistory} />
-          
-          {/* Pattern Detection & Risks */}
-          <div className="grid lg:grid-cols-2 gap-6">
-            <PatternDetectionWordCloud analysisHistory={analysisHistory} />
-            <AdminDetectedRisks gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
-          </div>
 
-          {/* CTA Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}>
-            <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div>
-                  <p className="text-slate-400 max-w-lg">
-                    {t('importDataDescription')}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Link to={createPageUrl("Analysis")}>
-                    <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                      {t('startAnalysis')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
+
+                </Link>
+                <Link to={createPageUrl("Analysis")}>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
+                    {t('startAnalysis')}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
               </div>
             </div>
-          </motion.div>
-
-          {/* Integration Status - Last Block Before Footer */}
-          <IntegrationStatus />
-        </div>
-        }
+          </div>
+        </motion.div>
       </div>
     </div>);
 
