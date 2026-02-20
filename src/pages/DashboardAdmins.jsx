@@ -235,6 +235,9 @@ export default function DashboardAdmins() {
                   <h1 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
+                  <p className="text-slate-500 mt-1 text-sm capitalize">
+                    {format(new Date(), "EEEE d MMMM", { locale: fr })}
+                  </p>
                   <p className="text-slate-600 mt-2 text-lg">
                     {t('sprintOverview')}
                   </p>
