@@ -44,21 +44,13 @@ export default function DashboardAdmins() {
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals filtered by workspace
+  // Fetch GDPR signals
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-        let markers = [];
-        if (selectedWorkspaceId && selectedWorkspaceType === 'jira') {
-          markers = await base44.entities.GDPRMarkers.filter({ jira_project_selection_id: selectedWorkspaceId });
-        } else if (selectedWorkspaceId && selectedWorkspaceType === 'trello') {
-          markers = await base44.entities.GDPRMarkers.filter({ trello_project_selection_id: selectedWorkspaceId });
-        } else {
-          markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
-        }
+        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
@@ -66,7 +58,7 @@ export default function DashboardAdmins() {
       }
     };
     fetchSignals();
-  }, [selectedWorkspaceId, selectedWorkspaceType]);
+  }, []);
 
   // Check authentication and role
   useEffect(() => {
@@ -323,9 +315,7 @@ export default function DashboardAdmins() {
             <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")}
-              selectedWorkspaceId={selectedWorkspaceId}
-              selectedWorkspaceType={selectedWorkspaceType} />
+              onReviewSprint={() => console.log("Review sprint")} />
 
             }
               
@@ -333,9 +323,7 @@ export default function DashboardAdmins() {
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName}
-              selectedWorkspaceId={selectedWorkspaceId}
-              selectedWorkspaceType={selectedWorkspaceType} />
+              sourceName={latestAnalysis?.sourceName} />
 
             </div>
 
