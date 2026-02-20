@@ -234,7 +234,6 @@ export default function DashboardAdmins() {
                     {t('welcomeBackTitle')}, {user?.full_name?.split(' ')[0] || 'there'}! 👋
                   </h1>
                   <p className="text-slate-600 mt-2 text-lg">
-                    {t('sprintOverview')}
                   </p>
                 </div>
               </div>
