@@ -19,11 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
-import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
-import RiskOpportunitiesWordCloud from "@/components/dashboard/RiskOpportunitiesWordCloud";
 
 import {
   Mic,
@@ -314,36 +309,28 @@ export default function DashboardAdmins() {
         }
 
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="space-y-6">
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                {sprintHealth &&
-              <SprintHealthCard
-                sprintHealth={sprintHealth}
-                onAcknowledge={() => console.log("Drift acknowledged")}
-                onReviewSprint={() => console.log("Review sprint")} />
+        <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={sprintHealth}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
 
-              }
-                
-                <PredictiveInsights analysisHistory={analysisHistory} />
-                <BlockersRisksTrendTable analysisHistory={analysisHistory} />
-                <SprintPerformanceChart analysisHistory={analysisHistory} />
-                <KeyRecommendations
-                latestAnalysis={latestAnalysis}
-                sourceUrl={latestAnalysis?.sourceUrl}
-                sourceName={latestAnalysis?.sourceName} />
+            }
+              
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
-              </div>
-
-              <div className="space-y-6">
-                <RecentAnalyses analyses={analysisHistory} />
-              </div>
             </div>
 
-            <ChartSuggestionGenerator analysisHistory={analysisHistory} />
-            <AdminDetectedRisks analysisHistory={analysisHistory} gdprSignals={gdprSignals} />
-            <RiskOpportunitiesWordCloud analysisHistory={analysisHistory} />
-            <IntegrationStatus />
+            <div className="space-y-6">
+              <RecentAnalyses analyses={analysisHistory} />
+              <IntegrationStatus />
+            </div>
           </div>
         }
 
