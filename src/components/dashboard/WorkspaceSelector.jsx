@@ -3,10 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Database, Layers } from "lucide-react";
 import { debugLog, useDebugWorkspaceFlow } from "@/components/hooks/useDebugWorkspaceFlow";
+import WorkspaceChangeAlert from "@/components/dashboard/WorkspaceChangeAlert";
 
 export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId, userRole }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [alertWorkspace, setAlertWorkspace] = useState(null); // { id, type }
   const { logStateChange, logCallback, logRenderCycle } = useDebugWorkspaceFlow('WorkspaceSelector');
 
 
