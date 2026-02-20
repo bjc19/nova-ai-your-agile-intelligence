@@ -36,11 +36,19 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
             setLoading(true);
             debugLog('WorkspaceSelector', { step: 'loading workspaces' });
             try {
-                const configs = await base44.entities.TeamConfiguration.list();
-                setWorkspaces(configs);
-                debugLog('WorkspaceSelector', { step: 'workspaces loaded', count: configs.length });
+                const jiraProjects = await base44.entities.JiraProjectSelection.filter({ is_active: true });
+                const trelloProjects = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
+                
+                const allWorkspaces = [
+                    ...jiraProjects.map(p => ({ ...p, type: 'jira' })),
+                    ...trelloProjects.map(p => ({ ...p, type: 'trello' }))
+                ];
+                
+                setWorkspaces(allWorkspaces);
+                debugLog('WorkspaceSelector', { step: 'workspaces loaded', jira: jiraProjects.length, trello: trelloProjects.length });
+                
                 // Validate that activeWorkspaceId exists in the loaded workspaces
-                if (activeWorkspaceId && !configs.find((w) => w.id === activeWorkspaceId)) {
+                if (activeWorkspaceId && !allWorkspaces.find((w) => w.id === activeWorkspaceId)) {
                     setSelectedValue(null);
                 }
             } catch (err) {
