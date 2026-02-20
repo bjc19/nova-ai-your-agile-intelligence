@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PatternDetectionWordCloud from "@/components/dashboard/PatternDetectionWordCloud";
 
 import {
   Mic,
