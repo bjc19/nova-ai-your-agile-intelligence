@@ -113,15 +113,16 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
 
     if (onWorkspaceChange) {
       try {
-        const selectedWs = workspaces.find(ws => ws.id === value);
-        const wsType = selectedWs ? (selectedWs.jira_project_id ? 'jira' : 'trello') : null;
+        debugLog('Before calling onWorkspaceChange', { value, onWorkspaceChangeType: typeof onWorkspaceChange });
+        const result = onWorkspaceChange(value);
+        debugLog('After calling onWorkspaceChange', { value, resultType: typeof result, isPromise: result instanceof Promise });
 
-        debugLog('Before calling onWorkspaceChange', { value, wsType, onWorkspaceChangeType: typeof onWorkspaceChange });
-        const result = onWorkspaceChange(value, wsType);
-        debugLog('After calling onWorkspaceChange', { value, wsType, resultType: typeof result });
-
-        if (value && selectedWs) {
-          setAlertWorkspace({ id: value, type: wsType });
+        if (value) {
+          const selectedWs = workspaces.find(ws => ws.id === value);
+          if (selectedWs) {
+            const wsType = selectedWs.jira_project_id ? 'jira' : 'trello';
+            setAlertWorkspace({ id: value, type: wsType });
+          }
         }
       } catch (err) {
         debugLog('ERROR in onWorkspaceChange callback', { error: err.message, stack: err.stack, value });
