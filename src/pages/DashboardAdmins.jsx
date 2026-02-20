@@ -19,12 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
-import AnalyticsInsightsBlock from "@/components/dashboard/AnalyticsInsightsBlock";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
-import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
-import PatternDetectionWordCloud from "@/components/dashboard/PatternDetectionWordCloud";
 
 import {
   Mic,
@@ -329,21 +323,7 @@ export default function DashboardAdmins() {
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName}
-              selectedWorkspaceId={selectedWorkspaceId}
-              selectedWorkspaceType={selectedWorkspaceType} />
-
-              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
-
-              <AdminDetectedRisks selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
-
-              <BlockersRisksTrendTable selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
-
-              <ChartSuggestionGenerator analysisHistory={analysisHistory} selectedWorkspaceId={selectedWorkspaceId} />
-
-              <PatternDetectionWordCloud selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} />
-
-              <AnalyticsInsightsBlock selectedWorkspaceId={selectedWorkspaceId} selectedWorkspaceType={selectedWorkspaceType} gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+              sourceName={latestAnalysis?.sourceName} />
 
             </div>
 
