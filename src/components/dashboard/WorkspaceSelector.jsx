@@ -95,30 +95,34 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
             
             <div className="flex items-center gap-3">
                 <Badge variant="outline" className="text-xs">
-                    Workspace
+                    {activeSource === 'jira' ? '🔷 Jira' : activeSource === 'trello' ? '🔵 Trello' : 'Workspace'}
                 </Badge>
                 
                 {loading ? (
                     <div className="w-[280px] h-10 bg-slate-100 rounded-md animate-pulse" />
+                ) : activeSource === null ? (
+                    <div className="text-sm text-slate-500">
+                        Aucune source connectée
+                    </div>
                 ) : (
                     <Select value={selectedValue || ''} onValueChange={handleValueChange}>
                         <SelectTrigger className="w-[280px] bg-white border-slate-200">
                             <SelectValue 
-                                placeholder="Sélectionner un workspace"
+                                placeholder={`Sélectionner un projet ${activeSource}`}
                                 defaultValue={selectedValue}
                             />
                         </SelectTrigger>
                         <SelectContent>
-                            {workspaces.length === 0 ? (
+                            {(activeSource === 'jira' ? jiraWorkspaces : trelloWorkspaces).length === 0 ? (
                                 <div className="px-2 py-1.5 text-sm text-slate-500 text-center">
-                                    Aucun workspace disponible
+                                    Aucun projet disponible
                                 </div>
                             ) : (
-                                workspaces.map((ws) => (
+                                (activeSource === 'jira' ? jiraWorkspaces : trelloWorkspaces).map((ws) => (
                                     <SelectItem key={ws.id} value={ws.id}>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-lg">{getWorkspaceIcon(ws.type)}</span>
-                                            <span>{getWorkspaceName(ws)}</span>
+                                            <span className="text-lg">{getWorkspaceIcon(activeSource)}</span>
+                                            <span>{getWorkspaceName(ws, activeSource)}</span>
                                         </div>
                                     </SelectItem>
                                 ))
