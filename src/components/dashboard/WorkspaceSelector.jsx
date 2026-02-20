@@ -105,6 +105,14 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
   }
 
   return (
+    <>
+    {alertWorkspace && (
+      <WorkspaceChangeAlert
+        newWorkspaceId={alertWorkspace.id}
+        newWorkspaceType={alertWorkspace.type}
+        onDismiss={() => setAlertWorkspace(null)}
+      />
+    )}
     <div className="flex items-center gap-2">
       <Layers className="w-4 h-4 text-slate-400" />
       <Select 
