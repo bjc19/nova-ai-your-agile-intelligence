@@ -104,61 +104,45 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
     return null;
   }
 
-  return (
-    <>
-    {alertWorkspace && (
-      <WorkspaceChangeAlert
-        newWorkspaceId={alertWorkspace.id}
-        newWorkspaceType={alertWorkspace.type}
-        onDismiss={() => setAlertWorkspace(null)}
-      />
-    )}
-    <div className="flex items-center gap-2">
-      <Layers className="w-4 h-4 text-slate-400" />
-      <Select 
-        value={activeWorkspaceId || ""} 
-        onValueChange={(value) => {
-          logCallback('onValueChange', { 
-            selectedValue: value,
-            previousValue: activeWorkspaceId,
-            callbackFunctionExists: !!onWorkspaceChange 
-          });
-          
-          if (onWorkspaceChange) {
-            try {
-              debugLog('Before calling onWorkspaceChange', { 
-                value,
-                onWorkspaceChangeType: typeof onWorkspaceChange 
-              });
-              const result = onWorkspaceChange(value);
-              debugLog('After calling onWorkspaceChange', { 
-                value,
-                resultType: typeof result,
-                isPromise: result instanceof Promise 
-              });
+  const handleValueChange = (value) => {
+    logCallback('onValueChange', {
+      selectedValue: value,
+      previousValue: activeWorkspaceId,
+      callbackFunctionExists: !!onWorkspaceChange
+    });
 
-              // Trigger reconciliation alert when a specific workspace is selected
-              if (value) {
-                const selectedWs = workspaces.find(ws => ws.id === value);
-                if (selectedWs) {
-                  const wsType = selectedWs.jira_project_id ? 'jira' : 'trello';
-                  setAlertWorkspace({ id: value, type: wsType });
-                }
-              }
-            } catch (err) {
-              debugLog('ERROR in onWorkspaceChange callback', { 
-                error: err.message,
-                stack: err.stack,
-                value
-              });
-            }
-          } else {
-            debugLog('ERROR: onWorkspaceChange is not defined', { 
-              value,
-              props: { onWorkspaceChange, activeWorkspaceId, userRole }
-            });
+    if (onWorkspaceChange) {
+      try {
+        debugLog('Before calling onWorkspaceChange', { value, onWorkspaceChangeType: typeof onWorkspaceChange });
+        const result = onWorkspaceChange(value);
+        debugLog('After calling onWorkspaceChange', { value, resultType: typeof result, isPromise: result instanceof Promise });
+
+        if (value) {
+          const selectedWs = workspaces.find(ws => ws.id === value);
+          if (selectedWs) {
+            const wsType = selectedWs.jira_project_id ? 'jira' : 'trello';
+            setAlertWorkspace({ id: value, type: wsType });
           }
-        }}>
+        }
+      } catch (err) {
+        debugLog('ERROR in onWorkspaceChange callback', { error: err.message, stack: err.stack, value });
+      }
+    } else {
+      debugLog('ERROR: onWorkspaceChange is not defined', { value, props: { onWorkspaceChange, activeWorkspaceId, userRole } });
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {alertWorkspace && (
+        <WorkspaceChangeAlert
+          newWorkspaceId={alertWorkspace.id}
+          newWorkspaceType={alertWorkspace.type}
+          onDismiss={() => setAlertWorkspace(null)}
+        />
+      )}
+      <Layers className="w-4 h-4 text-slate-400" />
+      <Select value={activeWorkspaceId || ""} onValueChange={handleValueChange}>
         <SelectTrigger className="w-[250px] bg-white border-slate-200">
           <SelectValue placeholder="Sélectionner un workspace" />
         </SelectTrigger>
@@ -180,6 +164,5 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
         </SelectContent>
       </Select>
     </div>
-    </>
   );
 }
