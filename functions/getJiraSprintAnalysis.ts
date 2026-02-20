@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     // 4. Invoke Existing Analysis
     const analysisResult = await base44.asServiceRole.functions.invoke('analyzeJiraAgile', {
-      jira_cloud_id,
+      jira_cloud_id: finalCloudId,
       board_id: jira_board_id,
       sprint_id: activeSprintId
     });
