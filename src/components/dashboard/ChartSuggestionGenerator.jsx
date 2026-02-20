@@ -179,7 +179,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="efficiency" stroke="#3b82f6" name="Efficacité %" />
+              <Line type="monotone" dataKey="flow_efficiency" stroke="#3b82f6" name="Efficacité %" />
               <Line type="monotone" dataKey="target" stroke="#d1d5db" strokeDasharray="5 5" name="Cible" />
             </RechartsLineChart>
           </ResponsiveContainer>
