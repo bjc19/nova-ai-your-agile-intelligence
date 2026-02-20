@@ -13,7 +13,7 @@ export function adaptMessage(messageKey, userRole, context = {}) {
   const messages = {
     // Quick Stats Labels
     totalBlockers: {
-      admin: "Bloquants \n(sources: analyses)",
+      admin: "Bloquants (sources:analyses)",
       contributor: "Points de Blocage à Traiter",
       user: "Défis en Cours"
     },
