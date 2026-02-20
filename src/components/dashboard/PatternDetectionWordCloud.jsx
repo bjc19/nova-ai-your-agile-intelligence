@@ -67,6 +67,7 @@ export default function PatternDetectionWordCloud({ selectedWorkspaceId, selecte
 
   const maxCount = Math.max(...sortedPatterns.map(p => p[1]));
   const minCount = Math.min(...sortedPatterns.map(p => p[1]));
+  const patternCount = sortedPatterns.length;
 
   return (
     <motion.div
