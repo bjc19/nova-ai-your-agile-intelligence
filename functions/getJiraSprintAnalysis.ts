@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
           }
         }
 
-    if (!jira_cloud_id || !jira_board_id) {
+    if (!finalCloudId || !jira_board_id) {
       return new Response(JSON.stringify({ error: 'Missing Jira cloud_id or board_id' }), { 
         status: 400,
         headers: { 'Content-Type': 'application/json' }
