@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
     let sprintName = null;
 
     try {
-      const boardUrl = `https://api.atlassian.com/site/${jira_cloud_id}/agile/1.0/board/${jira_board_id}/sprint?state=active`;
+      const boardUrl = `https://api.atlassian.com/site/${finalCloudId}/agile/1.0/board/${jira_board_id}/sprint?state=active`;
       const sprintResponse = await fetch(boardUrl, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
       });
