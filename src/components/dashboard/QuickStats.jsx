@@ -265,7 +265,7 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
            {paginatedStats.map((stat, index) => {
               const isHealthCard = stat.labelKey === "teamHealth";
-              const healthTooltip = isHealthCard ? getTechnicalHealthTooltip() : null;
+              const healthTooltip = isHealthCard ? getTeamHealthTooltip() : null;
 
               return (
                 <motion.div
