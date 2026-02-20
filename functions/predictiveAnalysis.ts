@@ -23,12 +23,21 @@ Deno.serve(async (req) => {
     let sprintHealthHistory;
 
     if (workspaceId) {
-      analysisHistory = await base44.entities.AnalysisHistory.filter(
-        { jira_project_selection_id: workspaceId }, '-created_date', 50
-      );
-      sprintHealthHistory = await base44.entities.SprintHealth.filter(
-        { jira_project_selection_id: workspaceId }, '-created_date', 50
-      );
+      // Déterminer si le workspace est Jira ou Trello
+      const [jiraWs, trelloWs] = await Promise.all([
+        base44.entities.JiraProjectSelection.filter({ id: workspaceId, is_active: true }),
+        base44.entities.TrelloProjectSelection.filter({ id: workspaceId, is_active: true }),
+      ]);
+      const isJira = jiraWs?.length > 0;
+
+      const wsFilter = isJira
+        ? { jira_project_selection_id: workspaceId }
+        : { trello_project_selection_id: workspaceId };
+
+      [analysisHistory, sprintHealthHistory] = await Promise.all([
+        base44.entities.AnalysisHistory.filter(wsFilter, '-created_date', 50),
+        base44.entities.SprintHealth.filter(wsFilter, '-created_date', 50),
+      ]);
     } else {
       analysisHistory = await base44.entities.AnalysisHistory.list('-created_date', 50);
       sprintHealthHistory = await base44.entities.SprintHealth.list('-created_date', 50);
