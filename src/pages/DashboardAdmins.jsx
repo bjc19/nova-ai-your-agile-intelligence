@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
 
 import QuickStats from "@/components/dashboard/QuickStats";
-import QuickStats2 from "@/components/dashboard/QuickStats2";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
@@ -20,13 +19,12 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
 import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
 import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import AverageResolutionTimeMetric from "@/components/dashboard/AverageResolutionTimeMetric";
-import BusinessValueChart from "@/components/dashboard/BusinessValueChart";
-import BusinessValueInputForm from "@/components/dashboard/BusinessValueInputForm";
-import StratifiedHealthDashboard from "@/components/dashboard/StratifiedHealthDashboard";
+import ContextualToolGenerator from "@/components/dashboard/ContextualToolGenerator";
+import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
+import TeamHealthSummary from "@/components/dashboard/TeamHealthSummary";
 
 import {
   Mic,
@@ -35,12 +33,8 @@ import {
   Zap,
   Calendar,
   Clock,
-  Loader2,
-  DollarSign,
-  Plus,
-  BarChart3
-} from "lucide-react";
-import { Card } from "@/components/ui/card";
+  Loader2 } from
+"lucide-react";
 
 export default function DashboardAdmins() {
   const navigate = useNavigate();
@@ -54,9 +48,6 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [businessValueMetrics, setBusinessValueMetrics] = useState([]);
-  const [showBusinessValueForm, setShowBusinessValueForm] = useState(false);
-  const [stratifiedData, setStratifiedData] = useState(null);
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -118,16 +109,6 @@ export default function DashboardAdmins() {
         });
       }
 
-      // Load Business Value Metrics
-      try {
-        const metrics = await base44.entities.BusinessValueMetric.filter({
-          user_email: currentUser.email
-        });
-        setBusinessValueMetrics(metrics || []);
-      } catch (e) {
-        console.error("Erreur chargement BusinessValueMetric:", e);
-      }
-
       setIsLoading(false);
     };
     checkAuth();
@@ -140,31 +121,12 @@ export default function DashboardAdmins() {
     enabled: !isLoading
   });
 
-  // Filter analysis history by workspace AND period
+  // Filter analysis history
   const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod
-      ? analysisDate >= new Date(selectedPeriod.start) &&
-        analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))
-      : true;
-
-    let matchesWorkspace = true;
-    if (selectedWorkspaceId) {
-      matchesWorkspace =
-        analysis.jira_project_selection_id === selectedWorkspaceId ||
-        analysis.trello_project_selection_id === selectedWorkspaceId;
-    }
-
+    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
+    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
     return matchesPeriod && matchesWorkspace;
-  });
-
-  // Filter GDPR signals by workspace
-  const filteredGdprSignals = gdprSignals.filter((signal) => {
-    if (!selectedWorkspaceId) return true;
-    return (
-      signal.jira_project_selection_id === selectedWorkspaceId ||
-      signal.trello_project_selection_id === selectedWorkspaceId
-    );
   });
 
   // Check for stored analysis
@@ -196,23 +158,6 @@ export default function DashboardAdmins() {
     }
   }, [selectedPeriod]);
 
-  // Load business value metrics when workspace changes
-  useEffect(() => {
-    if (!selectedWorkspaceId || !user) return;
-    const loadMetrics = async () => {
-      try {
-        const metrics = await base44.entities.BusinessValueMetric.filter({
-          workspace_id: selectedWorkspaceId,
-          user_email: user.email
-        });
-        setBusinessValueMetrics(metrics || []);
-      } catch (e) {
-        console.error("Erreur chargement BusinessValueMetric:", e);
-      }
-    };
-    loadMetrics();
-  }, [selectedWorkspaceId, user]);
-
   const sprintInfo = sprintContext ? {
     name: sprintContext.sprint_name,
     daysRemaining: Math.max(0, Math.ceil((new Date(sprintContext.end_date) - new Date()) / (1000 * 60 * 60 * 24))),
@@ -229,45 +174,43 @@ export default function DashboardAdmins() {
     sprint_name: "Sprint 14",
     wip_count: 8,
     wip_historical_avg: 5,
-    tickets_in_progress_over_3d: 3 + filteredGdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-    blocked_tickets_over_48h: 2 + filteredGdprSignals.filter((s) => s.criticite === 'moyenne').length,
+    tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+    blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
     sprint_day: 5,
     historical_sprints_count: 4,
     drift_acknowledged: false,
     problematic_tickets: [],
-    gdprSignals: filteredGdprSignals
+    gdprSignals: gdprSignals
   } : null;
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-      </div>
-    );
-  }
+      </div>);
 
-  const hasData = !selectedPeriod || analysisHistory.length > 0;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Onboarding Modal */}
       <TeamConfigOnboarding
         isOpen={showOnboarding}
-        onComplete={() => setShowOnboarding(false)}
-      />
+        onComplete={() => setShowOnboarding(false)} />
+
 
       {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-slate-200/50">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/40 via-transparent to-transparent" />
         <div className="absolute top-10 left-1/4 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl" />
         <div className="absolute top-20 right-1/4 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl" />
-
+        
         <div className="relative max-w-6xl mx-auto px-6 pt-10 pb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+            transition={{ duration: 0.6 }}>
+
             <div className="flex flex-col gap-6 mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
@@ -289,57 +232,54 @@ export default function DashboardAdmins() {
                   </p>
                 </div>
               </div>
-
+              
               <div className="flex justify-end gap-3">
                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)}
-                />
+                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
-                  }}
-                />
+                  }} />
+
               </div>
             </div>
 
-            {hasData && (
-              <>
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <>
                 <DailyQuote
-                  lang={t('language') === 'English' ? 'en' : 'fr'}
-                  blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-                  riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                  patterns={[]}
-                />
+                lang={t('language') === 'English' ? 'en' : 'fr'}
+                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+                patterns={[]} />
+
                 <QuickStats analysisHistory={analysisHistory} />
               </>
-            )}
+            }
           </motion.div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
-
-        {/* Multi-project Alert */}
-        {multiProjectAlert && (
-          <div>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {multiProjectAlert &&
+        <div className="mb-6">
             <MultiProjectAlert
-              detectionData={multiProjectAlert}
-              onConfirm={() => {
-                setMultiProjectAlert(null);
-                window.location.reload();
-              }}
-              onDismiss={() => setMultiProjectAlert(null)}
-            />
-          </div>
-        )}
+            detectionData={multiProjectAlert}
+            onConfirm={() => {
+              setMultiProjectAlert(null);
+              window.location.reload();
+            }}
+            onDismiss={() => setMultiProjectAlert(null)} />
 
-        {/* Empty period message */}
-        {selectedPeriod && analysisHistory.length === 0 && (
-          <div className="text-center py-16">
+          </div>
+        }
+
+        {selectedPeriod && analysisHistory.length === 0 &&
+        <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
             </div>
@@ -356,118 +296,68 @@ export default function DashboardAdmins() {
               </Button>
             </Link>
           </div>
-        )}
+        }
 
-        {hasData && (
-          <>
-            {/* QuickStats2 – bloquants/risques avec IST */}
-            <QuickStats2
-              gdprSignals={filteredGdprSignals}
-              analysisHistory={analysisHistory}
-              currentPageName="DashboardAdmins"
-            />
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={sprintHealth}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
 
-            {/* Blockers/Risks trend table */}
-            <BlockersRisksTrendTable
-              gdprSignals={filteredGdprSignals}
-              analysisHistory={analysisHistory}
-            />
+            }
+              
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              
+              {/* Blockers & Risks Table */}
+              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
+              
+              {/* Predictive Insights */}
+              <PredictiveInsights analysisHistory={analysisHistory} />
+              
+              <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
 
-            {/* Main 3-col grid */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                {sprintHealth && (
-                  <SprintHealthCard
-                    sprintHealth={sprintHealth}
-                    onAcknowledge={() => console.log("Drift acknowledged")}
-                    onReviewSprint={() => console.log("Review sprint")}
-                  />
-                )}
-                <SprintPerformanceChart analysisHistory={analysisHistory} />
-                <KeyRecommendations
-                  latestAnalysis={latestAnalysis}
-                  sourceUrl={latestAnalysis?.sourceUrl}
-                  sourceName={latestAnalysis?.sourceName}
-                />
-              </div>
-
-              <div className="space-y-6">
-                <RecentAnalyses analyses={analysisHistory} />
-                <IntegrationStatus />
-              </div>
             </div>
 
-            {/* Admin Detected Risks */}
+            <div className="space-y-6">
+              <RecentAnalyses analyses={analysisHistory} />
+              {/* Chart Suggestion Generator */}
+              <ChartSuggestionGenerator selectedWorkspaceId={selectedWorkspaceId} analysisHistory={analysisHistory} />
+              {/* Contextual Tool Generator */}
+              <ContextualToolGenerator analysisHistory={analysisHistory} />
+            </div>
+          </div>
+        }
+        
+        {/* Detected Risks & Team Health - Below main grid */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
             <AdminDetectedRisks />
+          </div>
+          <div className="lg:col-span-2">
+            <TeamHealthSummary />
+          </div>
+        </div>
+        }
+        
+        {/* Integration Status - At the end */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8">
+          <IntegrationStatus />
+        </div>
+        }
 
-            {/* Predictive Insights */}
-            <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
-
-            {/* Average Resolution Time */}
-            {selectedWorkspaceId && (
-              <AverageResolutionTimeMetric workspaceId={selectedWorkspaceId} />
-            )}
-
-            {/* Business Value Section */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                  <h3 className="text-lg font-semibold text-slate-900">Valeur Business</h3>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowBusinessValueForm(!showBusinessValueForm)}
-                  className="gap-2"
-                >
-                  {showBusinessValueForm ? (
-                    <>
-                      <BarChart3 className="w-4 h-4" />
-                      Voir le graphique
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4" />
-                      Saisir les données
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {showBusinessValueForm ? (
-                <BusinessValueInputForm
-                  selectedWorkspaceId={selectedWorkspaceId}
-                  onDataSubmitted={async () => {
-                    setShowBusinessValueForm(false);
-                    if (user) {
-                      const metrics = await base44.entities.BusinessValueMetric.filter({
-                        workspace_id: selectedWorkspaceId,
-                        user_email: user.email
-                      });
-                      setBusinessValueMetrics(metrics || []);
-                    }
-                  }}
-                  onCancel={() => setShowBusinessValueForm(false)}
-                />
-              ) : (
-                <BusinessValueChart data={businessValueMetrics} />
-              )}
-            </Card>
-
-            {/* Stratified Health Dashboard */}
-            {stratifiedData && (
-              <StratifiedHealthDashboard stratifiedData={stratifiedData} />
-            )}
-          </>
-        )}
-
-        {/* CTA Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-        >
+          className="mt-8">
           <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
               <div>
@@ -477,7 +367,10 @@ export default function DashboardAdmins() {
               </div>
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
-                  <span />
+                  
+
+
+
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
                   <Button className="bg-white text-slate-900 hover:bg-slate-100">
@@ -490,6 +383,6 @@ export default function DashboardAdmins() {
           </div>
         </motion.div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
