@@ -27,16 +27,24 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
         debugLog('handleValueChange', { value, activeSource });
         setSelectedValue(value);
         
-        const ws = activeSource === 'jira' 
-            ? jiraWorkspaces.find((w) => w.id === value)
-            : trelloWorkspaces.find((w) => w.id === value);
-        
-        if (ws) {
-            const name = getWorkspaceName(ws, activeSource);
-            setSelectedWorkspaceName(name);
-            setAlertWorkspace({ id: value, type: activeSource });
+        if (value === 'all-projects') {
+            setSelectedWorkspaceName('Tous les projets');
+            setAlertWorkspace(null);
             if (onWorkspaceChange) {
-                onWorkspaceChange(value, activeSource);
+                onWorkspaceChange(null, null);
+            }
+        } else {
+            const ws = activeSource === 'jira' 
+                ? jiraWorkspaces.find((w) => w.id === value)
+                : trelloWorkspaces.find((w) => w.id === value);
+            
+            if (ws) {
+                const name = getWorkspaceName(ws, activeSource);
+                setSelectedWorkspaceName(name);
+                setAlertWorkspace({ id: value, type: activeSource });
+                if (onWorkspaceChange) {
+                    onWorkspaceChange(value, activeSource);
+                }
             }
         }
     };
