@@ -331,7 +331,9 @@ export default function DashboardAdmins() {
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+              sourceName={latestAnalysis?.sourceName}
+              selectedWorkspaceId={selectedWorkspaceId}
+              selectedWorkspaceType={selectedWorkspaceType} />
 
             </div>
 
