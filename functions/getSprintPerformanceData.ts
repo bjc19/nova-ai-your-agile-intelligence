@@ -9,6 +9,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Identifier le workspace principal actif (Jira ou Trello)
+    const [activeJiraWorkspaces, activeTrelloWorkspaces] = await Promise.all([
+      base44.entities.JiraProjectSelection.filter({ is_active: true }),
+      base44.entities.TrelloProjectSelection.filter({ is_active: true }),
+    ]);
+
+    const hasActiveJira = activeJiraWorkspaces?.length > 0;
+    const hasActiveTrello = activeTrelloWorkspaces?.length > 0;
+
+    if (!hasActiveJira && !hasActiveTrello) {
+      return Response.json({ data: [], message: 'No active workspace found' });
+    }
+
+    // Si Trello actif uniquement → pas de sprint Jira, retourner vide
+    if (!hasActiveJira && hasActiveTrello) {
+      return Response.json({ data: [], message: 'Active workspace is Trello — no Jira sprint data available' });
+    }
+
     // Récupérer la connexion Jira active
     const jiraConnections = await base44.entities.JiraConnection.filter({
       user_email: user.email,
