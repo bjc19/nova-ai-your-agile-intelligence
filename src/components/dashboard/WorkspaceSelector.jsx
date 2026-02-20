@@ -128,6 +128,15 @@ export default function WorkspaceSelector({ onWorkspaceChange, activeWorkspaceId
                 resultType: typeof result,
                 isPromise: result instanceof Promise 
               });
+
+              // Trigger reconciliation alert when a specific workspace is selected
+              if (value) {
+                const selectedWs = workspaces.find(ws => ws.id === value);
+                if (selectedWs) {
+                  const wsType = selectedWs.jira_project_id ? 'jira' : 'trello';
+                  setAlertWorkspace({ id: value, type: wsType });
+                }
+              }
             } catch (err) {
               debugLog('ERROR in onWorkspaceChange callback', { 
                 error: err.message,
