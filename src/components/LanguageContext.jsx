@@ -41,11 +41,11 @@ export const translations = {
     fromYesterday: "depuis hier",
     noChange: "Aucun changement",
     more: "de plus",
-    totalBlockers: "Blockers totaux",
-    risksIdentified: "Risques identifiés",
+    blockersDetectedWorkshop: "Bloqueurs détectés (ateliers)",
+    risksDetectedWorkshop: "Risques détectés (ateliers)",
     analysesRun: "Analyses effectuées",
     resolved: "Résolus",
-    technicalHealth: "Santé Technique",
+    teamHealth: "Santé d'Équipe",
     
     // Settings
     languageSettings: "Langue / Language",
@@ -261,11 +261,11 @@ export const translations = {
     fromYesterday: "from yesterday",
     noChange: "No change",
     more: "more",
-    totalBlockers: "Total Blockers",
-    risksIdentified: "Risks Identified",
+    blockersDetectedWorkshop: "Blockers Detected (workshops)",
+    risksDetectedWorkshop: "Risks Detected (workshops)",
     analysesRun: "Analyses Run",
     resolved: "Resolved",
-    technicalHealth: "Technical Health",
+    teamHealth: "Team Health",
     
     // Settings
     languageSettings: "Language / Langue",
