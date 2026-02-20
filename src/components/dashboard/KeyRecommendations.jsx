@@ -63,7 +63,7 @@ const isVerbFrenchEnglish = (word) => {
   return false;
 };
 
-export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, sourceName, selectedWorkspaceId = null }) {
+export default function KeyRecommendations({ latestAnalysis = null, sourceUrl, sourceName, selectedWorkspaceId = null, selectedWorkspaceType = null }) {
    const { t, language } = useLanguage();
    const [expandedIndex, setExpandedIndex] = useState(null);
    const [loadingDetails, setLoadingDetails] = useState({});
