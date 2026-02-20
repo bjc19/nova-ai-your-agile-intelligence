@@ -1,0 +1,1 @@
+const requiredScopes = ['read:jira-work', 'read:jira-user', 'read:board-scope:jira-software', 'read:sprint:jira-software', 'read:me', 'offline_access'];
