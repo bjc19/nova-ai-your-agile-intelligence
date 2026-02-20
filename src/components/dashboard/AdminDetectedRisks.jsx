@@ -253,8 +253,14 @@ export default function AdminDetectedRisks({ selectedWorkspaceId = null, selecte
         )}
       </Card>
 
-      {/* Tableau Bloquants & Risques */}
-      <BlockersRisksTrendTable gdprSignals={gdprSignals} analysisHistory={analysisHistory} />
+      {/* Tableau Bloquants & Risques - avec données Jira si disponibles */}
+      <BlockersRisksTrendTable 
+        gdprSignals={gdprSignals} 
+        analysisHistory={analysisHistory}
+        jiraIssues={jiraIssues}
+        jiraStats={jiraStats}
+        jiraLoading={jiraLoading}
+      />
     </div>
   );
 }
