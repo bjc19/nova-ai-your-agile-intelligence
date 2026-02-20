@@ -124,7 +124,7 @@ export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReview
     catch((err) => console.error("Error fetching GDPR signals:", err));
 
     return unsubscribe;
-  }, [prodMode]);
+  }, [prodMode, selectedWorkspaceId, selectedWorkspaceType]);
 
   // Merge real data with live signals
   useEffect(() => {
