@@ -58,10 +58,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get active Jira connection - use user-scoped to respect RLS
-    const connections = await base44.entities.JiraConnection.list();
+    // Get active Jira connection for this user
+    const allConnections = await base44.asServiceRole.entities.JiraConnection.list();
+    const userConnections = allConnections.filter(c => 
+      c.data && c.data.user_email === user.email && c.data.is_active === true
+    );
 
-    if (!connections || connections.length === 0) {
+    if (!userConnections || userConnections.length === 0) {
       return Response.json({ 
         valid: false,
         reason: 'No active Jira connection',
@@ -69,7 +72,7 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    const connection = connections[0];
+    const connection = userConnections[0];
     const accessToken = connection.data.access_token;
     const cloudId = connection.data.cloud_id;
     const expiresAt = new Date(connection.data.expires_at);

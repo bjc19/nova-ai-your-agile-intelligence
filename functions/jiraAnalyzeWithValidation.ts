@@ -60,11 +60,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'workspace_id required' }, { status: 400 });
     }
 
-    // Get the project selection - use user-scoped to respect RLS
-    const allSelections = await base44.entities.JiraProjectSelection.list();
+    // Get the project selection for this user
+    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
     const selections = allSelections.filter(s =>
       s.id === workspace_id &&
-      s.data.is_active === true
+      s.data && s.data.is_active === true &&
+      s.created_by === user.email
     );
 
     if (!selections || selections.length === 0) {
@@ -86,8 +87,11 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    // Get active Jira connection - use user-scoped to respect RLS
-    const connections = await base44.entities.JiraConnection.list();
+    // Get active Jira connection for this user
+    const allConnections = await base44.asServiceRole.entities.JiraConnection.list();
+    const connections = allConnections.filter(c => 
+      c.data && c.data.user_email === user.email && c.data.is_active === true
+    );
 
     if (!connections || connections.length === 0) {
       return Response.json({
