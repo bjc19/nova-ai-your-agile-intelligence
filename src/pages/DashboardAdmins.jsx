@@ -329,6 +329,9 @@ export default function DashboardAdmins() {
             </div>
 
             <div className="space-y-6">
+              {selectedWorkspaceId && selectedWorkspaceType === 'jira' && (
+                <JiraSprintAnalysisDisplay jiraProjectSelectionId={selectedWorkspaceId} />
+              )}
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>
