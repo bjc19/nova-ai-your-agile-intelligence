@@ -59,7 +59,7 @@ const statusConfig = {
   }
 };
 
-export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReviewSprint }) {
+export default function SprintHealthCard({ sprintHealth, onAcknowledge, onReviewSprint, selectedWorkspaceId = null, selectedWorkspaceType = null }) {
   // GUARD: Never render without real sprint data
   if (!sprintHealth) {
     return null;
