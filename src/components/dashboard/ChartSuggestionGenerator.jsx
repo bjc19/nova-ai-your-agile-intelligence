@@ -193,7 +193,7 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
               <YAxis label={{ value: 'Jours', angle: -90, position: 'insideLeft' }} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="cycleTime" fill="#a855f7" name="Cycle Time (jours)" />
+              <Bar dataKey="cycle_time_avg" fill="#a855f7" name="Cycle Time (jours)" />
               <Bar dataKey="average" fill="#d1d5db" name="Moyenne" />
             </BarChart>
           </ResponsiveContainer>
