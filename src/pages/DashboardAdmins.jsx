@@ -14,6 +14,7 @@ import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
 import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
+import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
@@ -308,7 +309,6 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {/* Main Dashboard Content */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -335,8 +335,8 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {/* Detected Risks from selected workspace */}
-        {selectedWorkspaceId &&
+        {/* Detected Risks & Blockers from all sources */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
