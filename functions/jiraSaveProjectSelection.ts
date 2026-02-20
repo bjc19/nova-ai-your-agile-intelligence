@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
       // Fetch board ID for this project
       let boardId = null;
       try {
-        const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/api/3/board?projectKeyOrId=${project.key}`;
+        const boardUrl = `https://api.atlassian.com/ex/jira/${jiraConn.cloud_id}/rest/agile/1.0/board?projectKeyOrId=${project.key}`;
         console.log('🔗 Fetching board for', project.key, 'URL:', boardUrl);
         const boardRes = await fetch(boardUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
