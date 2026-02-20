@@ -35,13 +35,22 @@ Deno.serve(async (req) => {
         analysis_data
       });
 
+    // Déterminer le type de workspace pour affecter le bon champ
+    const [jiraWs, trelloWs] = await Promise.all([
+      base44.entities.JiraProjectSelection.filter({ id: workspace_id, is_active: true }),
+      base44.entities.TrelloProjectSelection.filter({ id: workspace_id, is_active: true }),
+    ]);
+    const isJiraWorkspace = jiraWs?.length > 0;
+
     // Créer AnalysisHistory unifiée
     const analysisHistory = await base44.entities.AnalysisHistory.create({
       title: contributing_sources.length > 1 
         ? `${title} (Multi-source)` 
         : title,
       source: contributing_sources.length > 1 ? 'multi_source' : primary_source,
-      jira_project_selection_id: workspace_id,
+      jira_project_selection_id: isJiraWorkspace ? workspace_id : undefined,
+      trello_project_selection_id: !isJiraWorkspace ? workspace_id : undefined,
+      workspace_type: isJiraWorkspace ? 'jira' : 'trello',
       workspace_name,
       blockers_count: merged_analysis.aggregated?.total_blockers || blockers_count || 0,
       risks_count: merged_analysis.aggregated?.total_risks || risks_count || 0,
