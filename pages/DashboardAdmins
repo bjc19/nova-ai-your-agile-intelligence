@@ -229,9 +229,13 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
-                <WorkspaceSelector
+                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
+                  onWorkspaceChange={(id, type) => {
+                    setSelectedWorkspaceId(id);
+                    setSelectedWorkspaceType(type);
+                  }} />
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
