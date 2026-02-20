@@ -333,6 +333,11 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <RiskOpportunitiesWordCloud
+                selectedWorkspaceId={selectedWorkspaceId}
+                gdprSignals={gdprSignals}
+                analysisHistory={analysisHistory}
+              />
               <IntegrationStatus />
             </div>
           </div>
