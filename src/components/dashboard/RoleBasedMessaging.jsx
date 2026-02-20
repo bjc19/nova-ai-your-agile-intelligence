@@ -18,7 +18,7 @@ export function adaptMessage(messageKey, userRole, context = {}) {
       user: "Défis en Cours"
     },
     risksIdentified: {
-      admin: "Risques Système Identifiés",
+      admin: "Risques (Sources : APIs Signals)",
       contributor: "Risques à Anticiper",
       user: "Points d'Attention"
     },
