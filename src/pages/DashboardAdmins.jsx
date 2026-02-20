@@ -318,8 +318,9 @@ export default function DashboardAdmins() {
             <SprintHealthCard
               sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
-
+              onReviewSprint={() => console.log("Review sprint")}
+              selectedWorkspaceId={selectedWorkspaceId}
+              selectedWorkspaceType={selectedWorkspaceType} />
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
@@ -328,6 +329,14 @@ export default function DashboardAdmins() {
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
 
+              <PredictiveInsights selectedWorkspaceId={selectedWorkspaceId} />
+
+              <AdminDetectedRisks />
+
+              <AnalyticsInsightsBlock
+                selectedWorkspaceId={selectedWorkspaceId}
+                gdprSignals={gdprSignals}
+                analysisHistory={analysisHistory} />
             </div>
 
             <div className="space-y-6">
