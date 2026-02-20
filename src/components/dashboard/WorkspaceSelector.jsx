@@ -1,41 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { Select } from 'antd';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { base44 } from "@/api/base44Client";
+import { debugLog } from "@/components/hooks/useDebugWorkspaceFlow";
+import WorkspaceChangeAlert from "./WorkspaceChangeAlert";
 
-const WorkspaceSelector = ({ onWorkspaceChange }) => {
-    const [selectedValue, setSelectedValue] = useState(null);
-    const [workspaceType, setWorkspaceType] = useState('');
+const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
+    const [selectedValue, setSelectedValue] = useState(activeWorkspaceId || null);
+    const [workspaces, setWorkspaces] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [alertWorkspace, setAlertWorkspace] = useState(null);
 
-    const determineWorkspaceType = (value) => {
+    const determineWorkspaceType = (workspace) => {
         // Debug Logging
-        console.log('Determining workspace type for:', value);
-        if (value.startsWith('jira')) {
-            setWorkspaceType('jira');
-        } else if (value.startsWith('trello')) {
-            setWorkspaceType('trello');
-        } else {
-            setWorkspaceType('unknown');
+        debugLog('determineWorkspaceType', { workspace });
+        if (workspace?.jira_project_id) {
+            return 'jira';
         }
+        return 'trello';
     };
 
     const handleValueChange = (value) => {
         // Debug Logging
-        console.log('Selected value:', value);
+        debugLog('handleValueChange', { value });
         setSelectedValue(value);
-        determineWorkspaceType(value);
-        onWorkspaceChange(value, workspaceType);
+        const ws = workspaces.find((w) => w.id === value);
+        const wsType = determineWorkspaceType(ws);
+        setAlertWorkspace({ id: value, type: wsType });
+        if (onWorkspaceChange) {
+            onWorkspaceChange(value, wsType);
+        }
     };
 
     useEffect(() => {
-        // Simulated loading logic for Jira & Trello
         const fetchData = async () => {
             setLoading(true);
-            console.log('Loading workspaces...');
-            // Simulate API call
-            setTimeout(() => {
+            debugLog('WorkspaceSelector', { step: 'loading workspaces' });
+            try {
+                const configs = await base44.entities.TeamConfiguration.list();
+                setWorkspaces(configs);
+                debugLog('WorkspaceSelector', { step: 'workspaces loaded', count: configs.length });
+                // Validate that activeWorkspaceId exists in the loaded workspaces
+                if (activeWorkspaceId && !configs.find((w) => w.id === activeWorkspaceId)) {
+                    setSelectedValue(null);
+                }
+            } catch (err) {
+                console.error('WorkspaceSelector: error loading workspaces', err);
+            } finally {
                 setLoading(false);
-                console.log('Finished loading workspaces.');
-            }, 1000);
+            }
         };
 
         fetchData();
@@ -43,16 +55,27 @@ const WorkspaceSelector = ({ onWorkspaceChange }) => {
 
     return (
         <div>
-            {loading ? ( 
+            {alertWorkspace && (
+                <WorkspaceChangeAlert
+                    newWorkspaceId={alertWorkspace.id}
+                    newWorkspaceType={alertWorkspace.type}
+                    onDismiss={() => setAlertWorkspace(null)}
+                />
+            )}
+            {loading ? (
                 <p>Loading workspaces...</p>
             ) : (
-                <Select
-                    placeholder="Select a workspace"
-                    onChange={handleValueChange}
-                    value={selectedValue}
-                >
-                    <Select.Option value="jira-1">Jira Workspace 1</Select.Option>
-                    <Select.Option value="trello-1">Trello Workspace 1</Select.Option>
+                <Select value={selectedValue} onValueChange={handleValueChange}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select a workspace" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {workspaces.map((ws) => (
+                            <SelectItem key={ws.id} value={ws.id}>
+                                {ws.project_name || ws.team_name || 'Unnamed Workspace'}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
                 </Select>
             )}
         </div>
