@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     const cardsInProgress = issuesByStatus['In Progress'] || issuesByStatus['En Cours'] || 0;
     const cardsBlocked = issuesByStatus['Blocked'] || issuesByStatus['Bloqué'] || 0;
     const wip = cardsInProgress + cardsBlocked;
-    const throughput = cardsCCompleted;
+    const throughput = cardsCompleted;
 
     // Préparer les données pour stockage
     const metricsRecord = {
