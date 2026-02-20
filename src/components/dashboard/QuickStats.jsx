@@ -221,29 +221,33 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
 
 
  
-  // Helper to generate tooltip for technicalHealth
-   const getTechnicalHealthTooltip = () => {
+  // Helper to generate tooltip for Team Health
+   const getTeamHealthTooltip = () => {
      if (language === 'fr') {
        return {
-         title: "Indice de Santé Technique (IST)",
-         formula: `Résolus (${resolvedItems.length}) ÷ Total détecté (${gdprSignals.length + analysisHistory.flatMap(a => [...(a.analysis_data?.blockers || []), ...(a.analysis_data?.risks || [])]).length}) × 100`,
-         interpretation: teamHealthScore >= 50
-           ? `✓ Excellent : ${teamHealthScore}% des problèmes détectés ont été résolus.`
-           : `⚠ À améliorer : Seulement ${teamHealthScore}% des problèmes détectés ont été résolus.`,
-         tips: teamHealthScore >= 50
-           ? "Continuez à résoudre les bloquants et risques détectés."
-           : "Priorisez la résolution des bloquants avant d'ajouter de nouvelles tâches.",
+         title: "Indice de Santé d'Équipe",
+         formula: `Communication (${teamContext?.communication_tone === 'constructive' ? 30 : teamContext?.communication_tone === 'neutral' ? 15 : 0}/30) + Engagement (${teamContext?.engagement_level === 'high' ? 25 : teamContext?.engagement_level === 'moderate' ? 12 : 0}/25) + Rétros (${Math.round((teamContext?.retro_actions_completed_rate || 0) / 100 * 25)}/25) + Participation (${teamContext?.conversation_balance === 'balanced' ? 20 : teamContext?.conversation_balance === 'dominated' ? 8 : 0}/20)`,
+         interpretation: teamHealthScore >= 60
+           ? `✓ Excellent : ${teamHealthScore}/100 - L'équipe communique bien et s'engage activement.`
+           : teamHealthScore >= 40
+           ? `⚠ À surveiller : ${teamHealthScore}/100 - Des améliorations sont possibles dans la dynamique d'équipe.`
+           : `🔴 Critique : ${teamHealthScore}/100 - L'équipe a besoin de support immédiat.`,
+         tips: teamHealthScore >= 60
+           ? "Maintenez cette dynamique positive. Continuez à favoriser la communication constructive."
+           : "Améliorez la communication d'équipe et encouragez la participation de tous.",
        };
      } else {
        return {
-         title: "Technical Health Index (IST)",
-         formula: `Resolved (${resolvedItems.length}) ÷ Total detected (${gdprSignals.length + analysisHistory.flatMap(a => [...(a.analysis_data?.blockers || []), ...(a.analysis_data?.risks || [])]).length}) × 100`,
-         interpretation: teamHealthScore >= 50
-           ? `✓ Excellent: ${teamHealthScore}% of detected problems have been resolved.`
-           : `⚠ Needs improvement: Only ${teamHealthScore}% of detected problems have been resolved.`,
-         tips: teamHealthScore >= 50
-           ? "Keep resolving detected blockers and risks."
-           : "Prioritize resolving blockers before adding new tasks.",
+         title: "Team Health Index",
+         formula: `Communication (${teamContext?.communication_tone === 'constructive' ? 30 : teamContext?.communication_tone === 'neutral' ? 15 : 0}/30) + Engagement (${teamContext?.engagement_level === 'high' ? 25 : teamContext?.engagement_level === 'moderate' ? 12 : 0}/25) + Retros (${Math.round((teamContext?.retro_actions_completed_rate || 0) / 100 * 25)}/25) + Participation (${teamContext?.conversation_balance === 'balanced' ? 20 : teamContext?.conversation_balance === 'dominated' ? 8 : 0}/20)`,
+         interpretation: teamHealthScore >= 60
+           ? `✓ Excellent: ${teamHealthScore}/100 - Team communicates well and actively engages.`
+           : teamHealthScore >= 40
+           ? `⚠ Monitor: ${teamHealthScore}/100 - Team dynamics can be improved.`
+           : `🔴 Critical: ${teamHealthScore}/100 - Team needs immediate support.`,
+         tips: teamHealthScore >= 60
+           ? "Maintain this positive momentum. Keep fostering constructive communication."
+           : "Improve team communication and encourage participation from everyone.",
        };
      }
    };
