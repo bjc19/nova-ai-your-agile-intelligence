@@ -80,7 +80,7 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
                     <SelectContent>
                         {workspaces.map((ws) => (
                             <SelectItem key={ws.id} value={ws.id}>
-                                {ws.project_name || ws.team_name || 'Unnamed Workspace'}
+                                {ws.type === 'jira' ? ws.jira_project_name : ws.trello_project_name || ws.workspace_name || 'Unnamed Workspace'}
                             </SelectItem>
                         ))}
                     </SelectContent>
