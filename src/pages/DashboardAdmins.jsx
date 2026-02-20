@@ -24,6 +24,7 @@ import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTa
 import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
 import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
 import RiskOpportunitiesWordCloud from "@/components/dashboard/RiskOpportunitiesWordCloud";
+import JiraSprintAnalysisDisplay from "@/components/dashboard/JiraSprintAnalysisDisplay";
 
 import {
   Mic,
@@ -336,6 +337,9 @@ export default function DashboardAdmins() {
               </div>
 
               <div className="space-y-6">
+                {selectedWorkspaceId && selectedWorkspaceType === 'jira' && (
+                  <JiraSprintAnalysisDisplay jiraProjectSelectionId={selectedWorkspaceId} />
+                )}
                 <RecentAnalyses analyses={analysisHistory} />
               </div>
             </div>
