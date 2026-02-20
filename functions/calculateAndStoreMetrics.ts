@@ -176,7 +176,10 @@ Deno.serve(async (req) => {
     
     // Tenter de stocker au moins un enregistrement d'erreur
     try {
-      const { workspaceId, workspaceType } = await req.json();
+      if (!bodyData) {
+        bodyData = {};
+      }
+      const { workspaceId, workspaceType } = bodyData;
       await base44.asServiceRole.entities.MetricsHistory.create({
         workspace_id: workspaceId,
         workspace_type: workspaceType,
