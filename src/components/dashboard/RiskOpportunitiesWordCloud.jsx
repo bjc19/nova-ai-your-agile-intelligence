@@ -100,7 +100,13 @@ export default function RiskOpportunitiesWordCloud({ selectedWorkspaceId, gdprSi
     }, 800);
   };
 
-  // Afficher même sans workspace (les données seront vides)
+  if (!selectedWorkspaceId) {
+    return null;
+
+
+
+
+  }
 
   const getWordSize = (frequency, maxFreq) => {
     const minSize = 0.8;
