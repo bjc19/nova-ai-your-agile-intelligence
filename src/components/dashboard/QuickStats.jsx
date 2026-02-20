@@ -200,6 +200,14 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
        textColor: "text-amber-600",
      },
      {
+       labelKey: "resolved",
+       value: resolvedItems.length,
+       icon: CheckCircle2,
+       color: "from-emerald-500 to-emerald-600",
+       bgColor: "bg-emerald-500/10",
+       textColor: "text-emerald-600",
+     },
+     {
        labelKey: "teamHealth",
        value: teamHealthScore,
        icon: Activity,
