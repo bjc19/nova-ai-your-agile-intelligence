@@ -82,9 +82,28 @@ export default function PatternDetectionWordCloud({ selectedWorkspaceId, selecte
         <CardContent>
           <div className="flex flex-wrap gap-3 justify-center py-6">
             {sortedPatterns.map(([pattern, count], idx) => {
-              // Scale from 0.85rem to 2.5rem based on count
-              const normalizedCount = (count - minCount) / (maxCount - minCount);
-              const size = 0.85 + normalizedCount * 1.65;
+              // Adaptive sizing: fewer patterns = bigger text
+              let minSize, maxSize;
+              if (patternCount <= 2) {
+                // 1-2 patterns: énorme (2.5rem à 4rem)
+                minSize = 2.5;
+                maxSize = 4;
+              } else if (patternCount <= 4) {
+                // 3-4 patterns: très gros (1.8rem à 3.5rem)
+                minSize = 1.8;
+                maxSize = 3.5;
+              } else if (patternCount <= 8) {
+                // 5-8 patterns: gros (1.2rem à 3rem)
+                minSize = 1.2;
+                maxSize = 3;
+              } else {
+                // 9+ patterns: progressif (0.85rem à 2.5rem)
+                minSize = 0.85;
+                maxSize = 2.5;
+              }
+
+              const normalizedCount = (count - minCount) / (maxCount - minCount || 1);
+              const size = minSize + normalizedCount * (maxSize - minSize);
               
               const colors = [
                 "bg-red-100 text-red-700",
