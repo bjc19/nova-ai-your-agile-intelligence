@@ -59,10 +59,11 @@ Deno.serve(async (req) => {
     }
 
     // Get active Jira connection
-    const connections = await base44.asServiceRole.entities.JiraConnection.filter({
-      'data.user_email': user.email,
-      'data.is_active': true
-    });
+    const allConnections = await base44.asServiceRole.entities.JiraConnection.list();
+    const connections = allConnections.filter(c => 
+      c.data.user_email === user.email && 
+      c.data.is_active === true
+    );
 
     if (!connections || connections.length === 0) {
       return Response.json({ 

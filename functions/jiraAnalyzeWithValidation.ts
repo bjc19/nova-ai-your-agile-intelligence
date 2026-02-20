@@ -61,11 +61,12 @@ Deno.serve(async (req) => {
     }
 
     // Get the project selection
-    const selections = await base44.asServiceRole.entities.JiraProjectSelection.filter({
-      id: workspace_id,
-      'data.is_active': true,
-      'created_by': user.email
-    });
+    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
+    const selections = allSelections.filter(s =>
+      s.id === workspace_id &&
+      s.data.is_active === true &&
+      s.created_by === user.email
+    );
 
     if (!selections || selections.length === 0) {
       return Response.json({
@@ -87,10 +88,11 @@ Deno.serve(async (req) => {
     }
 
     // Get active Jira connection
-    const connections = await base44.asServiceRole.entities.JiraConnection.filter({
-      'data.user_email': user.email,
-      'data.is_active': true
-    });
+    const allConnections = await base44.asServiceRole.entities.JiraConnection.list();
+    const connections = allConnections.filter(c => 
+      c.data.user_email === user.email && 
+      c.data.is_active === true
+    );
 
     if (!connections || connections.length === 0) {
       return Response.json({

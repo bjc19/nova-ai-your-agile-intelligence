@@ -10,10 +10,11 @@ Deno.serve(async (req) => {
     }
 
     // Get active Jira connection
-    const connections = await base44.asServiceRole.entities.JiraConnection.filter({
-      'data.user_email': user.email,
-      'data.is_active': true
-    });
+    const allConnections = await base44.asServiceRole.entities.JiraConnection.list();
+    const connections = allConnections.filter(c => 
+      c.data.user_email === user.email && 
+      c.data.is_active === true
+    );
 
     if (!connections || connections.length === 0) {
       return Response.json({ error: 'No active Jira connection' }, { status: 400 });
@@ -28,10 +29,11 @@ Deno.serve(async (req) => {
     }
 
     // Get all active project selections
-    const projectSelections = await base44.asServiceRole.entities.JiraProjectSelection.filter({
-      'data.is_active': true,
-      'created_by': user.email
-    });
+    const allSelections = await base44.asServiceRole.entities.JiraProjectSelection.list();
+    const projectSelections = allSelections.filter(s =>
+      s.data.is_active === true &&
+      s.created_by === user.email
+    );
 
     if (!projectSelections || projectSelections.length === 0) {
       return Response.json({ 
