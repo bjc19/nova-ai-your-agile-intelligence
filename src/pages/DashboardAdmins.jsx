@@ -19,12 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import BlockersRisksTrendTable from "@/components/dashboard/BlockersRisksTrendTable";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
-import ContextualToolGenerator from "@/components/dashboard/ContextualToolGenerator";
-import ChartSuggestionGenerator from "@/components/dashboard/ChartSuggestionGenerator";
-import AdminDetectedRisks from "@/components/dashboard/AdminDetectedRisks";
-import TeamHealthSummary from "@/components/dashboard/TeamHealthSummary";
 
 import {
   Mic,
@@ -46,16 +40,25 @@ export default function DashboardAdmins() {
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
+  const [selectedWorkspaceType, setSelectedWorkspaceType] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
-  // Fetch GDPR signals
+  // Fetch GDPR signals filtered by workspace
   useEffect(() => {
     const fetchSignals = async () => {
       try {
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+
+        let markers = [];
+        if (selectedWorkspaceId && selectedWorkspaceType === 'jira') {
+          markers = await base44.entities.GDPRMarkers.filter({ jira_project_selection_id: selectedWorkspaceId });
+        } else if (selectedWorkspaceId && selectedWorkspaceType === 'trello') {
+          markers = await base44.entities.GDPRMarkers.filter({ trello_project_selection_id: selectedWorkspaceId });
+        } else {
+          markers = await base44.entities.GDPRMarkers.list('-created_date', 100);
+        }
         const recentMarkers = markers.filter((m) => new Date(m.created_date) >= sevenDaysAgo);
         setGdprSignals(recentMarkers);
       } catch (error) {
@@ -63,7 +66,7 @@ export default function DashboardAdmins() {
       }
     };
     fetchSignals();
-  }, []);
+  }, [selectedWorkspaceId, selectedWorkspaceType]);
 
   // Check authentication and role
   useEffect(() => {
@@ -122,10 +125,21 @@ export default function DashboardAdmins() {
   });
 
   // Filter analysis history
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+    const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    const matchesWorkspace = selectedWorkspaceId ? analysis.jira_project_selection_id === selectedWorkspaceId : true;
+    
+    let matchesWorkspace = true;
+    if (selectedWorkspaceId && selectedWorkspaceType) {
+      if (selectedWorkspaceType === 'jira') {
+        matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
+      } else if (selectedWorkspaceType === 'trello') {
+        matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
+      }
+    } else if (selectedWorkspaceId) { // Fallback si le type n'est pas fourni, suppose Jira
+      matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
+    }
+
     return matchesPeriod && matchesWorkspace;
   });
 
@@ -234,9 +248,13 @@ export default function DashboardAdmins() {
               </div>
               
               <div className="flex justify-end gap-3">
-                <WorkspaceSelector
+                 <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  onWorkspaceChange={(id) => setSelectedWorkspaceId(id)} />
+                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
+                  onWorkspaceChange={(id, type) => {
+                    setSelectedWorkspaceId(id);
+                    setSelectedWorkspaceType(type);
+                  }} />
 
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
@@ -310,13 +328,6 @@ export default function DashboardAdmins() {
             }
               
               <SprintPerformanceChart analysisHistory={analysisHistory} />
-              
-              {/* Blockers & Risks Table */}
-              <BlockersRisksTrendTable analysisHistory={analysisHistory} />
-              
-              {/* Predictive Insights */}
-              <PredictiveInsights analysisHistory={analysisHistory} />
-              
               <KeyRecommendations
               latestAnalysis={latestAnalysis}
               sourceUrl={latestAnalysis?.sourceUrl}
@@ -326,31 +337,9 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              {/* Chart Suggestion Generator */}
-              <ChartSuggestionGenerator selectedWorkspaceId={selectedWorkspaceId} analysisHistory={analysisHistory} />
-              {/* Contextual Tool Generator */}
-              <ContextualToolGenerator analysisHistory={analysisHistory} />
+              <IntegrationStatus />
             </div>
           </div>
-        }
-        
-        {/* Detected Risks & Team Health - Below main grid */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <AdminDetectedRisks />
-          </div>
-          <div className="lg:col-span-2">
-            <TeamHealthSummary />
-          </div>
-        </div>
-        }
-        
-        {/* Integration Status - At the end */}
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="mt-8">
-          <IntegrationStatus />
-        </div>
         }
 
         <motion.div
