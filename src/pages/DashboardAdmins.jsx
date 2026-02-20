@@ -308,7 +308,6 @@ export default function DashboardAdmins() {
           </div>
         }
 
-        {/* Main Dashboard Content */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -333,20 +332,6 @@ export default function DashboardAdmins() {
               <IntegrationStatus />
             </div>
           </div>
-        }
-
-        {/* Detected Risks from selected workspace */}
-        {selectedWorkspaceId &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8">
-          <AdminDetectedRisks 
-            selectedWorkspaceId={selectedWorkspaceId}
-            selectedWorkspaceType={selectedWorkspaceType}
-          />
-        </motion.div>
         }
 
         <motion.div
