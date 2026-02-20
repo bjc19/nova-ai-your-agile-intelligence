@@ -86,7 +86,7 @@ export default function BlockersRisksTrendTable({ gdprSignals = [], analysisHist
     fr: {
       title: "Évolution des Bloquants & Risques",
       day: "Jour",
-      blockers: "Bloquants (Sources:Signaux APIs)",
+      blockers: "Bloquants (Sources : Signaux APIs)",
       risks: "Risques (Sources : Signaux APIs)",
       total: "Total",
       trend: "Tendance",
