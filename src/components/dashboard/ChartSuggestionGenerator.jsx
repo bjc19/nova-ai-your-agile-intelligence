@@ -137,19 +137,19 @@ export default function ChartSuggestionGenerator({ selectedWorkspaceId, gdprSign
       case 'flow_efficiency':
         return days.map((day) => ({
           day,
-          efficiency: Math.max(20, 100 - dataByDay[day].risks * 5),
+          flow_efficiency: Math.max(20, 100 - dataByDay[day].risks * 5),
           target: 70
         }));
       case 'cycle_time':
         return days.map((day) => ({
           day,
-          cycleTime: Math.max(1, 5 - dataByDay[day].blockers * 0.5),
+          cycle_time_avg: Math.max(1, 5 - dataByDay[day].blockers * 0.5),
           average: 4.5
         }));
       case 'change_failure_rate':
         return days.map((day) => ({
           day,
-          cfr: Math.min(30, dataByDay[day].blockers * 3),
+          change_failure_rate: Math.min(30, dataByDay[day].blockers * 3),
           ideal: 8
         }));
       default:
