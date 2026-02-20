@@ -329,6 +329,9 @@ export default function DashboardAdmins() {
             </div>
 
             <div className="space-y-6">
+              <PatternDetectionWordCloud 
+                selectedWorkspaceId={selectedWorkspaceId}
+                selectedWorkspaceType={selectedWorkspaceType} />
               <RecentAnalyses analyses={analysisHistory} />
               <IntegrationStatus />
             </div>
