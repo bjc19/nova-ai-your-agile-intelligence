@@ -32,20 +32,14 @@ Deno.serve(async (req) => {
           });
         }
 
-        const { jira_cloud_id, jira_board_id, jira_project_key } = jiraProjectSelection;
+        const { jira_board_id, jira_project_key } = jiraProjectSelection;
 
-        // If cloud_id is missing, fetch it from JiraConnection
-        let finalCloudId = jira_cloud_id;
-        if (!finalCloudId) {
-          const jiraConns = await base44.asServiceRole.entities.JiraConnection.filter({
-            user_email: user.email,
-            is_active: true
-          }, '-created_date', 1);
+        // Always fetch cloud_id from JiraConnection (not stored on JiraProjectSelection)
+        const jiraConns = await base44.entities.JiraConnection.filter({
+          is_active: true
+        }, '-created_date', 1);
 
-          if (jiraConns && jiraConns.length > 0) {
-            finalCloudId = jiraConns[0].cloud_id;
-          }
-        }
+        const finalCloudId = jiraConns && jiraConns.length > 0 ? jiraConns[0].cloud_id : null;
 
     if (!finalCloudId || !jira_board_id) {
       return new Response(JSON.stringify({ error: 'Missing Jira cloud_id or board_id' }), { 
