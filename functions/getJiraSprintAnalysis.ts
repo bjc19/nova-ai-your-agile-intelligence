@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     }
 
     // 2. Fetch Project Context & Jira Connection
-        const jiraProjectSelection = await base44.asServiceRole.entities.JiraProjectSelection.get(jiraProjectSelectionId);
+        const jiraProjectSelection = await base44.entities.JiraProjectSelection.get(jiraProjectSelectionId);
 
         if (!jiraProjectSelection) {
           return new Response(JSON.stringify({ error: 'Jira project selection not found' }), { 
