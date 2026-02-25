@@ -49,8 +49,8 @@ Deno.serve(async (req) => {
     }
 
     // 3. Fetch Active Sprint
-    const jiraConnection = await base44.asServiceRole.entities.JiraConnection.filter(
-      { user_email: user.email, is_active: true },
+    const jiraConnection = await base44.entities.JiraConnection.filter(
+      { is_active: true },
       '-created_date',
       1
     );
