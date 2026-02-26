@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
       console.log('Could not detect board type, defaulting to kanban fallback:', e.message);
     }
 
+    // 3a-bis. Try JQL directly as fallback if board config not available
     // 3b. Try Scrum sprint endpoint (works for Scrum and some Hybrid boards)
     try {
       const sprintUrl = `https://api.atlassian.com/site/${finalCloudId}/agile/1.0/board/${jira_board_id}/sprint?state=active`;
