@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       // KANBAN or no active sprint: fetch In Progress issues from board directly
       sprintName = 'Kanban Board (En cours)';
       try {
-        const boardIssuesUrl = `https://api.atlassian.com/site/${finalCloudId}/agile/1.0/board/${jira_board_id}/issue?jql=status%3D%22In+Progress%22&maxResults=100&fields=summary,status,priority,assignee,issuetype,labels,created,updated`;
+        const boardIssuesUrl = `https://api.atlassian.com/site/${finalCloudId}/agile/1.0/board/${jira_board_id}/issue?maxResults=100&fields=summary,status,priority,assignee,issuetype,labels,created,updated`;
         const boardIssuesRes = await fetch(boardIssuesUrl, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
