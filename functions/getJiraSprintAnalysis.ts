@@ -123,21 +123,8 @@ Deno.serve(async (req) => {
         console.log('Error fetching kanban board issues:', e.message);
       }
 
-      // Also fetch "To Do" issues for full picture
-      if (issues.length === 0) {
-        try {
-          const allBoardIssuesUrl = `https://api.atlassian.com/site/${finalCloudId}/agile/1.0/board/${jira_board_id}/issue?jql=statusCategory+in+(%22In+Progress%22%2C%22To+Do%22)&maxResults=100&fields=summary,status,priority,assignee,issuetype,labels,created,updated`;
-          const allIssuesRes = await fetch(allBoardIssuesUrl, {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
-          if (allIssuesRes.ok) {
-            const allData = await allIssuesRes.json();
-            issues = allData.issues || [];
-          }
-        } catch (e) {
-          console.log('Error fetching all board issues:', e.message);
-        }
-      }
+      // Log response for debug
+      console.log('Kanban issues fetched:', issues.length);
     }
 
     // 4. Format & analyze issues
