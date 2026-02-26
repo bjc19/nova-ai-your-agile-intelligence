@@ -109,24 +109,26 @@ Deno.serve(async (req) => {
         console.log('Error fetching sprint issues:', e.message);
       }
     } else {
-      // KANBAN or no active sprint: fetch In Progress issues from board directly
-      sprintName = 'Kanban Board (En cours)';
+      // KANBAN or no active sprint: use JQL to fetch non-done issues for this project
+      sprintName = 'Tableau actif (Kanban/Hybride)';
       try {
-        const boardIssuesUrl = `https://api.atlassian.com/site/${finalCloudId}/agile/1.0/board/${jira_board_id}/issue?maxResults=100&fields=summary,status,priority,assignee,issuetype,labels,created,updated`;
-        console.log('Fetching kanban issues from:', boardIssuesUrl);
-        const boardIssuesRes = await fetch(boardIssuesUrl, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
+        // Use Jira REST API v3 search with JQL — works regardless of board type
+        const jql = encodeURIComponent(`project = "${jira_project_key}" AND statusCategory != Done ORDER BY updated DESC`);
+        const jqlUrl = `https://api.atlassian.com/ex/jira/${finalCloudId}/rest/api/3/search?jql=${jql}&maxResults=100&fields=summary,status,priority,assignee,issuetype,labels,created,updated`;
+        console.log('JQL URL:', jqlUrl);
+        const jqlRes = await fetch(jqlUrl, {
+          headers: { 
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json'
+          }
         });
-        console.log('Kanban issues response status:', boardIssuesRes.status);
-        const boardIssuesData = await boardIssuesRes.json();
-        console.log('Kanban issues data keys:', Object.keys(boardIssuesData));
-        console.log('Kanban issues count:', boardIssuesData.issues?.length, 'errorMessage:', boardIssuesData.errorMessages);
-        issues = boardIssuesData.issues || [];
+        console.log('JQL response status:', jqlRes.status);
+        const jqlData = await jqlRes.json();
+        console.log('JQL total issues:', jqlData.total, 'fetched:', jqlData.issues?.length, 'errors:', jqlData.errorMessages);
+        issues = jqlData.issues || [];
       } catch (e) {
-        console.log('Error fetching kanban board issues:', e.message);
+        console.log('Error fetching issues via JQL:', e.message);
       }
-
-      console.log('Total kanban issues fetched:', issues.length);
     }
 
     // 4. Format & analyze issues
