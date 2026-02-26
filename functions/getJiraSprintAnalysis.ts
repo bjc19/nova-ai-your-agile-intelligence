@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     // 3. Detect board type and fetch issues — supports Scrum, Kanban, and Hybrid
     let activeSprintId = null;
     let sprintName = null;
-    let boardType = 'kanban'; // default assumption
+    let boardType = 'unknown';
     let issues = [];
 
     // 3a. Try to get board config to detect type
