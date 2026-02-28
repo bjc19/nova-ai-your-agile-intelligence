@@ -77,25 +77,25 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
             
             <div className="flex items-center gap-3">
                 <Badge variant="outline" className="text-xs">
-                    {activeSource === 'jira' ? '🔷 Jira' : activeSource === 'trello' ? '🔵 Trello' : 'Workspace'}
+                    🔵 Trello
                 </Badge>
                 
                 {loading ? (
                     <div className="w-[280px] h-10 bg-slate-100 rounded-md animate-pulse" />
-                ) : activeSource === null ? (
+                ) : trelloWorkspaces.length === 0 ? (
                     <div className="text-sm text-slate-500">
-                        Aucune source connectée
+                        Aucun projet Trello connecté
                     </div>
                 ) : (
                     <Select value={selectedValue || ''} onValueChange={handleValueChange}>
                         <SelectTrigger className="w-[280px] bg-white border-slate-200">
                             <SelectValue 
-                                placeholder={`Sélectionner un projet ${activeSource}`}
+                                placeholder="Sélectionner un projet"
                                 defaultValue={selectedValue}
                             />
                         </SelectTrigger>
                         <SelectContent>
-                            {(activeSource === 'jira' ? jiraWorkspaces : trelloWorkspaces).length === 0 ? (
+                            {trelloWorkspaces.length === 0 ? (
                                 <div className="px-2 py-1.5 text-sm text-slate-500 text-center">
                                     Aucun projet disponible
                                 </div>
@@ -107,11 +107,11 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
                                             <span>Tous les projets</span>
                                         </div>
                                     </SelectItem>
-                                    {(activeSource === 'jira' ? jiraWorkspaces : trelloWorkspaces).map((ws) => (
+                                    {trelloWorkspaces.map((ws) => (
                                         <SelectItem key={ws.id} value={ws.id}>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-lg">{getWorkspaceIcon(activeSource)}</span>
-                                                <span>{getWorkspaceName(ws, activeSource)}</span>
+                                                <span className="text-lg">🔵</span>
+                                                <span>{ws.board_name || 'Unnamed Workspace'}</span>
                                             </div>
                                         </SelectItem>
                                     ))}
@@ -120,6 +120,10 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
                         </SelectContent>
                     </Select>
                 )}
+                
+                <Badge className="bg-amber-100 text-amber-800 text-xs">
+                    🔷 Jira Coming Soon
+                </Badge>
             </div>
         </div>
     );
