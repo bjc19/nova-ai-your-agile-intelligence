@@ -1250,57 +1250,85 @@ export default function Settings() {
         }
 
         {/* Coming Soon Integrations - Admin only */}
-        {currentRole === 'admin' &&
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mb-6">
+         {currentRole === 'admin' &&
+         <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5, delay: 0.3 }}
+           className="mb-6">
 
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-slate-400" />
-            {t('comingSoon')}
-          </h2>
-          
-          <div className="grid gap-4">
-            {integrations.filter((i) => !i.available).map((integration, index) =>
-            <Card key={integration.id} className="opacity-60">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl ${integration.bgColor}`}>
-                        <integration.icon className={`w-6 h-6 ${integration.iconColor}`} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-slate-900">{integration.name}</h3>
-                          {integration.requiresBackend &&
-                        <Badge variant="outline" className="text-xs">
-                              Prochainement
-                            </Badge>
-                        }
-                          {integration.comingSoon &&
-                        <Badge variant="outline" className="text-xs bg-slate-100">
-                              Prochainement
-                            </Badge>
-                        }
-                        </div>
-                        <p className="text-sm text-slate-600">
-                          {t(`${integration.id}Description`)}
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="outline" disabled>
-                      <Lock className="w-4 h-4 mr-2" />
-                      {t('connect')}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </motion.div>
-        }
+           <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+             <AlertCircle className="w-5 h-5 text-slate-400" />
+             {t('comingSoon')}
+           </h2>
+
+           <div className="grid gap-4">
+             {/* Jira Coming Soon */}
+             <Card className="opacity-60">
+                 <CardContent className="p-6">
+                   <div className="flex items-start justify-between gap-4">
+                     <div className="flex items-start gap-4">
+                       <div className={`p-3 rounded-xl bg-blue-100`}>
+                         <Database className={`w-6 h-6 text-blue-600`} />
+                       </div>
+                       <div>
+                         <div className="flex items-center gap-2 mb-1">
+                           <h3 className="font-semibold text-slate-900">Jira</h3>
+                           <Badge variant="outline" className="text-xs bg-slate-100">
+                             Prochainement
+                           </Badge>
+                         </div>
+                         <p className="text-sm text-slate-600">
+                           Analyse backlog & issues, GDPR compliant
+                         </p>
+                       </div>
+                     </div>
+                     <Button variant="outline" disabled>
+                       <Lock className="w-4 h-4 mr-2" />
+                       {t('connect')}
+                     </Button>
+                   </div>
+                 </CardContent>
+               </Card>
+
+             {integrations.filter((i) => !i.available && i.id !== 'jira').map((integration, index) =>
+             <Card key={integration.id} className="opacity-60">
+                 <CardContent className="p-6">
+                   <div className="flex items-start justify-between gap-4">
+                     <div className="flex items-start gap-4">
+                       <div className={`p-3 rounded-xl ${integration.bgColor}`}>
+                         <integration.icon className={`w-6 h-6 ${integration.iconColor}`} />
+                       </div>
+                       <div>
+                         <div className="flex items-center gap-2 mb-1">
+                           <h3 className="font-semibold text-slate-900">{integration.name}</h3>
+                           {integration.requiresBackend &&
+                         <Badge variant="outline" className="text-xs">
+                               Prochainement
+                             </Badge>
+                         }
+                           {integration.comingSoon &&
+                         <Badge variant="outline" className="text-xs bg-slate-100">
+                               Prochainement
+                             </Badge>
+                         }
+                         </div>
+                         <p className="text-sm text-slate-600">
+                           {t(`${integration.id}Description`)}
+                         </p>
+                       </div>
+                     </div>
+                     <Button variant="outline" disabled>
+                       <Lock className="w-4 h-4 mr-2" />
+                       {t('connect')}
+                     </Button>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+           </div>
+         </motion.div>
+         }
 
         {/* Plan Assignment - Admin only (Dev Mode) */}
         {currentRole === 'admin' &&
