@@ -109,14 +109,51 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period
+  // Fetch Trello analysis dynamically when workspace or period changes
+  useEffect(() => {
+    const fetchTrelloAnalysis = async () => {
+      if (!selectedWorkspaceId) {
+        setDynamicTrelloAnalysis(null);
+        return;
+      }
+
+      setLoadingTrelloAnalysis(true);
+      try {
+        const response = await base44.functions.invoke('analyzeTrelloBoardDynamic', {
+          workspaceId: selectedWorkspaceId,
+          startDate: selectedPeriod?.start,
+          endDate: selectedPeriod?.end
+        });
+        setDynamicTrelloAnalysis(response.data);
+      } catch (error) {
+        console.error('Error fetching Trello analysis:', error);
+        setDynamicTrelloAnalysis(null);
+      } finally {
+        setLoadingTrelloAnalysis(false);
+      }
+    };
+
+    fetchTrelloAnalysis();
+  }, [selectedWorkspaceId, selectedPeriod]);
+
+  // Filter analysis history based on selected period and workspace
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+    // Filter by workspace if selected
+    if (selectedWorkspaceId && analysis.trello_project_selection_id !== selectedWorkspaceId) {
+      return false;
+    }
+    
     const analysisDate = new Date(analysis.created_date);
     const startDate = new Date(selectedPeriod.start);
     const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
+    endDate.setHours(23, 59, 59, 999);
     return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+  }) : allAnalysisHistory.filter((analysis) => {
+    if (selectedWorkspaceId && analysis.trello_project_selection_id !== selectedWorkspaceId) {
+      return false;
+    }
+    return true;
+  });
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
