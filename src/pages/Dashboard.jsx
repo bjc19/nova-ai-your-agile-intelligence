@@ -357,26 +357,78 @@ export default function Dashboard() {
           </div>
         }
 
-        {/* Empty State for No Data in Period */}
-        {selectedPeriod && analysisHistory.length === 0 &&
-        <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-              <Calendar className="w-8 h-8 text-slate-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">
-              Aucune analyse pour cette période
-            </h3>
-            <p className="text-slate-600 mb-6">
-              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
-            </p>
-            <Link to={createPageUrl("Analysis")}>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
-                <Mic className="w-4 h-4 mr-2" />
-                Créer une analyse
-              </Button>
-            </Link>
+        {/* Dynamic Trello Analysis Display */}
+        {selectedWorkspaceId && loadingTrelloAnalysis && (
+          <div className="text-center py-8">
+            <Loader2 className="w-6 h-6 text-blue-600 animate-spin mx-auto mb-2" />
+            <p className="text-sm text-slate-600">Analyse du tableau Trello en cours...</p>
           </div>
-        }
+        )}
+
+        {selectedWorkspaceId && dynamicTrelloAnalysis && !loadingTrelloAnalysis && (
+          <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">Analyse Trello - {dynamicTrelloAnalysis.workspace_name}</h3>
+              <Badge variant="outline" className="text-xs">
+                Données en temps réel
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-slate-50 rounded-lg p-4">
+                <p className="text-sm text-slate-600 mb-1">Cartes dans la période</p>
+                <p className="text-2xl font-bold text-slate-900">{dynamicTrelloAnalysis.summary.total_cards_in_period}</p>
+              </div>
+              <div className="bg-amber-50 rounded-lg p-4">
+                <p className="text-sm text-slate-600 mb-1">Cartes stagnantes (&gt;3j)</p>
+                <p className="text-2xl font-bold text-amber-600">{dynamicTrelloAnalysis.summary.stagnant_cards_count}</p>
+              </div>
+              <div className="bg-red-50 rounded-lg p-4">
+                <p className="text-sm text-slate-600 mb-1">Cartes bloquées</p>
+                <p className="text-2xl font-bold text-red-600">{dynamicTrelloAnalysis.summary.blocked_cards_count}</p>
+              </div>
+            </div>
+
+            {dynamicTrelloAnalysis.stagnant_cards.length > 0 && (
+              <div className="mb-4">
+                <h4 className="text-sm font-semibold text-slate-700 mb-3">Cartes stagnantes:</h4>
+                <div className="space-y-2">
+                  {dynamicTrelloAnalysis.stagnant_cards.slice(0, 3).map((card) => (
+                    <div key={card.id} className="flex justify-between items-center text-sm p-2 bg-amber-50 rounded">
+                      <span className="text-slate-700">{card.name}</span>
+                      <span className="text-amber-700 font-medium">{card.daysSinceInProgress}j</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-slate-500">
+              Dernière mise à jour: {new Date(dynamicTrelloAnalysis.generated_at).toLocaleString('fr-FR')}
+            </p>
+          </div>
+        )}
+
+        {/* Empty State for No Data in Period */}
+         {selectedPeriod && analysisHistory.length === 0 && !selectedWorkspaceId &&
+         <div className="text-center py-16">
+             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+               <Calendar className="w-8 h-8 text-slate-400" />
+             </div>
+             <h3 className="text-xl font-semibold text-slate-900 mb-2">
+               Aucune analyse pour cette période
+             </h3>
+             <p className="text-slate-600 mb-6">
+               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
+             </p>
+             <Link to={createPageUrl("Analysis")}>
+               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                 <Mic className="w-4 h-4 mr-2" />
+                 Créer une analyse
+               </Button>
+             </Link>
+           </div>
+         }
 
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
