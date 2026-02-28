@@ -51,6 +51,7 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
                     const initialWs = trelloProjects?.find((w) => w.id === activeWorkspaceId);
                     if (initialWs) {
                         setSelectedWorkspaceName(initialWs.board_name || 'Unnamed Workspace');
+                        setSelectedValue(activeWorkspaceId);
                     } else {
                         setSelectedValue(null);
                     }
@@ -63,7 +64,7 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
         };
 
         fetchData();
-    }, []);
+    }, [activeWorkspaceId]);
 
     return (
         <div>
