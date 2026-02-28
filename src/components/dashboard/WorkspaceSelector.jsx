@@ -8,42 +8,30 @@ import WorkspaceChangeAlert from "./WorkspaceChangeAlert";
 
 const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
     const [selectedValue, setSelectedValue] = useState(activeWorkspaceId || null);
-    const [jiraWorkspaces, setJiraWorkspaces] = useState([]);
     const [trelloWorkspaces, setTrelloWorkspaces] = useState([]);
-    const [activeSource, setActiveSource] = useState(null);
     const [loading, setLoading] = useState(true);
     const [alertWorkspace, setAlertWorkspace] = useState(null);
     const [selectedWorkspaceName, setSelectedWorkspaceName] = useState('Sélectionner un workspace');
 
-    const getWorkspaceIcon = (type) => {
-        return type === 'jira' ? '🔷' : '🔵';
-    };
-
-    const getWorkspaceName = (ws, type) => {
-        return type === 'jira' ? ws.jira_project_name : ws.board_name || 'Unnamed Workspace';
-    };
-
     const handleValueChange = (value) => {
-        debugLog('handleValueChange', { value, activeSource });
+        debugLog('handleValueChange', { value, source: 'trello' });
         setSelectedValue(value);
         
         if (value === 'all-projects') {
             setSelectedWorkspaceName('Tous les projets');
             setAlertWorkspace(null);
             if (onWorkspaceChange) {
-                onWorkspaceChange(null, null);
+                onWorkspaceChange(null, 'trello');
             }
         } else {
-            const ws = activeSource === 'jira' 
-                ? jiraWorkspaces.find((w) => w.id === value)
-                : trelloWorkspaces.find((w) => w.id === value);
+            const ws = trelloWorkspaces.find((w) => w.id === value);
             
             if (ws) {
-                const name = getWorkspaceName(ws, activeSource);
+                const name = ws.board_name || 'Unnamed Workspace';
                 setSelectedWorkspaceName(name);
-                setAlertWorkspace({ id: value, type: activeSource });
+                setAlertWorkspace({ id: value, type: 'trello' });
                 if (onWorkspaceChange) {
-                    onWorkspaceChange(value, activeSource);
+                    onWorkspaceChange(value, 'trello');
                 }
             }
         }
@@ -52,31 +40,17 @@ const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            debugLog('WorkspaceSelector', { step: 'loading workspaces' });
+            debugLog('WorkspaceSelector', { step: 'loading trello workspaces only' });
             try {
-                const jiraProjects = await base44.entities.JiraProjectSelection.filter({ is_active: true });
                 const trelloProjects = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
-                
-                setJiraWorkspaces(jiraProjects || []);
                 setTrelloWorkspaces(trelloProjects || []);
-                debugLog('WorkspaceSelector', { step: 'workspaces loaded', jira: jiraProjects.length, trello: trelloProjects.length });
+                debugLog('WorkspaceSelector', { step: 'trello workspaces loaded', count: trelloProjects?.length || 0 });
                 
-                // Détermine la source active en fonction de ce qui est connecté
-                let sourceActive = null;
-                if (jiraProjects && jiraProjects.length > 0) {
-                    sourceActive = 'jira';
-                } else if (trelloProjects && trelloProjects.length > 0) {
-                    sourceActive = 'trello';
-                }
-                
-                setActiveSource(sourceActive);
-                
-                // Set initial workspace name basé sur la source active
-                if (activeWorkspaceId && sourceActive) {
-                    const workspaces = sourceActive === 'jira' ? jiraProjects : trelloProjects;
-                    const initialWs = workspaces.find((w) => w.id === activeWorkspaceId);
+                // Set initial workspace name
+                if (activeWorkspaceId) {
+                    const initialWs = trelloProjects?.find((w) => w.id === activeWorkspaceId);
                     if (initialWs) {
-                        setSelectedWorkspaceName(getWorkspaceName(initialWs, sourceActive));
+                        setSelectedWorkspaceName(initialWs.board_name || 'Unnamed Workspace');
                     } else {
                         setSelectedValue(null);
                     }
