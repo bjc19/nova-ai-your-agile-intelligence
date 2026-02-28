@@ -131,7 +131,7 @@ export default function Dashboard() {
     return true;
   });
 
-  // Check for stored analysis from session and filter by period
+  // Check for stored analysis from session and filter by period and workspace
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -142,6 +142,12 @@ export default function Dashboard() {
         const { url, name } = JSON.parse(sourceInfo);
         parsedAnalysis.sourceUrl = url;
         parsedAnalysis.sourceName = name;
+      }
+
+      // Filter by workspace first
+      if (selectedWorkspaceId && parsedAnalysis.trello_project_selection_id !== selectedWorkspaceId) {
+        setLatestAnalysis(null);
+        return;
       }
 
       // Filter by selected period if one is set
@@ -160,7 +166,7 @@ export default function Dashboard() {
         setLatestAnalysis(parsedAnalysis);
       }
     }
-  }, [selectedPeriod]);
+  }, [selectedPeriod, selectedWorkspaceId]);
 
   // Calculate sprint info from real data
   const calculateDaysRemaining = (endDate) => {
