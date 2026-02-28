@@ -124,9 +124,15 @@ export default function Dashboard() {
           startDate: selectedPeriod?.start,
           endDate: selectedPeriod?.end
         });
-        setDynamicTrelloAnalysis(response.data);
+        
+        if (response.data?.error) {
+          console.error('Trello analysis error:', response.data.error);
+          setDynamicTrelloAnalysis(null);
+        } else {
+          setDynamicTrelloAnalysis(response.data);
+        }
       } catch (error) {
-        console.error('Error fetching Trello analysis:', error);
+        console.error('Error fetching Trello analysis:', error.message || error);
         setDynamicTrelloAnalysis(null);
       } finally {
         setLoadingTrelloAnalysis(false);
@@ -136,24 +142,14 @@ export default function Dashboard() {
     fetchTrelloAnalysis();
   }, [selectedWorkspaceId, selectedPeriod]);
 
-  // Filter analysis history based on selected period and workspace
+  // Filter analysis history based on selected period
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
-    // Filter by workspace if selected
-    if (selectedWorkspaceId && analysis.trello_project_selection_id !== selectedWorkspaceId) {
-      return false;
-    }
-    
     const analysisDate = new Date(analysis.created_date);
     const startDate = new Date(selectedPeriod.start);
     const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
     return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory.filter((analysis) => {
-    if (selectedWorkspaceId && analysis.trello_project_selection_id !== selectedWorkspaceId) {
-      return false;
-    }
-    return true;
-  });
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -377,19 +373,19 @@ export default function Dashboard() {
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-slate-50 rounded-lg p-4">
                 <p className="text-sm text-slate-600 mb-1">Cartes dans la période</p>
-                <p className="text-2xl font-bold text-slate-900">{dynamicTrelloAnalysis.summary.total_cards_in_period}</p>
+                <p className="text-2xl font-bold text-slate-900">{dynamicTrelloAnalysis.summary?.total_cards_in_period || 0}</p>
               </div>
               <div className="bg-amber-50 rounded-lg p-4">
                 <p className="text-sm text-slate-600 mb-1">Cartes stagnantes (&gt;3j)</p>
-                <p className="text-2xl font-bold text-amber-600">{dynamicTrelloAnalysis.summary.stagnant_cards_count}</p>
+                <p className="text-2xl font-bold text-amber-600">{dynamicTrelloAnalysis.summary?.stagnant_cards_count || 0}</p>
               </div>
               <div className="bg-red-50 rounded-lg p-4">
                 <p className="text-sm text-slate-600 mb-1">Cartes bloquées</p>
-                <p className="text-2xl font-bold text-red-600">{dynamicTrelloAnalysis.summary.blocked_cards_count}</p>
+                <p className="text-2xl font-bold text-red-600">{dynamicTrelloAnalysis.summary?.blocked_cards_count || 0}</p>
               </div>
             </div>
 
-            {dynamicTrelloAnalysis.stagnant_cards.length > 0 && (
+            {dynamicTrelloAnalysis.stagnant_cards && dynamicTrelloAnalysis.stagnant_cards.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-slate-700 mb-3">Cartes stagnantes:</h4>
                 <div className="space-y-2">
@@ -409,26 +405,32 @@ export default function Dashboard() {
           </div>
         )}
 
+        {selectedWorkspaceId && !loadingTrelloAnalysis && !dynamicTrelloAnalysis && (
+          <div className="text-center py-8 bg-amber-50 rounded-lg border border-amber-200 mb-6">
+            <p className="text-sm text-amber-700">Impossible de charger les données Trello. Vérifiez votre configuration.</p>
+          </div>
+        )}
+
         {/* Empty State for No Data in Period */}
          {selectedPeriod && analysisHistory.length === 0 && !selectedWorkspaceId &&
-         <div className="text-center py-16">
-             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-               <Calendar className="w-8 h-8 text-slate-400" />
-             </div>
-             <h3 className="text-xl font-semibold text-slate-900 mb-2">
-               Aucune analyse pour cette période
-             </h3>
-             <p className="text-slate-600 mb-6">
-               Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
-             </p>
-             <Link to={createPageUrl("Analysis")}>
-               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
-                 <Mic className="w-4 h-4 mr-2" />
-                 Créer une analyse
-               </Button>
-             </Link>
-           </div>
-         }
+        <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+              <Calendar className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              Aucune analyse pour cette période
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
+            </p>
+            <Link to={createPageUrl("Analysis")}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                <Mic className="w-4 h-4 mr-2" />
+                Créer une analyse
+              </Button>
+            </Link>
+          </div>
+        }
 
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
