@@ -107,14 +107,23 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history based on selected period and workspace
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+    // Filter by workspace
+    const workspaceMatch = !selectedWorkspaceId || 
+      analysis.trello_project_selection_id === selectedWorkspaceId;
+    
+    // Filter by period
+    if (!selectedPeriod) return workspaceMatch;
+    
     const analysisDate = new Date(analysis.created_date);
     const startDate = new Date(selectedPeriod.start);
     const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
-    return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+    endDate.setHours(23, 59, 59, 999);
+    const periodMatch = analysisDate >= startDate && analysisDate <= endDate;
+    
+    return workspaceMatch && periodMatch;
+  });
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
