@@ -107,25 +107,16 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period and workspace
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    // Filter by workspace
-    const workspaceMatch = !selectedWorkspaceId || 
-      analysis.trello_project_selection_id === selectedWorkspaceId;
-    
-    // Filter by period
-    if (!selectedPeriod) return workspaceMatch;
-    
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const startDate = new Date(selectedPeriod.start);
     const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999);
-    const periodMatch = analysisDate >= startDate && analysisDate <= endDate;
-    
-    return workspaceMatch && periodMatch;
-  });
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
-  // Check for stored analysis from session and filter by period and workspace
+  // Check for stored analysis from session and filter by period
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -138,28 +129,23 @@ export default function Dashboard() {
         parsedAnalysis.sourceName = name;
       }
 
-      // Filter by workspace
-      const workspaceMatch = !selectedWorkspaceId || 
-        parsedAnalysis.trello_project_selection_id === selectedWorkspaceId;
-
       // Filter by selected period if one is set
-      let shouldShowAnalysis = workspaceMatch;
-      if (selectedPeriod && parsedAnalysis.created_date && workspaceMatch) {
+      if (selectedPeriod && parsedAnalysis.created_date) {
         const analysisDate = new Date(parsedAnalysis.created_date);
         const startDate = new Date(selectedPeriod.start);
         const endDate = new Date(selectedPeriod.end);
         endDate.setHours(23, 59, 59, 999);
 
-        shouldShowAnalysis = analysisDate >= startDate && analysisDate <= endDate;
-      }
-
-      if (shouldShowAnalysis) {
-        setLatestAnalysis(parsedAnalysis);
+        if (analysisDate >= startDate && analysisDate <= endDate) {
+          setLatestAnalysis(parsedAnalysis);
+        } else {
+          setLatestAnalysis(null);
+        }
       } else {
-        setLatestAnalysis(null);
+        setLatestAnalysis(parsedAnalysis);
       }
     }
-  }, [selectedPeriod, selectedWorkspaceId]);
+  }, [selectedPeriod]);
 
   // Calculate sprint info from real data
   const calculateDaysRemaining = (endDate) => {
@@ -295,8 +281,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                onWorkspaceChange={(workspaceId) => setSelectedWorkspaceId(workspaceId)} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
