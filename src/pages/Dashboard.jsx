@@ -40,6 +40,8 @@ export default function Dashboard() {
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
+  const [dynamicTrelloAnalysis, setDynamicTrelloAnalysis] = useState(null);
+  const [loadingTrelloAnalysis, setLoadingTrelloAnalysis] = useState(false);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -107,31 +109,16 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period and workspace
+  // Filter analysis history based on selected period
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
-    // Filter by workspace if selected
-    if (selectedWorkspaceId && analysis.trello_project_selection_id !== selectedWorkspaceId) {
-      return false;
-    }
-    
-    // Check if analysis falls within period
-    if (!analysis.created_date) return false;
-    
     const analysisDate = new Date(analysis.created_date);
     const startDate = new Date(selectedPeriod.start);
     const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999);
-    
+    endDate.setHours(23, 59, 59, 999); // Include end of day
     return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory.filter((analysis) => {
-    // No period selected: filter by workspace if one is selected, show all otherwise
-    if (selectedWorkspaceId && analysis.trello_project_selection_id !== selectedWorkspaceId) {
-      return false;
-    }
-    return true;
-  });
+  }) : allAnalysisHistory;
 
-  // Check for stored analysis from session and filter by period and workspace
+  // Check for stored analysis from session and filter by period
   useEffect(() => {
     const stored = sessionStorage.getItem("novaAnalysis");
     if (stored) {
@@ -142,12 +129,6 @@ export default function Dashboard() {
         const { url, name } = JSON.parse(sourceInfo);
         parsedAnalysis.sourceUrl = url;
         parsedAnalysis.sourceName = name;
-      }
-
-      // Filter by workspace first
-      if (selectedWorkspaceId && parsedAnalysis.trello_project_selection_id !== selectedWorkspaceId) {
-        setLatestAnalysis(null);
-        return;
       }
 
       // Filter by selected period if one is set
@@ -166,7 +147,7 @@ export default function Dashboard() {
         setLatestAnalysis(parsedAnalysis);
       }
     }
-  }, [selectedPeriod, selectedWorkspaceId]);
+  }, [selectedPeriod]);
 
   // Calculate sprint info from real data
   const calculateDaysRemaining = (endDate) => {
@@ -302,8 +283,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                onWorkspaceChange={(workspaceId) => setSelectedWorkspaceId(workspaceId)} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
