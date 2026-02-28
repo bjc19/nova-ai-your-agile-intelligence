@@ -28,15 +28,19 @@ Deno.serve(async (req) => {
     });
 
     if (!trelloProjectSelections || trelloProjectSelections.length === 0) {
-      return Response.json({ error: 'No Trello project selection found' }, { status: 404 });
+      console.error(`TrelloProjectSelection not found for workspaceId: ${workspaceId}`);
+      return Response.json({ error: 'Workspace Trello non trouvé', detail: `Aucun workspace avec l'ID: ${workspaceId}` }, { status: 404 });
     }
 
     const projectSelection = trelloProjectSelections[0];
     const boardId = projectSelection.board_id;
 
     if (!boardId) {
-      return Response.json({ error: 'board_id not found' }, { status: 400 });
+      console.error(`board_id not found in projectSelection:`, projectSelection);
+      return Response.json({ error: 'Board ID manquant', detail: 'La configuration du workspace Trello est incomplète' }, { status: 400 });
     }
+
+    console.log(`Fetching Trello board: ${boardId} for workspace: ${workspaceId}`);
 
     // Récupérer les listes du board
     const listsResponse = await fetch(
@@ -45,7 +49,9 @@ Deno.serve(async (req) => {
     );
 
     if (!listsResponse.ok) {
-      throw new Error(`Trello API error: ${listsResponse.status}`);
+      const errorText = await listsResponse.text();
+      console.error(`Trello API error getting lists - Status: ${listsResponse.status}`, errorText);
+      throw new Error(`Erreur API Trello (${listsResponse.status}): Vérifiez que vos credentials Trello sont valides et que le board existe`);
     }
 
     const lists = await listsResponse.json();
@@ -57,7 +63,9 @@ Deno.serve(async (req) => {
     );
 
     if (!cardsResponse.ok) {
-      throw new Error(`Trello API error: ${cardsResponse.status}`);
+      const errorText = await cardsResponse.text();
+      console.error(`Trello API error getting cards - Status: ${cardsResponse.status}`, errorText);
+      throw new Error(`Erreur API Trello (${cardsResponse.status}): Impossible de récupérer les cartes`);
     }
 
     const cards = await cardsResponse.json();
@@ -163,7 +171,11 @@ Deno.serve(async (req) => {
 
     return Response.json(analysis);
   } catch (error) {
-    console.error('Error in analyzeTrelloBoardDynamic:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Error in analyzeTrelloBoardDynamic:', error.message);
+    console.error('Full error:', error);
+    return Response.json({ 
+      error: error.message || 'Erreur inconnue lors de l\'analyse Trello',
+      debug: error.message 
+    }, { status: 500 });
   }
 });
