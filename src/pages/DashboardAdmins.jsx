@@ -259,6 +259,15 @@ export default function DashboardAdmins() {
               </div>
             </div>
 
+            {/* Widget situation contextuelle - visible en premier */}
+            <div className="mt-4">
+              <SituationalContextInput
+                workspaceId={selectedWorkspaceId}
+                workspaceType={selectedWorkspaceType}
+                onAnalysisDone={() => {}}
+              />
+            </div>
+
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
                 <DailyQuote
