@@ -259,12 +259,6 @@ export default function DashboardAdmins() {
               </div>
             </div>
 
-            {/* Situational Context Input — always visible for admins */}
-            <SituationalContextInput
-              workspaceId={selectedWorkspaceId}
-              workspaceType={selectedWorkspaceType}
-              onAnalysisDone={() => {}} />
-
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
                 <DailyQuote
