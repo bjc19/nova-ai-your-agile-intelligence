@@ -258,8 +258,8 @@ export default function DashboardAdmins() {
               </div>
             </div>
 
-            {/* Widget Situationnel - TOUJOURS visible, premier élément */}
-            <div className="mt-4">
+            {/* SituationalContextInput - TOUJOURS visible en premier, peu importe les analyses */}
+            <div className="mt-4 mb-6">
               <SituationalContextInput
                 workspaceId={selectedWorkspaceId}
                 workspaceType={selectedWorkspaceType}
