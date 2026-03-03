@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import SituationalContextInput from "@/components/dashboard/SituationalContextInput";
 
 import {
   Mic,
@@ -258,15 +259,6 @@ export default function DashboardAdmins() {
               </div>
             </div>
 
-            {/* Widget Situation — toujours visible, premier élément interactif */}
-            <div className="mt-6">
-              <SituationalContextInput
-                workspaceId={selectedWorkspaceId}
-                workspaceType={selectedWorkspaceType}
-                onAnalysisDone={() => {}}
-              />
-            </div>
-
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
                 <DailyQuote
@@ -283,7 +275,7 @@ export default function DashboardAdmins() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         {multiProjectAlert &&
         <div className="mb-6">
             <MultiProjectAlert
