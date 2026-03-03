@@ -19,8 +19,8 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import SituationalContextInput from "@/components/dashboard/SituationalContextInput";
 
-import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
 import {
   Mic,
   Sparkles,
@@ -274,20 +274,8 @@ export default function DashboardAdmins() {
         </div>
       </div>
 
-      {/* Situation Input - Premier plan */}
-      <div className="max-w-6xl mx-auto px-6 pt-6 pb-2">
-        <SituationInputWidget
-          selectedWorkspaceId={selectedWorkspaceId}
-          selectedWorkspaceType={selectedWorkspaceType}
-          analysisHistory={analysisHistory}
-          onAnalysisComplete={() => {
-            // Refresh analysis history after new situation submitted
-          }}
-        />
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         {multiProjectAlert &&
         <div className="mb-6">
             <MultiProjectAlert
