@@ -11,6 +11,7 @@ import { useLanguage } from "@/components/LanguageContext";
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
+import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
@@ -18,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
 import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
@@ -329,15 +331,10 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
+              <IntegrationStatus />
             </div>
           </div>
         }
-
-        {(!selectedPeriod || analysisHistory.length > 0) && (
-          <div className="mt-6">
-            <ContextualModuleEngine analysisHistory={analysisHistory} lastAnalysisResult={latestAnalysis} />
-          </div>
-        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
