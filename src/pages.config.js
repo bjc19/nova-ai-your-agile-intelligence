@@ -70,7 +70,6 @@ import TeamManagement from './pages/TeamManagement';
 import TrelloProjectSelector from './pages/TrelloProjectSelector';
 import VerifyEmail from './pages/VerifyEmail';
 import acceptInvitation from './pages/accept-invitation';
-import DashboardAdmins from './pages/DashboardAdmins';
 import __Layout from './Layout.jsx';
 
 
@@ -98,7 +97,6 @@ export const PAGES = {
     "TrelloProjectSelector": TrelloProjectSelector,
     "VerifyEmail": VerifyEmail,
     "accept-invitation": acceptInvitation,
-    "DashboardAdmins": DashboardAdmins,
 }
 
 export const pagesConfig = {
