@@ -19,6 +19,8 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
+import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
   Mic,
@@ -239,7 +241,7 @@ export default function DashboardAdmins() {
                 </div>
               </div>
               
-              <div className="flex justify-start gap-3">
+              <div className="flex justify-end gap-3">
                  <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
                   activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
