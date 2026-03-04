@@ -274,6 +274,16 @@ export default function DashboardAdmins() {
         </div>
       </div>
 
+      {/* Nouvelle Situation — Premier bloc visible pour inciter à l'action */}
+      <div className="max-w-6xl mx-auto px-6 pt-8 pb-2">
+        <SituationInputWidget
+          selectedWorkspaceId={selectedWorkspaceId}
+          selectedWorkspaceType={selectedWorkspaceType}
+          analysisHistory={analysisHistory}
+          onAnalysisComplete={() => {}}
+        />
+      </div>
+
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         {multiProjectAlert &&
