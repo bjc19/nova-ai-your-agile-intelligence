@@ -20,6 +20,7 @@ import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
 import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
+import ContextualAnalyticsDashboard from "@/components/dashboard/ContextualAnalyticsDashboard";
 
 import {
   Mic,
@@ -239,19 +240,11 @@ export default function DashboardAdmins() {
                   </p>
                 </div>
               </div>
-
-              {/* Situational Context Widget */}
-              <SituationInputWidget
-                selectedWorkspaceId={selectedWorkspaceId}
-                selectedWorkspaceType={selectedWorkspaceType}
-                analysisHistory={analysisHistory}
-              />
-
-              {/* Selectors below the situational context */}
+              
               <div className="flex justify-end gap-3">
                  <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  activeWorkspaceType={selectedWorkspaceType}
+                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
                   onWorkspaceChange={(id, type) => {
                     setSelectedWorkspaceId(id);
                     setSelectedWorkspaceType(type);
@@ -263,6 +256,7 @@ export default function DashboardAdmins() {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
+
               </div>
             </div>
 

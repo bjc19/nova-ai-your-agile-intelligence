@@ -19,6 +19,7 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
+import ContextualAnalyticsDashboard from "@/components/dashboard/ContextualAnalyticsDashboard";
 
 import {
   Mic,
@@ -279,12 +280,7 @@ export default function Dashboard() {
 
               </div>
               
-              {/* Situational Context Widget */}
-              <SituationInputWidget
-                analysisHistory={analysisHistory}
-              />
-
-              {/* Selectors below the situational context */}
+              {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
@@ -292,7 +288,9 @@ export default function Dashboard() {
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
+                    console.log("Period changed:", period);
                   }} />
+
               </div>
             </div>
 
