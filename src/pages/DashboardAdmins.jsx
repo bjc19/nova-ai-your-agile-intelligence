@@ -19,6 +19,8 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
+import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
+import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
   Mic,
@@ -242,7 +244,7 @@ export default function DashboardAdmins() {
               <div className="flex justify-end gap-3">
                  <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
+                  activeWorkspaceType={selectedWorkspaceType}
                   onWorkspaceChange={(id, type) => {
                     setSelectedWorkspaceId(id);
                     setSelectedWorkspaceType(type);
@@ -273,7 +275,7 @@ export default function DashboardAdmins() {
         </div>
       </div>
 
-      {/* Nouvelle Situation — Bloc audio/texte */}
+      {/* Situation Input Widget - Priority placement */}
       <div className="max-w-6xl mx-auto px-6 pt-8 pb-2">
         <SituationInputWidget
           selectedWorkspaceId={selectedWorkspaceId}
@@ -344,6 +346,13 @@ export default function DashboardAdmins() {
           </div>
         }
 
+        {/* Contextual Module Engine */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8">
+          <ContextualModuleEngine analysisHistory={analysisHistory} lastAnalysisResult={latestAnalysis} />
+        </div>
+        }
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -359,8 +368,6 @@ export default function DashboardAdmins() {
               <div className="flex items-center gap-3">
                 <Link to={createPageUrl("Settings")}>
                   
-
-
 
                 </Link>
                 <Link to={createPageUrl("Analysis")}>
