@@ -13,6 +13,8 @@ const URGENCY_STYLES = {
 
 function ItemCard({ item, type, onResolve, resolving }) {
   const [expanded, setExpanded] = useState(false);
+  const [showContext, setShowContext] = useState(false);
+
   const anon = (t) => {
     if (!t) return "-";
     return t.replace(/\b([A-ZÀ-ÿ][a-zà-ÿ]+)\b/g, (m) => {
@@ -23,6 +25,8 @@ function ItemCard({ item, type, onResolve, resolving }) {
 
   const title = anon(item.issue || item.description || item.title || "-");
   const urgencyStyle = URGENCY_STYLES[item.urgency] || URGENCY_STYLES.low;
+  const hasDetail = item.root_cause || item.impact || item.system_impact || item.action || item.mitigation || item.recommendation;
+  const hasContextAnalysis = item.analysisData?.analysis_data;
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -74,26 +78,56 @@ function ItemCard({ item, type, onResolve, resolving }) {
             className="overflow-hidden border-t border-slate-100"
           >
             <div className="p-4 bg-slate-50 space-y-3">
-              {item.root_cause && (
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Cause racine</p>
-                  <p className="text-sm text-slate-700">{anon(item.root_cause)}</p>
-                </div>
-              )}
-              {(item.impact || item.system_impact) && (
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Impact</p>
-                  <p className="text-sm text-slate-700">{anon(item.impact || item.system_impact)}</p>
-                </div>
-              )}
-              {(item.action || item.mitigation || item.recommendation) && (
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Recommandation</p>
-                  <p className="text-sm text-slate-700">{anon(item.action || item.mitigation || item.recommendation)}</p>
-                </div>
+              {hasDetail && (
+                <>
+                  {item.root_cause && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Cause racine</p>
+                      <p className="text-sm text-slate-700">{anon(item.root_cause)}</p>
+                    </div>
+                  )}
+                  {(item.impact || item.system_impact) && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Impact</p>
+                      <p className="text-sm text-slate-700">{anon(item.impact || item.system_impact)}</p>
+                    </div>
+                  )}
+                  {(item.action || item.mitigation || item.recommendation) && (
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Recommandation</p>
+                      <p className="text-sm text-slate-700">{anon(item.action || item.mitigation || item.recommendation)}</p>
+                    </div>
+                  )}
+                </>
               )}
               {item.resolved_date && (
                 <p className="text-xs text-emerald-600">✓ Résolu le {new Date(item.resolved_date).toLocaleDateString("fr-FR")}</p>
+              )}
+
+              {/* Lien vers l'analyse contextuelle complète */}
+              {item.analysisData && (
+                <div>
+                  <button
+                    onClick={() => setShowContext(!showContext)}
+                    className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors mt-1"
+                  >
+                    <Brain className="w-3.5 h-3.5" />
+                    {showContext ? "Masquer l'analyse contextuelle" : "Voir l'analyse contextuelle complète"}
+                    {showContext ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+                  <AnimatePresence>
+                    {showContext && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <AnalysisContextPanel analysis={item.analysisData} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
             </div>
           </motion.div>
