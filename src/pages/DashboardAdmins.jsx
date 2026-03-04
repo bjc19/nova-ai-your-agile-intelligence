@@ -319,6 +319,15 @@ export default function DashboardAdmins() {
           </div>
         }
 
+        {/* Contextual Analytics Dashboard */}
+        <div className="mb-6">
+          <ContextualAnalyticsDashboard
+            workspaceId={selectedWorkspaceId}
+            workspaceType={selectedWorkspaceType}
+            lastAnalysisResult={lastSituationalResult}
+          />
+        </div>
+
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
