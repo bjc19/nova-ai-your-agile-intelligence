@@ -11,15 +11,13 @@ import { useLanguage } from "@/components/LanguageContext";
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
-import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
-import ContextualAnalyticsDashboard from "@/components/dashboard/ContextualAnalyticsDashboard";
+import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
   Mic,
@@ -44,7 +42,6 @@ export default function Dashboard() {
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [lastSituationalResult, setLastSituationalResult] = useState(null);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -281,13 +278,7 @@ export default function Dashboard() {
 
               </div>
               
-              {/* Situational Context Widget */}
-              <SituationInputWidget
-                analysisHistory={analysisHistory}
-                onAnalysisComplete={(result) => setLastSituationalResult(result)}
-              />
-
-              {/* Selectors below the situational context */}
+              {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
@@ -311,13 +302,6 @@ export default function Dashboard() {
 
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Contextual Analytics Dashboard */}
-        <div className="mb-6">
-          <ContextualAnalyticsDashboard
-            lastAnalysisResult={lastSituationalResult}
-          />
-        </div>
-
         {/* Multi-Project Alert */}
         {multiProjectAlert &&
         <div className="mb-6">
