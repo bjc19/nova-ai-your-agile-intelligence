@@ -370,23 +370,12 @@ export default function Dashboard() {
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
-            <SprintHealthCard
-              sprintHealth={{
-                sprint_name: "Sprint 14",
-                wip_count: 8,
-                wip_historical_avg: 5,
-                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-                sprint_day: 5,
-                historical_sprints_count: 4,
-                drift_acknowledged: false,
-                problematic_tickets: sprintHealth.problematic_tickets,
-                gdprSignals: gdprSignals
-              }}
+              <SprintHealthCard
+              sprintHealth={sprintHealth}
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
 
-            }
+              }
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
