@@ -19,8 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
-import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
   Mic,
@@ -275,7 +273,7 @@ export default function DashboardAdmins() {
         </div>
       </div>
 
-      {/* Nouvelle Situation — Premier bloc visible pour inciter à l'action */}
+      {/* Nouvelle Situation — Bloc audio/texte */}
       <div className="max-w-6xl mx-auto px-6 pt-8 pb-2">
         <SituationInputWidget
           selectedWorkspaceId={selectedWorkspaceId}
@@ -344,12 +342,6 @@ export default function DashboardAdmins() {
               <IntegrationStatus />
             </div>
           </div>
-        }
-
-        {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="mt-8">
-          <ContextualModuleEngine analysisHistory={analysisHistory} lastAnalysisResult={latestAnalysis} />
-        </div>
         }
 
         <motion.div
