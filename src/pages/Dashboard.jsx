@@ -319,15 +319,37 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector />
+              <WorkspaceSelector 
+                 activeWorkspaceId={selectedWorkspaceId}
+                 activeWorkspaceType={selectedWorkspaceType}
+                 onWorkspaceChange={(id, type) => {
+                   setSelectedWorkspaceId(id);
+                   setSelectedWorkspaceType(type);
+                 }} />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
-                    console.log("Period changed:", period);
                   }} />
-
+              {user?.role !== 'admin' &&
+              <button
+                onClick={async () => {
+                  setRefreshing(true);
+                  try {
+                    const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
+                    setAllAnalysisHistory(analyses);
+                  } catch (error) {
+                    console.error("Erreur rafraîchissement:", error);
+                  } finally {
+                    setRefreshing(false);
+                  }
+                }}
+                disabled={refreshing}
+                className="text-slate-600 hover:text-slate-700">
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </button>
+              }
               </div>
             </div>
 
