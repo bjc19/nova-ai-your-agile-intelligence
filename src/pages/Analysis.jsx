@@ -507,23 +507,14 @@ Provide a detailed analysis in the following JSON format:`;
       }
     }
 
-    // Check if workspace selected for multi-source fusion
-    if (!selectedWorkspaceId) {
-      setError("Veuillez sélectionner un workspace pour l'analyse cross-source.");
-      setIsAnalyzing(false);
-      return;
-    }
-
-    // Call createAnalysis with workspace_id for multi-source fusion
+    // Call createAnalysis (workspace is optional for multi-source fusion)
     const response = await base44.functions.invoke('createAnalysis', {
       analysisRecord: {
         ...analysisRecord,
-        jira_project_selection_id: selectedWorkspaceId,
-        workspace_name: selectedWorkspaceName
+        ...(selectedWorkspaceId ? { jira_project_selection_id: selectedWorkspaceId, workspace_name: selectedWorkspaceName } : {})
       },
       patternDetections,
-      workspace_id: selectedWorkspaceId,
-      workspace_name: selectedWorkspaceName
+      ...(selectedWorkspaceId ? { workspace_id: selectedWorkspaceId, workspace_name: selectedWorkspaceName } : {})
     });
     
     const createdAnalysis = response.data.analysis;
