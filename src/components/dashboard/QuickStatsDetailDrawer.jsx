@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { X, AlertOctagon, ShieldAlert, CheckCircle2, TrendingUp, ChevronDown, ChevronUp, FileText, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { anonymizeNamesInText } from "@/components/nova/anonymizationEngine";
