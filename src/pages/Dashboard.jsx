@@ -11,13 +11,14 @@ import { useLanguage } from "@/components/LanguageContext";
 import QuickStats from "@/components/dashboard/QuickStats";
 import SprintPerformanceChart from "@/components/dashboard/SprintPerformanceChart";
 import RecentAnalyses from "@/components/dashboard/RecentAnalyses";
+import IntegrationStatus from "@/components/dashboard/IntegrationStatus";
 import KeyRecommendations from "@/components/dashboard/KeyRecommendations";
 import SprintHealthCard from "@/components/dashboard/SprintHealthCard";
 import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
+import DailyQuote from "@/components/nova/DailyQuote";
 
 import {
   Mic,
@@ -375,17 +376,14 @@ export default function Dashboard() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
           </div>
         </div>
         }
-
-        {/* Contextual Module Engine */}
-        {(!selectedPeriod || analysisHistory.length > 0) && (
-          <div className="mt-6">
-            <ContextualModuleEngine analysisHistory={analysisHistory} />
-          </div>
-        )}
 
         {(user?.role === 'admin') &&
         <motion.div
