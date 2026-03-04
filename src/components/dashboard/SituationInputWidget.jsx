@@ -331,22 +331,45 @@ export default function SituationInputWidget({ selectedWorkspaceId, selectedWork
             {mode === "voice" && (
               <div className="space-y-4">
                 {/* Recorder */}
+                {/* Context reminder badge in voice mode */}
+                {contextLabel.trim() && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg mb-1">
+                    <Tag className="w-3 h-3 text-blue-500 shrink-0" />
+                    <span className="text-xs text-blue-700 font-medium truncate">{contextLabel}</span>
+                  </div>
+                )}
+
                 <div className={`rounded-xl border-2 transition-all p-4 ${isRecording ? "border-blue-400 bg-blue-50" : "border-slate-200 bg-slate-50"}`}>
                   <div className="flex flex-col items-center gap-3">
                     <VoiceWaveform isRecording={isRecording} energyLevel={energyLevel} />
                     <button
-                      onClick={isRecording ? stopRecording : startRecording}
+                      onClick={isRecording ? stopRecording : (!contextLabel.trim() && !skipContext ? null : startRecording)}
                       className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-md ${
                         isRecording
                           ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
-                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                          : (!contextLabel.trim() && !skipContext)
+                            ? "bg-slate-300 text-slate-400 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
                       }`}
                     >
                       {isRecording ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
                     </button>
-                    <p className="text-xs text-slate-500">
-                      {isRecording ? "Enregistrement en cours... Cliquez pour arrêter" : "Cliquez pour commencer"}
+                    <p className="text-xs text-slate-500 text-center">
+                      {isRecording
+                        ? "Enregistrement en cours... Cliquez pour arrêter"
+                        : (!contextLabel.trim() && !skipContext)
+                          ? "Ajoutez un contexte ci-dessus pour activer l'enregistrement"
+                          : "Cliquez pour commencer"
+                      }
                     </p>
+                    {!contextLabel.trim() && !skipContext && !isRecording && (
+                      <button
+                        onClick={() => setSkipContext(true)}
+                        className="text-xs text-slate-400 hover:text-slate-600 underline transition-colors"
+                      >
+                        Continuer sans contexte
+                      </button>
+                    )}
                   </div>
                 </div>
 
