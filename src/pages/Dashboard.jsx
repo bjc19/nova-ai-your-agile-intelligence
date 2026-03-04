@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
-
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/components/LanguageContext";
@@ -18,6 +18,8 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
+import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
   Mic,
@@ -100,13 +102,11 @@ export default function Dashboard() {
   }, [navigate]);
 
   // Fetch analysis history
-  const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
-  
-  useEffect(() => {
-    if (!isLoading) {
-      base44.entities.AnalysisHistory.list('-created_date', 100).then(setAllAnalysisHistory);
-    }
-  }, [isLoading]);
+  const { data: allAnalysisHistory = [] } = useQuery({
+    queryKey: ['analysisHistory'],
+    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
+    enabled: !isLoading
+  });
 
   // Filter analysis history based on selected period
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
@@ -174,8 +174,29 @@ export default function Dashboard() {
     sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
   }
 
-  // Sprint health will load from real data when available
-  const sprintHealth = null;
+  // Simulated sprint health data (will come from Jira integration)
+  // Only show simulated data if there are analyses in the period
+  const sprintHealth = !selectedPeriod || analysisHistory.length > 0 ? {
+    sprint_name: "Sprint 14",
+    sprint_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    risk_score: analysisHistory.length > 0 ?
+    Math.min(100, analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) * 15 +
+    analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0) * 10) :
+    45,
+    status: analysisHistory.length > 0 &&
+    analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0) >= 3 ?
+    "at_risk" : "healthy",
+    wip_count: 6,
+    wip_historical_avg: 5,
+    tickets_in_progress_over_3d: analysisHistory.length > 0 ? Math.min(3, analysisHistory[0]?.blockers_count || 0) : 1,
+    blocked_tickets_over_48h: analysisHistory.length > 0 ? Math.min(2, analysisHistory[0]?.risks_count || 0) : 0,
+    alert_sent: false,
+    recommendations: latestAnalysis?.recommendations?.slice(0, 1) || ["Réduire le WIP et prioriser les tickets bloqués"],
+    problematic_tickets: [
+    { ticket_id: "US-123", title: "Intégration API paiement", status: "in_progress", days_in_status: 4, assignee: "Marie D." },
+    { ticket_id: "BUG-456", title: "Fix timeout base de données", status: "blocked", days_in_status: 2, assignee: "Jean P." }]
+
+  } : null;
 
   if (isLoading) {
     return (
@@ -364,6 +385,24 @@ export default function Dashboard() {
           </div>
         </div>
         }
+
+        {/* Situation Input Widget - Audio & Text Analysis */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-8">
+          <SituationInputWidget latestAnalysis={latestAnalysis} analysisHistory={analysisHistory} />
+        </motion.div>
+
+        {/* Contextual Module Engine - Situational Analysis */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-8">
+          <ContextualModuleEngine latestAnalysis={latestAnalysis} gdprSignals={gdprSignals} />
+        </motion.div>
 
         {(user?.role === 'admin') &&
         <motion.div
