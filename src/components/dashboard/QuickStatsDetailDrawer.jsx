@@ -103,6 +103,52 @@ function ItemCard({ item, type, onResolve, resolving }) {
   );
 }
 
+function AnalysisContextPanel({ analysis }) {
+  const data = analysis?.analysis_data || {};
+  const sections = [
+    { label: "Évaluation situationnelle", value: data.situational_assessment },
+    { label: "Résumé", value: data.summary || data.meeting_summary },
+    { label: "Santé globale", value: data.overall_health },
+    { label: "Alignement historique", value: data.historical_alignment },
+    { label: "Contexte", value: data.context_description },
+  ].filter(s => s.value);
+
+  const recommendations = (data.recommendations || []).slice(0, 3);
+
+  if (!sections.length && !recommendations.length) {
+    return (
+      <div className="text-center py-8 text-slate-400 text-sm">
+        <Brain className="w-8 h-8 mx-auto mb-2 opacity-30" />
+        Aucune analyse contextuelle disponible
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3 pt-2">
+      {sections.map((s, i) => (
+        <div key={i} className="bg-white rounded-lg border border-slate-200 p-3">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">{s.label}</p>
+          <p className="text-sm text-slate-700 leading-relaxed">{s.value}</p>
+        </div>
+      ))}
+      {recommendations.length > 0 && (
+        <div className="bg-white rounded-lg border border-slate-200 p-3">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Recommandations</p>
+          <ul className="space-y-1.5">
+            {recommendations.map((r, i) => (
+              <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
+                <span className="shrink-0 w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-bold mt-0.5">{i + 1}</span>
+                {r.action || r.description || r}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysisHistory = [], resolvedItems = [], onResolve, resolving }) {
   const CONFIG = {
     blockers: {
