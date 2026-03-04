@@ -262,6 +262,8 @@ export default function DashboardAdmins() {
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
             <>
+                <SituationInputWidget />
+                
                 <DailyQuote
                 lang={t('language') === 'English' ? 'en' : 'fr'}
                 blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
