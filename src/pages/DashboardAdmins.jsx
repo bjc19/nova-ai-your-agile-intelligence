@@ -19,8 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
-import ContextualAnalyticsDashboard from "@/components/dashboard/ContextualAnalyticsDashboard";
 
 import {
   Mic,
@@ -45,7 +43,6 @@ export default function DashboardAdmins() {
   const [selectedWorkspaceType, setSelectedWorkspaceType] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [lastSituationalResult, setLastSituationalResult] = useState(null);
 
   // Fetch GDPR signals
   useEffect(() => {
@@ -120,22 +117,20 @@ export default function DashboardAdmins() {
   });
 
   // Filter analysis history
-    const analysisHistory = allAnalysisHistory.filter((analysis) => {
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    
-    let matchesWorkspace = true;
-    if (selectedWorkspaceId && selectedWorkspaceType) {
-      if (selectedWorkspaceType === 'jira') {
-        matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
-      } else if (selectedWorkspaceType === 'trello') {
-        matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
-      }
-    } else if (selectedWorkspaceId) { // Fallback si le type n'est pas fourni, suppose Jira
-      matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
+
+    let matchesContext = true;
+    if (selectedWorkspaceId && selectedWorkspaceType === 'context') {
+      matchesContext = analysis.context_label === selectedWorkspaceId;
+    } else if (selectedWorkspaceId && selectedWorkspaceType === 'jira') {
+      matchesContext = analysis.jira_project_selection_id === selectedWorkspaceId;
+    } else if (selectedWorkspaceId && selectedWorkspaceType === 'trello') {
+      matchesContext = analysis.trello_project_selection_id === selectedWorkspaceId;
     }
 
-    return matchesPeriod && matchesWorkspace;
+    return matchesPeriod && matchesContext;
   });
 
   // Check for stored analysis
@@ -259,14 +254,6 @@ export default function DashboardAdmins() {
                   }} />
 
               </div>
-
-              {/* Situational Context Widget */}
-              <SituationInputWidget
-                selectedWorkspaceId={selectedWorkspaceId}
-                selectedWorkspaceType={selectedWorkspaceType}
-                analysisHistory={analysisHistory}
-                onAnalysisComplete={(result) => setLastSituationalResult(result)}
-              />
             </div>
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
@@ -318,15 +305,6 @@ export default function DashboardAdmins() {
             </Link>
           </div>
         }
-
-        {/* Contextual Analytics Dashboard */}
-        <div className="mb-6">
-          <ContextualAnalyticsDashboard
-            workspaceId={selectedWorkspaceId}
-            workspaceType={selectedWorkspaceType}
-            lastAnalysisResult={lastSituationalResult}
-          />
-        </div>
 
         {(!selectedPeriod || analysisHistory.length > 0) &&
         <div className="grid lg:grid-cols-3 gap-6">
