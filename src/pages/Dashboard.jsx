@@ -311,6 +311,13 @@ export default function Dashboard() {
 
       {/* Main Dashboard Content */}
       <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Contextual Analytics Dashboard */}
+        <div className="mb-6">
+          <ContextualAnalyticsDashboard
+            lastAnalysisResult={lastSituationalResult}
+          />
+        </div>
+
         {/* Multi-Project Alert */}
         {multiProjectAlert &&
         <div className="mb-6">
