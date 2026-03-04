@@ -197,6 +197,7 @@ export default function SituationInputWidget({ selectedWorkspaceId, selectedWork
         vocalMetrics: mode === "voice" ? vocalMetrics : null,
         workspaceId: selectedWorkspaceId,
         workspaceType: selectedWorkspaceType,
+        contextLabel: contextLabel.trim() || null,
       });
       setResult(response.data);
       if (onAnalysisComplete) onAnalysisComplete(response.data);
