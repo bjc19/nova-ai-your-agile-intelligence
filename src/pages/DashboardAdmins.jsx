@@ -259,6 +259,14 @@ export default function DashboardAdmins() {
                   }} />
 
               </div>
+
+              {/* Situational Context Widget */}
+              <SituationInputWidget
+                selectedWorkspaceId={selectedWorkspaceId}
+                selectedWorkspaceType={selectedWorkspaceType}
+                analysisHistory={analysisHistory}
+                onAnalysisComplete={(result) => setLastSituationalResult(result)}
+              />
             </div>
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
