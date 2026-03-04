@@ -102,56 +102,9 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   // Helper: check if item is resolved
   const isItemResolved = (itemId) => resolvedItems.includes(itemId);
 
-  // SYNC WITH BlockersRisksTrendTable: Calculate same TOTALS as "Totaux" row (sum over 5-day trend period)
-   const getTotalsData = () => {
-     if (gdprSignals.length === 0 && analysisHistory.length === 0) {
-       return { blockers: 0, risks: 0 };
-     }
-
-     // Build same 5-day range as BlockersRisksTrendTable (lines 42-45)
-     const allSignals = [
-       ...gdprSignals.map(s => new Date(s.created_date)),
-       ...analysisHistory.map(a => new Date(a.created_date))
-     ];
-
-     if (allSignals.length === 0) {
-       return { blockers: 0, risks: 0 };
-     }
-
-     const maxDate = new Date(Math.max(...allSignals.map(d => d.getTime())));
-     const minDate = new Date(maxDate);
-     minDate.setDate(minDate.getDate() - 4);
-     minDate.setHours(0, 0, 0, 0);
-
-     // Filter signals within this 5-day window (same logic as BlockersRisksTrendTable)
-     const last5DaysSignals = gdprSignals.filter(s => {
-       const sDate = new Date(s.created_date);
-       sDate.setHours(0, 0, 0, 0);
-       return sDate.getTime() >= minDate.getTime();
-     });
-
-     const last5DaysAnalysis = analysisHistory.filter(a => {
-       const aDate = new Date(a.created_date);
-       aDate.setHours(0, 0, 0, 0);
-       return aDate.getTime() >= minDate.getTime();
-     });
-
-     // Count by criticite (matching BlockersRisksTrendTable line 59-60)
-     const gdprBlockers = last5DaysSignals.filter(s => s.criticite === 'critique' || s.criticite === 'haute').length;
-     const gdprRisks = last5DaysSignals.filter(s => s.criticite === 'moyenne' || s.criticite === 'basse').length;
-
-     const analysisBlockers = last5DaysAnalysis.flatMap(a => (a.analysis_data?.blockers || [])).length;
-     const analysisRisks = last5DaysAnalysis.flatMap(a => (a.analysis_data?.risks || [])).length;
-
-     return {
-       blockers: gdprBlockers + analysisBlockers,
-       risks: gdprRisks + analysisRisks
-     };
-   };
-
-   const totalsData = getTotalsData();
-   const totalBlockers = totalsData.blockers;
-   const totalRisks = totalsData.risks;
+  // Compute totals directly from analysisHistory (real manager data only)
+   const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || (a.analysis_data?.blockers?.length ?? 0)), 0);
+   const totalRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || (a.analysis_data?.risks?.length ?? 0)), 0);
   
   // Team Health Index calculation based on TeamContext
   const calculateTeamHealth = () => {
