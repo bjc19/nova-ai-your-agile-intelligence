@@ -355,7 +355,14 @@ export default function Dashboard() {
 
             {/* Quick Stats - Only show if data in period */}
             {(!selectedPeriod || analysisHistory.length > 0) &&
-            <QuickStats analysisHistory={analysisHistory} />
+            <>
+              <DailyQuote
+                lang={t('language') === 'English' ? 'en' : 'fr'}
+                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
+                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
+                patterns={[]} />
+              <QuickStats analysisHistory={analysisHistory} />
+            </>
             }
           </motion.div>
         </div>
