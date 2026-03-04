@@ -117,10 +117,10 @@ export default function DashboardAdmins() {
   });
 
   // Filter analysis history
-    const analysisHistory = allAnalysisHistory.filter((analysis) => {
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
     const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    
+
     let matchesWorkspace = true;
     if (selectedWorkspaceId && selectedWorkspaceType) {
       if (selectedWorkspaceType === 'jira') {
@@ -128,7 +128,7 @@ export default function DashboardAdmins() {
       } else if (selectedWorkspaceType === 'trello') {
         matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
       }
-    } else if (selectedWorkspaceId) { // Fallback si le type n'est pas fourni, suppose Jira
+    } else if (selectedWorkspaceId) {// Fallback si le type n'est pas fourni, suppose Jira
       matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
     }
 
@@ -339,29 +339,29 @@ export default function DashboardAdmins() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-8">
-          <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <p className="text-slate-400 max-w-lg">
-                  {t('importDataDescription')}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  
+          
 
 
 
-                </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </motion.div>
       </div>
     </div>);
