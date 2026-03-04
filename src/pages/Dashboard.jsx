@@ -18,7 +18,6 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
   Mic,
@@ -372,22 +371,25 @@ export default function Dashboard() {
                sourceUrl={latestAnalysis?.sourceUrl}
                sourceName={latestAnalysis?.sourceName} />
 
+             {/* Audio/Text Analysis - SituationInputWidget */}
+             {latestAnalysis && <SituationInputWidget analysisData={latestAnalysis} />}
+
              {/* Contextual Analysis */}
-             <ContextualModuleEngine
+             {latestAnalysis && <ContextualModuleEngine
                analysisHistory={analysisHistory}
                gdprSignals={gdprSignals}
-               latestAnalysis={latestAnalysis} />
+               latestAnalysis={latestAnalysis} />}
 
             </div>
 
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
-             {/* Recent Analyses */}
-             <RecentAnalyses analyses={analysisHistory} />
-
-             {/* Integration Status */}
-             <IntegrationStatus />
-            </div>
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
+          </div>
         </div>
         }
 
