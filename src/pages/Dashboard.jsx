@@ -129,21 +129,30 @@ export default function Dashboard() {
     checkAuth();
   }, [navigate]);
 
-  // Fetch analysis history
-  const { data: allAnalysisHistory = [] } = useQuery({
-    queryKey: ['analysisHistory'],
-    queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
-    enabled: !isLoading
-  });
-
-  // Filter analysis history based on selected period
-  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history based on selected period and workspace
+  const analysisHistory = allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const startDate = new Date(selectedPeriod.start);
-    const endDate = new Date(selectedPeriod.end);
-    endDate.setHours(23, 59, 59, 999); // Include end of day
-    return analysisDate >= startDate && analysisDate <= endDate;
-  }) : allAnalysisHistory;
+    const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
+    
+    let matchesWorkspace = true;
+    if (user?.role !== 'admin') {
+      // Non-admin users see only their assigned workspaces
+      matchesWorkspace = selectedWorkspaceId ? 
+        (analysis.jira_project_selection_id === selectedWorkspaceId || analysis.trello_project_selection_id === selectedWorkspaceId) :
+        assignedWorkspaceIds.includes(analysis.jira_project_selection_id) || assignedWorkspaceIds.includes(analysis.trello_project_selection_id);
+    } else {
+      // Admin users can filter by workspace if selected
+      if (selectedWorkspaceId && selectedWorkspaceType) {
+        if (selectedWorkspaceType === 'jira') {
+          matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
+        } else if (selectedWorkspaceType === 'trello') {
+          matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
+        }
+      }
+    }
+
+    return matchesPeriod && matchesWorkspace;
+  });
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
