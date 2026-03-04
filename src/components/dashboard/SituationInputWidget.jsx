@@ -213,6 +213,8 @@ export default function SituationInputWidget({ selectedWorkspaceId, selectedWork
     setText("");
     setTranscript("");
     setVocalMetrics(null);
+    setContextLabel("");
+    setSkipContext(false);
     setMode("text");
   };
 
