@@ -109,33 +109,47 @@ export default function ContextualModuleEngine({ analysisHistory = [], lastAnaly
   const [generated, setGenerated] = useState(false);
   const [contextSummary, setContextSummary] = useState("");
 
-  // Build context from history + last result
+  // Build context with precise signals to drive conditional generation
   const buildContext = () => {
     const recentAnalyses = analysisHistory.slice(0, 10);
     const totalBlockers = recentAnalyses.reduce((s, a) => s + (a.blockers_count || 0), 0);
     const totalRisks = recentAnalyses.reduce((s, a) => s + (a.risks_count || 0), 0);
+    const totalResolved = recentAnalyses.reduce((s, a) => s + (a.resolved_count || 0), 0);
     const sources = [...new Set(recentAnalyses.map(a => a.source).filter(Boolean))];
     const contextLabels = [...new Set(recentAnalyses.map(a => a.context_label).filter(Boolean))];
+
+    // Extract actual blocker/risk descriptions for precision
+    const blockerTexts = recentAnalyses
+      .flatMap(a => (a.analysis_data?.blockers || []).map(b => b.issue || b.description).filter(Boolean))
+      .slice(0, 5);
+    const riskTexts = recentAnalyses
+      .flatMap(a => (a.analysis_data?.risks || []).map(r => r.description || r.issue).filter(Boolean))
+      .slice(0, 5);
     const assessments = recentAnalyses
       .filter(a => a.analysis_data?.situational_assessment)
       .map(a => a.analysis_data.situational_assessment)
-      .slice(0, 3)
-      .join(" | ");
+      .slice(0, 3);
 
     const lastHealth = lastAnalysisResult?.overall_health || recentAnalyses[0]?.analysis_data?.overall_health;
     const lastAssessment = lastAnalysisResult?.situational_assessment || recentAnalyses[0]?.analysis_data?.situational_assessment;
     const historicalAlignment = lastAnalysisResult?.historical_alignment || recentAnalyses[0]?.analysis_data?.historical_alignment;
+    const recommendations = (lastAnalysisResult?.recommendations || recentAnalyses[0]?.analysis_data?.recommendations || [])
+      .slice(0, 3).map(r => r.action || r.description || r).filter(Boolean);
 
     return {
       totalBlockers,
       totalRisks,
+      totalResolved,
       analysisCount: recentAnalyses.length,
       sources,
       contextLabels,
+      blockerTexts,
+      riskTexts,
       assessments,
       lastHealth,
       lastAssessment,
       historicalAlignment,
+      recommendations,
     };
   };
 
@@ -144,33 +158,41 @@ export default function ContextualModuleEngine({ analysisHistory = [], lastAnaly
     setLoading(true);
     try {
       const ctx = buildContext();
-      const prompt = `Tu es Nova, un outil d'intelligence agile contextuelle qui s'adapte à tous les frameworks de gestion de projet (Scrum, Kanban, SAFe, Spotify, Lean, Kaizen, Six Sigma, OKR, gestion du changement, transformation digitale, hybrides, etc.).
+      const prompt = `Tu es Nova, un moteur d'intelligence contextuelle pour équipes agiles. Tu dois générer des modules d'aide UNIQUEMENT si les signaux réels le justifient clairement.
 
-Contexte détecté :
-- ${ctx.analysisCount} analyses récentes
-- ${ctx.totalBlockers} blockers totaux, ${ctx.totalRisks} risques
-- Sources : ${ctx.sources.join(", ") || "situationnel"}
-- Contextes étiquetés : ${ctx.contextLabels.join(", ") || "non défini"}
-- Dernière santé : ${ctx.lastHealth || "inconnue"}
-- Dernière évaluation : "${ctx.lastAssessment || ""}"
+DONNÉES RÉELLES OBSERVÉES :
+- Nombre d'analyses : ${ctx.analysisCount}
+- Blockers actifs : ${ctx.totalBlockers} (descriptions : ${ctx.blockerTexts.join(" / ") || "aucune"})
+- Risques actifs : ${ctx.totalRisks} (descriptions : ${ctx.riskTexts.join(" / ") || "aucune"})
+- Éléments résolus : ${ctx.totalResolved}
+- Sources de données : ${ctx.sources.join(", ") || "non précisé"}
+- Labels de contexte : ${ctx.contextLabels.join(", ") || "non défini"}
+- Santé globale détectée : ${ctx.lastHealth || "inconnue"}
+- Dernière évaluation situationnelle : "${ctx.lastAssessment || ""}"
+- Évaluations passées : ${ctx.assessments.join(" | ") || "aucune"}
 - Alignement historique : "${ctx.historicalAlignment || ""}"
-- Résumés récents : "${ctx.assessments || ""}"
+- Recommandations existantes : ${ctx.recommendations.join(" / ") || "aucune"}
 
-En fonction de ce contexte, génère entre 1 et 3 modules intelligents et adaptés. Chaque module doit correspondre à l'outil ou framework le plus pertinent compte tenu de la situation (ex : si on détecte beaucoup de blockers et tensions, propose un plan de transformation ou de gestion du changement ; si on détecte des problèmes de priorité, propose un alignement OKR ; si on détecte des gaspillages récurrents, propose Kaizen ; si le contexte est multi-projets complexe, propose une matrice de risques SAFe ou hybride, etc.).
+RÈGLES STRICTES :
+1. Ne génère un module QUE si un signal précis dans les données le justifie directement (ex: blockers récurrents sur un même thème → matrice d'impact, risques non résolus qui s'accumulent → plan de mitigation, etc.)
+2. Si aucun signal fort n'est détectable, retourne un tableau "modules" VIDE et explique pourquoi dans "context_summary".
+3. Maximum 2 modules. Jamais plus.
+4. Chaque module doit être directement ancré sur des données réelles citées ci-dessus, pas sur des généralités.
+5. Les sections doivent contenir des éléments SPÉCIFIQUES à la situation détectée, pas des templates génériques.
+6. Le "rationale" doit citer explicitement un chiffre ou un fait observé.
 
-Réponds en JSON strict avec ce format :
+Réponds en JSON strict :
 {
-  "context_summary": "Résumé du contexte détecté en 1-2 phrases",
+  "context_summary": "Ce que Nova a réellement détecté (basé sur les données, pas des suppositions)",
   "modules": [
     {
-      "type": "transformation_plan|change_management|risk_matrix|okr_alignment|kaizen_sprint|lean_analysis|agile_health|generic",
-      "title": "Titre du module",
-      "framework": "Framework de référence (ex: SAFe, Kaizen, OKR...)",
-      "rationale": "Pourquoi ce module est pertinent maintenant (1 phrase)",
+      "type": "risk_matrix|kaizen_sprint|okr_alignment|agile_health|lean_analysis|change_management|generic",
+      "title": "Titre précis ancré dans le contexte réel",
+      "framework": "Framework applicable",
+      "rationale": "Justification basée sur un fait observé (ex: '3 blockers non résolus depuis 2 sprints sur le thème X')",
       "sections": [
-        { "label": "Diagnostic", "content": "Texte ou tableau..." },
-        { "label": "Actions prioritaires", "content": ["Action 1", "Action 2", "Action 3"] },
-        { "label": "Indicateurs à surveiller", "content": ["KPI 1", "KPI 2"] }
+        { "label": "Ce qui est détecté", "content": "Observation précise depuis les données" },
+        { "label": "Actions ciblées", "content": ["Action 1 spécifique", "Action 2 spécifique"] }
       ]
     }
   ]
