@@ -1,133 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Folder, Trello } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import { base44 } from "@/api/base44Client";
-import { debugLog } from "@/components/hooks/useDebugWorkspaceFlow";
-import WorkspaceChangeAlert from "./WorkspaceChangeAlert";
 
 const WorkspaceSelector = ({ onWorkspaceChange, activeWorkspaceId }) => {
-  const [selectedValue, setSelectedValue] = useState(activeWorkspaceId || null);
-  const [trelloWorkspaces, setTrelloWorkspaces] = useState([]);
+  const [selectedValue, setSelectedValue] = useState(activeWorkspaceId || 'all-contexts');
+  const [contextLabels, setContextLabels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [alertWorkspace, setAlertWorkspace] = useState(null);
-  const [selectedWorkspaceName, setSelectedWorkspaceName] = useState('Sélectionner un workspace');
-
-  const handleValueChange = (value) => {
-    debugLog('handleValueChange', { value, source: 'trello' });
-    setSelectedValue(value);
-
-    if (value === 'all-projects') {
-      setSelectedWorkspaceName('Tous les projets');
-      setAlertWorkspace(null);
-      if (onWorkspaceChange) {
-        onWorkspaceChange(null, 'trello');
-      }
-    } else {
-      const ws = trelloWorkspaces.find((w) => w.id === value);
-
-      if (ws) {
-        const name = ws.board_name || 'Unnamed Workspace';
-        setSelectedWorkspaceName(name);
-        setAlertWorkspace({ id: value, type: 'trello' });
-        if (onWorkspaceChange) {
-          onWorkspaceChange(value, 'trello');
-        }
-      }
-    }
-  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchContextLabels = async () => {
       setLoading(true);
-      debugLog('WorkspaceSelector', { step: 'loading trello workspaces only' });
       try {
-        const trelloProjects = await base44.entities.TrelloProjectSelection.filter({ is_active: true });
-        setTrelloWorkspaces(trelloProjects || []);
-        debugLog('WorkspaceSelector', { step: 'trello workspaces loaded', count: trelloProjects?.length || 0 });
-
-        // Set initial workspace name
-        if (activeWorkspaceId) {
-          const initialWs = trelloProjects?.find((w) => w.id === activeWorkspaceId);
-          if (initialWs) {
-            setSelectedWorkspaceName(initialWs.board_name || 'Unnamed Workspace');
-            setSelectedValue(activeWorkspaceId);
-          } else {
-            setSelectedValue(null);
-          }
-        }
+        const analyses = await base44.entities.AnalysisHistory.list('-created_date', 200);
+        // Extract unique, non-empty context_labels
+        const labels = [...new Set(
+          analyses
+            .map(a => a.context_label)
+            .filter(label => label && label.trim() !== '')
+        )];
+        setContextLabels(labels);
       } catch (err) {
-        console.error('WorkspaceSelector: error loading workspaces', err);
+        console.error('WorkspaceSelector: error loading context labels', err);
       } finally {
         setLoading(false);
       }
     };
+    fetchContextLabels();
+  }, []);
 
-    fetchData();
-  }, [activeWorkspaceId]);
+  const handleValueChange = (value) => {
+    setSelectedValue(value);
+    if (value === 'all-contexts') {
+      if (onWorkspaceChange) onWorkspaceChange(null, 'context');
+    } else {
+      if (onWorkspaceChange) onWorkspaceChange(value, 'context');
+    }
+  };
 
   return (
-    <div>
-            {alertWorkspace &&
-      <WorkspaceChangeAlert
-        newWorkspaceId={alertWorkspace.id}
-        newWorkspaceType={alertWorkspace.type}
-        onDismiss={() => setAlertWorkspace(null)} />
+    <div className="flex items-center gap-3">
+      <Badge variant="outline" className="text-xs shrink-0">
+        <Tag className="w-3 h-3 mr-1" />
+        Contexte
+      </Badge>
 
-      }
-            
-            <div className="flex items-center gap-3">
-                <Badge variant="outline" className="text-xs">
-                    🔵 Trello
-                </Badge>
-                
-                {loading ?
-        <div className="w-[280px] h-10 bg-slate-100 rounded-md animate-pulse" /> :
-        trelloWorkspaces.length === 0 ?
-        <div className="text-sm text-slate-500">
-                        Aucun projet Trello connecté
-                    </div> :
-
-        <Select value={selectedValue || ''} onValueChange={handleValueChange}>
-                        <SelectTrigger className="w-[280px] bg-white border-slate-200">
-                            <SelectValue
-              placeholder="Sélectionner un projet"
-              defaultValue={selectedValue} />
-
-                        </SelectTrigger>
-                        <SelectContent>
-                            {trelloWorkspaces.length === 0 ?
-            <div className="px-2 py-1.5 text-sm text-slate-500 text-center">
-                                    Aucun projet disponible
-                                </div> :
-
-            <>
-                                    <SelectItem value="all-projects">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-lg">📊</span>
-                                            <span>Tous les projets</span>
-                                        </div>
-                                    </SelectItem>
-                                    {trelloWorkspaces.map((ws) =>
-              <SelectItem key={ws.id} value={ws.id}>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-lg">🔵</span>
-                                                <span>{ws.board_name || 'Unnamed Workspace'}</span>
-                                            </div>
-                                        </SelectItem>
-              )}
-                                </>
-            }
-                        </SelectContent>
-                    </Select>
-        }
-                
-                
-
-
-            </div>
-        </div>);
-
+      {loading ? (
+        <div className="w-[220px] h-10 bg-slate-100 rounded-md animate-pulse" />
+      ) : contextLabels.length === 0 ? (
+        <div className="text-sm text-slate-400 italic">Aucun contexte défini</div>
+      ) : (
+        <Select value={selectedValue} onValueChange={handleValueChange}>
+          <SelectTrigger className="w-[220px] bg-white border-slate-200">
+            <SelectValue placeholder="Filtrer par contexte" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all-contexts">
+              <div className="flex items-center gap-2">
+                <span>📊</span>
+                <span>Tous les contextes</span>
+              </div>
+            </SelectItem>
+            {contextLabels.map((label) => (
+              <SelectItem key={label} value={label}>
+                <div className="flex items-center gap-2">
+                  <span>🏷️</span>
+                  <span>{label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    </div>
+  );
 };
 
 export default WorkspaceSelector;

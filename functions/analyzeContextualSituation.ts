@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const { situationText, vocalMetrics, workspaceId, workspaceType } = await req.json();
+    const { situationText, vocalMetrics, workspaceId, workspaceType, contextLabel } = await req.json();
 
     if (!situationText || !situationText.trim()) {
       return Response.json({ error: 'situationText is required' }, { status: 400 });
