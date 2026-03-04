@@ -124,7 +124,7 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const healthStatus = teamHealthScore >= 60 ? "healthy" : teamHealthScore >= 40 ? "moderate" : "critical";
   
   // Only show stats if we have real data
-  const hasRealData = gdprSignals.length > 0 || analysisHistory.length > 0 || resolvedItems.length > 0;
+   const hasRealData = analysisHistory.length > 0 || resolvedItems.length > 0;
 
   const stats = hasRealData ? [
      {
