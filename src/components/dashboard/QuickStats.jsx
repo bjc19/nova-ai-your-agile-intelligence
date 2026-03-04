@@ -28,8 +28,6 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
    }
    const { t, language } = useLanguage();
    const navigate = useNavigate();
-   const [gdprSignals, setGdprSignals] = useState(propGdprSignals || []);
-   const [teamsInsights, setTeamsInsights] = useState([]);
    const [resolvedItems, setResolvedItems] = useState([]);
    const [userRole, setUserRole] = useState('user');
    const [currentPage, setCurrentPage] = useState(0);
@@ -51,13 +49,6 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
      };
      fetchUserRole();
    }, []);
-
-   // Update gdprSignals when propGdprSignals changes
-   useEffect(() => {
-     if (propGdprSignals && propGdprSignals.length > 0) {
-       setGdprSignals(propGdprSignals);
-     }
-   }, [propGdprSignals]);
 
    // Fetch TeamContext for team health
    useEffect(() => {
