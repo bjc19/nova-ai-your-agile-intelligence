@@ -18,7 +18,6 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
 import ContextualModuleEngine from "@/components/dashboard/ContextualModuleEngine";
 
 import {
@@ -368,41 +367,29 @@ export default function Dashboard() {
             <SprintPerformanceChart analysisHistory={analysisHistory} />
             
             {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+             <KeyRecommendations
+               latestAnalysis={latestAnalysis}
+               sourceUrl={latestAnalysis?.sourceUrl}
+               sourceName={latestAnalysis?.sourceName} />
 
-          </div>
+             {/* Contextual Analysis */}
+             <ContextualModuleEngine
+               analysisHistory={analysisHistory}
+               gdprSignals={gdprSignals}
+               latestAnalysis={latestAnalysis} />
 
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
-          </div>
+            </div>
+
+            {/* Right Column - Sidebar */}
+            <div className="space-y-6">
+             {/* Recent Analyses */}
+             <RecentAnalyses analyses={analysisHistory} />
+
+             {/* Integration Status */}
+             <IntegrationStatus />
+            </div>
         </div>
         }
-
-        {/* Situation Input Widget - Audio & Text Analysis */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8">
-          <SituationInputWidget latestAnalysis={latestAnalysis} analysisHistory={analysisHistory} />
-        </motion.div>
-
-        {/* Contextual Module Engine - Situational Analysis */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-8">
-          <ContextualModuleEngine latestAnalysis={latestAnalysis} gdprSignals={gdprSignals} />
-        </motion.div>
 
         {(user?.role === 'admin') &&
         <motion.div
