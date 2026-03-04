@@ -65,108 +65,49 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
 
 
  
-  // Helper to generate tooltip for Team Health
-   const getTeamHealthTooltip = () => {
-     if (language === 'fr') {
-       return {
-         title: "Indice de Santé d'Équipe",
-         formula: `Communication (${teamContext?.communication_tone === 'constructive' ? 30 : teamContext?.communication_tone === 'neutral' ? 15 : 0}/30) + Engagement (${teamContext?.engagement_level === 'high' ? 25 : teamContext?.engagement_level === 'moderate' ? 12 : 0}/25) + Rétros (${Math.round((teamContext?.retro_actions_completed_rate || 0) / 100 * 25)}/25) + Participation (${teamContext?.conversation_balance === 'balanced' ? 20 : teamContext?.conversation_balance === 'dominated' ? 8 : 0}/20)`,
-         interpretation: teamHealthScore >= 60
-           ? `✓ Excellent : ${teamHealthScore}/100 - L'équipe communique bien et s'engage activement.`
-           : teamHealthScore >= 40
-           ? `⚠ À surveiller : ${teamHealthScore}/100 - Des améliorations sont possibles dans la dynamique d'équipe.`
-           : `🔴 Critique : ${teamHealthScore}/100 - L'équipe a besoin de support immédiat.`,
-         tips: teamHealthScore >= 60
-           ? "Maintenez cette dynamique positive. Continuez à favoriser la communication constructive."
-           : "Améliorez la communication d'équipe et encouragez la participation de tous.",
-       };
-     } else {
-       return {
-         title: "Team Health Index",
-         formula: `Communication (${teamContext?.communication_tone === 'constructive' ? 30 : teamContext?.communication_tone === 'neutral' ? 15 : 0}/30) + Engagement (${teamContext?.engagement_level === 'high' ? 25 : teamContext?.engagement_level === 'moderate' ? 12 : 0}/25) + Retros (${Math.round((teamContext?.retro_actions_completed_rate || 0) / 100 * 25)}/25) + Participation (${teamContext?.conversation_balance === 'balanced' ? 20 : teamContext?.conversation_balance === 'dominated' ? 8 : 0}/20)`,
-         interpretation: teamHealthScore >= 60
-           ? `✓ Excellent: ${teamHealthScore}/100 - Team communicates well and actively engages.`
-           : teamHealthScore >= 40
-           ? `⚠ Monitor: ${teamHealthScore}/100 - Team dynamics can be improved.`
-           : `🔴 Critical: ${teamHealthScore}/100 - Team needs immediate support.`,
-         tips: teamHealthScore >= 60
-           ? "Maintain this positive momentum. Keep fostering constructive communication."
-           : "Improve team communication and encourage participation from everyone.",
-       };
-     }
-   };
+  if (!hasRealData) return null;
 
-   const paginatedStats = stats.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
-   const totalPages = Math.ceil(stats.length / itemsPerPage);
+  const LABELS = {
+    totalBlockers: "Blockers détectés",
+    risksIdentified: "Risques identifiés",
+    resolved: "Éléments résolus",
+    analysesRun: "Analyses effectuées",
+  };
 
-   if (!hasRealData) {
-     return null; // Don't render if no real data
-   }
+  return (
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.labelKey}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 * index }}
+            onClick={() => handleStatClick(stat.labelKey)}
+            className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all group"
+          >
+            <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
+            <div className="relative">
+              <div className={`inline-flex p-2 rounded-xl ${stat.bgColor} mb-3`}>
+                <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
+              </div>
+              <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+              <p className="text-sm text-slate-500 mt-1">{LABELS[stat.labelKey]}</p>
+              <p className="text-xs text-slate-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Cliquez pour le détail →</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
-   return (
-      <TooltipProvider>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           {paginatedStats.map((stat, index) => {
-              const isHealthCard = stat.labelKey === "teamHealth";
-              const healthTooltip = isHealthCard ? getTeamHealthTooltip() : null;
-
-              return (
-                <motion.div
-                  key={stat.labelKey}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 * index }}
-                  onClick={() => handleStatClick(stat.labelKey)}
-                  className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 cursor-pointer hover:border-slate-300 hover:shadow-md transition-all"
-                >
-                  <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${stat.bgColor} -translate-y-1/2 translate-x-1/2`} />
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className={`inline-flex p-2 rounded-xl ${stat.bgColor}`}>
-                        <stat.icon className={`w-5 h-5 ${stat.textColor}`} />
-                      </div>
-                      {isHealthCard && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs" side="top">
-                            <div className="space-y-2 text-xs">
-                              <p className="font-semibold text-slate-100">{healthTooltip?.title}</p>
-                              <p className="text-slate-300">{healthTooltip?.formula}</p>
-                              <p className="text-slate-300 italic">{healthTooltip?.interpretation}</p>
-                              <p className="text-slate-400 border-t border-slate-600 pt-2">{healthTooltip?.tips}</p>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
-                    </div>
-                    <p className="text-3xl font-bold text-slate-900">{stat.value}{isHealthCard ? '%' : (stat.suffix || '')}</p>
-                    <p className="text-sm text-slate-500 mt-1">{adaptMessage(stat.labelKey, userRole)}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
-           </div>
-
-           {totalPages > 1 && (
-             <div className="flex justify-center items-center gap-2">
-               {Array.from({ length: totalPages }).map((_, page) => (
-                 <motion.button
-                   key={page}
-                   onClick={() => setCurrentPage(page)}
-                   whileHover={{ scale: 1.1 }}
-                   whileTap={{ scale: 0.95 }}
-                   className={`w-2 h-2 rounded-full transition-all ${
-                     currentPage === page ? 'bg-slate-900 w-8' : 'bg-slate-300 hover:bg-slate-400'
-                   }`}
-                   aria-label={`Page ${page + 1}`}
-                 />
-               ))}
-             </div>
-           )}
-         </div>
-       </TooltipProvider>
-     );
-   }
+      <QuickStatsDetailDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        type={drawerType}
+        analysisHistory={analysisHistory}
+        resolvedItems={resolvedItems}
+        onResolve={handleResolve}
+        resolving={resolvingId}
+      />
+    </>
+  );
+}
