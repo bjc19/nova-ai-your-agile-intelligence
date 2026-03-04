@@ -18,6 +18,7 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import SituationInputWidget from "@/components/dashboard/SituationInputWidget";
 
 import {
   Mic,
@@ -39,9 +40,6 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
-  const [dynamicTrelloAnalysis, setDynamicTrelloAnalysis] = useState(null);
-  const [loadingTrelloAnalysis, setLoadingTrelloAnalysis] = useState(false);
 
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
@@ -108,39 +106,6 @@ export default function Dashboard() {
     queryFn: () => base44.entities.AnalysisHistory.list('-created_date', 100),
     enabled: !isLoading
   });
-
-  // Fetch Trello analysis dynamically when workspace or period changes
-  useEffect(() => {
-    const fetchTrelloAnalysis = async () => {
-      if (!selectedWorkspaceId) {
-        setDynamicTrelloAnalysis(null);
-        return;
-      }
-
-      setLoadingTrelloAnalysis(true);
-      try {
-        const response = await base44.functions.invoke('analyzeTrelloBoardDynamic', {
-          workspaceId: selectedWorkspaceId,
-          startDate: selectedPeriod?.start,
-          endDate: selectedPeriod?.end
-        });
-        
-        if (response.data?.error) {
-          console.error('Trello analysis error:', response.data.error);
-          setDynamicTrelloAnalysis(null);
-        } else {
-          setDynamicTrelloAnalysis(response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching Trello analysis:', error.message || error);
-        setDynamicTrelloAnalysis(null);
-      } finally {
-        setLoadingTrelloAnalysis(false);
-      }
-    };
-
-    fetchTrelloAnalysis();
-  }, [selectedWorkspaceId, selectedPeriod]);
 
   // Filter analysis history based on selected period
   const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
@@ -316,8 +281,7 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                onWorkspaceChange={(workspaceId) => setSelectedWorkspaceId(workspaceId)} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
@@ -353,66 +317,8 @@ export default function Dashboard() {
           </div>
         }
 
-        {/* Dynamic Trello Analysis Display */}
-        {selectedWorkspaceId && loadingTrelloAnalysis && (
-          <div className="text-center py-8">
-            <Loader2 className="w-6 h-6 text-blue-600 animate-spin mx-auto mb-2" />
-            <p className="text-sm text-slate-600">Analyse du tableau Trello en cours...</p>
-          </div>
-        )}
-
-        {selectedWorkspaceId && dynamicTrelloAnalysis && !loadingTrelloAnalysis && (
-          <div className="bg-white rounded-lg border border-slate-200 p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Analyse Trello - {dynamicTrelloAnalysis.workspace_name}</h3>
-              <Badge variant="outline" className="text-xs">
-                Données en temps réel
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-slate-50 rounded-lg p-4">
-                <p className="text-sm text-slate-600 mb-1">Cartes dans la période</p>
-                <p className="text-2xl font-bold text-slate-900">{dynamicTrelloAnalysis.summary?.total_cards_in_period || 0}</p>
-              </div>
-              <div className="bg-amber-50 rounded-lg p-4">
-                <p className="text-sm text-slate-600 mb-1">Cartes stagnantes (&gt;3j)</p>
-                <p className="text-2xl font-bold text-amber-600">{dynamicTrelloAnalysis.summary?.stagnant_cards_count || 0}</p>
-              </div>
-              <div className="bg-red-50 rounded-lg p-4">
-                <p className="text-sm text-slate-600 mb-1">Cartes bloquées</p>
-                <p className="text-2xl font-bold text-red-600">{dynamicTrelloAnalysis.summary?.blocked_cards_count || 0}</p>
-              </div>
-            </div>
-
-            {dynamicTrelloAnalysis.stagnant_cards && dynamicTrelloAnalysis.stagnant_cards.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold text-slate-700 mb-3">Cartes stagnantes:</h4>
-                <div className="space-y-2">
-                  {dynamicTrelloAnalysis.stagnant_cards.slice(0, 3).map((card) => (
-                    <div key={card.id} className="flex justify-between items-center text-sm p-2 bg-amber-50 rounded">
-                      <span className="text-slate-700">{card.name}</span>
-                      <span className="text-amber-700 font-medium">{card.daysSinceInProgress}j</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <p className="text-xs text-slate-500">
-              Dernière mise à jour: {new Date(dynamicTrelloAnalysis.generated_at).toLocaleString('fr-FR')}
-            </p>
-          </div>
-        )}
-
-        {selectedWorkspaceId && !loadingTrelloAnalysis && !dynamicTrelloAnalysis && (
-          <div className="text-center py-8 bg-amber-50 rounded-lg border border-amber-200 mb-6">
-            <p className="text-sm text-amber-700">Impossible de charger les données Trello. Vérifiez votre configuration.</p>
-          </div>
-        )}
-
         {/* Empty State for No Data in Period */}
-         {selectedPeriod && analysisHistory.length === 0 && !selectedWorkspaceId &&
+        {selectedPeriod && analysisHistory.length === 0 &&
         <div className="text-center py-16">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
               <Calendar className="w-8 h-8 text-slate-400" />
