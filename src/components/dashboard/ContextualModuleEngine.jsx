@@ -144,44 +144,33 @@ export default function ContextualModuleEngine({ analysisHistory = [], lastAnaly
     setLoading(true);
     try {
       const ctx = buildContext();
-      const prompt = `Tu es Nova. Tu dois générer UN SEUL module d'aide contextuelle — celui qui répond le mieux au problème dominant observé dans les données ci-dessous. PAS DE FOURRE-TOUT, PAS DE LISTE GÉNÉRIQUE.
+      const prompt = `Tu es Nova, un outil d'intelligence agile contextuelle qui s'adapte à tous les frameworks de gestion de projet (Scrum, Kanban, SAFe, Spotify, Lean, Kaizen, Six Sigma, OKR, gestion du changement, transformation digitale, hybrides, etc.).
 
-Données réelles observées :
+Contexte détecté :
 - ${ctx.analysisCount} analyses récentes
-- ${ctx.totalBlockers} blockers cumulés, ${ctx.totalRisks} risques
-- Sources actives : ${ctx.sources.join(", ") || "situationnel"}
-- Contexte(s) de projet : ${ctx.contextLabels.join(", ") || "non défini"}
-- Santé dernière analyse : ${ctx.lastHealth || "inconnue"}
-- Évaluation situationnelle : "${ctx.lastAssessment || ""}"
+- ${ctx.totalBlockers} blockers totaux, ${ctx.totalRisks} risques
+- Sources : ${ctx.sources.join(", ") || "situationnel"}
+- Contextes étiquetés : ${ctx.contextLabels.join(", ") || "non défini"}
+- Dernière santé : ${ctx.lastHealth || "inconnue"}
+- Dernière évaluation : "${ctx.lastAssessment || ""}"
 - Alignement historique : "${ctx.historicalAlignment || ""}"
 - Résumés récents : "${ctx.assessments || ""}"
 
-Règles strictes :
-1. Génère EXACTEMENT 1 module — celui qui est le plus pertinent pour LE problème dominant.
-2. Le module doit traiter un problème CONCRET détecté dans les données (pas un framework au hasard).
-3. Choisis le type selon ce qui est réellement observé :
-   - Beaucoup de blockers récurrents → "risk_matrix" (identifier et cartographier les vraies causes)
-   - Tensions d'équipe, communication dégradée → "change_management" (adresser la dynamique humaine)
-   - Lenteur, gaspillages, WIP élevé → "kaizen_sprint" (éliminer le gaspillage spécifique)
-   - Santé agile faible, cérémonies inefficaces → "agile_health" (corriger les pratiques)
-   - Drift par rapport aux objectifs → "lean_analysis" (recalibrage priorité/valeur)
-   - Aucun problème dominant clair → "generic" (observation légère)
-4. Les sections doivent être SPÉCIFIQUES à la situation, pas génériques.
-5. Les actions doivent être actionnables immédiatement, en lien direct avec ce qui est observé.
+En fonction de ce contexte, génère entre 1 et 3 modules intelligents et adaptés. Chaque module doit correspondre à l'outil ou framework le plus pertinent compte tenu de la situation (ex : si on détecte beaucoup de blockers et tensions, propose un plan de transformation ou de gestion du changement ; si on détecte des problèmes de priorité, propose un alignement OKR ; si on détecte des gaspillages récurrents, propose Kaizen ; si le contexte est multi-projets complexe, propose une matrice de risques SAFe ou hybride, etc.).
 
-Réponds en JSON strict :
+Réponds en JSON strict avec ce format :
 {
-  "context_summary": "1 phrase décrivant LE problème dominant observé dans les données",
+  "context_summary": "Résumé du contexte détecté en 1-2 phrases",
   "modules": [
     {
-      "type": "risk_matrix|change_management|kaizen_sprint|agile_health|lean_analysis|generic",
-      "title": "Titre précis lié au problème observé",
-      "framework": "Outil ou approche de référence adapté à CE problème",
-      "rationale": "Pourquoi CE module maintenant — basé sur les données réelles (1 phrase)",
+      "type": "transformation_plan|change_management|risk_matrix|okr_alignment|kaizen_sprint|lean_analysis|agile_health|generic",
+      "title": "Titre du module",
+      "framework": "Framework de référence (ex: SAFe, Kaizen, OKR...)",
+      "rationale": "Pourquoi ce module est pertinent maintenant (1 phrase)",
       "sections": [
-        { "label": "Problème observé", "content": "Description précise du problème réel" },
-        { "label": "Actions immédiates", "content": ["Action concrète 1", "Action concrète 2", "Action concrète 3"] },
-        { "label": "Signaux à surveiller", "content": ["Signal 1", "Signal 2"] }
+        { "label": "Diagnostic", "content": "Texte ou tableau..." },
+        { "label": "Actions prioritaires", "content": ["Action 1", "Action 2", "Action 3"] },
+        { "label": "Indicateurs à surveiller", "content": ["KPI 1", "KPI 2"] }
       ]
     }
   ]
