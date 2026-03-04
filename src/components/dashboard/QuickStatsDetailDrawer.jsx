@@ -217,7 +217,6 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
   const getItems = () => {
     if (type === "blockers") {
       const items = analysisHistory.flatMap((a, idx) => {
-        // Prefer analysis_data.blockers, fallback to top-level blockers array
         const blockers = a.analysis_data?.blockers || a.blockers || [];
         if (blockers.length > 0) {
           return blockers.map((b, i) => ({
@@ -225,9 +224,9 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
             ...b,
             analysisTitle: a.title,
             analysisDate: a.created_date,
+            analysisData: a,
           }));
         }
-        // If no detailed blockers but blockers_count > 0, show a synthetic entry
         if ((a.blockers_count || 0) > 0) {
           return [{
             id: `b-${a.id || idx}-synth`,
@@ -235,6 +234,7 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
             description: a.transcript_preview || a.title || "Analyse sans détail",
             analysisTitle: a.title,
             analysisDate: a.created_date,
+            analysisData: a,
           }];
         }
         return [];
@@ -250,6 +250,7 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
             ...r,
             analysisTitle: a.title,
             analysisDate: a.created_date,
+            analysisData: a,
           }));
         }
         if ((a.risks_count || 0) > 0) {
@@ -259,6 +260,7 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
             description: a.transcript_preview || a.title || "Analyse sans détail",
             analysisTitle: a.title,
             analysisDate: a.created_date,
+            analysisData: a,
           }];
         }
         return [];
@@ -283,6 +285,7 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
         description: `${a.blockers_count || 0} blockers · ${a.risks_count || 0} risques`,
         analysisTitle: a.source,
         analysisDate: a.created_date,
+        analysisData: a,
       }));
     }
     return [];
