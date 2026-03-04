@@ -8,19 +8,12 @@ import QuickStatsDetailDrawer from "./QuickStatsDetailDrawer";
 import { useQuery } from "@tanstack/react-query";
 
 export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard", selectedWorkspaceId = null, gdprSignals: propGdprSignals = null }) {
-   // CRITICAL: No rendering if no workspace selected OR workspace has zero data
-   if (selectedWorkspaceId && analysisHistory.length === 0) {
-     return null;
-   }
-   const { t, language } = useLanguage();
-   const navigate = useNavigate();
-   const [resolvedItems, setResolvedItems] = useState([]);
-   const [userRole, setUserRole] = useState('user');
-   const [currentPage, setCurrentPage] = useState(0);
-   const [translatedTooltips, setTranslatedTooltips] = useState({});
-   const [lastDayDate, setLastDayDate] = useState(null);
-   const [teamContext, setTeamContext] = useState(null);
-   const itemsPerPage = 10;
+  if (selectedWorkspaceId && analysisHistory.length === 0) return null;
+  const { t } = useLanguage();
+  const [userRole, setUserRole] = useState('user');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState(null);
+  const [resolvingId, setResolvingId] = useState(null);
 
    // Fetch user role
    useEffect(() => {
