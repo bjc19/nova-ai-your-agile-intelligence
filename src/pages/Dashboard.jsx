@@ -281,7 +281,13 @@ export default function Dashboard() {
 
               </div>
               
-              {/* Time Period Selector */}
+              {/* Situational Context Widget */}
+              <SituationInputWidget
+                analysisHistory={analysisHistory}
+                onAnalysisComplete={(result) => setLastSituationalResult(result)}
+              />
+
+              {/* Selectors below the situational context */}
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
