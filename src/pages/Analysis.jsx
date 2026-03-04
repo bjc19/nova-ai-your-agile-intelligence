@@ -256,11 +256,6 @@ Thanks team. @mike_backend let's discuss the migration timeline - client demo is
       return;
     }
 
-    if (!selectedWorkspaceId) {
-      setError("Veuillez sélectionner un workspace.");
-      return;
-    }
-
     // Check plan limitations for manual analysis
     const limitCheck = await canCreateManualAnalysis();
     if (!limitCheck.allowed) {
