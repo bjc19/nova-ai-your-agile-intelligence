@@ -63,7 +63,7 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication (temporarily disabled for demo)
+  // Check authentication
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -71,29 +71,31 @@ export default function Dashboard() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
 
-        // Charger contexte sprint actif
+        // Load sprint context
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
         if (activeSprints.length > 0) {
           setSprintContext(activeSprints[0]);
         }
 
-        // Vérifier onboarding
+        // Check onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Vérifier alertes multi-projets en attente
-        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-          admin_response: "pending"
-        });
-        if (pendingAlerts.length > 0) {
-          const latest = pendingAlerts[pendingAlerts.length - 1];
-          setMultiProjectAlert({
-            confidence: latest.detection_score,
-            signals: latest.weighted_signals,
-            log_id: latest.id
+        // Check multi-project alerts (admin only)
+        if (currentUser?.role === 'admin') {
+          const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+            admin_response: "pending"
           });
+          if (pendingAlerts.length > 0) {
+            const latest = pendingAlerts[pendingAlerts.length - 1];
+            setMultiProjectAlert({
+              confidence: latest.detection_score,
+              signals: latest.weighted_signals,
+              log_id: latest.id
+            });
+          }
         }
       }
       setIsLoading(false);
