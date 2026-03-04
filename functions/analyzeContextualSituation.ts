@@ -19,10 +19,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'situationText is required' }, { status: 400 });
     }
 
-    // 1. Fetch historical analyses for this workspace (last 20)
+    // 1. Fetch historical analyses for this context (last 20)
     let historicalAnalyses = [];
     try {
-      if (workspaceId && workspaceType === 'trello') {
+      if (contextLabel && contextLabel.trim()) {
+        historicalAnalyses = await base44.entities.AnalysisHistory.filter(
+          { context_label: contextLabel },
+          '-created_date',
+          20
+        );
+      } else if (workspaceId && workspaceType === 'trello') {
         historicalAnalyses = await base44.entities.AnalysisHistory.filter(
           { trello_project_selection_id: workspaceId },
           '-created_date',
@@ -111,8 +117,9 @@ JSON attendu :
     // 5. Save as AnalysisHistory
     try {
       const historyData = {
-        title: `Situation - ${new Date().toLocaleDateString('fr-FR')}`,
+        title: contextLabel ? `${contextLabel} - ${new Date().toLocaleDateString('fr-FR')}` : `Situation - ${new Date().toLocaleDateString('fr-FR')}`,
         source: 'transcript',
+        ...(contextLabel && contextLabel.trim() ? { context_label: contextLabel.trim() } : {}),
         blockers_count: llmResult.overall_health === 'critical' ? 3 : llmResult.overall_health === 'at_risk' ? 1 : 0,
         risks_count: llmResult.overall_health !== 'healthy' ? 2 : 0,
         analysis_data: { ...llmResult, vocalMetrics: vocalMetrics || null, situationText: '[ANONYMISÉ]' },
