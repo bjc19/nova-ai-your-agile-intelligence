@@ -15,34 +15,14 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
   const [drawerType, setDrawerType] = useState(null);
   const [resolvingId, setResolvingId] = useState(null);
 
-   // Fetch user role
    useEffect(() => {
-     const fetchUserRole = async () => {
-       try {
-         const user = await base44.auth.me();
-         setUserRole(user?.app_role || user?.role || 'user');
-       } catch (error) {
-         console.error('Error fetching user role:', error);
-         setUserRole('user');
-       }
-     };
-     fetchUserRole();
+     base44.auth.me().then(u => setUserRole(u?.role || 'user')).catch(() => {});
    }, []);
 
-   // Fetch TeamContext for team health
-   useEffect(() => {
-     const fetchTeamHealth = async () => {
-       try {
-         const contexts = await base44.entities.TeamContext.list(null, 1);
-         if (contexts?.length > 0) {
-           setTeamContext(contexts[0]);
-         }
-       } catch (error) {
-         console.error('Error fetching team context:', error);
-       }
-     };
-     fetchTeamHealth();
-   }, []);
+   const { data: resolvedItems = [] } = useQuery({
+     queryKey: ['resolvedItems'],
+     queryFn: () => base44.entities.ResolvedItem.list('-resolved_date', 100),
+   });
 
   // Anonymize names in text
   const anonymizeNamesInText = (text) => {
