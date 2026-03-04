@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mic, MicOff, Send, Shield, ChevronDown, ChevronUp, Loader2, Sparkles, RotateCcw, CheckCircle2, AlertTriangle, Activity, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
+import ContextLabelInput from "@/components/dashboard/ContextLabelInput";
 
 const TONE_LABELS = {
   confident: { label: "Confiant·e", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" },
