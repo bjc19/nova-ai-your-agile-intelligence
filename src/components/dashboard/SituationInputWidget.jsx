@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, MicOff, Send, Shield, ChevronDown, ChevronUp, Loader2, Sparkles, RotateCcw, CheckCircle2, AlertTriangle, Activity } from "lucide-react";
+import { Mic, MicOff, Send, Shield, ChevronDown, ChevronUp, Loader2, Sparkles, RotateCcw, CheckCircle2, AlertTriangle, Activity, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { base44 } from "@/api/base44Client";
 
