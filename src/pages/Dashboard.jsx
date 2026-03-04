@@ -375,14 +375,17 @@ export default function Dashboard() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Recent Analyses */}
             <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
           </div>
         </div>
         }
+
+        {/* Contextual Module Engine */}
+        {(!selectedPeriod || analysisHistory.length > 0) && (
+          <div className="mt-6">
+            <ContextualModuleEngine analysisHistory={analysisHistory} />
+          </div>
+        )}
 
         {(user?.role === 'admin') &&
         <motion.div
