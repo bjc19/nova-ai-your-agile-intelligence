@@ -138,13 +138,13 @@ function LayoutContent({ children, currentPageName }) {
                      {t('dashboard')}
                    </Link>
                    {(user?.role === 'admin' || canInvite) &&
-                   <Link
-                   to={createPageUrl("Analysis")}
-                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              <Link
+                to={createPageUrl("Analysis")}
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
 
-                         Analyses ateliers
-                       </Link>
-                   }
+                        {t('analyze')}
+                      </Link>
+              }
                    <Link
                 to={createPageUrl("Settings")}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
@@ -230,14 +230,14 @@ function LayoutContent({ children, currentPageName }) {
                            {t('dashboard')}
                          </Link>
                          {(user?.role === 'admin' || canInvite) &&
-                         <Link
-                         to={createPageUrl("Analysis")}
-                         className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                         onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      to={createPageUrl("Analysis")}
+                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                      onClick={() => setMobileMenuOpen(false)}>
 
-                             Analyses ateliers
-                           </Link>
-                         }
+                            {t('analyze')}
+                          </Link>
+                    }
                         <Link
                       to={createPageUrl("Settings")}
                       className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"

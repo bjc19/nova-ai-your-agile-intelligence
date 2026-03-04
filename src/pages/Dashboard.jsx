@@ -301,124 +301,124 @@ export default function Dashboard() {
       </div>
 
       {/* Main Dashboard Content */}
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Multi-Project Alert */}
+        {multiProjectAlert &&
+        <div className="mb-6">
+            <MultiProjectAlert
+            detectionData={multiProjectAlert}
+            onConfirm={() => {
+              setMultiProjectAlert(null);
+              window.location.reload();
+            }}
+            onDismiss={() => setMultiProjectAlert(null)} />
+
+          </div>
+        }
+
+        {/* Empty State for No Data in Period */}
+        {selectedPeriod && analysisHistory.length === 0 &&
+        <div className="text-center py-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+              <Calendar className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">
+              Aucune analyse pour cette période
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Aucune donnée disponible du {new Date(selectedPeriod.start).toLocaleDateString('fr-FR')} au {new Date(selectedPeriod.end).toLocaleDateString('fr-FR')}
+            </p>
+            <Link to={createPageUrl("Analysis")}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                <Mic className="w-4 h-4 mr-2" />
+                Créer une analyse
+              </Button>
+            </Link>
+          </div>
+        }
+
+        {/* Show content only if there are analyses in the period */}
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Sprint Health Card - Drift Detection */}
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={{
+                sprint_name: "Sprint 14",
+                wip_count: 8,
+                wip_historical_avg: 5,
+                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+                sprint_day: 5,
+                historical_sprints_count: 4,
+                drift_acknowledged: false,
+                problematic_tickets: sprintHealth.problematic_tickets,
+                gdprSignals: gdprSignals
+              }}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
+
+            }
+            
+            {/* Sprint Performance Chart */}
+            <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
+
+          </div>
+
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
+          </div>
+        </div>
+        }
+
+        {(user?.role === 'admin') &&
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-8">
+
+    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+          </h3>
+          <p className="text-slate-400 max-w-lg">
+            {t('importDataDescription')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl("Settings")}>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Zap className="w-4 h-4 mr-2" />
+              {t('connectSlack')}
+            </Button>
+          </Link>
+          <Link to={createPageUrl("Analysis")}>
+            <Button className="bg-white text-slate-900 hover:bg-slate-100">
+              {t('startAnalysis')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+        }
+      </div>
     </div>);
 
 }
