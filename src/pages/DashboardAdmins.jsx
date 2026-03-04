@@ -329,10 +329,15 @@ export default function DashboardAdmins() {
 
             <div className="space-y-6">
               <RecentAnalyses analyses={analysisHistory} />
-              <IntegrationStatus />
             </div>
           </div>
         }
+
+        {(!selectedPeriod || analysisHistory.length > 0) && (
+          <div className="mt-6">
+            <ContextualModuleEngine analysisHistory={analysisHistory} lastAnalysisResult={latestAnalysis} />
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
