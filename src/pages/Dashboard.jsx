@@ -18,7 +18,12 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
+import UserDailyFocus from "@/components/dashboard/UserDailyFocus";
+import UserBlockages from "@/components/dashboard/UserBlockages";
+import UserContributions from "@/components/dashboard/UserContributions";
+import SprintResetAlert from "@/components/dashboard/SprintResetAlert";
 import DailyQuote from "@/components/nova/DailyQuote";
+import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -40,8 +45,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
-  const [selectedWorkspaceType, setSelectedWorkspaceType] = useState(null);
+
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
 
@@ -63,7 +67,7 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication
+  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
@@ -71,31 +75,29 @@ export default function Dashboard() {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
 
-        // Load sprint context
+        // Charger contexte sprint actif
         const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
         if (activeSprints.length > 0) {
           setSprintContext(activeSprints[0]);
         }
 
-        // Check onboarding
+        // Vérifier onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Check multi-project alerts (admin only)
-        if (currentUser?.role === 'admin') {
-          const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
-            admin_response: "pending"
+        // Vérifier alertes multi-projets en attente
+        const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
+          admin_response: "pending"
+        });
+        if (pendingAlerts.length > 0) {
+          const latest = pendingAlerts[pendingAlerts.length - 1];
+          setMultiProjectAlert({
+            confidence: latest.detection_score,
+            signals: latest.weighted_signals,
+            log_id: latest.id
           });
-          if (pendingAlerts.length > 0) {
-            const latest = pendingAlerts[pendingAlerts.length - 1];
-            setMultiProjectAlert({
-              confidence: latest.detection_score,
-              signals: latest.weighted_signals,
-              log_id: latest.id
-            });
-          }
         }
       }
       setIsLoading(false);
@@ -110,24 +112,14 @@ export default function Dashboard() {
     enabled: !isLoading
   });
 
-  // Filter analysis history based on selected period and workspace
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
     const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999)) : true;
-    
-    let matchesWorkspace = true;
-    if (selectedWorkspaceId && selectedWorkspaceType) {
-      if (selectedWorkspaceType === 'jira') {
-        matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
-      } else if (selectedWorkspaceType === 'trello') {
-        matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
-      }
-    } else if (selectedWorkspaceId) {
-      matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
-    }
-
-    return matchesPeriod && matchesWorkspace;
-  });
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -294,34 +286,22 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector
-                activeWorkspaceId={selectedWorkspaceId}
-                activeWorkspaceType={selectedWorkspaceType}
-                onWorkspaceChange={(id, type) => {
-                  setSelectedWorkspaceId(id);
-                  setSelectedWorkspaceType(type);
-                }} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
+                    console.log("Period changed:", period);
                   }} />
 
               </div>
             </div>
 
             {/* Quick Stats - Only show if data in period */}
-             {(!selectedPeriod || analysisHistory.length > 0) &&
-             <>
-               <DailyQuote
-                 lang={t('language') === 'English' ? 'en' : 'fr'}
-                 blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-                 riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                 patterns={[]} />
-               <QuickStats analysisHistory={analysisHistory} />
-             </>
-             }
+            {(!selectedPeriod || analysisHistory.length > 0) &&
+            <QuickStats analysisHistory={analysisHistory} />
+            }
           </motion.div>
         </div>
       </div>
@@ -370,12 +350,23 @@ export default function Dashboard() {
             <div className="lg:col-span-2 space-y-6">
               {/* Sprint Health Card - Drift Detection */}
               {sprintHealth &&
-              <SprintHealthCard
-              sprintHealth={sprintHealth}
+            <SprintHealthCard
+              sprintHealth={{
+                sprint_name: "Sprint 14",
+                wip_count: 8,
+                wip_historical_avg: 5,
+                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+                sprint_day: 5,
+                historical_sprints_count: 4,
+                drift_acknowledged: false,
+                problematic_tickets: sprintHealth.problematic_tickets,
+                gdprSignals: gdprSignals
+              }}
               onAcknowledge={() => console.log("Drift acknowledged")}
               onReviewSprint={() => console.log("Review sprint")} />
 
-              }
+            }
             
             {/* Sprint Performance Chart */}
             <SprintPerformanceChart analysisHistory={analysisHistory} />
@@ -399,35 +390,40 @@ export default function Dashboard() {
         </div>
         }
 
+        {(user?.role === 'admin') &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-8">
-          <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <p className="text-slate-400 max-w-lg">
-                  {t('importDataDescription')}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                    <Zap className="w-4 h-4 mr-2" />
-                    {t('connectSlack')}
-                  </Button>
-                </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+
+    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+          </h3>
+          <p className="text-slate-400 max-w-lg">
+            {t('importDataDescription')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl("Settings")}>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Zap className="w-4 h-4 mr-2" />
+              {t('connectSlack')}
+            </Button>
+          </Link>
+          <Link to={createPageUrl("Analysis")}>
+            <Button className="bg-white text-slate-900 hover:bg-slate-100">
+              {t('startAnalysis')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+        }
       </div>
     </div>);
 
