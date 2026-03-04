@@ -39,6 +39,8 @@ function VoiceWaveform({ isRecording, energyLevel }) {
 export default function SituationInputWidget({ selectedWorkspaceId, selectedWorkspaceType, analysisHistory = [], onAnalysisComplete }) {
   const [mode, setMode] = useState("text"); // "text" | "voice"
   const [text, setText] = useState("");
+  const [contextLabel, setContextLabel] = useState("");
+  const [skipContext, setSkipContext] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
