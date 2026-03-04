@@ -33,7 +33,8 @@ import {
   Calendar,
   Clock,
   Loader2,
-  TrendingUp } from
+  TrendingUp,
+  RefreshCw } from
 "lucide-react";
 
 export default function Dashboard() {
