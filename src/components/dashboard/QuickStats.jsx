@@ -24,42 +24,24 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
      queryFn: () => base44.entities.ResolvedItem.list('-resolved_date', 100),
    });
 
-  // Anonymize names in text
-  const anonymizeNamesInText = (text) => {
-    if (!text) return text;
-
-    // Extract potential names (capitalized words) and anonymize them
-    const namePattern = /\b([A-ZÀ-ÿ][a-zà-ÿ]+)\b/g;
-    return text.replace(namePattern, (match) => {
-      // Don't anonymize common words, articles, etc.
-      const commonWords = ['Vous', 'Excellent', 'À', 'Continuez', 'Priorisez', 'You', 'Needs', 'Keep', 'Prioritize', 'Resolved', 'Blockers', 'Risks', 'IST'];
-      if (commonWords.includes(match)) return match;
-      return anonymizeFirstName(match);
-    });
-  };
-
   const handleStatClick = (labelKey) => {
-     let detailType = null;
-     if (labelKey === "totalBlockers") {
-       detailType = "blockers";
-     } else if (labelKey === "risksIdentified") {
-       detailType = "risks";
-     } else if (labelKey === "resolved") {
-       detailType = "resolved";
-     }
-
-    if (detailType) {
-      sessionStorage.setItem("detailsType", detailType);
-      sessionStorage.setItem("previousDashboard", currentPageName);
-      if (selectedWorkspaceId) {
-        sessionStorage.setItem("selectedWorkspaceId", selectedWorkspaceId);
-      }
-      navigate(createPageUrl("Details"));
-    }
+    const typeMap = { totalBlockers: "blockers", risksIdentified: "risks", resolved: "resolved", analysesRun: "analyses" };
+    const type = typeMap[labelKey];
+    if (type) { setDrawerType(type); setDrawerOpen(true); }
   };
-  
-  // Helper: check if item is resolved
-  const isItemResolved = (itemId) => resolvedItems.includes(itemId);
+
+  const handleResolve = async (item) => {
+    setResolvingId(item.id);
+    try {
+      await base44.functions.invoke('markItemResolved', {
+        itemId: item.id, source: item.source || 'manual',
+        itemType: drawerType === 'blockers' ? 'blocker' : 'risk',
+        title: item.issue || item.description || '-',
+        urgency: item.urgency || 'medium',
+        analysisDate: item.analysisDate || item.created_date,
+      });
+    } catch (e) { console.error(e); } finally { setResolvingId(null); }
+  };
 
   // Compute totals directly from analysisHistory (real manager data only)
    const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || (a.analysis_data?.blockers?.length ?? 0)), 0);
