@@ -43,64 +43,23 @@ export default function QuickStats({ analysisHistory = [], currentPageName = "Da
     } catch (e) { console.error(e); } finally { setResolvingId(null); }
   };
 
-  // Compute totals directly from analysisHistory (real manager data only)
-   const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || (a.analysis_data?.blockers?.length ?? 0)), 0);
-   const totalRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || (a.analysis_data?.risks?.length ?? 0)), 0);
-  
-  // Team Health Index calculation based on TeamContext
-  const calculateTeamHealth = () => {
-    if (!teamContext) return 0;
-    let score = 0;
-    if (teamContext.communication_tone === 'constructive') score += 30;
-    else if (teamContext.communication_tone === 'neutral') score += 15;
-    if (teamContext.engagement_level === 'high') score += 25;
-    else if (teamContext.engagement_level === 'moderate') score += 12;
-    const retroRate = teamContext.retro_actions_completed_rate || 0;
-    score += (retroRate / 100) * 25;
-    if (teamContext.conversation_balance === 'balanced') score += 20;
-    else if (teamContext.conversation_balance === 'dominated') score += 8;
-    return Math.round(score);
-  };
-  const teamHealthScore = teamContext ? calculateTeamHealth() : 0;
-  const healthStatus = teamHealthScore >= 60 ? "healthy" : teamHealthScore >= 40 ? "moderate" : "critical";
-  
-  // Only show stats if we have real data
-   const hasRealData = analysisHistory.length > 0 || resolvedItems.length > 0;
+  const totalBlockers = analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0);
+  const totalRisks = analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0);
+  const analysesCount = analysisHistory.length;
+
+  // Resolution rate: % of blockers+risks that got resolved
+  const totalIssues = totalBlockers + totalRisks;
+  const resolvedCount = resolvedItems.length;
+  const resolutionRate = totalIssues > 0 ? Math.round((resolvedCount / Math.max(totalIssues, resolvedCount)) * 100) : 0;
+
+  const hasRealData = analysisHistory.length > 0 || resolvedItems.length > 0;
 
   const stats = hasRealData ? [
-     {
-       labelKey: "totalBlockers",
-       value: totalBlockers,
-       icon: AlertOctagon,
-       color: "from-blue-500 to-blue-600",
-       bgColor: "bg-blue-500/10",
-       textColor: "text-blue-600",
-     },
-     {
-       labelKey: "risksIdentified",
-       value: totalRisks,
-       icon: ShieldAlert,
-       color: "from-amber-500 to-amber-600",
-       bgColor: "bg-amber-500/10",
-       textColor: "text-amber-600",
-     },
-     {
-       labelKey: "resolved",
-       value: resolvedItems.length,
-       icon: CheckCircle2,
-       color: "from-emerald-500 to-emerald-600",
-       bgColor: "bg-emerald-500/10",
-       textColor: "text-emerald-600",
-     },
-     {
-       labelKey: "teamHealth",
-       value: teamHealthScore,
-       icon: Activity,
-       color: healthStatus === "healthy" ? "from-green-500 to-green-600" : healthStatus === "moderate" ? "from-yellow-500 to-yellow-600" : "from-red-500 to-red-600",
-       bgColor: healthStatus === "healthy" ? "bg-green-500/10" : healthStatus === "moderate" ? "bg-yellow-500/10" : "bg-red-500/10",
-       textColor: healthStatus === "healthy" ? "text-green-600" : healthStatus === "moderate" ? "text-yellow-600" : "text-red-600",
-     },
-   ] : [];
+    { labelKey: "totalBlockers", value: totalBlockers, icon: AlertOctagon, bgColor: "bg-blue-500/10", textColor: "text-blue-600" },
+    { labelKey: "risksIdentified", value: totalRisks, icon: ShieldAlert, bgColor: "bg-amber-500/10", textColor: "text-amber-600" },
+    { labelKey: "resolved", value: resolvedCount, icon: CheckCircle2, bgColor: "bg-emerald-500/10", textColor: "text-emerald-600" },
+    { labelKey: "analysesRun", value: analysesCount, icon: BarChart2, bgColor: "bg-indigo-500/10", textColor: "text-indigo-600", suffix: "" },
+  ] : [];
 
 
 
