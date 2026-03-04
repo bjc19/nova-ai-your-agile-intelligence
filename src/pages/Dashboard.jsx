@@ -407,49 +407,49 @@ export default function Dashboard() {
 
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Sprint Health Card - Drift Detection */}
+        <>
+          {/* Admin View */}
+          {user?.role === 'admin' && (
+            <div className="space-y-6 mb-8">
               {sprintHealth &&
-            <SprintHealthCard
-              sprintHealth={{
-                sprint_name: "Sprint 14",
-                wip_count: 8,
-                wip_historical_avg: 5,
-                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
-                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
-                sprint_day: 5,
-                historical_sprints_count: 4,
-                drift_acknowledged: false,
-                problematic_tickets: sprintHealth.problematic_tickets,
-                gdprSignals: gdprSignals
-              }}
-              onAcknowledge={() => console.log("Drift acknowledged")}
-              onReviewSprint={() => console.log("Review sprint")} />
+              <SprintHealthCard
+                sprintHealth={sprintHealth}
+                onAcknowledge={() => console.log("Drift acknowledged")}
+                onReviewSprint={() => console.log("Review sprint")} />
+              }
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <PredictiveInsights analysisHistory={analysisHistory} />
+            </div>
+          )}
 
-            }
-            
-            {/* Sprint Performance Chart */}
-            <SprintPerformanceChart analysisHistory={analysisHistory} />
-            
-            {/* Key Recommendations */}
-            <KeyRecommendations
-              latestAnalysis={latestAnalysis}
-              sourceUrl={latestAnalysis?.sourceUrl}
-              sourceName={latestAnalysis?.sourceName} />
+          {/* User/Contributor View */}
+          {user?.role !== 'admin' && (
+            <div className="space-y-6 mb-8">
+              <SprintResetAlert />
+              <UserDailyFocus />
+              <UserBlockages />
+            </div>
+          )}
 
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <SprintPerformanceChart analysisHistory={analysisHistory} />
+              <KeyRecommendations
+                latestAnalysis={latestAnalysis}
+                sourceUrl={latestAnalysis?.sourceUrl}
+                sourceName={latestAnalysis?.sourceName} />
+            </div>
+
+            <div className="space-y-6">
+              {user?.role === 'admin' ?
+                <RecentAnalyses analyses={analysisHistory} />
+              :
+                <UserContributions />
+              }
+              <IntegrationStatus />
+            </div>
           </div>
-
-          {/* Right Column - Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Analyses */}
-            <RecentAnalyses analyses={analysisHistory} />
-            
-            {/* Integration Status */}
-            <IntegrationStatus />
-          </div>
-        </div>
+        </>
         }
 
         {(user?.role === 'admin') &&
