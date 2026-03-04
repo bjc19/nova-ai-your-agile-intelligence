@@ -273,16 +273,16 @@ export default function SituationInputWidget({ selectedWorkspaceId, selectedWork
             {/* Mode Toggle */}
             <div className="flex gap-2 mb-4">
               <button
-                onClick={() => { setMode("text"); if (isRecording) stopRecording(); }}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${mode === "text" ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}
-              >
-                ✍️ Écrire
-              </button>
-              <button
                 onClick={() => setMode("voice")}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${mode === "voice" ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}
               >
                 🎙️ Parler
+              </button>
+              <button
+                onClick={() => { setMode("text"); if (isRecording) stopRecording(); }}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${mode === "text" ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"}`}
+              >
+                ✍️ Écrire
               </button>
             </div>
 
