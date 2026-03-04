@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -368,6 +367,3 @@ export default function DashboardAdmins() {
     </div>);
 
 }
-
-// Alias pour résoudre l'erreur de build
-export { default } from './Dashboard';
