@@ -23,11 +23,16 @@ export function LoginDialog({ isOpen, onClose }) {
 
     try {
       await base44.auth.loginViaEmailPassword(email, password);
+      const loggedUser = await base44.auth.me();
       setEmail("");
       setPassword("");
       onClose();
       setTimeout(() => {
-        window.location.href = createPageUrl("Dashboard");
+        if (loggedUser?.role === 'admin') {
+          window.location.href = createPageUrl("DashboardAdmins");
+        } else {
+          window.location.href = createPageUrl("Dashboard");
+        }
       }, 100);
     } catch (err) {
       console.error("Login error:", err);
