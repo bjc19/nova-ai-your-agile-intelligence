@@ -1,25 +1,11 @@
 import { motion } from "framer-motion";
-      import { useNavigate } from "react-router-dom";
-      import { useEffect, useState, useRef } from "react";
-      import { createPageUrl } from "@/utils";
-      import { base44 } from "@/api/base44Client";
-      import { getCacheService } from "@/components/hooks/useCacheService";
-import {
-   AlertOctagon,
-   ShieldAlert,
-   CheckCircle2,
-   Activity,
-   HelpCircle
- } from "lucide-react";
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { AlertOctagon, ShieldAlert, CheckCircle2, BarChart2 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageContext";
 import { adaptMessage } from "./RoleBasedMessaging";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { anonymizeFirstName } from "@/components/nova/anonymizationEngine";
+import QuickStatsDetailDrawer from "./QuickStatsDetailDrawer";
+import { useQuery } from "@tanstack/react-query";
 
 export default function QuickStats({ analysisHistory = [], currentPageName = "Dashboard", selectedWorkspaceId = null, gdprSignals: propGdprSignals = null }) {
    // CRITICAL: No rendering if no workspace selected OR workspace has zero data
