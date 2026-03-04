@@ -347,6 +347,12 @@ export default function DashboardAdmins() {
           </div>
         }
 
+        {(!selectedPeriod || analysisHistory.length > 0) &&
+        <div className="mt-8">
+          <ContextualModuleEngine analysisHistory={analysisHistory} lastAnalysisResult={latestAnalysis} />
+        </div>
+        }
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
