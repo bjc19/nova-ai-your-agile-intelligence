@@ -19,7 +19,6 @@ import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
 import DailyQuote from "@/components/nova/DailyQuote";
-import SituationalContextInput from "@/components/dashboard/SituationalContextInput";
 
 import {
   Mic,
@@ -239,33 +238,22 @@ export default function DashboardAdmins() {
                   </p>
                 </div>
               </div>
-              
-              <div className="flex justify-end gap-3">
-                 <WorkspaceSelector
+
+              <div className="flex flex-wrap items-center gap-3 mt-2">
+                <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
+                  activeWorkspaceType={selectedWorkspaceType}
                   onWorkspaceChange={(id, type) => {
                     setSelectedWorkspaceId(id);
                     setSelectedWorkspaceType(type);
                   }} />
-
                 <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
-
               </div>
-            </div>
-
-            {/* SituationalContextInput - TOUJOURS visible, avant tout */}
-            <div className="mt-4 mb-6">
-              <SituationalContextInput
-                workspaceId={selectedWorkspaceId}
-                workspaceType={selectedWorkspaceType}
-                onAnalysisDone={() => {}}
-              />
             </div>
 
             {(!selectedPeriod || analysisHistory.length > 0) &&
