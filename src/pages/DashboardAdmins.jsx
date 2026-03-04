@@ -239,11 +239,19 @@ export default function DashboardAdmins() {
                   </p>
                 </div>
               </div>
-              
+
+              {/* Situational Context Widget */}
+              <SituationInputWidget
+                selectedWorkspaceId={selectedWorkspaceId}
+                selectedWorkspaceType={selectedWorkspaceType}
+                analysisHistory={analysisHistory}
+              />
+
+              {/* Selectors below the situational context */}
               <div className="flex justify-end gap-3">
                  <WorkspaceSelector
                   activeWorkspaceId={selectedWorkspaceId}
-                  activeWorkspaceType={selectedWorkspaceType} // Assurez-vous que WorkspaceSelector utilise ceci
+                  activeWorkspaceType={selectedWorkspaceType}
                   onWorkspaceChange={(id, type) => {
                     setSelectedWorkspaceId(id);
                     setSelectedWorkspaceType(type);
@@ -255,7 +263,6 @@ export default function DashboardAdmins() {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
                   }} />
-
               </div>
             </div>
 

@@ -279,7 +279,12 @@ export default function Dashboard() {
 
               </div>
               
-              {/* Time Period Selector */}
+              {/* Situational Context Widget */}
+              <SituationInputWidget
+                analysisHistory={analysisHistory}
+              />
+
+              {/* Selectors below the situational context */}
               <div className="flex justify-end gap-3">
               <WorkspaceSelector />
               <TimePeriodSelector
@@ -287,9 +292,7 @@ export default function Dashboard() {
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
-                    console.log("Period changed:", period);
                   }} />
-
               </div>
             </div>
 
