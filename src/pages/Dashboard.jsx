@@ -373,7 +373,16 @@ export default function Dashboard() {
               sourceUrl={latestAnalysis?.sourceUrl}
               sourceName={latestAnalysis?.sourceName} />
 
-          </div>
+            {/* Situation Analysis */}
+            {latestAnalysis && <SituationInputWidget analysisData={latestAnalysis} />}
+
+            {/* Contextual Analysis */}
+            {latestAnalysis && <ContextualModuleEngine
+              analysisHistory={analysisHistory}
+              gdprSignals={gdprSignals}
+              latestAnalysis={latestAnalysis} />}
+
+            </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
