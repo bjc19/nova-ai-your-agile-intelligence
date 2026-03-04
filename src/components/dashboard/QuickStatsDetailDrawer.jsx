@@ -136,24 +136,54 @@ export default function QuickStatsDetailDrawer({ isOpen, onClose, type, analysis
 
   const getItems = () => {
     if (type === "blockers") {
-      return analysisHistory.flatMap((a, idx) =>
-        (a.analysis_data?.blockers || []).filter(b => b.urgency).map((b, i) => ({
-          id: `b-${idx}-${i}`,
-          ...b,
-          analysisTitle: a.title,
-          analysisDate: a.created_date,
-        }))
-      ).filter(item => !resolvedItems.some(r => r.item_id === item.id));
+      const items = analysisHistory.flatMap((a, idx) => {
+        // Prefer analysis_data.blockers, fallback to top-level blockers array
+        const blockers = a.analysis_data?.blockers || a.blockers || [];
+        if (blockers.length > 0) {
+          return blockers.map((b, i) => ({
+            id: `b-${a.id || idx}-${i}`,
+            ...b,
+            analysisTitle: a.title,
+            analysisDate: a.created_date,
+          }));
+        }
+        // If no detailed blockers but blockers_count > 0, show a synthetic entry
+        if ((a.blockers_count || 0) > 0) {
+          return [{
+            id: `b-${a.id || idx}-synth`,
+            issue: `${a.blockers_count} blocker(s) détecté(s)`,
+            description: a.transcript_preview || a.title || "Analyse sans détail",
+            analysisTitle: a.title,
+            analysisDate: a.created_date,
+          }];
+        }
+        return [];
+      });
+      return items.filter(item => !resolvedItems.some(r => r.item_id === item.id));
     }
     if (type === "risks") {
-      return analysisHistory.flatMap((a, idx) =>
-        (a.analysis_data?.risks || []).map((r, i) => ({
-          id: `r-${idx}-${i}`,
-          ...r,
-          analysisTitle: a.title,
-          analysisDate: a.created_date,
-        }))
-      ).filter(item => !resolvedItems.some(r => r.item_id === item.id));
+      const items = analysisHistory.flatMap((a, idx) => {
+        const risks = a.analysis_data?.risks || a.risks || [];
+        if (risks.length > 0) {
+          return risks.map((r, i) => ({
+            id: `r-${a.id || idx}-${i}`,
+            ...r,
+            analysisTitle: a.title,
+            analysisDate: a.created_date,
+          }));
+        }
+        if ((a.risks_count || 0) > 0) {
+          return [{
+            id: `r-${a.id || idx}-synth`,
+            issue: `${a.risks_count} risque(s) identifié(s)`,
+            description: a.transcript_preview || a.title || "Analyse sans détail",
+            analysisTitle: a.title,
+            analysisDate: a.created_date,
+          }];
+        }
+        return [];
+      });
+      return items.filter(item => !resolvedItems.some(r => r.item_id === item.id));
     }
     if (type === "resolved") {
       return resolvedItems.map(item => ({
