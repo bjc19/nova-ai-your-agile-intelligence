@@ -18,12 +18,6 @@ import TeamConfigOnboarding from "@/components/onboarding/TeamConfigOnboarding";
 import MultiProjectAlert from "@/components/dashboard/MultiProjectAlert";
 import TimePeriodSelector from "@/components/dashboard/TimePeriodSelector";
 import WorkspaceSelector from "@/components/dashboard/WorkspaceSelector";
-import UserDailyFocus from "@/components/dashboard/UserDailyFocus";
-import UserBlockages from "@/components/dashboard/UserBlockages";
-import UserContributions from "@/components/dashboard/UserContributions";
-import SprintResetAlert from "@/components/dashboard/SprintResetAlert";
-import DailyQuote from "@/components/nova/DailyQuote";
-import PredictiveInsights from "@/components/dashboard/PredictiveInsights";
 
 import {
   Mic,
@@ -33,8 +27,7 @@ import {
   Calendar,
   Clock,
   Loader2,
-  TrendingUp,
-  RefreshCw } from
+  TrendingUp } from
 "lucide-react";
 
 export default function Dashboard() {
@@ -46,13 +39,9 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
-  const [selectedWorkspaceType, setSelectedWorkspaceType] = useState(null);
+
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
-  const [assignedWorkspaceIds, setAssignedWorkspaceIds] = useState([]);
-  const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
@@ -72,45 +61,27 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication and role
+  // Check authentication (temporarily disabled for demo)
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) {
-        navigate(createPageUrl("Home"));
-        return;
-      }
+      if (authenticated) {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
 
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+        // Charger contexte sprint actif
+        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+        if (activeSprints.length > 0) {
+          setSprintContext(activeSprints[0]);
+        }
 
-      // Load assigned workspaces for non-admin users
-      if (currentUser?.role !== 'admin') {
-        const workspaceMembers = await base44.entities.WorkspaceMember.filter({
-          user_email: currentUser?.email
-        });
-        const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
-        setAssignedWorkspaceIds(workspaceIds);
-      }
-
-      // Load sprint context
-      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-      if (activeSprints.length > 0) {
-        setSprintContext(activeSprints[0]);
-      }
-
-      // Load analysis history
-      const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
-      setAllAnalysisHistory(analyses);
-
-      // Check onboarding (admin only)
-      if (currentUser?.role === 'admin') {
+        // Vérifier onboarding
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Check for pending multi-project alerts (admin only)
+        // Vérifier alertes multi-projets en attente
         const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
           admin_response: "pending"
         });
@@ -123,36 +94,28 @@ export default function Dashboard() {
           });
         }
       }
-
       setIsLoading(false);
     };
     checkAuth();
   }, [navigate]);
 
-  // Filter analysis history based on selected period and workspace
-  const analysisHistory = allAnalysisHistory.filter((analysis) => {
-    const analysisDate = new Date(analysis.created_date);
-    const matchesPeriod = selectedPeriod ? (analysisDate >= new Date(selectedPeriod.start) && analysisDate <= new Date(new Date(selectedPeriod.end).setHours(23, 59, 59, 999))) : true;
-    
-    let matchesWorkspace = true;
-    if (user?.role !== 'admin') {
-      // Non-admin users see only their assigned workspaces
-      matchesWorkspace = selectedWorkspaceId ? 
-        (analysis.jira_project_selection_id === selectedWorkspaceId || analysis.trello_project_selection_id === selectedWorkspaceId) :
-        assignedWorkspaceIds.includes(analysis.jira_project_selection_id) || assignedWorkspaceIds.includes(analysis.trello_project_selection_id);
-    } else {
-      // Admin users can filter by workspace if selected
-      if (selectedWorkspaceId && selectedWorkspaceType) {
-        if (selectedWorkspaceType === 'jira') {
-          matchesWorkspace = analysis.jira_project_selection_id === selectedWorkspaceId;
-        } else if (selectedWorkspaceType === 'trello') {
-          matchesWorkspace = analysis.trello_project_selection_id === selectedWorkspaceId;
-        }
-      }
+  // Fetch analysis history
+  const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
+  
+  useEffect(() => {
+    if (!isLoading) {
+      base44.entities.AnalysisHistory.list('-created_date', 100).then(setAllAnalysisHistory);
     }
+  }, [isLoading]);
 
-    return matchesPeriod && matchesWorkspace;
-  });
+  // Filter analysis history based on selected period
+  const analysisHistory = selectedPeriod ? allAnalysisHistory.filter((analysis) => {
+    const analysisDate = new Date(analysis.created_date);
+    const startDate = new Date(selectedPeriod.start);
+    const endDate = new Date(selectedPeriod.end);
+    endDate.setHours(23, 59, 59, 999); // Include end of day
+    return analysisDate >= startDate && analysisDate <= endDate;
+  }) : allAnalysisHistory;
 
   // Check for stored analysis from session and filter by period
   useEffect(() => {
@@ -211,7 +174,7 @@ export default function Dashboard() {
     sprintInfo.name = sprintInfo.deliveryMode === "kanban" ? "En cours" : "Sprint en cours";
   }
 
-  // Sprint health will be loaded from real data when available
+  // Sprint health will load from real data when available
   const sprintHealth = null;
 
   if (isLoading) {
@@ -298,50 +261,21 @@ export default function Dashboard() {
               
               {/* Time Period Selector */}
               <div className="flex justify-end gap-3">
-              <WorkspaceSelector 
-                 activeWorkspaceId={selectedWorkspaceId}
-                 activeWorkspaceType={selectedWorkspaceType}
-                 onWorkspaceChange={(id, type) => {
-                   setSelectedWorkspaceId(id);
-                   setSelectedWorkspaceType(type);
-                 }} />
+              <WorkspaceSelector />
               <TimePeriodSelector
                   deliveryMode={sprintInfo.deliveryMode}
                   onPeriodChange={(period) => {
                     setSelectedPeriod(period);
                     sessionStorage.setItem("selectedPeriod", JSON.stringify(period));
+                    console.log("Period changed:", period);
                   }} />
-              {user?.role !== 'admin' &&
-              <button
-                onClick={async () => {
-                  setRefreshing(true);
-                  try {
-                    const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
-                    setAllAnalysisHistory(analyses);
-                  } catch (error) {
-                    console.error("Erreur rafraîchissement:", error);
-                  } finally {
-                    setRefreshing(false);
-                  }
-                }}
-                disabled={refreshing}
-                className="text-slate-600 hover:text-slate-700">
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-              </button>
-              }
+
               </div>
             </div>
 
             {/* Quick Stats - Only show if data in period */}
             {(!selectedPeriod || analysisHistory.length > 0) &&
-            <>
-              <DailyQuote
-                lang={t('language') === 'English' ? 'en' : 'fr'}
-                blockerCount={analysisHistory.reduce((sum, a) => sum + (a.blockers_count || 0), 0)}
-                riskCount={analysisHistory.reduce((sum, a) => sum + (a.risks_count || 0), 0)}
-                patterns={[]} />
-              <QuickStats analysisHistory={analysisHistory} />
-            </>
+            <QuickStats analysisHistory={analysisHistory} />
             }
           </motion.div>
         </div>
@@ -386,80 +320,85 @@ export default function Dashboard() {
 
         {/* Show content only if there are analyses in the period */}
         {(!selectedPeriod || analysisHistory.length > 0) &&
-        <>
-          {/* Admin View */}
-          {user?.role === 'admin' && (
-            <div className="space-y-6 mb-8">
-              {sprintHealth &&
-              <SprintHealthCard
-                sprintHealth={sprintHealth}
-                onAcknowledge={() => console.log("Drift acknowledged")}
-                onReviewSprint={() => console.log("Review sprint")} />
-              }
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
-              <PredictiveInsights analysisHistory={analysisHistory} />
-            </div>
-          )}
-
-          {/* User/Contributor View */}
-          {user?.role !== 'admin' && (
-            <div className="space-y-6 mb-8">
-              <SprintResetAlert />
-              <UserDailyFocus />
-              <UserBlockages />
-            </div>
-          )}
-
-          <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              <SprintPerformanceChart analysisHistory={analysisHistory} />
-              <KeyRecommendations
-                latestAnalysis={latestAnalysis}
-                sourceUrl={latestAnalysis?.sourceUrl}
-                sourceName={latestAnalysis?.sourceName} />
-            </div>
+              {/* Sprint Health Card - Drift Detection */}
+              {sprintHealth &&
+            <SprintHealthCard
+              sprintHealth={{
+                sprint_name: "Sprint 14",
+                wip_count: 8,
+                wip_historical_avg: 5,
+                tickets_in_progress_over_3d: 3 + gdprSignals.filter((s) => s.criticite === 'critique' || s.criticite === 'haute').length,
+                blocked_tickets_over_48h: 2 + gdprSignals.filter((s) => s.criticite === 'moyenne').length,
+                sprint_day: 5,
+                historical_sprints_count: 4,
+                drift_acknowledged: false,
+                problematic_tickets: sprintHealth.problematic_tickets,
+                gdprSignals: gdprSignals
+              }}
+              onAcknowledge={() => console.log("Drift acknowledged")}
+              onReviewSprint={() => console.log("Review sprint")} />
 
-            <div className="space-y-6">
-              {user?.role === 'admin' ?
-                <RecentAnalyses analyses={analysisHistory} />
-              :
-                <UserContributions />
-              }
-              <IntegrationStatus />
-            </div>
+            }
+            
+            {/* Sprint Performance Chart */}
+            <SprintPerformanceChart analysisHistory={analysisHistory} />
+            
+            {/* Key Recommendations */}
+            <KeyRecommendations
+              latestAnalysis={latestAnalysis}
+              sourceUrl={latestAnalysis?.sourceUrl}
+              sourceName={latestAnalysis?.sourceName} />
+
           </div>
-        </>
+
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Recent Analyses */}
+            <RecentAnalyses analyses={analysisHistory} />
+            
+            {/* Integration Status */}
+            <IntegrationStatus />
+          </div>
+        </div>
         }
 
+        {(user?.role === 'admin') &&
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="mt-8">
-          <div className="bg-blue-800 p-6 rounded-2xl md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <p className="text-slate-400 max-w-lg">
-                  {t('importDataDescription')}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link to={createPageUrl("Settings")}>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                    <Zap className="w-4 h-4 mr-2" />
-                    {t('connectSlack')}
-                  </Button>
-                </Link>
-                <Link to={createPageUrl("Analysis")}>
-                  <Button className="bg-white text-slate-900 hover:bg-slate-100">
-                    {t('startAnalysis')}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+
+    <div className="bg-blue-800 p-6 rounded-2xl from-slate-900 to-slate-800 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+          </h3>
+          <p className="text-slate-400 max-w-lg">
+            {t('importDataDescription')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl("Settings")}>
+            <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+              <Zap className="w-4 h-4 mr-2" />
+              {t('connectSlack')}
+            </Button>
+          </Link>
+          <Link to={createPageUrl("Analysis")}>
+            <Button className="bg-white text-slate-900 hover:bg-slate-100">
+              {t('startAnalysis')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+        }
       </div>
     </div>);
 
