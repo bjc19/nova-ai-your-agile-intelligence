@@ -276,29 +276,12 @@ export default function SituationInputWidget({ selectedWorkspaceId, selectedWork
         {/* Input Area */}
         {!result && (
           <div className="p-6">
-            {/* Context Label Field */}
+            {/* Context Label Field with smart suggestions */}
             <div className="mb-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Tag className="w-3.5 h-3.5 text-slate-500" />
-                <label className="text-xs font-medium text-slate-600 uppercase tracking-wide">
-                  Contexte de l'analyse
-                </label>
-                <span className="text-xs text-slate-400">(Projet, Sprint, Sujet...)</span>
-                <Badge variant="outline" className="text-xs border-amber-200 text-amber-600 bg-amber-50 ml-auto">
-                  Recommandé
-                </Badge>
-              </div>
-              <Input
+              <ContextLabelInput
                 value={contextLabel}
-                onChange={(e) => setContextLabel(e.target.value)}
-                placeholder="Ex : Projet Alpha – Sprint 3, Rétrospective Q1, Équipe Backend..."
-                className="text-sm border-slate-200 focus:border-blue-400"
+                onChange={setContextLabel}
               />
-              {!contextLabel.trim() && (
-                <p className="text-xs text-slate-400 mt-1">
-                  💡 Un contexte rend les analyses comparables dans le temps et améliore le filtrage du tableau de bord.
-                </p>
-              )}
             </div>
 
             {/* Mode Toggle */}
