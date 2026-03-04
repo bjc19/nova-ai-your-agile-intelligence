@@ -72,27 +72,45 @@ export default function Dashboard() {
     fetchSignals();
   }, []);
 
-  // Check authentication (temporarily disabled for demo)
+  // Check authentication and role
   useEffect(() => {
     const checkAuth = async () => {
       const authenticated = await base44.auth.isAuthenticated();
-      if (authenticated) {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
+      if (!authenticated) {
+        navigate(createPageUrl("Home"));
+        return;
+      }
 
-        // Charger contexte sprint actif
-        const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
-        if (activeSprints.length > 0) {
-          setSprintContext(activeSprints[0]);
-        }
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
 
-        // Vérifier onboarding
+      // Load assigned workspaces for non-admin users
+      if (currentUser?.role !== 'admin') {
+        const workspaceMembers = await base44.entities.WorkspaceMember.filter({
+          user_email: currentUser?.email
+        });
+        const workspaceIds = workspaceMembers.map(wm => wm.workspace_id);
+        setAssignedWorkspaceIds(workspaceIds);
+      }
+
+      // Load sprint context
+      const activeSprints = await base44.entities.SprintContext.filter({ is_active: true });
+      if (activeSprints.length > 0) {
+        setSprintContext(activeSprints[0]);
+      }
+
+      // Load analysis history
+      const analyses = await base44.entities.AnalysisHistory.list('-created_date', 100);
+      setAllAnalysisHistory(analyses);
+
+      // Check onboarding (admin only)
+      if (currentUser?.role === 'admin') {
         const teamConfigs = await base44.entities.TeamConfiguration.list();
         if (teamConfigs.length === 0 || !teamConfigs[0].onboarding_completed) {
           setShowOnboarding(true);
         }
 
-        // Vérifier alertes multi-projets en attente
+        // Check for pending multi-project alerts (admin only)
         const pendingAlerts = await base44.entities.MultiProjectDetectionLog.filter({
           admin_response: "pending"
         });
@@ -105,6 +123,7 @@ export default function Dashboard() {
           });
         }
       }
+
       setIsLoading(false);
     };
     checkAuth();
