@@ -46,9 +46,13 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [multiProjectAlert, setMultiProjectAlert] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState(null);
-
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(null);
+  const [selectedWorkspaceType, setSelectedWorkspaceType] = useState(null);
   const [sprintContext, setSprintContext] = useState(null);
   const [gdprSignals, setGdprSignals] = useState([]);
+  const [assignedWorkspaceIds, setAssignedWorkspaceIds] = useState([]);
+  const [allAnalysisHistory, setAllAnalysisHistory] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch GDPR signals from last 7 days
   useEffect(() => {
