@@ -402,7 +402,7 @@ export default function Home() {
               className="col-span-12 md:col-span-7 relative rounded-2xl overflow-hidden h-80 md:h-96 group"
             >
               <img
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&auto=format&fit=crop&q=80"
+                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/8be8b94da_generated_image.png"
                 alt="Équipe agile en collaboration"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
@@ -423,7 +423,7 @@ export default function Home() {
                 className="relative rounded-2xl overflow-hidden h-44 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=700&auto=format&fit=crop&q=80"
+                  src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/e6f91e73f_generated_image.png"
                   alt="Intelligence artificielle agentique"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -442,7 +442,7 @@ export default function Home() {
                 className="relative rounded-2xl overflow-hidden h-44 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=700&auto=format&fit=crop&q=80"
+                  src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/ea0f79171_generated_image.png"
                   alt="Consultants en transformation digitale"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -457,19 +457,19 @@ export default function Home() {
             {/* Bottom row — 3 images */}
             {[
               {
-                src: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop&q=80",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/639beac4c_generated_image.png",
                 label: lang === "fr" ? "Automatisation intelligente" : "Intelligent automation",
                 tag: "AI-Native",
                 delay: 0.1
               },
               {
-                src: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&auto=format&fit=crop&q=80",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/8525261da_generated_image.png",
                 label: lang === "fr" ? "Cérémonies Scrum" : "Scrum ceremonies",
                 tag: "Agile Coaching",
                 delay: 0.2
               },
               {
-                src: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&auto=format&fit=crop&q=80",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/e6f91e73f_generated_image.png",
                 label: lang === "fr" ? "Agents IA en temps réel" : "Real-time AI agents",
                 tag: "Agentic · RLHF",
                 delay: 0.3
