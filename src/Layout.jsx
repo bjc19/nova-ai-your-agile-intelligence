@@ -173,10 +173,14 @@ function LayoutContent({ children, currentPageName }) {
                 </> :
 
             <>
+                  <Link
+                to="/Pricing"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                    Tarifs
+                  </Link>
                   <button
                 onClick={() => setShowDemoSimulator(true)}
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-
                     {t('tryDemo')}
                   </button>
                   <Link
@@ -269,13 +273,18 @@ function LayoutContent({ children, currentPageName }) {
                       </> :
 
                   <>
+                        <Link
+                      to="/Pricing"
+                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                      onClick={() => setMobileMenuOpen(false)}>
+                          Tarifs
+                        </Link>
                         <button
                       onClick={() => {
                         setShowDemoSimulator(true);
                         setMobileMenuOpen(false);
                       }}
                       className="text-left text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2">
-
                           {t('tryDemo')}
                         </button>
                         <Link

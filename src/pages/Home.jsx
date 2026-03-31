@@ -716,12 +716,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── PRICING ─── */}
-      <Suspense fallback={<div className="py-16 h-96" />}>
-        <div id="pricing" className="max-w-7xl mx-auto px-6 py-16">
-          <PricingSection />
-        </div>
-      </Suspense>
+
 
       {/* ─── CTA ─── */}
       <section className="py-24 bg-gradient-to-br from-slate-900 to-teal-950 relative overflow-hidden">
