@@ -423,7 +423,7 @@ export default function Home() {
                 className="relative rounded-2xl overflow-hidden h-44 group"
               >
                 <img
-                  src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/e6f91e73f_generated_image.png"
+                  src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/6500aa816_generated_image.png"
                   alt="Intelligence artificielle agentique"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -469,7 +469,7 @@ export default function Home() {
                 delay: 0.2
               },
               {
-                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/e6f91e73f_generated_image.png",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/c6cef557e_generated_image.png",
                 label: lang === "fr" ? "Agents IA en temps réel" : "Real-time AI agents",
                 tag: "Agentic · RLHF",
                 delay: 0.3
