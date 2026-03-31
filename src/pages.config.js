@@ -71,6 +71,7 @@ import DashboardCommonUsers from './pages/DashboardCommonUsers';
 import DashboardContributors from './pages/DashboardContributors';
 import Dashboard from './pages/Dashboard';
 import DashboardAdmins from './pages/DashboardAdmins';
+import Pricing from './pages/Pricing';
 import __Layout from './Layout.jsx';
 
 
@@ -99,6 +100,7 @@ export const PAGES = {
     "DashboardContributors": DashboardContributors,
     "Dashboard": Dashboard,
     "DashboardAdmins": DashboardAdmins,
+    "Pricing": Pricing,
 }
 
 export const pagesConfig = {
