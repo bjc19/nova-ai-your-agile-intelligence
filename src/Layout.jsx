@@ -104,7 +104,7 @@ function LayoutContent({ children, currentPageName }) {
               onClick={() => navigate(createPageUrl("Dashboard"))}
               className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-teal-500/25">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-slate-900 tracking-tight">
@@ -116,7 +116,7 @@ function LayoutContent({ children, currentPageName }) {
               to={createPageUrl("Home")}
               className="flex items-center gap-2.5"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-teal-500/25">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-slate-900 tracking-tight">
@@ -193,7 +193,7 @@ function LayoutContent({ children, currentPageName }) {
                   <Button
                 size="sm"
                 onClick={() => setShowLoginDialog(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                className="bg-gradient-to-r from-teal-500 to-indigo-400 text-white">
 
                     <LogIn className="w-4 h-4 mr-2" />
                     {t('signIn')}
@@ -213,9 +213,9 @@ function LayoutContent({ children, currentPageName }) {
                 <SheetContent side="right" className="w-[280px]">
                   <SheetHeader className="mb-6">
                     <SheetTitle className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center">
                         <Sparkles className="w-4 h-4 text-white" />
-                      </div>
+                    </div>
                       Nova
                     </SheetTitle>
                   </SheetHeader>
@@ -295,7 +295,7 @@ function LayoutContent({ children, currentPageName }) {
                           setShowLoginDialog(true);
                           setMobileMenuOpen(false);
                         }}
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                        className="w-full bg-gradient-to-r from-teal-500 to-indigo-400 text-white">
 
                             <LogIn className="w-4 h-4 mr-2" />
                             {t('signIn')}
@@ -341,7 +341,7 @@ function LayoutContent({ children, currentPageName }) {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
               </div>
               <span className="text-sm font-semibold text-slate-900">Nova</span>

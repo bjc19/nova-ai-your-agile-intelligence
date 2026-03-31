@@ -132,41 +132,41 @@ const pillars = (t) => [
     icon: Target,
     title: t("pillar1"),
     description: t("pillar1desc"),
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-100",
+    color: "text-teal-600",
+    bgColor: "bg-teal-50",
+    borderColor: "border-teal-100",
     tag: "HITL · Agentic",
-    tagColor: "text-blue-500",
+    tagColor: "text-teal-500",
   },
   {
     icon: Users,
     title: t("pillar2"),
     description: t("pillar2desc"),
-    color: "text-indigo-600",
+    color: "text-indigo-500",
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-100",
     tag: "RLHF · Human-in-the-Loop",
-    tagColor: "text-indigo-500",
+    tagColor: "text-indigo-400",
   },
   {
     icon: Brain,
     title: t("pillar3"),
     description: t("pillar3desc"),
-    color: "text-violet-600",
-    bgColor: "bg-violet-50",
-    borderColor: "border-violet-100",
+    color: "text-teal-500",
+    bgColor: "bg-teal-50",
+    borderColor: "border-teal-100",
     tag: "AI-Native · Multi-Agent",
-    tagColor: "text-violet-500",
+    tagColor: "text-teal-400",
   },
   {
     icon: Database,
     title: t("pillar4"),
     description: t("pillar4desc"),
-    color: "text-cyan-600",
-    bgColor: "bg-cyan-50",
-    borderColor: "border-cyan-100",
+    color: "text-indigo-400",
+    bgColor: "bg-indigo-50",
+    borderColor: "border-indigo-100",
     tag: "HITL by Design",
-    tagColor: "text-cyan-500",
+    tagColor: "text-indigo-400",
   },
 ];
 
@@ -210,10 +210,10 @@ export default function Home() {
     <div className="min-h-screen bg-white">
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950">
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950">
         {/* Decorative grid */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:64px_64px]" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/10 rounded-full blur-[100px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-teal-500/10 rounded-full blur-[100px]" />
 
         <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-28">
           <motion.div
@@ -222,14 +222,14 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-4xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-400/30 bg-blue-500/10 text-blue-300 text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-teal-400/40 bg-teal-500/10 text-teal-300 text-sm font-medium mb-8">
               <Zap className="w-4 h-4" />
               {t("tagline")}
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.05] mb-6">
               {t("heroTitle1")}{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-teal-400 to-indigo-300 bg-clip-text text-transparent">
                 {t("heroTitle2")}
               </span>
             </h1>
@@ -242,7 +242,7 @@ export default function Home() {
               <Button
                 size="lg"
                 onClick={() => document.getElementById("expertise")?.scrollIntoView({ behavior: "smooth" })}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-6 text-base rounded-xl shadow-lg shadow-blue-900/40 transition-all hover:-translate-y-0.5"
+                className="bg-teal-500 hover:bg-teal-400 text-white px-8 py-6 text-base rounded-xl shadow-lg shadow-teal-900/40 transition-all hover:-translate-y-0.5"
               >
                 {t("ctaPrimary")}
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -290,7 +290,7 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <Badge className="mb-4 bg-blue-50 text-blue-700 border-blue-200 px-3 py-1">
+            <Badge className="mb-4 bg-teal-50 text-teal-700 border-teal-200 px-3 py-1">
               {t("whatWeDo")}
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
@@ -343,13 +343,13 @@ export default function Home() {
 
           <div className="grid md:grid-cols-4 gap-0 relative">
             {/* Connecting line */}
-            <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-blue-200 via-indigo-300 to-violet-200" />
+            <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-teal-200 via-indigo-300 to-teal-200" />
 
             {[
-              { num: "01", title: t("step1"), desc: t("step1desc"), color: "bg-blue-600" },
-              { num: "02", title: t("step2"), desc: t("step2desc"), color: "bg-indigo-600" },
-              { num: "03", title: t("step3"), desc: t("step3desc"), color: "bg-violet-600" },
-              { num: "04", title: t("step4"), desc: t("step4desc"), color: "bg-cyan-600" },
+              { num: "01", title: t("step1"), desc: t("step1desc"), color: "bg-teal-500" },
+              { num: "02", title: t("step2"), desc: t("step2desc"), color: "bg-indigo-400" },
+              { num: "03", title: t("step3"), desc: t("step3desc"), color: "bg-teal-400" },
+              { num: "04", title: t("step4"), desc: t("step4desc"), color: "bg-indigo-500" },
             ].map((step, i) => (
               <motion.div
                 key={i}
@@ -371,7 +371,7 @@ export default function Home() {
       </section>
 
       {/* ─── NOVA PRODUCT SPOTLIGHT ─── */}
-      <section className="py-24 bg-gradient-to-br from-slate-900 to-blue-950 relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-br from-slate-900 to-teal-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:48px_48px]" />
         <div className="relative max-w-6xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -381,7 +381,7 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
             >
-              <Badge className="mb-6 bg-blue-500/20 text-blue-300 border-blue-400/30 px-3 py-1">
+              <Badge className="mb-6 bg-teal-500/20 text-teal-300 border-teal-400/30 px-3 py-1">
                 Nova Platform
               </Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
@@ -408,7 +408,7 @@ export default function Home() {
               <div className="flex items-center gap-4">
                 <Button
                   onClick={() => setShowDemoSimulator(true)}
-                  className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-5 rounded-xl"
+                  className="bg-teal-500 hover:bg-teal-400 text-white px-6 py-5 rounded-xl"
                 >
                   <Play className="w-4 h-4 mr-2" />
                   {t("tryDemo")} ({demoTriesLeft}/2)
@@ -477,7 +477,7 @@ export default function Home() {
                       {[40, 55, 35, 70, 50, 45, 30].map((h, i) => (
                         <motion.div
                           key={i}
-                          className="flex-1 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t opacity-70"
+                          className="flex-1 bg-gradient-to-t from-teal-500 to-indigo-400 rounded-t opacity-70"
                           initial={{ height: 0 }}
                           whileInView={{ height: `${h}%` }}
                           viewport={{ once: true }}
@@ -513,7 +513,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             {[
-              { icon: Shield, title: t("readOnly"), desc: t("readOnlyDesc"), color: "text-blue-600", bg: "bg-blue-50" },
+              { icon: Shield, title: t("readOnly"), desc: t("readOnlyDesc"), color: "text-teal-600", bg: "bg-teal-50" },
               { icon: Database, title: t("zeroStorage"), desc: t("zeroStorageDesc"), color: "text-violet-600", bg: "bg-violet-50" },
               { icon: Award, title: t("anonymized"), desc: t("anonymizedDesc"), color: "text-emerald-600", bg: "bg-emerald-50" },
             ].map((item, i) => (
@@ -595,7 +595,7 @@ export default function Home() {
       </Suspense>
 
       {/* ─── CTA ─── */}
-      <section className="py-24 bg-gradient-to-br from-slate-900 to-blue-950 relative overflow-hidden">
+      <section className="py-24 bg-gradient-to-br from-slate-900 to-teal-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:48px_48px]" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
           <motion.div
@@ -603,7 +603,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-400/30 bg-blue-500/10 text-blue-300 text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-teal-400/30 bg-teal-500/10 text-teal-300 text-sm font-medium mb-8">
               <Globe className="w-4 h-4" />
               Novagile AI
             </div>
@@ -617,7 +617,7 @@ export default function Home() {
               <Button
                 onClick={() => setShowConsultationModal(true)}
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-blue-900/40"
+                className="bg-teal-500 hover:bg-teal-400 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-teal-900/40"
               >
                 {t("bookConsultation")}
                 <ArrowRight className="w-5 h-5 ml-2" />
