@@ -85,7 +85,7 @@ export default function ConsultationModal({ isOpen, onClose, lang = "fr" }) {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center">
               <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -102,7 +102,7 @@ export default function ConsultationModal({ isOpen, onClose, lang = "fr" }) {
             </div>
             <h3 className="text-lg font-semibold text-slate-900">{t.successTitle}</h3>
             <p className="text-slate-600 text-sm">{t.successMsg}</p>
-            <Button onClick={handleClose} className="mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+            <Button onClick={handleClose} className="mt-2 bg-gradient-to-r from-teal-500 to-indigo-400 text-white">
               {t.close}
             </Button>
           </div>
@@ -173,7 +173,7 @@ export default function ConsultationModal({ isOpen, onClose, lang = "fr" }) {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-5"
+              className="w-full bg-gradient-to-r from-teal-500 to-indigo-400 hover:from-teal-400 hover:to-indigo-300 text-white py-5"
             >
               {loading ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t.sending}</>

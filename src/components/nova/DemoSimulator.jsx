@@ -467,7 +467,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                 <p className="text-sm text-red-700 mt-1">Vous avez utilisé vos 2 essais de démo. Choisissez un plan pour continuer.</p>
               </div>
             </div>
-            <Button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button onClick={onClose} className="w-full bg-teal-500 hover:bg-teal-400">
               Voir les Plans Tarifaires
             </Button>
           </div>
@@ -614,7 +614,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                         }
                       }, 100);
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-teal-500 hover:bg-teal-400"
                   >
                     Voir les Plans Tarifaires
                   </Button>
@@ -632,7 +632,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                     </Button>
                     <Button 
                       onClick={onClose}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      className="flex-1 bg-teal-500 hover:bg-teal-400"
                     >
                       Fermer
                     </Button>
@@ -668,17 +668,17 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
             <div>
               <p className="text-sm font-semibold text-slate-900 mb-2">Confiance de l'analyse</p>
               <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-600" style={{ width: `${results.confidence}%` }} />
+                <div className="h-full bg-gradient-to-r from-teal-500 to-indigo-400" style={{ width: `${results.confidence}%` }} />
               </div>
               <p className="text-xs text-slate-600 mt-1">{results.confidence}%</p>
             </div>
 
             {/* Patterns Detected */}
             <div>
-              <p className="text-sm font-semibold text-slate-900 mb-3">Anti-patterns Détectés pour <span className="text-blue-600">{results.meetingType}</span></p>
+              <p className="text-sm font-semibold text-slate-900 mb-3">Anti-patterns Détectés pour <span className="text-teal-600">{results.meetingType}</span></p>
               <div className="space-y-2">
                 {results.patterns.map((pattern, idx) => (
-                  <Card key={idx} className={`border-slate-200 cursor-pointer hover:shadow-md transition-all ${expandedPattern === idx ? 'ring-2 ring-blue-400' : ''}`}>
+                  <Card key={idx} className={`border-slate-200 cursor-pointer hover:shadow-md transition-all ${expandedPattern === idx ? 'ring-2 ring-teal-400' : ''}`}>
                     <button
                       onClick={() => setExpandedPattern(expandedPattern === idx ? null : idx)}
                       className="w-full text-left"
@@ -702,12 +702,12 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                     </button>
                     
                     {expandedPattern === idx && (
-                      <div className="border-t border-slate-200 px-3 py-3 bg-blue-50">
+                      <div className="border-t border-slate-200 px-3 py-3 bg-teal-50">
                         <p className="text-xs font-semibold text-slate-900 mb-2">💡 Suggestions d'amélioration :</p>
                         <ul className="space-y-1.5">
                           {pattern.suggestions.map((suggestion, sidx) => (
                             <li key={sidx} className="flex gap-2 text-xs text-slate-700">
-                              <span className="text-blue-600 font-bold">✓</span>
+                              <span className="text-teal-600 font-bold">✓</span>
                               <span>{suggestion}</span>
                             </li>
                           ))}
@@ -752,7 +752,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
 
             {/* CTA */}
             {tries === 0 ? (
-              <Button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button onClick={onClose} className="w-full bg-teal-500 hover:bg-teal-400">
                 Voir les Plans Tarifaires
               </Button>
             ) : (
@@ -777,7 +777,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                       }
                     }, 100);
                   }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-teal-500 hover:bg-teal-400"
                 >
                   Voir les Plans Tarifaires
                 </Button>
@@ -862,17 +862,17 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                 // Si contexte professionnel validé, montrer la détection d'atelier
                 if (detection) {
                   return (
-                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+                    <div className="mt-4 p-3 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-slate-900">
-                            Atelier détecté: <span className="text-blue-600">{detection.type}</span>
-                            {detection.subtype && <span className="text-blue-500"> {detection.subtype}</span>}
+                            Atelier détecté: <span className="text-teal-600">{detection.type}</span>
+                            {detection.subtype && <span className="text-teal-500"> {detection.subtype}</span>}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="flex-1 h-2 bg-blue-200 rounded-full overflow-hidden max-w-xs">
+                            <div className="flex-1 h-2 bg-teal-100 rounded-full overflow-hidden max-w-xs">
                               <div 
-                                className="h-full bg-gradient-to-r from-blue-500 to-blue-600" 
+                                className="h-full bg-gradient-to-r from-teal-500 to-indigo-400" 
                                 style={{ width: `${detection.confidence}%` }} 
                               />
                             </div>
@@ -898,8 +898,8 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
                         ))}
                       </div>
 
-                      <div className="pt-3 border-t border-blue-200">
-                        <p className="text-xs text-blue-700 italic">
+                      <div className="pt-3 border-t border-teal-200">
+                        <p className="text-xs text-teal-700 italic">
                           💡 Bien que Nova AI soit très performant, la pré-détection peut se tromper de type d'atelier si son contenu semble mixé avec d'autres pratiques, mais l'analyse approfondie une fois lancée corrigera ce faux-positif.
                         </p>
                       </div>
@@ -953,7 +953,7 @@ export function DemoSimulator({ onClose, onTriesUpdate }) {
               <Button 
                 onClick={handleAnalyze}
                 disabled={analyzing || !input.trim()}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-teal-500 hover:bg-teal-400"
               >
                 {analyzing ? (
                   <>

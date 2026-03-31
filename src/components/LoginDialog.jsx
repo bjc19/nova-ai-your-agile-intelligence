@@ -112,7 +112,7 @@ export function LoginDialog({ isOpen, onClose }) {
               <Button
                 type="submit"
                 disabled={forgotLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                className="w-full bg-gradient-to-r from-teal-500 to-indigo-400 text-white"
               >
                 {forgotLoading ? (
                   <>
@@ -127,7 +127,7 @@ export function LoginDialog({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(false)}
-                className="w-full text-sm text-blue-600 hover:text-blue-700"
+                className="w-full text-sm text-teal-600 hover:text-teal-700"
               >
                 Back to Sign In
               </button>
@@ -185,7 +185,7 @@ export function LoginDialog({ isOpen, onClose }) {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+            className="w-full bg-gradient-to-r from-teal-500 to-indigo-400 text-white"
           >
             {loading ? (
               <>
@@ -201,7 +201,7 @@ export function LoginDialog({ isOpen, onClose }) {
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="text-sm text-teal-600 hover:text-teal-700"
             >
               Forgot Password?
             </button>
@@ -217,7 +217,7 @@ export function LoginDialog({ isOpen, onClose }) {
                 const loginUrl = `/login?signup=true&from_url=${encodeURIComponent(chooseAccessUrl)}`;
                 window.location.href = loginUrl;
               }}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-teal-600 hover:text-teal-700 font-medium"
             >
               Sign up
             </button>
