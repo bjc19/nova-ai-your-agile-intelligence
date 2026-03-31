@@ -351,7 +351,7 @@ function LayoutContent({ children, currentPageName }) {
                 alt="Novagile AI"
                 className="h-7 w-auto object-contain"
               />
-              <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
+              <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2020 - 2026 - All Rights Reserved')}</span>
             </div>
           </div>
         </div>
