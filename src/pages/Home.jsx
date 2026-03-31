@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoginDialog } from "@/components/LoginDialog";
+import { useRef } from "react";
 import {
   ArrowRight,
   Play,
@@ -174,6 +175,7 @@ export default function Home() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [demoTriesLeft, setDemoTriesLeft] = useState(2);
   const [lang, setLang] = useState("fr");
+  const authChecked = useRef(false);
 
   useEffect(() => {
     const browserLang = navigator.language || navigator.userLanguage;
@@ -183,12 +185,18 @@ export default function Home() {
     setDemoTriesLeft(parseInt(tries));
 
     const checkAuth = async () => {
-      const isAuth = await base44.auth.isAuthenticated();
-      if (isAuth) {
-        const user = await base44.auth.me();
-        setTimeout(() => {
-          navigate(createPageUrl(user?.app_role ? "Dashboard" : "ChooseAccess"));
-        }, 0);
+      if (authChecked.current) return;
+      authChecked.current = true;
+      try {
+        const isAuth = await base44.auth.isAuthenticated();
+        if (isAuth) {
+          const user = await base44.auth.me();
+          setTimeout(() => {
+            navigate(createPageUrl(user?.app_role ? "Dashboard" : "ChooseAccess"));
+          }, 0);
+        }
+      } catch (e) {
+        console.warn("Auth check skipped:", e.message);
       }
     };
     checkAuth();
