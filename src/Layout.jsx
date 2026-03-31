@@ -102,26 +102,21 @@ function LayoutContent({ children, currentPageName }) {
           {isAuthenticated ? (
             <button
               onClick={() => navigate(createPageUrl("Dashboard"))}
-              className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
+              className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-teal-500/25">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900 tracking-tight">
-                Nova
-              </span>
+              <img
+                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
+                alt="Novagile AI"
+                className="h-9 w-auto object-contain"
+              />
             </button>
           ) : (
-            <Link 
-              to={createPageUrl("Home")}
-              className="flex items-center gap-2.5"
-            >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center shadow-lg shadow-teal-500/25">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900 tracking-tight">
-                Nova
-              </span>
+            <Link to={createPageUrl("Home")} className="flex items-center">
+              <img
+                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
+                alt="Novagile AI"
+                className="h-9 w-auto object-contain"
+              />
             </Link>
           )}
 
@@ -212,11 +207,12 @@ function LayoutContent({ children, currentPageName }) {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[280px]">
                   <SheetHeader className="mb-6">
-                    <SheetTitle className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-white" />
-                    </div>
-                      Nova
+                    <SheetTitle className="flex items-center">
+                      <img
+                        src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
+                        alt="Novagile AI"
+                        className="h-8 w-auto object-contain"
+                      />
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-4">
@@ -340,12 +336,12 @@ function LayoutContent({ children, currentPageName }) {
       <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
-              </div>
-              <span className="text-sm font-semibold text-slate-900">Nova</span>
-              <span className="text-xs text-slate-400 ml-2">{t('Your Agile Intelligence')}</span>
+            <div className="flex items-center gap-3">
+              <img
+                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
+                alt="Novagile AI"
+                className="h-7 w-auto object-contain"
+              />
               <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2026 - All Rights Reserved')}</span>
             </div>
           </div>
