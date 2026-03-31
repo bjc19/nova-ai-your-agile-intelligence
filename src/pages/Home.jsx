@@ -402,7 +402,7 @@ export default function Home() {
               className="col-span-12 md:col-span-7 relative rounded-2xl overflow-hidden h-80 md:h-96 group"
             >
               <img
-                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/8be8b94da_generated_image.png"
+                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/0779dfc87_generated_image.png"
                 alt="Équipe agile en collaboration"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
@@ -442,7 +442,7 @@ export default function Home() {
                 className="relative rounded-2xl overflow-hidden h-44 group"
               >
                 <img
-                  src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/ea0f79171_generated_image.png"
+                  src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/e3f310683_generated_image.png"
                   alt="Consultants en transformation digitale"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -463,7 +463,7 @@ export default function Home() {
                 delay: 0.1
               },
               {
-                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/8525261da_generated_image.png",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/d2a1c1d1c_generated_image.png",
                 label: lang === "fr" ? "Cérémonies Scrum" : "Scrum ceremonies",
                 tag: "Agile Coaching",
                 delay: 0.2
