@@ -341,7 +341,7 @@ export const translations = {
 
     // Footer
     aiScrumMaster: "Your Agile Intelligence",
-    demoVersionNotice: "Copyright © 2026 - All Rights Reserved",
+    demoVersionNotice: "Copyright © 2020 - 2026 - All Rights Reserved",
 
     // Posture Indicator
     novaIsInMode: "Nova is in",
