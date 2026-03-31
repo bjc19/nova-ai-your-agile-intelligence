@@ -30,23 +30,23 @@ const PricingSection = lazy(() => import("@/components/nova/PricingSection").the
 
 const translations = {
   en: {
-    tagline: "Agile Transformation & AI Solutions",
+    tagline: "AI-Native Agile Transformation",
     heroTitle1: "Accelerate Your",
     heroTitle2: "Digital Transformation",
-    heroSubtitle: "Novagile AI combines strategic consulting, team coaching and AI technology deployment to modernize your data ecosystem and maximize agile performance.",
+    heroSubtitle: "Novagile AI fuses strategic consulting, human coaching and agentic AI to modernize your data ecosystem and maximize agile performance — with humans always in the loop.",
     ctaPrimary: "Explore Our Solutions",
     ctaSecondary: "Sign In",
     trustedBy: "Trusted by agile teams and organizations",
-    whatWeDo: "What We Do",
-    whatWeDoSub: "A holistic approach that integrates strategy, people, and technology to deliver measurable results.",
-    pillar1: "Strategic Consulting",
-    pillar1desc: "Agile transformation roadmaps, organizational diagnosis, and customized change management strategies.",
-    pillar2: "Team Coaching",
-    pillar2desc: "Scrum Master and Agile Coach support, ceremony facilitation, and continuous team performance improvement.",
-    pillar3: "AI Solution Deployment",
-    pillar3desc: "Integration of intelligent tools to automate workflows, detect patterns, and generate actionable insights.",
-    pillar4: "Data Modernization",
-    pillar4desc: "Architecture and strategy to unify, secure, and enhance your data assets in a context of digital transformation.",
+    whatWeDo: "Our Expertise",
+    whatWeDoSub: "AI-native and human-centered — every service is augmented by agentic intelligence and governed by HITL/RLHF loops for continuous improvement.",
+    pillar1: "AI-Augmented Strategic Consulting",
+    pillar1desc: "Transformation roadmaps co-designed by human consultants and AI agents. Our agentic layer analyzes organizational signals in real time, while HITL loops ensure every recommendation is validated by expert judgment.",
+    pillar2: "Human + AI Team Coaching",
+    pillar2desc: "Scrum Masters and Agile Coaches amplified by AI copilots. Nova's RLHF-trained models surface coaching insights from ceremonies, letting humans focus on what matters: people, trust and growth.",
+    pillar3: "Agentic AI Solution Deployment",
+    pillar3desc: "End-to-end deployment of autonomous AI agents that detect patterns, trigger actions and learn from human feedback (RLHF). Built AI-native from day one — not retrofitted.",
+    pillar4: "AI-Driven Data Modernization",
+    pillar4desc: "Data architecture unified by intelligent agents. We design pipelines where AI continuously monitors data quality and humans retain governance — HITL by design, not by accident.",
     ourApproach: "Our Approach",
     approachSub: "From diagnosis to deployment — a structured methodology for sustainable transformation.",
     step1: "Organizational Audit",
@@ -77,23 +77,23 @@ const translations = {
     explorePlatform: "Explore the Platform",
   },
   fr: {
-    tagline: "Transformation Agile & Solutions IA",
+    tagline: "Transformation Agile AI-Native",
     heroTitle1: "Accélérez Votre",
     heroTitle2: "Transformation Numérique",
-    heroSubtitle: "Novagile AI combine conseil stratégique, coaching d'équipes et déploiement de solutions IA pour moderniser votre écosystème de données et maximiser la performance agile.",
+    heroSubtitle: "Novagile AI fusionne conseil stratégique, coaching humain et IA agentique pour moderniser votre écosystème de données et maximiser la performance agile — avec l'humain toujours dans la boucle.",
     ctaPrimary: "Découvrir Nos Solutions",
     ctaSecondary: "Se Connecter",
     trustedBy: "La confiance d'équipes et d'organisations agiles",
     whatWeDo: "Nos Expertises",
-    whatWeDoSub: "Une approche holistique qui intègre stratégie, personnes et technologie pour livrer des résultats mesurables.",
-    pillar1: "Conseil Stratégique",
-    pillar1desc: "Feuilles de route de transformation agile, diagnostic organisationnel et stratégies de conduite du changement sur mesure.",
-    pillar2: "Coaching d'Équipes",
-    pillar2desc: "Accompagnement Scrum Master et Agile Coach, facilitation des cérémonies et amélioration continue de la performance collective.",
-    pillar3: "Déploiement Solutions IA",
-    pillar3desc: "Intégration d'outils intelligents pour automatiser les workflows, détecter les patterns et générer des insights actionnables.",
-    pillar4: "Modernisation des Données",
-    pillar4desc: "Architecture et stratégie pour unifier, sécuriser et valoriser vos actifs de données dans un contexte de transformation numérique.",
+    whatWeDoSub: "AI-native et centré sur l'humain — chaque service est augmenté par l'intelligence agentique et gouverné par des boucles HITL/RLHF pour une amélioration continue.",
+    pillar1: "Conseil Stratégique Augmenté par l'IA",
+    pillar1desc: "Feuilles de route co-conçues par des consultants humains et des agents IA. Notre couche agentique analyse les signaux organisationnels en temps réel, pendant que les boucles HITL garantissent que chaque recommandation est validée par un expert humain.",
+    pillar2: "Coaching d'Équipes Human + AI",
+    pillar2desc: "Scrum Masters et Agile Coaches amplifiés par des copilotes IA. Les modèles entraînés par RLHF de Nova détectent les insights de coaching dans les cérémonies, libérant les humains pour l'essentiel : les personnes, la confiance et la croissance.",
+    pillar3: "Déploiement de Solutions IA Agentiques",
+    pillar3desc: "Déploiement de bout en bout d'agents IA autonomes qui détectent les patterns, déclenchent des actions et apprennent du feedback humain (RLHF). Construit AI-native dès le premier jour — jamais en rétrofit.",
+    pillar4: "Modernisation des Données par l'IA",
+    pillar4desc: "Architecture de données unifiée par des agents intelligents. Nous concevons des pipelines où l'IA surveille en continu la qualité des données tandis que les humains gardent la gouvernance — HITL by design, pas par accident.",
     ourApproach: "Notre Approche",
     approachSub: "Du diagnostic au déploiement — une méthodologie structurée pour une transformation durable.",
     step1: "Audit Organisationnel",
@@ -133,6 +133,8 @@ const pillars = (t) => [
     color: "text-blue-600",
     bgColor: "bg-blue-50",
     borderColor: "border-blue-100",
+    tag: "HITL · Agentic",
+    tagColor: "text-blue-500",
   },
   {
     icon: Users,
@@ -141,6 +143,8 @@ const pillars = (t) => [
     color: "text-indigo-600",
     bgColor: "bg-indigo-50",
     borderColor: "border-indigo-100",
+    tag: "RLHF · Human-in-the-Loop",
+    tagColor: "text-indigo-500",
   },
   {
     icon: Brain,
@@ -149,6 +153,8 @@ const pillars = (t) => [
     color: "text-violet-600",
     bgColor: "bg-violet-50",
     borderColor: "border-violet-100",
+    tag: "AI-Native · Multi-Agent",
+    tagColor: "text-violet-500",
   },
   {
     icon: Database,
@@ -157,6 +163,8 @@ const pillars = (t) => [
     color: "text-cyan-600",
     bgColor: "bg-cyan-50",
     borderColor: "border-cyan-100",
+    tag: "HITL by Design",
+    tagColor: "text-cyan-500",
   },
 ];
 
@@ -297,7 +305,10 @@ export default function Home() {
                     <div className={`w-12 h-12 rounded-xl ${pillar.bgColor} flex items-center justify-center mb-5`}>
                       <pillar.icon className={`w-6 h-6 ${pillar.color}`} />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-3">{pillar.title}</h3>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{pillar.title}</h3>
+                    {pillar.tag && (
+                      <span className={`text-xs font-semibold uppercase tracking-wider ${pillar.tagColor} mb-3 inline-block`}>{pillar.tag}</span>
+                    )}
                     <p className="text-sm text-slate-600 leading-relaxed">{pillar.description}</p>
                   </CardContent>
                 </Card>
