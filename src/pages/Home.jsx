@@ -464,7 +464,7 @@ export default function Home() {
               },
               {
                 src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/d2a1c1d1c_generated_image.png",
-                label: lang === "fr" ? "Cérémonies Scrum" : "Scrum ceremonies",
+                label: lang === "fr" ? "Agilité Augmentée" : "Augmented Agility",
                 tag: "Agile Coaching",
                 delay: 0.2
               },
