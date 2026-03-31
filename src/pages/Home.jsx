@@ -370,6 +370,135 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── VISUAL PROOF SECTION ─── */}
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <Badge className="mb-4 bg-indigo-50 text-indigo-700 border-indigo-200 px-3 py-1">
+              {lang === "fr" ? "Humain + IA, en action" : "Human + AI, in action"}
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              {lang === "fr" ? "Transformation vécue, pas seulement théorisée" : "Transformation lived, not just theorized"}
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              {lang === "fr"
+                ? "Nos consultants travaillent aux côtés de vos équipes, augmentés par des agents IA en temps réel."
+                : "Our consultants work alongside your teams, augmented by real-time AI agents."}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-12 gap-4">
+            {/* Large left image */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="col-span-12 md:col-span-7 relative rounded-2xl overflow-hidden h-80 md:h-96 group"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&auto=format&fit=crop&q=80"
+                alt="Équipe agile en collaboration"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent" />
+              <div className="absolute bottom-5 left-5 text-white">
+                <p className="text-sm font-semibold">{lang === "fr" ? "Coaching d'équipe augmenté" : "Augmented team coaching"}</p>
+                <p className="text-xs text-slate-300 mt-0.5">Human-in-the-Loop · Agile</p>
+              </div>
+            </motion.div>
+
+            {/* Right column — 2 stacked images */}
+            <div className="col-span-12 md:col-span-5 flex flex-col gap-4">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="relative rounded-2xl overflow-hidden h-44 group"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=700&auto=format&fit=crop&q=80"
+                  alt="Intelligence artificielle agentique"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-teal-900/60 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <p className="text-sm font-semibold">{lang === "fr" ? "IA Agentique" : "Agentic AI"}</p>
+                  <p className="text-xs text-teal-200 mt-0.5">RLHF · Multi-Agent</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="relative rounded-2xl overflow-hidden h-44 group"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=700&auto=format&fit=crop&q=80"
+                  alt="Consultants en transformation digitale"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/60 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <p className="text-sm font-semibold">{lang === "fr" ? "Conseil stratégique" : "Strategic consulting"}</p>
+                  <p className="text-xs text-indigo-200 mt-0.5">HITL · AI-Native</p>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Bottom row — 3 images */}
+            {[
+              {
+                src: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop&q=80",
+                label: lang === "fr" ? "Automatisation intelligente" : "Intelligent automation",
+                tag: "AI-Native",
+                delay: 0.1
+              },
+              {
+                src: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&auto=format&fit=crop&q=80",
+                label: lang === "fr" ? "Cérémonies Scrum" : "Scrum ceremonies",
+                tag: "Agile Coaching",
+                delay: 0.2
+              },
+              {
+                src: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&auto=format&fit=crop&q=80",
+                label: lang === "fr" ? "Agents IA en temps réel" : "Real-time AI agents",
+                tag: "Agentic · RLHF",
+                delay: 0.3
+              }
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: item.delay }}
+                className="col-span-12 md:col-span-4 relative rounded-2xl overflow-hidden h-52 group"
+              >
+                <img
+                  src={item.src}
+                  alt={item.label}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/65 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <p className="text-sm font-semibold">{item.label}</p>
+                  <p className="text-xs text-slate-300 mt-0.5">{item.tag}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── NOVA PRODUCT SPOTLIGHT ─── */}
       <section className="py-24 bg-gradient-to-br from-slate-900 to-teal-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:48px_48px]" />
