@@ -82,7 +82,7 @@ const translations = {
     tagline: "Transformation Agile AI-Native",
     heroTitle1: "Accélérez Votre",
     heroTitle2: "Transformation Numérique",
-    heroSubtitle: "Novagile AI fusionne conseil stratégique, coaching humain et IA agentique pour moderniser votre écosystème de données et maximiser la performance agile — avec l'humain toujours dans la boucle.",
+    heroSubtitle: "Novagile AI fusionne conseil stratégique, coaching humain et IA agentique pour moderniser votre écosystème de données et maximiser la performance agile — avec l'humain au coeur de la boucle.",
     ctaPrimary: "Découvrir Nos Solutions",
     ctaSecondary: "Se Connecter",
     trustedBy: "La confiance d'équipes et d'organisations agiles",
