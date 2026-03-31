@@ -26,6 +26,7 @@ import {
   Award
 } from "lucide-react";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
+import ConsultationModal from "@/components/nova/ConsultationModal";
 
 const PricingSection = lazy(() => import("@/components/nova/PricingSection").then(m => ({ default: m.PricingSection })));
 
@@ -176,6 +177,7 @@ export default function Home() {
   const [demoTriesLeft, setDemoTriesLeft] = useState(2);
   const [lang, setLang] = useState("fr");
   const authChecked = useRef(false);
+  const [showConsultationModal, setShowConsultationModal] = useState(false);
 
   useEffect(() => {
     const browserLang = navigator.language || navigator.userLanguage;
@@ -613,7 +615,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
-                onClick={() => setShowLoginDialog(true)}
+                onClick={() => setShowConsultationModal(true)}
                 size="lg"
                 className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-6 rounded-xl text-base font-semibold shadow-lg shadow-blue-900/40"
               >
@@ -641,6 +643,11 @@ export default function Home() {
           onTriesUpdate={setDemoTriesLeft}
         />
       )}
+      <ConsultationModal
+        isOpen={showConsultationModal}
+        onClose={() => setShowConsultationModal(false)}
+        lang={lang}
+      />
       <LoginDialog
         isOpen={showLoginDialog}
         onClose={() => setShowLoginDialog(false)}
