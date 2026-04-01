@@ -15,14 +15,18 @@ export default function Privacy() {
             </div>
             <h1 className="text-4xl font-bold text-slate-900">Politique de confidentialité</h1>
           </div>
-          <p className="text-slate-600 text-lg">Dernière mise à jour : 15 février 2026</p>
+          <p className="text-slate-600 text-lg">Dernière mise à jour : 1er avril 2026</p>
           
           <div className="mt-4 bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
             <p className="text-sm text-teal-900 font-medium mb-1">📋 Déclaration de Protection des Données</p>
             <p className="text-sm text-teal-800">
-              Nova stocke les tokens d'accès OAuth et adresses email au-delà de 24h (conformément aux exigences de connexion persistante). 
-              Cependant, <strong>aucune donnée brute de vos outils</strong> (Jira, Trello, Slack, Teams) n'est stockée — 
+              Nova stocke les tokens d'accès OAuth et adresses email au-delà de 24h (conformément aux exigences de connexion persistante).
+              Cependant, <strong>aucune donnée brute de vos outils</strong> (Jira, Trello, Slack, Teams) n'est stockée —
               seulement les résultats d'analyse anonymisés après traitement backend sécurisé.
+            </p>
+            <p className="text-sm text-teal-800 mt-2">
+              🇨🇦 <strong>Conformité canadienne :</strong> Novagile AI respecte la <strong>Loi 25</strong> (Québec), le <strong>PIPEDA</strong> (fédéral) et — applicable au Canada — le <strong>RGPD</strong> (UE).
+              De plus, nous anticipons et nous préparons à la conformité avec l’<strong>EU AI Act</strong> qui entre en vigueur en août 2026.
             </p>
           </div>
         </div>
@@ -218,10 +222,19 @@ export default function Privacy() {
           <div className="flex items-start gap-4 mb-4">
             <Shield className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">5. Vos droits (RGPD)</h2>
-              
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">5. Vos droits (RGPD · Loi 25 · PIPEDA)</h2>
+
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-r-lg">
+                <p className="text-sm font-semibold text-blue-900 mb-1">🇨🇦 Droits reconnus au Canada</p>
+                <p className="text-sm text-blue-800">
+                  En vertu de la <strong>Loi 25</strong> (Québec) et du <strong>PIPEDA</strong> (fédéral), vous bénéficiez des mêmes droits fondamentaux que ceux prévus par le RGPD européen,
+                  notamment le droit d’accès, de rectification, de suppression (« droit à l’oubli »), de portabilité et d’opposition.
+                  La Loi 25 impose également une notification obligatoire en cas d’incident de confidentialité.
+                </p>
+              </div>
+
               <p className="text-slate-700 mb-4">
-                Conformément au Règlement Général sur la Protection des Données (RGPD), vous avez le droit de :
+                Conformément au Règlement Général sur la Protection des Données (RGPD), à la Loi 25 et au PIPEDA, vous avez le droit de :
               </p>
               
               <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
@@ -280,8 +293,32 @@ export default function Privacy() {
         </div>
 
         {/* Section 8 */}
+        {/* Section EU AI Act */}
+        <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
+          <div className="flex items-start gap-4 mb-4">
+            <Shield className="w-6 h-6 text-indigo-600 flex-shrink-0 mt-1" />
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">8. EU AI Act — Préparation 2026</h2>
+              <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-4 rounded-r-lg">
+                <p className="text-sm font-semibold text-indigo-900 mb-1">🤖 EU AI Act — Applicable en août 2026</p>
+                <p className="text-sm text-indigo-800">
+                  Le Règlement européen sur l’intelligence artificielle (EU AI Act) entre pleinement en vigueur en août 2026.
+                  En tant que plateforme IA desservant des organisations, Novagile AI anticipe cette réglementation et s’y prépare activement.
+                </p>
+              </div>
+              <ul className="list-disc list-inside text-slate-700 space-y-2 ml-4">
+                <li><strong>Classification du risque :</strong> Nos systèmes IA sont évalués selon les catégories de risque de l’EU AI Act.</li>
+                <li><strong>Transparence algorithmique :</strong> Chaque recommandation de Nova est traçable et explicable (XAI).</li>
+                <li><strong>Human-in-the-Loop (HITL) :</strong> Toutes les décisions critiques nécessitent une validation humaine.</li>
+                <li><strong>Documentation technique :</strong> Nos modèles IA font l’objet d’une documentation conforme aux exigences règlementaires.</li>
+                <li><strong>Supervision humaine :</strong> Aucune décision automatisée à impact élevé sans contrôle humain explicite.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white rounded-xl shadow-sm p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">8. Modifications</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">9. Modifications</h2>
           
           <p className="text-slate-700">
             Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. 

@@ -269,7 +269,7 @@ export default function Home() {
               { value: "50+", label: lang === "fr" ? "Équipes accompagnées" : "Teams Coached" },
               { value: "40%", label: lang === "fr" ? "Réduction des blocages" : "Blocker Reduction" },
               { value: "3×", label: lang === "fr" ? "Vélocité améliorée" : "Velocity Improved" },
-              { value: "GDPR", label: lang === "fr" ? "Conformité native" : "Native Compliance" },
+              { value: "RGPD·L25·PIPEDA", label: lang === "fr" ? "Conformité native" : "Native Compliance" },
             ].map((stat, i) => (
               <div key={i} className="bg-white/5 px-6 py-5 text-center">
                 <p className="text-2xl font-bold text-white">{stat.value}</p>
@@ -525,7 +525,7 @@ export default function Home() {
                   lang === "fr" ? "Détection automatique des blocages et risques" : "Automatic blocker and risk detection",
                   lang === "fr" ? "Analyse multi-sources (Slack, Teams, Jira, Trello)" : "Multi-source analysis (Slack, Teams, Jira, Trello)",
                   lang === "fr" ? "Recommandations contextuelles actionnables" : "Contextual actionable recommendations",
-                  lang === "fr" ? "Conformité GDPR native — zéro rétention de données brutes" : "Native GDPR compliance — zero raw data retention",
+                  lang === "fr" ? "Conformité native RGPD · Loi 25 · PIPEDA — zéro rétention de données brutes" : "Native compliance GDPR · Loi 25 · PIPEDA — zero raw data retention",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
@@ -645,6 +645,7 @@ export default function Home() {
               { icon: Shield, title: t("readOnly"), desc: t("readOnlyDesc"), color: "text-teal-600", bg: "bg-teal-50" },
               { icon: Database, title: t("zeroStorage"), desc: t("zeroStorageDesc"), color: "text-violet-600", bg: "bg-violet-50" },
               { icon: Award, title: t("anonymized"), desc: t("anonymizedDesc"), color: "text-emerald-600", bg: "bg-emerald-50" },
+              { icon: Shield, title: lang === "fr" ? "Loi 25 & PIPEDA" : "Loi 25 & PIPEDA", desc: lang === "fr" ? "Conformité aux lois canadiennes sur la protection des données personnelles." : "Compliant with Canadian privacy laws.", color: "text-indigo-600", bg: "bg-indigo-50" },
             ].map((item, i) => (
               <motion.div
                 key={i}
@@ -668,7 +669,7 @@ export default function Home() {
 
           {/* Certifications strip */}
           <div className="flex flex-wrap items-center justify-center gap-6">
-            {["SOC 2 Type II", "ISO 27001", "GDPR", "CCPA"].map((cert) => (
+            {["SOC 2 Type II", "ISO 27001", "RGPD", "Loi 25", "PIPEDA", "EU AI Act (2026)"].map((cert) => (
               <div key={cert} className="flex items-center gap-2 px-5 py-2.5 bg-slate-50 border border-slate-200 rounded-full">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 <span className="text-sm font-semibold text-slate-700">{cert}</span>
@@ -735,8 +736,8 @@ export default function Home() {
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
               {lang === "fr"
-                ? "Novagile AI s'engage \u00e0 une IA responsable, \u00e9thique et centr\u00e9e sur l'humain \u2014 conform\u00e9ment aux standards internationaux."
-                : "Novagile AI is committed to responsible, ethical, and human-centered AI \u2014 aligned with international standards."}
+                ? "Novagile AI s'engage à une IA responsable, éthique et centrée sur l'humain — RGPD, Loi 25, PIPEDA et EU AI Act (août 2026)."
+                : "Novagile AI is committed to responsible, ethical, and human-centered AI — aligned with GDPR, Loi 25, PIPEDA and the EU AI Act (August 2026)."}
             </p>
           </motion.div>
 
