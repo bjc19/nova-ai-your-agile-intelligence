@@ -463,7 +463,7 @@ export default function Home() {
                 delay: 0.1
               },
               {
-                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/1d79abea2_generated_image.png",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/b61323d51_generated_image.png",
                 label: lang === "fr" ? "Agilité Augmentée" : "Augmented Agility",
                 tag: "AI-Agile Coaching",
                 delay: 0.2
