@@ -266,9 +266,9 @@ export default function Home() {
             className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10"
           >
             {[
-              { value: "50+", label: lang === "fr" ? "Équipes accompagnées" : "Teams Coached" },
+              { value: "100+", label: lang === "fr" ? "Équipes accompagnées" : "Teams Coached" },
               { value: "40%", label: lang === "fr" ? "Réduction des blocages" : "Blocker Reduction" },
-              { value: "3×", label: lang === "fr" ? "Vélocité améliorée" : "Velocity Improved" },
+              { value: "10×", label: lang === "fr" ? "Vélocité améliorée" : "Velocity Improved" },
               { value: "RGPD·L25·PIPEDA", label: lang === "fr" ? "Conformité native" : "Native Compliance" },
             ].map((stat, i) => (
               <div key={i} className="bg-white/5 px-6 py-5 text-center">
