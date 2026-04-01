@@ -268,7 +268,7 @@ export function PricingSection() {
                   plan.id === 'pro' 
                     ? 'bg-purple-600 hover:bg-purple-700' 
                     : plan.id === 'starter' || plan.id === 'growth' || plan.id === 'enterprise'
-                    ? 'bg-[#197aed] hover:bg-[#1568d3]'
+                    ? 'bg-gradient-to-r from-teal-500 to-indigo-400 hover:from-teal-400 hover:to-indigo-300'
                     : 'bg-slate-900 hover:bg-slate-800'
                 }`}
               >

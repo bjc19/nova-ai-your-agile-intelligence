@@ -10,16 +10,16 @@ export default function Privacy() {
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-400 flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-4xl font-bold text-slate-900">Politique de confidentialité</h1>
           </div>
           <p className="text-slate-600 text-lg">Dernière mise à jour : 15 février 2026</p>
           
-          <div className="mt-4 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-            <p className="text-sm text-blue-900 font-medium mb-1">📋 Déclaration de Protection des Données</p>
-            <p className="text-sm text-blue-800">
+          <div className="mt-4 bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
+            <p className="text-sm text-teal-900 font-medium mb-1">📋 Déclaration de Protection des Données</p>
+            <p className="text-sm text-teal-800">
               Nova stocke les tokens d'accès OAuth et adresses email au-delà de 24h (conformément aux exigences de connexion persistante). 
               Cependant, <strong>aucune donnée brute de vos outils</strong> (Jira, Trello, Slack, Teams) n'est stockée — 
               seulement les résultats d'analyse anonymisés après traitement backend sécurisé.
@@ -42,7 +42,7 @@ export default function Privacy() {
         {/* Section 1 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Database className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Database className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">1. Données collectées</h2>
               
@@ -79,9 +79,9 @@ export default function Privacy() {
                 <li>Métriques de performance d'équipe agrégées</li>
                 <li>Historique d'analyses et tendances</li>
               </ul>
-              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
-                <p className="text-sm font-semibold text-blue-900 mb-1">🔒 Anonymisation systématique backend (RGPD stricte)</p>
-                <p className="text-sm text-blue-800">
+              <div className="bg-teal-50 border-l-4 border-teal-500 p-4 mb-4">
+                <p className="text-sm font-semibold text-teal-900 mb-1">🔒 Anonymisation systématique backend (RGPD stricte)</p>
+                <p className="text-sm text-teal-800">
                   Toutes les données sensibles provenant de Jira, Trello, Slack et Teams sont <strong>anonymisées côté backend</strong> 
                   avant toute persistance. Nos fonctions d'analyse appliquent des transformations de sécurité propriétaires 
                   pour garantir qu'aucun identifiant personnel direct n'est jamais stocké. Les prénoms des membres d'équipe 
@@ -101,7 +101,7 @@ export default function Privacy() {
         {/* Section 2 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Eye className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Eye className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">2. Utilisation des données</h2>
               
@@ -123,16 +123,16 @@ export default function Privacy() {
         {/* Section 3 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Lock className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Lock className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">3. Sécurité et protection</h2>
               
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6 mb-6">
-                <h3 className="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <div className="bg-gradient-to-r from-teal-50 to-indigo-50 border-2 border-teal-300 rounded-xl p-6 mb-6">
+                <h3 className="text-lg font-bold text-teal-900 mb-3 flex items-center gap-2">
                   <span className="text-2xl">🛡️</span>
                   Architecture Privacy by Design
                 </h3>
-                <div className="space-y-2 text-sm text-blue-900">
+                <div className="space-y-2 text-sm text-teal-900">
                   <p><strong>✅ Accès lecture seule</strong> : Nova ne peut ni créer, ni modifier, ni supprimer vos données sources</p>
                   <p><strong>✅ Analyse en mémoire</strong> : Les données brutes sont traitées en temps réel et immédiatement supprimées</p>
                   <p><strong>✅ Stockage minimal</strong> : Seuls les tokens OAuth + résultats anonymisés (marqueurs, métriques) sont conservés</p>
@@ -182,7 +182,7 @@ export default function Privacy() {
         {/* Section 4 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Users className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Users className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">4. Partage des données</h2>
               
@@ -216,7 +216,7 @@ export default function Privacy() {
         {/* Section 5 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Shield className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Shield className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">5. Vos droits (RGPD)</h2>
               
@@ -235,7 +235,7 @@ export default function Privacy() {
               </ul>
               
               <p className="text-slate-700 mt-4">
-                Pour exercer ces droits, contactez-nous à <a href="mailto:privacy@novagile.ca" className="text-blue-600 hover:underline">privacy@novagile.ca</a>
+                Pour exercer ces droits, contactez-nous à <a href="mailto:privacy@novagile.ca" className="text-teal-600 hover:underline">privacy@novagile.ca</a>
               </p>
             </div>
           </div>
@@ -244,7 +244,7 @@ export default function Privacy() {
         {/* Section 6 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Database className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Database className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">6. Conservation des données</h2>
               
@@ -262,7 +262,7 @@ export default function Privacy() {
         {/* Section 7 */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
           <div className="flex items-start gap-4 mb-4">
-            <Mail className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+            <Mail className="w-6 h-6 text-teal-600 flex-shrink-0 mt-1" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900 mb-4">7. Contact</h2>
               
@@ -272,8 +272,8 @@ export default function Privacy() {
               
               <div className="bg-slate-50 rounded-lg p-4">
                 <p className="text-slate-700 font-medium">Nova Agile</p>
-                <p className="text-slate-600">Email : <a href="mailto:privacy@novagile.ca" className="text-blue-600 hover:underline">privacy@novagile.ca</a></p>
-                <p className="text-slate-600">Support : <a href="mailto:support@novagile.ca" className="text-blue-600 hover:underline">support@novagile.ca</a></p>
+                <p className="text-slate-600">Email : <a href="mailto:privacy@novagile.ca" className="text-teal-600 hover:underline">privacy@novagile.ca</a></p>
+                <p className="text-slate-600">Support : <a href="mailto:support@novagile.ca" className="text-teal-600 hover:underline">support@novagile.ca</a></p>
               </div>
             </div>
           </div>

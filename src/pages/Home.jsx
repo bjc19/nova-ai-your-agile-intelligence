@@ -463,13 +463,13 @@ export default function Home() {
                 delay: 0.1
               },
               {
-                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/d2a1c1d1c_generated_image.png",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/1d79abea2_generated_image.png",
                 label: lang === "fr" ? "Agilité Augmentée" : "Augmented Agility",
                 tag: "AI-Agile Coaching",
                 delay: 0.2
               },
               {
-                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/c6cef557e_generated_image.png",
+                src: "https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/2a282ed61_generated_image.png",
                 label: lang === "fr" ? "Agents IA en temps réel" : "Real-time AI agents",
                 tag: "Agentic · RLHF",
                 delay: 0.3
@@ -717,6 +717,54 @@ export default function Home() {
       </section>
 
 
+
+      {/* ─── RESPONSIBLE AI VALUES ─── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-14"
+          >
+            <Badge className="mb-4 bg-teal-50 text-teal-700 border-teal-200 px-3 py-1">
+              {lang === "fr" ? "IA Responsable" : "Responsible AI"}
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              {lang === "fr" ? "Nos valeurs fondamentales" : "Our Core Values"}
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              {lang === "fr"
+                ? "Novagile AI s'engage \u00e0 une IA responsable, \u00e9thique et centr\u00e9e sur l'humain \u2014 conform\u00e9ment aux standards internationaux."
+                : "Novagile AI is committed to responsible, ethical, and human-centered AI \u2014 aligned with international standards."}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+            {[
+              { icon: "\u2696\ufe0f", label: lang === "fr" ? "\u00c9thique" : "Ethics", desc: lang === "fr" ? "D\u00e9cisions align\u00e9es sur les valeurs humaines et les normes morales universelles." : "Decisions aligned with human values and universal moral standards.", color: "border-teal-200 bg-teal-50", textColor: "text-teal-700" },
+              { icon: "\ud83e\udd1d", label: lang === "fr" ? "\u00c9quit\u00e9" : "Fairness", desc: lang === "fr" ? "Traitement impartial, sans biais algorithmiques ni discrimination." : "Impartial treatment, free from algorithmic bias and discrimination.", color: "border-indigo-200 bg-indigo-50", textColor: "text-indigo-700" },
+              { icon: "\ud83d\udd12", label: lang === "fr" ? "Vie priv\u00e9e" : "Privacy", desc: lang === "fr" ? "Protection syst\u00e9matique des donn\u00e9es personnelles. RGPD natif." : "Systematic personal data protection. GDPR native.", color: "border-teal-200 bg-teal-50", textColor: "text-teal-700" },
+              { icon: "\ud83d\udee1\ufe0f", label: lang === "fr" ? "Robustesse" : "Robustness", desc: lang === "fr" ? "Syst\u00e8mes fiables, r\u00e9silients et s\u00e9curis\u00e9s face aux conditions adverses." : "Reliable, resilient, and secure systems under adverse conditions.", color: "border-indigo-200 bg-indigo-50", textColor: "text-indigo-700" },
+              { icon: "\ud83d\udd0d", label: lang === "fr" ? "Explicabilit\u00e9" : "Explainability", desc: lang === "fr" ? "Chaque recommandation est tra\u00e7able, compr\u00e9hensible et justifiable." : "Every recommendation is traceable, understandable, and justifiable.", color: "border-teal-200 bg-teal-50", textColor: "text-teal-700" },
+              { icon: "\ud83d\udca1", label: lang === "fr" ? "Transparence" : "Transparency", desc: lang === "fr" ? "Processus ouverts, auditables et communiqu\u00e9s clairement aux utilisateurs." : "Open, auditable processes clearly communicated to users.", color: "border-indigo-200 bg-indigo-50", textColor: "text-indigo-700" },
+            ].map((val, i) => (
+              <motion.div
+                key={val.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className={`p-6 rounded-2xl border-2 ${val.color} hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
+              >
+                <div className="text-3xl mb-3">{val.icon}</div>
+                <h3 className={`text-base font-bold mb-2 ${val.textColor}`}>{val.label}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{val.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ─── CTA ─── */}
       <section className="py-24 bg-gradient-to-br from-slate-900 to-teal-950 relative overflow-hidden">
