@@ -23,7 +23,11 @@ import {
   Layers,
   ChevronRight,
   Globe,
-  Award
+  Award,
+  Scale,
+  Lock,
+  Search,
+  Eye
 } from "lucide-react";
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 import ConsultationModal from "@/components/nova/ConsultationModal";
@@ -741,14 +745,14 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { icon: "\u2696\ufe0f", label: lang === "fr" ? "\u00c9thique" : "Ethics", desc: lang === "fr" ? "D\u00e9cisions align\u00e9es sur les valeurs humaines et les normes morales universelles." : "Decisions aligned with human values and universal moral standards.", color: "border-teal-200 bg-teal-50", textColor: "text-teal-700" },
-              { icon: "\ud83e\udd1d", label: lang === "fr" ? "\u00c9quit\u00e9" : "Fairness", desc: lang === "fr" ? "Traitement impartial, sans biais algorithmiques ni discrimination." : "Impartial treatment, free from algorithmic bias and discrimination.", color: "border-indigo-200 bg-indigo-50", textColor: "text-indigo-700" },
-              { icon: "\ud83d\udd12", label: lang === "fr" ? "Vie priv\u00e9e" : "Privacy", desc: lang === "fr" ? "Protection syst\u00e9matique des donn\u00e9es personnelles. RGPD natif." : "Systematic personal data protection. GDPR native.", color: "border-teal-200 bg-teal-50", textColor: "text-teal-700" },
-              { icon: "\ud83d\udee1\ufe0f", label: lang === "fr" ? "Robustesse" : "Robustness", desc: lang === "fr" ? "Syst\u00e8mes fiables, r\u00e9silients et s\u00e9curis\u00e9s face aux conditions adverses." : "Reliable, resilient, and secure systems under adverse conditions.", color: "border-indigo-200 bg-indigo-50", textColor: "text-indigo-700" },
-              { icon: "\ud83d\udd0d", label: lang === "fr" ? "Explicabilit\u00e9" : "Explainability", desc: lang === "fr" ? "Chaque recommandation est tra\u00e7able, compr\u00e9hensible et justifiable." : "Every recommendation is traceable, understandable, and justifiable.", color: "border-teal-200 bg-teal-50", textColor: "text-teal-700" },
-              { icon: "\ud83d\udca1", label: lang === "fr" ? "Transparence" : "Transparency", desc: lang === "fr" ? "Processus ouverts, auditables et communiqu\u00e9s clairement aux utilisateurs." : "Open, auditable processes clearly communicated to users.", color: "border-indigo-200 bg-indigo-50", textColor: "text-indigo-700" },
+              { icon: Scale, label: lang === "fr" ? "\u00c9thique" : "Ethics", desc: lang === "fr" ? "D\u00e9cisions align\u00e9es sur les valeurs humaines et les normes morales universelles." : "Decisions aligned with human values and universal moral standards." },
+              { icon: Users, label: lang === "fr" ? "\u00c9quit\u00e9" : "Fairness", desc: lang === "fr" ? "Traitement impartial, sans biais algorithmiques ni discrimination." : "Impartial treatment, free from algorithmic bias and discrimination." },
+              { icon: Lock, label: lang === "fr" ? "Vie priv\u00e9e" : "Privacy", desc: lang === "fr" ? "Protection syst\u00e9matique des donn\u00e9es personnelles. RGPD · Loi 25 · PIPEDA natifs." : "Systematic personal data protection. GDPR · Loi 25 · PIPEDA native." },
+              { icon: Shield, label: lang === "fr" ? "Robustesse" : "Robustness", desc: lang === "fr" ? "Syst\u00e8mes fiables, r\u00e9silients et s\u00e9curis\u00e9s face aux conditions adverses." : "Reliable, resilient, and secure systems under adverse conditions." },
+              { icon: Search, label: lang === "fr" ? "Explicabilit\u00e9" : "Explainability", desc: lang === "fr" ? "Chaque recommandation est tra\u00e7able, compr\u00e9hensible et justifiable." : "Every recommendation is traceable, understandable, and justifiable." },
+              { icon: Eye, label: lang === "fr" ? "Transparence" : "Transparency", desc: lang === "fr" ? "Processus ouverts, auditables et communiqu\u00e9s clairement aux utilisateurs." : "Open, auditable processes clearly communicated to users." },
             ].map((val, i) => (
               <motion.div
                 key={val.label}
@@ -756,11 +760,13 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className={`p-6 rounded-2xl border-2 ${val.color} hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}
+                className="p-6 rounded-xl border border-slate-200 bg-white hover:shadow-md hover:border-slate-300 transition-all duration-300"
               >
-                <div className="text-3xl mb-3">{val.icon}</div>
-                <h3 className={`text-base font-bold mb-2 ${val.textColor}`}>{val.label}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{val.desc}</p>
+                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
+                  <val.icon className="w-4 h-4 text-slate-600" />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-2">{val.label}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{val.desc}</p>
               </motion.div>
             ))}
           </div>
