@@ -1,18 +1,15 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { LoginDialog } from "@/components/LoginDialog";
 import { useRef } from "react";
 import {
   ArrowRight,
   Play,
   CheckCircle2,
-  TrendingUp,
   Zap,
   BarChart3,
   Users,
@@ -20,8 +17,6 @@ import {
   Shield,
   Database,
   Brain,
-  Layers,
-  ChevronRight,
   Globe,
   Award,
   Scale,
@@ -177,7 +172,6 @@ const pillars = (t) => [
 export default function Home() {
   const navigate = useNavigate();
   const [showDemoSimulator, setShowDemoSimulator] = useState(false);
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [demoTriesLeft, setDemoTriesLeft] = useState(2);
   const [lang, setLang] = useState("fr");
   const authChecked = useRef(false);
@@ -186,27 +180,9 @@ export default function Home() {
   useEffect(() => {
     const browserLang = navigator.language || navigator.userLanguage;
     setLang(browserLang.startsWith("fr") ? "fr" : "en");
-
     const tries = localStorage.getItem("nova_demo_tries") || "2";
     setDemoTriesLeft(parseInt(tries));
-
-    const checkAuth = async () => {
-      if (authChecked.current) return;
-      authChecked.current = true;
-      try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (isAuth) {
-          const user = await base44.auth.me();
-          setTimeout(() => {
-            navigate(createPageUrl(user?.app_role ? "Dashboard" : "ChooseAccess"));
-          }, 0);
-        }
-      } catch (e) {
-        console.warn("Auth check skipped:", e.message);
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+  }, []);
 
   const t = (key) => translations[lang]?.[key] || translations["fr"][key];
 
@@ -251,14 +227,15 @@ export default function Home() {
                 {t("ctaPrimary")}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => setShowLoginDialog(true)}
-                className="px-8 py-6 text-base rounded-xl border-white/20 text-white hover:bg-white/10 bg-transparent"
-              >
-                {t("ctaSecondary")}
-              </Button>
+              <a href="https://novalive.ca" target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="px-8 py-6 text-base rounded-xl border-white/20 text-white hover:bg-white/10 bg-transparent"
+                >
+                  Accéder à Nova →
+                </Button>
+              </a>
             </div>
           </motion.div>
 
@@ -826,10 +803,6 @@ export default function Home() {
         isOpen={showConsultationModal}
         onClose={() => setShowConsultationModal(false)}
         lang={lang}
-      />
-      <LoginDialog
-        isOpen={showLoginDialog}
-        onClose={() => setShowLoginDialog(false)}
       />
     </div>
   );

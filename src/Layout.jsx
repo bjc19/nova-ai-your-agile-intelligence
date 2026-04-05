@@ -1,347 +1,129 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LogOut, LogIn, Users, Menu, X, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
-import { LoginDialog } from "@/components/LoginDialog";
 import { DemoSimulator } from "@/components/nova/DemoSimulator";
-import { JoinRequestsManager } from "@/components/subscription/JoinRequestsManager";
-import AgileCoachWidget from "@/components/nova/AgileCoachWidget";
-import AdminNotificationsPanel from "@/components/AdminNotificationsPanel";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger } from
-"@/components/ui/sheet";
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
-function LayoutContent({ children, currentPageName }) {
-  const navigate = useNavigate();
+function LayoutContent({ children }) {
   const { t } = useLanguage();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showDemoSimulator, setShowDemoSimulator] = useState(false);
-  const [user, setUser] = useState(null);
-  const [canInvite, setCanInvite] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [pendingAlerts, setPendingAlerts] = useState(0);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const auth = await base44.auth.isAuthenticated();
-        setIsAuthenticated(auth);
-        if (auth) {
-          const currentUser = await base44.auth.me();
-          setUser(currentUser);
-
-          try {
-            const statusRes = await base44.functions.invoke('getUserSubscriptionStatus', {});
-            setCanInvite(statusRes.data.canInvite || false);
-          } catch (e) {
-            setCanInvite(false);
-          }
-
-          // Fetch pending alerts for admins
-          if (currentUser?.role === 'admin') {
-            try {
-              const sprintAlerts = await base44.entities.SprintHealth.filter({
-                status: "critical"
-              });
-
-              // Fetch connection errors from all integration sources
-              const jiraErrors = await base44.entities.JiraConnection.filter({
-                connection_status_error: true
-              });
-              const trelloErrors = await base44.entities.TrelloConnection.filter({
-                connection_status_error: true
-              });
-              const confluenceErrors = await base44.entities.ConfluenceConnection.filter({
-                connection_status_error: true
-              });
-              const slackErrors = await base44.entities.SlackConnection.filter({
-                connection_status_error: true
-              });
-              const teamsErrors = await base44.entities.TeamsConnection.filter({
-                connection_status_error: true
-              });
-
-              const totalConnectionErrors = (jiraErrors?.length || 0) + (
-              trelloErrors?.length || 0) + (
-              confluenceErrors?.length || 0) + (
-              slackErrors?.length || 0) + (
-              teamsErrors?.length || 0);
-
-              setPendingAlerts((sprintAlerts?.length || 0) + totalConnectionErrors);
-            } catch (e) {
-              setPendingAlerts(0);
-            }
-          }
-        } else {
-          setCanInvite(false);
-        }
-      } catch (err) {
-        setIsAuthenticated(false);
-      }
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, []);
-
-  const isPublicPage = currentPageName === "Home" || currentPageName === "Demo" || currentPageName === "AcceptInvitation";
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Navigation */}
       <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-lg">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          {isAuthenticated ? (
+          <Link to="/" className="flex items-center">
+            <img
+              src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
+              alt="Novagile AI"
+              className="h-9 w-auto object-contain"
+            />
+          </Link>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-6">
             <button
-              onClick={() => navigate(createPageUrl("Dashboard"))}
-              className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setShowDemoSimulator(true)}
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
             >
-              <img
-                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
-                alt="Novagile AI"
-                className="h-9 w-auto object-contain"
-              />
+              {t("tryDemo")}
             </button>
-          ) : (
-            <Link to={createPageUrl("Home")} className="flex items-center">
-              <img
-                src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
-                alt="Novagile AI"
-                className="h-9 w-auto object-contain"
-              />
+            <Link
+              to="/Privacy"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Confidentialité
             </Link>
-          )}
-
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center gap-6">
-              {isLoading ?
-            <div className="w-6 h-6 rounded-full border-2 border-slate-300 border-t-blue-600 animate-spin" /> :
-            isAuthenticated ?
-            <>
-                  <Link
-                to={createPageUrl("Dashboard")}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-
-                     {t('dashboard')}
-                   </Link>
-                   {(user?.role === 'admin' || canInvite) &&
-              <Link
-                to={createPageUrl("Analysis")}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-
-                        {t('analyze')}
-                      </Link>
-              }
-                   <Link
-                to={createPageUrl("Settings")}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-
-                    {t('settings')}
-                   </Link>
-                   
-
-
-
-
-
-
-
-
-                   {user?.role === 'admin' &&
-              <AdminNotificationsPanel pendingAlerts={pendingAlerts} />
-              }
-                   <Button
-                variant="ghost"
+            <a
+              href="https://novalive.ca"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
                 size="sm"
-                onClick={async () => {
-                  setIsAuthenticated(false);
-                  await base44.auth.logout();
-                  window.location.href = createPageUrl("Home");
-                }}
-                className="text-slate-500 hover:text-slate-700">
+                className="bg-gradient-to-r from-teal-500 to-indigo-400 text-white"
+              >
+                Accéder à Nova →
+              </Button>
+            </a>
+          </div>
 
-                     <LogOut className="w-4 h-4" />
-                   </Button>
-                </> :
-
-            <>
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px]">
+                <SheetHeader className="mb-6">
+                  <SheetTitle className="flex items-center">
+                    <img
+                      src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
+                      alt="Novagile AI"
+                      className="h-8 w-auto object-contain"
+                    />
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4">
                   <button
-                onClick={() => setShowDemoSimulator(true)}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                    {t('tryDemo')}
+                    onClick={() => {
+                      setShowDemoSimulator(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-left text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                  >
+                    {t("tryDemo")}
                   </button>
                   <Link
-                to="/Pricing"
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                    Tarifs
-                  </Link>
-                  <Link
-                to={createPageUrl("Privacy")}
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-
+                    to="/Privacy"
+                    className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Confidentialité
                   </Link>
-                  <Button
-                size="sm"
-                onClick={() => setShowLoginDialog(true)}
-                className="bg-gradient-to-r from-teal-500 to-indigo-400 text-white">
-
-                    <LogIn className="w-4 h-4 mr-2" />
-                    {t('signIn')}
-                  </Button>
-                </>
-            }
-            </div>
-
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="w-5 h-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[280px]">
-                  <SheetHeader className="mb-6">
-                    <SheetTitle className="flex items-center">
-                      <img
-                        src="https://media.base44.com/images/public/697a48b6e08a49e0f4c8ada6/9eb1d0f0e_IMG_0134.png"
-                        alt="Novagile AI"
-                        className="h-8 w-auto object-contain"
-                      />
-                    </SheetTitle>
-                  </SheetHeader>
-                  <div className="flex flex-col gap-4">
-                    {isAuthenticated ?
-                  <>
-                        <Link
-                      to={createPageUrl("Dashboard")}
-                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                      onClick={() => setMobileMenuOpen(false)}>
-
-                           {t('dashboard')}
-                         </Link>
-                         {(user?.role === 'admin' || canInvite) &&
-                    <Link
-                      to={createPageUrl("Analysis")}
-                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                      onClick={() => setMobileMenuOpen(false)}>
-
-                            {t('analyze')}
-                          </Link>
-                    }
-                        <Link
-                      to={createPageUrl("Settings")}
-                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                      onClick={() => setMobileMenuOpen(false)}>
-
-                          {t('settings')}
-                        </Link>
-                        {canInvite &&
-                    <Link
-                      to={createPageUrl("TeamManagement")}
-                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2 flex items-center gap-2"
-                      onClick={() => setMobileMenuOpen(false)}>
-
-                            <Users className="w-4 h-4" />
-                            Équipe
-                          </Link>
-                    }
-                        <div className="pt-4 border-t border-slate-200">
-                          <Button
-                        onClick={async () => {
-                          setIsAuthenticated(false);
-                          await base44.auth.logout();
-                          window.location.href = createPageUrl("Home");
-                          setMobileMenuOpen(false);
-                        }}
-                        className="w-full text-slate-600 hover:text-slate-700"
-                        variant="outline">
-
-                            <LogOut className="w-4 h-4 mr-2" />
-                            Déconnexion
-                          </Button>
-                        </div>
-                      </> :
-
-                  <>
-                        <button
-                      onClick={() => {
-                        setShowDemoSimulator(true);
-                        setMobileMenuOpen(false);
-                      }}
-                      className="text-left text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2">
-                          {t('tryDemo')}
-                        </button>
-                        <Link
-                      to="/Pricing"
-                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                      onClick={() => setMobileMenuOpen(false)}>
-                          Tarifs
-                        </Link>
-                        <Link
-                      to={createPageUrl("Privacy")}
-                      className="text-base font-medium text-slate-700 hover:text-slate-900 transition-colors py-2"
-                      onClick={() => setMobileMenuOpen(false)}>
-
-                          Confidentialité
-                        </Link>
-                        <div className="pt-4 border-t border-slate-200">
-                          <Button
-                        onClick={() => {
-                          setShowLoginDialog(true);
-                          setMobileMenuOpen(false);
-                        }}
-                        className="w-full bg-gradient-to-r from-teal-500 to-indigo-400 text-white">
-
-                            <LogIn className="w-4 h-4 mr-2" />
-                            {t('signIn')}
-                          </Button>
-                        </div>
-                      </>
-                  }
+                  <div className="pt-4 border-t border-slate-200">
+                    <a
+                      href="https://novalive.ca"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button className="w-full bg-gradient-to-r from-teal-500 to-indigo-400 text-white">
+                        Accéder à Nova →
+                      </Button>
+                    </a>
                   </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main>
-        {children}
-      </main>
-
-      {/* Login Dialog */}
-      <LoginDialog 
-        isOpen={showLoginDialog}
-        onClose={() => setShowLoginDialog(false)}
-      />
+      <main>{children}</main>
 
       {/* Demo Simulator */}
-            {showDemoSimulator && (
-              <DemoSimulator 
-                onClose={() => setShowDemoSimulator(false)} 
-                onTriesUpdate={(remaining) => {
-                  // Optionnel: gérer le compteur ici si nécessaire
-                }} 
-              />
-            )}
+      {showDemoSimulator && (
+        <DemoSimulator
+          onClose={() => setShowDemoSimulator(false)}
+          onTriesUpdate={() => {}}
+        />
+      )}
 
-             {/* Agile Coach Widget */}
-            {isAuthenticated && (
-              <AgileCoachWidget />
-            )}
-
-            {/* Footer */}
+      {/* Footer */}
       <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -351,19 +133,34 @@ function LayoutContent({ children, currentPageName }) {
                 alt="Novagile AI"
                 className="h-7 w-auto object-contain"
               />
-              <span className="text-xs text-slate-400 ml-2">{t('Copyright © 2020 - 2026 - All Rights Reserved')}</span>
+              <span className="text-xs text-slate-400 ml-2">
+                {t("Copyright © 2020 - 2026 - All Rights Reserved")}
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link to="/Privacy" className="text-xs text-slate-500 hover:text-slate-700">
+                Confidentialité
+              </Link>
+              <a
+                href="https://novalive.ca"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-teal-600 hover:text-teal-700 font-medium"
+              >
+                novalive.ca →
+              </a>
             </div>
           </div>
         </div>
       </footer>
     </div>
-    );
-    }
+  );
+}
 
-    export default function Layout({ children, currentPageName }) {
-    return (
+export default function Layout({ children }) {
+  return (
     <LanguageProvider>
-    <LayoutContent children={children} currentPageName={currentPageName} />
+      <LayoutContent children={children} />
     </LanguageProvider>
-    );
-    }
+  );
+}
