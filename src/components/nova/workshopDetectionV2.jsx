@@ -28,10 +28,10 @@ const REVIEW_OBJECTS = {
 };
 
 const RETROSPECTIVE_OBJECTS = {
-  teamProcess: ['communication', 'collaboration', 'workflow', 'processus', 'process', 'dynamique', 'équipe', 'team', 'relation', 'entraide', 'mutual support'],
-  improvement: ['amélioration', 'improvement', 'friction', 'friction', 'difficultés', 'difficulties', 'on devrait', 'we should', 'la prochaine fois', 'next time', 'proposer', 'suggest', 'action', 'action de réparation', 'action plan', 'dette technique', 'technical debt'],
-  emotion: ['frustration', 'stress', 'difficile', 'difficult', 'problème', 'problem', 'sentiment', 'feeling', 'ressenti', 'felt', 'sur les rotules', 'burned out', 'ancre', 'anchor'],
-  retrospectiveMethod: ['speedboat', 'voile', 'voiles', 'ancre', 'ancres', 'requin', 'requins', 'rose thorn', 'bud', 'glad sad mad', '4ls', 'sailing', 'sail', 'anchor', 'shark'],
+  teamProcess: ['communication', 'collaboration', 'workflow', 'processus', 'process', 'dynamique', 'équipe', 'team', 'relation', 'entraide', 'mutual support', 'synchroniser', 'synchronisation', 'clarification', 'disponibilité', 'multitasking', 'pair programming', 'pression', 'focus'],
+  improvement: ['amélioration', 'improvement', 'friction', 'difficultés', 'difficulties', 'on devrait', 'we should', 'la prochaine fois', 'next time', 'proposer', 'suggest', 'action', 'action de réparation', 'action plan', 'dette technique', 'technical debt', 'améliorer', 'mieux', 'formaliser', 'faire mieux', 'bien fonctionné', 'on va faire mieux', 'priorité', 'dès le prochain sprint'],
+  emotion: ['frustration', 'stress', 'difficile', 'difficult', 'problème', 'problem', 'sentiment', 'feeling', 'ressenti', 'felt', 'sur les rotules', 'burned out', 'ancre', 'anchor', 'lourd', 'urgence', 'pression', 'impression', 'sous pression', 'réactif', 'en difficulté'],
+  retrospectiveMethod: ['speedboat', 'voile', 'voiles', 'ancre', 'ancres', 'requin', 'requins', 'rose thorn', 'bud', 'glad sad mad', '4ls', 'sailing', 'sail', 'anchor', 'shark', 'ce qui a bien fonctionné', 'qu\'est-ce qui a bien fonctionné', 'ce qui a mal fonctionné', 'qu\'est-ce qu\'on améliore', 'ce qu\'on garde', 'ce qu\'on arrête'],
 };
 
 const PLANNING_OBJECTS = {
@@ -62,7 +62,8 @@ const PLANNING_DIFFERENTIATORS = {
 // ============================================
 
 const DAILY_TIME = {
-  short: ['hier', 'yesterday', 'aujourd\'hui', 'today', 'ce matin', 'this morning', 'demain', 'tomorrow', 'dernier jour', 'last day', 'quotidien', 'daily'],
+  // NOTE: 'daily' removed — it's often used as a noun ("en daily") in retro/other transcripts
+  short: ['hier', 'yesterday', 'aujourd\'hui', 'today', 'ce matin', 'this morning', 'demain', 'tomorrow', 'dernier jour', 'last day', 'quotidien'],
   immediate: ['maintenant', 'now', 'immédiatement', 'immediately', 'urgent', 'asap', 'bloque', 'blocked'],
 };
 
@@ -71,7 +72,7 @@ const REVIEW_TIME = {
 };
 
 const RETROSPECTIVE_TIME = {
-  reflective: ['en regardant', 'looking back', 'rétrospectivement', 'retrospectively', 'dernièrement', 'recently', 'auparavant', 'previously'],
+  reflective: ['en regardant', 'looking back', 'rétrospectivement', 'retrospectively', 'dernièrement', 'recently', 'auparavant', 'previously', 'revenir sur', 'ce sprint', 'sprint passé', 'sprint dernier', 'au cours de ce sprint', 'vécu'],
 };
 
 const PLANNING_TIME = {
@@ -98,12 +99,13 @@ const PATTERNS = {
     stakeholder: /(?:client|customer|stakeholder|utilisateur|user|sponsor|product owner)/i,
   },
   retrospective: {
-    processAnalysis: /(?:communication|collaboration|workflow|processus|process|dynamique|friction|entraide)/i,
-    improvementProposal: /(?:amélioration|improvement|on devrait|we should|la prochaine fois|next time|proposer|suggest|différent|different|action\s+(?:de|plan|item)|action\s+de\s+réparation)/i,
-    emotionalContext: /(?:frustration|stress|difficile|difficult|problème|problem|sentir|feel|ressenti|felt|sur\s+les\s+rotules|burned\s+out)/i,
-    teamFocus: /(?:équipe|team|nous|we|ensemble|together|collaboration|collectif)/i,
-    retrospectiveMethod: /(?:speedboat|voile|ancre|requin|rose\s+thorn|glad\s+sad\s+mad|4ls|sailing)/i,
+    processAnalysis: /(?:communication|collaboration|workflow|processus|process|dynamique|friction|entraide|clarification|synchronis|disponibilité|multitasking|pair\s+programming)/i,
+    improvementProposal: /(?:amélioration|améliorer|mieux\s+(?:faire|préparer)|formaliser|faire\s+mieux|bien\s+fonctionné|on\s+va\s+faire\s+mieux|improvement|on devrait|we should|la prochaine fois|next time|proposer|propose|suggest|différent|different|action\s+(?:de|plan|item)|action\s+de\s+réparation|en\s+priorité|dès\s+le\s+prochain)/i,
+    emotionalContext: /(?:frustration|stress|difficile|difficult|lourd|pression|urgence|impression|difficultés|problème|problem|sentir|senti|feel|ressenti|felt|sur\s+les\s+rotules|burned\s+out|en\s+mode\s+urgence|réactif)/i,
+    teamFocus: /(?:équipe|team|nous|we|ensemble|together|collaboration|collectif|disponibilité|transparence)/i,
+    retrospectiveMethod: /(?:speedboat|voile|ancre|requin|rose\s+thorn|glad\s+sad\s+mad|4ls|sailing|ce\s+qui\s+a\s+bien\s+fonctionné|ce\s+qui\s+a\s+mal\s+fonctionn)/i,
     technicalDebt: /(?:dette\s+technique|technical\s+debt|refactor|refactoring|code\s+(?:rapide|quick)|propre|clean\s+(?:up|code))/i,
+    retroStructure: /(?:revenir\s+sur\s+ce\s+sprint|comment\s+vous\s+l.avez\s+vécu|ce\s+que\s+vous\s+avez\s+vécu|vous\s+l.avez\s+vécu|en\s+regardant\s+ce\s+sprint|retour\s+sur\s+le\s+sprint)/i,
   },
   planning: {
     futureCommitment: /(?:prochain sprint|next sprint|engagement|commitment|on s'engage|we commit|repart|embarque)/i,
@@ -181,6 +183,10 @@ function detectExplicitCeremony(text) {
 
   const ceremonies = {
     retrospective: [
+      /on\s+va\s+se\s+poser.*revenir\s+sur\s+ce\s+sprint/i,
+      /revenir\s+sur\s+ce\s+sprint/i,
+      /comment\s+vous\s+l.avez\s+vécu/i,
+      /retour\s+sur\s+le\s+sprint/i,
       /on\s+démarre\s+la\s+rétrospective/i,
       /on\s+fait\s+la\s+rétrospective/i,
       /rétrospective\s+de\s+sprint/i,
@@ -364,7 +370,17 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   
   // If structural Daily pattern exists, heavily penalize Retrospective
   if (hasStructuralPatternDaily) score -= 40;
-  
+
+  // RETRO STRUCTURAL OVERRIDE: "revenir sur ce sprint" / "comment vous l'avez vécu" = Retro
+  if (PATTERNS.retrospective.retroStructure.test(text)) {
+    score += 80;
+  }
+
+  // Retro Method: "ce qui a bien fonctionné" / "une seule chose à améliorer" = strong retro
+  if (PATTERNS.retrospective.retrospectiveMethod.test(text)) {
+    score += 60;
+  }
+
   // CRITICAL HARD OVERRIDE: If explicit retro method detected (Speedboat, voiles/ancres/requins, etc.) = RETROSPECTIVE
   const hasRetroMethod = matchesAny(text, RETROSPECTIVE_OBJECTS.retrospectiveMethod);
   if (hasRetroMethod) {
@@ -396,10 +412,10 @@ function scoreRetrospective(text, hasStructuralPatternDaily = false) {
   
   // Intent patterns
   if (PATTERNS.retrospective.processAnalysis.test(text)) score += 20;
-  if (PATTERNS.retrospective.improvementProposal.test(text)) score += 20;
-  if (PATTERNS.retrospective.emotionalContext.test(text)) score += 15;
+  if (PATTERNS.retrospective.improvementProposal.test(text)) score += 25;
+  if (PATTERNS.retrospective.emotionalContext.test(text)) score += 20;
   if (PATTERNS.retrospective.teamFocus.test(text)) score += 15;
-  if (PATTERNS.retrospective.retrospectiveMethod.test(text)) score += 40;
+  if (PATTERNS.retrospective.retroStructure.test(text)) score += 25;
   if (PATTERNS.retrospective.technicalDebt.test(text)) score += 25;
   
   // Anti-pattern penalties
