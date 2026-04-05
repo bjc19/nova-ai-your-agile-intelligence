@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useRef } from "react";
 import {
   ArrowRight,
   Play,
@@ -27,7 +26,7 @@ import {
 import { DemoSimulator } from "@/components/nova/DemoSimulator.jsx";
 import ConsultationModal from "@/components/nova/ConsultationModal";
 
-const PricingSection = lazy(() => import("@/components/nova/PricingSection").then(m => ({ default: m.PricingSection })));
+
 
 const translations = {
   en: {
